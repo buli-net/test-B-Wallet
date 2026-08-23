@@ -485,5 +485,6 @@
 <string name="menu_price_chart">Price Chart</string>
 <string name="market_chart_title">Market Chart</string>
 <string name="loading">Loading...</string>
+<string name="chart_loading">Loading chart...</string>
     
 </resources>
