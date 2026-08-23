@@ -493,5 +493,6 @@
 <string name="chart_low_detail">L: %1$s</string>
 <string name="chart_close_label">C: %1$s</string>
 <string name="chart_volume_label">V: %1$s</string>
+<string name="menu_market">Market</string>
 <string name="menu_price_chart">Price Chart</string>
 </resources>
