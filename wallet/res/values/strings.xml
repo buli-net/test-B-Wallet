@@ -483,6 +483,7 @@
 <string name="menu_market">Market</string>
 <string name="menu_exchange_rates">Exchange Rates</string>
 <string name="menu_price_chart">Price Chart</string>
-
+<string name="market_chart_title">Market Chart</string>
 <string name="loading">Loading...</string>
+    
 </resources>
