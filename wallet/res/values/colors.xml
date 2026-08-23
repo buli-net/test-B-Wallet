@@ -48,17 +48,12 @@
     <color name="appicon_gradient_end">#999999</color>
 
     <!-- Chart market -->
-    <!-- Chart maket - full system colors -->
-<color name="chart_bg">?android:attr/colorBackground</color>
-<color name="chart_grid">?android:attr/textColorHint</color>
-<color name="chart_text">?android:attr/textColorSecondary</color>
 <color name="chart_bull">@android:color/holo_green_light</color>
 <color name="chart_bear">@android:color/holo_red_light</color>
-<color name="chart_wick">?android:attr/textColorPrimary</color>
+<color name="chart_wick">@android:color/primary_text_light</color>
 <color name="chart_last_price_line">@android:color/holo_orange_light</color>
 <color name="chart_ma5">@android:color/holo_purple</color>
 <color name="chart_ma10">@android:color/holo_blue_light</color>
 <color name="chart_ma20">@android:color/holo_orange_dark</color>
-<color name="chart_popup_bg">?android:attr/colorBackgroundFloating</color>
-<color name="chart_popup_text">?android:attr/textColorPrimary</color>
+    
 </resources>
