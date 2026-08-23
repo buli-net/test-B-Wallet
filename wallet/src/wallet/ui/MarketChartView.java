@@ -1,6 +1,7 @@
 package wallet.ui;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.graphics.DashPathEffect;
@@ -123,6 +124,8 @@ public class MarketChartView extends View
     private static final int FETCH_LIMIT = 200;
     private static final long LIVE_REFRESH_INTERVAL_MS = 1000L;
     private static final long COUNTDOWN_INTERVAL_MS = 1000L;
+    private static final String PREFS_MA = "ma_prefs";
+    private static final String KEY_MA = "ma_lines";
 
     private int visibleCandleCount = DEFAULT_VISIBLE_CANDLE_COUNT;
     private float translationX = 0f;
@@ -156,8 +159,60 @@ public class MarketChartView extends View
         initGestures(context);
     }
 
+    private void saveMaLines(Context context)
+    {
+        try
+        {
+            SharedPreferences sp = context.getSharedPreferences(PREFS_MA, Context.MODE_PRIVATE);
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < maLines.size(); i++)
+            {
+                MaLine m = maLines.get(i);
+                if (i > 0) sb.append(";");
+                sb.append(m.period).append(",").append(m.color);
+            }
+            sp.edit().putString(KEY_MA, sb.toString()).apply();
+        }
+        catch (Exception e)
+        {
+        }
+    }
+
+    private boolean loadMaLinesFromPrefs(Context context)
+    {
+        try
+        {
+            SharedPreferences sp = context.getSharedPreferences(PREFS_MA, Context.MODE_PRIVATE);
+            String s = sp.getString(KEY_MA, null);
+            if (s == null || s.isEmpty()) return false;
+            String[] parts = s.split(";");
+            List<MaLine> list = new ArrayList<>();
+            for (String p : parts)
+            {
+                String[] kv = p.split(",");
+                if (kv.length!= 2) continue;
+                int period = Integer.parseInt(kv[0]);
+                int color = Integer.parseInt(kv[1]);
+                list.add(new MaLine(period, color));
+            }
+            if (!list.isEmpty())
+            {
+                maLines = list;
+                return true;
+            }
+        }
+        catch (Exception e)
+        {
+        }
+        return false;
+    }
+
     private void initMaLines(Context context)
     {
+        if (loadMaLinesFromPrefs(context))
+        {
+            return;
+        }
         try
         {
             int[] periods = context.getResources().getIntArray(R.array.ma_default_periods);
@@ -190,6 +245,7 @@ public class MarketChartView extends View
             return;
         }
         this.maLines = new ArrayList<>(list);
+        saveMaLines(getContext());
         initPaints(getContext());
         invalidate();
         notifyMa();
