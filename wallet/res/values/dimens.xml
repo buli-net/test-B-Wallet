@@ -27,8 +27,6 @@
     <dimen name="shortcut_icon_size">32dp</dimen>
 
     <!-- market chart -->
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
     <!-- CHART CORE -->
     <dimen name="chart_wick_width">2dp</dimen>
     <dimen name="chart_grid_width">1dp</dimen>
