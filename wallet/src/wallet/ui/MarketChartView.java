@@ -14,6 +14,7 @@ import android.view.ScaleGestureDetector;
 import android.view.View;
 
 import org.json.JSONArray;
+import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -36,21 +37,46 @@ public class MarketChartView extends View {
         public final float close;
         public final float volume;
         public final long openTime;
-        public Candle(float o,float h,float l,float c,float v,long t){open=o;high=h;low=l;close=c;volume=v;openTime=t;}
+        public final long closeTime;
+
+        public Candle(float open, float high, float low, float close, float volume, long openTime, long closeTime) {
+            this.open = open;
+            this.high = high;
+            this.low = low;
+            this.close = close;
+            this.volume = volume;
+            this.openTime = openTime;
+            this.closeTime = closeTime;
+        }
     }
 
-    public interface OnCandleSelectedListener {
+    public interface OnChartUpdateListener {
+        void onPriceUpdate(float price, float high24h, float low24h);
+        void onCountdownUpdate(String countdown);
         void onCandleSelected(Candle candle);
         void onNothingSelected();
     }
 
-    private OnCandleSelectedListener selectedListener;
-    public void setOnCandleSelectedListener(OnCandleSelectedListener l){ this.selectedListener = l; }
+    private OnChartUpdateListener updateListener;
+
+    public void setOnChartUpdateListener(OnChartUpdateListener listener) {
+        this.updateListener = listener;
+    }
 
     private List<Candle> data = new ArrayList<>();
-    private Paint bullishPaint, bearishPaint, wickPaint, gridPaint, textPaint, lastPriceLinePaint;
-    private Paint movingAverage5Paint, movingAverage10Paint, movingAverage20Paint;
-    private Paint volumeBullishPaint, volumeBearishPaint, selectedLinePaint;
+
+    private Paint bullishPaint;
+    private Paint bearishPaint;
+    private Paint wickPaint;
+    private Paint gridPaint;
+    private Paint textPaint;
+    private Paint lastPriceLinePaint;
+    private Paint movingAverage5Paint;
+    private Paint movingAverage10Paint;
+    private Paint movingAverage20Paint;
+    private Paint volumeBullishPaint;
+    private Paint volumeBearishPaint;
+    private Paint selectedLinePaint;
 
     private static final int DEFAULT_VISIBLE_CANDLE_COUNT = 80;
     private static final int MIN_VISIBLE_CANDLE_COUNT = 20;
@@ -60,11 +86,15 @@ public class MarketChartView extends View {
     private static final int VOLUME_CHART_HEIGHT_PX = 180;
     private static final int VOLUME_TOP_MARGIN_PX = 30;
     private static final int FETCH_LIMIT = 200;
-    private static final long LIVE_REFRESH_INTERVAL_MS = 10000L;
+    private static final long LIVE_REFRESH_INTERVAL_MS = 1000L;
+    private static final long COUNTDOWN_INTERVAL_MS = 1000L;
 
     private int visibleCandleCount = DEFAULT_VISIBLE_CANDLE_COUNT;
     private float translationX = 0f;
-    private float minPrice = 0f, maxPrice = 0f, lastPrice = 0f, maxVolume = 0f;
+    private float minPrice = 0f;
+    private float maxPrice = 0f;
+    private float lastPrice = 0f;
+    private float maxVolume = 0f;
     private int selectedIndex = -1;
     private int startIndexCache = 0;
 
@@ -72,9 +102,14 @@ public class MarketChartView extends View {
     private GestureDetector gestureDetector;
     private Handler mainHandler = new Handler(Looper.getMainLooper());
     private Handler liveHandler = new Handler(Looper.getMainLooper());
+    private Handler countdownHandler = new Handler(Looper.getMainLooper());
     private Runnable liveRunnable;
-    private String currentSymbol, currentInterval;
+    private Runnable countdownRunnable;
+
+    private String currentSymbol;
+    private String currentInterval;
     private SimpleDateFormat timeFormat = new SimpleDateFormat("MM-dd HH:mm", Locale.US);
+    private long currentCandleCloseTime = 0L;
 
     public MarketChartView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -84,7 +119,7 @@ public class MarketChartView extends View {
 
     private void initPaints(Context context) {
         Resources res = context.getResources();
-        // ĐỔI MÀU THEO THEME - LẤY TỪ R.color, KHÔNG FIX CỨNG
+
         setBackgroundColor(res.getColor(R.color.chart_bg));
 
         bullishPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
@@ -98,10 +133,12 @@ public class MarketChartView extends View {
         volumeBullishPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         volumeBullishPaint.setColor(res.getColor(R.color.chart_bull));
         volumeBullishPaint.setAlpha(150);
+        volumeBullishPaint.setStyle(Paint.Style.FILL);
 
         volumeBearishPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         volumeBearishPaint.setColor(res.getColor(R.color.chart_bear));
         volumeBearishPaint.setAlpha(150);
+        volumeBearishPaint.setStyle(Paint.Style.FILL);
 
         wickPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         wickPaint.setColor(res.getColor(R.color.chart_wick));
@@ -124,28 +161,27 @@ public class MarketChartView extends View {
         movingAverage5Paint = new Paint(Paint.ANTI_ALIAS_FLAG);
         movingAverage5Paint.setColor(res.getColor(R.color.chart_ma5));
         movingAverage5Paint.setStyle(Paint.Style.STROKE);
-        movingAverage5Paint.setStrokeWidth(2.5f);
+        movingAverage5Paint.setStrokeWidth(res.getDimension(R.dimen.chart_ma_width));
 
         movingAverage10Paint = new Paint(Paint.ANTI_ALIAS_FLAG);
         movingAverage10Paint.setColor(res.getColor(R.color.chart_ma10));
         movingAverage10Paint.setStyle(Paint.Style.STROKE);
-        movingAverage10Paint.setStrokeWidth(2.5f);
+        movingAverage10Paint.setStrokeWidth(res.getDimension(R.dimen.chart_ma_width));
 
         movingAverage20Paint = new Paint(Paint.ANTI_ALIAS_FLAG);
         movingAverage20Paint.setColor(res.getColor(R.color.chart_ma20));
         movingAverage20Paint.setStyle(Paint.Style.STROKE);
-        movingAverage20Paint.setStrokeWidth(2.5f);
+        movingAverage20Paint.setStrokeWidth(res.getDimension(R.dimen.chart_ma_width));
 
         selectedLinePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         selectedLinePaint.setColor(res.getColor(R.color.chart_text));
-        selectedLinePaint.setStrokeWidth(1f);
+        selectedLinePaint.setStrokeWidth(res.getDimension(R.dimen.chart_selected_width));
         selectedLinePaint.setAlpha(100);
     }
 
     @Override
     protected void onConfigurationChanged(android.content.res.Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
-        // KHI ĐỔI THEME, LOAD LẠI MÀU
         initPaints(getContext());
         invalidate();
     }
@@ -165,7 +201,7 @@ public class MarketChartView extends View {
         gestureDetector = new GestureDetector(context, new GestureDetector.SimpleOnGestureListener() {
             @Override
             public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
-                translationX -= distanceX; // FIX NGƯỢC
+                translationX -= distanceX;
                 invalidate();
                 return true;
             }
@@ -175,15 +211,16 @@ public class MarketChartView extends View {
                 if (data.isEmpty()) return false;
                 int width = getWidth();
                 int count = Math.min(visibleCandleCount, data.size());
+                if (count == 0) return false;
                 float candleWidth = width / (float) count;
                 int index = (int) (e.getX() / candleWidth) + startIndexCache;
                 if (index >= 0 && index < data.size()) {
                     selectedIndex = index;
-                    if (selectedListener != null) selectedListener.onCandleSelected(data.get(index));
+                    if (updateListener != null) updateListener.onCandleSelected(data.get(index));
                     invalidate();
                 } else {
                     selectedIndex = -1;
-                    if (selectedListener != null) selectedListener.onNothingSelected();
+                    if (updateListener != null) updateListener.onNothingSelected();
                     invalidate();
                 }
                 return true;
@@ -195,17 +232,75 @@ public class MarketChartView extends View {
         this.currentSymbol = symbol;
         this.currentInterval = interval;
         this.selectedIndex = -1;
+        this.translationX = 0f;
+        stopLive();
         fetchCandles();
-        if (liveRunnable == null) {
-            liveRunnable = new Runnable() {
-                @Override
-                public void run() {
-                    fetchCandles();
-                    liveHandler.postDelayed(this, LIVE_REFRESH_INTERVAL_MS);
-                }
-            };
-            liveHandler.postDelayed(liveRunnable, LIVE_REFRESH_INTERVAL_MS);
+        startLive();
+        startCountdown();
+    }
+
+    private long getIntervalMillis(String interval) {
+        if (interval == null) return 60_000L;
+        switch (interval) {
+            case "1m": return 60_000L;
+            case "3m": return 3L * 60_000L;
+            case "5m": return 5L * 60_000L;
+            case "15m": return 15L * 60_000L;
+            case "30m": return 30L * 60_000L;
+            case "1h": return 60L * 60_000L;
+            case "2h": return 2L * 60L * 60_000L;
+            case "4h": return 4L * 60L * 60_000L;
+            case "6h": return 6L * 60L * 60_000L;
+            case "12h": return 12L * 60L * 60_000L;
+            case "1d": return 24L * 60L * 60_000L;
+            case "3d": return 3L * 24L * 60L * 60_000L;
+            case "1w": return 7L * 24L * 60L * 60_000L;
+            case "1M": return 30L * 24L * 60L * 60_000L;
+            default: return 60_000L;
         }
+    }
+
+    private void startCountdown() {
+        if (countdownRunnable != null) countdownHandler.removeCallbacks(countdownRunnable);
+        countdownRunnable = new Runnable() {
+            @Override
+            public void run() {
+                if (currentCandleCloseTime > 0L) {
+                    long now = System.currentTimeMillis();
+                    long remain = currentCandleCloseTime - now;
+                    if (remain < 0L) remain = 0L;
+                    long seconds = (remain / 1000L) % 60L;
+                    long minutes = (remain / 1000L / 60L) % 60L;
+                    long hours = remain / 1000L / 60L / 60L;
+                    String text;
+                    if (getIntervalMillis(currentInterval) >= 24L * 60L * 60_000L) {
+                        text = String.format(Locale.US, "%02d:%02d:%02d:%02d", hours / 24L, hours % 24L, minutes, seconds);
+                    } else {
+                        text = String.format(Locale.US, "%02d:%02d:%02d", hours, minutes, seconds);
+                    }
+                    if (updateListener != null) updateListener.onCountdownUpdate(text);
+                }
+                countdownHandler.postDelayed(this, COUNTDOWN_INTERVAL_MS);
+            }
+        };
+        countdownHandler.post(countdownRunnable);
+    }
+
+    private void startLive() {
+        if (liveRunnable != null) liveHandler.removeCallbacks(liveRunnable);
+        liveRunnable = new Runnable() {
+            @Override
+            public void run() {
+                fetchPriceAndCandle();
+                liveHandler.postDelayed(this, LIVE_REFRESH_INTERVAL_MS);
+            }
+        };
+        liveHandler.post(liveRunnable);
+    }
+
+    private void stopLive() {
+        if (liveRunnable != null) liveHandler.removeCallbacks(liveRunnable);
+        if (countdownRunnable != null) countdownHandler.removeCallbacks(countdownRunnable);
     }
 
     private void fetchCandles() {
@@ -232,7 +327,8 @@ public class MarketChartView extends View {
                     float close = (float) kline.getDouble(4);
                     float volume = (float) kline.getDouble(5);
                     long openTime = kline.getLong(0);
-                    newData.add(new Candle(open, high, low, close, volume, openTime));
+                    long closeTime = kline.getLong(6);
+                    newData.add(new Candle(open, high, low, close, volume, openTime, closeTime));
                 }
                 mainHandler.post(() -> {
                     data = newData;
@@ -246,15 +342,53 @@ public class MarketChartView extends View {
                             if (candle.volume > maxVolume) maxVolume = candle.volume;
                         }
                         lastPrice = data.get(data.size() - 1).close;
+                        currentCandleCloseTime = data.get(data.size() - 1).closeTime;
                         float padding = (maxPrice - minPrice) * 0.1f;
                         minPrice -= padding;
                         maxPrice += padding;
+                        if (updateListener != null) updateListener.onPriceUpdate(lastPrice, maxPrice, minPrice);
                     }
-                    translationX = 0f;
                     invalidate();
                 });
             } catch (Exception e) {
                 e.printStackTrace();
+            }
+        }).start();
+    }
+
+    private void fetchPriceAndCandle() {
+        if (currentSymbol == null) return;
+        new Thread(() -> {
+            try {
+                String tickerUrl = String.format(Locale.US, "https://api.binance.com/api/v3/ticker/24hr?symbol=%s", currentSymbol);
+                HttpURLConnection connection = (HttpURLConnection) new URL(tickerUrl).openConnection();
+                connection.setConnectTimeout(5000);
+                connection.setReadTimeout(5000);
+                BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+                StringBuilder builder = new StringBuilder();
+                String line;
+                while ((line = reader.readLine()) != null) builder.append(line);
+                reader.close();
+                JSONObject jsonObject = new JSONObject(builder.toString());
+                float price = (float) jsonObject.getDouble("lastPrice");
+                float high = (float) jsonObject.getDouble("highPrice");
+                float low = (float) jsonObject.getDouble("lowPrice");
+                mainHandler.post(() -> {
+                    if (!data.isEmpty()) {
+                        Candle lastCandle = data.get(data.size() - 1);
+                        Candle updatedCandle = new Candle(lastCandle.open, Math.max(lastCandle.high, price), Math.min(lastCandle.low, price), price, lastCandle.volume, lastCandle.openTime, lastCandle.closeTime);
+                        data.set(data.size() - 1, updatedCandle);
+                        lastPrice = price;
+                        currentCandleCloseTime = updatedCandle.closeTime;
+                        if (System.currentTimeMillis() >= updatedCandle.closeTime) {
+                            fetchCandles();
+                        } else {
+                            invalidate();
+                        }
+                        if (updateListener != null) updateListener.onPriceUpdate(price, high, low);
+                    }
+                });
+            } catch (Exception e) {
             }
         }).start();
     }
@@ -305,7 +439,7 @@ public class MarketChartView extends View {
 
         float bodyWidth = candleWidth * 0.7f;
         float priceRange = maxPrice - minPrice;
-        if (priceRange == 0) priceRange = 1f;
+        if (priceRange == 0f) priceRange = 1f;
 
         for (int i = 0; i < count; i++) {
             int dataIndex = startIndex + i;
@@ -327,7 +461,8 @@ public class MarketChartView extends View {
         for (int periodIndex = 0; periodIndex < 3; periodIndex++) {
             int period = periodIndex == 0 ? 5 : periodIndex == 1 ? 10 : 20;
             Paint paint = periodIndex == 0 ? movingAverage5Paint : periodIndex == 1 ? movingAverage10Paint : movingAverage20Paint;
-            float previousX = 0f, previousY = 0f;
+            float previousX = 0f;
+            float previousY = 0f;
             boolean isFirstPoint = true;
             for (int i = 0; i < count; i++) {
                 int dataIndex = startIndex + i;
@@ -337,7 +472,9 @@ public class MarketChartView extends View {
                 float x = i * candleWidth + candleWidth / 2f;
                 float y = TOP_PADDING_PX + priceChartHeight - ((movingAverage - minPrice) / priceRange * priceChartHeight);
                 if (!isFirstPoint) canvas.drawLine(previousX, previousY, x, y, paint);
-                previousX = x; previousY = y; isFirstPoint = false;
+                previousX = x;
+                previousY = y;
+                isFirstPoint = false;
             }
         }
 
@@ -351,28 +488,27 @@ public class MarketChartView extends View {
             canvas.drawLine(0f, lastPriceY, width, lastPriceY, lastPriceLinePaint);
             String lastPriceText = String.format(Locale.US, "%.2f", lastPrice);
             float textWidth = textPaint.measureText(lastPriceText);
-            canvas.drawText(lastPriceText, width - textWidth - 8f, lastPriceY - 10f, textPaint);
+            canvas.drawText(lastPriceText, width - textWidth - getResources().getDimension(R.dimen.chart_price_margin), lastPriceY - getResources().getDimension(R.dimen.chart_price_margin), textPaint);
         }
 
         for (int i = 0; i <= 4; i++) {
             float price = maxPrice - (maxPrice - minPrice) * i / 4f;
-            float y = TOP_PADDING_PX + priceChartHeight * i / 4f + 12f;
+            float y = TOP_PADDING_PX + priceChartHeight * i / 4f + getResources().getDimension(R.dimen.chart_price_text_offset);
             String priceText = String.format(Locale.US, "%.2f", price);
             float textWidth = textPaint.measureText(priceText);
-            canvas.drawText(priceText, width - textWidth - 8f, y, textPaint);
+            canvas.drawText(priceText, width - textWidth - getResources().getDimension(R.dimen.chart_price_margin), y, textPaint);
         }
 
         for (int i = 0; i < count; i += Math.max(1, count / 4)) {
             int dataIndex = startIndex + i;
             if (dataIndex >= data.size()) break;
-            Candle candle = data.get(dataIndex);
             float x = i * candleWidth;
-            String timeText = timeFormat.format(new Date(candle.openTime));
-            canvas.drawText(timeText, x, TOP_PADDING_PX + priceChartHeight + VOLUME_CHART_HEIGHT_PX + 50f, textPaint);
+            String timeText = timeFormat.format(new Date(data.get(dataIndex).openTime));
+            canvas.drawText(timeText, x, TOP_PADDING_PX + priceChartHeight + VOLUME_CHART_HEIGHT_PX + getResources().getDimension(R.dimen.chart_time_margin), textPaint);
         }
 
-        float volumeTop = TOP_PADDING_PX + priceChartHeight + VOLUME_TOP_MARGIN_PX + 10f;
-        float volumeHeight = VOLUME_CHART_HEIGHT_PX - 20f;
+        float volumeTop = TOP_PADDING_PX + priceChartHeight + VOLUME_TOP_MARGIN_PX + getResources().getDimension(R.dimen.chart_volume_top);
+        float volumeHeight = VOLUME_CHART_HEIGHT_PX - getResources().getDimension(R.dimen.chart_volume_offset);
         if (maxVolume == 0f) maxVolume = 1f;
         for (int i = 0; i < count; i++) {
             int dataIndex = startIndex + i;
@@ -388,6 +524,6 @@ public class MarketChartView extends View {
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
-        if (liveRunnable != null) liveHandler.removeCallbacks(liveRunnable);
+        stopLive();
     }
 }
