@@ -225,7 +225,7 @@
             android:parentActivityName="wallet.ui.WalletActivity"
             android:theme="@style/My.Preference" />
       <!-- end create paper wallet-->
-        
+
   <!-- Web Browser Activity -->
 
        <activity
@@ -239,8 +239,10 @@
            android:label="@string/menu_web_browser"
            android:theme="@style/My.Preference" />
 
-<!-- end-->
-
+<!-- Setting ma chart-->
+      <activity 
+          android:name=".ui.indicator.MaSettingsActivity"/>
+        
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.file_attachment"
