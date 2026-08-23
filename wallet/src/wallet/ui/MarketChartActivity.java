@@ -2,6 +2,7 @@ package wallet.ui;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.graphics.Typeface;
@@ -18,7 +19,6 @@ import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.GridLayout;
 import android.widget.LinearLayout;
@@ -26,8 +26,6 @@ import android.widget.TextView;
 
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
-import com.google.android.material.bottomsheet.BottomSheetDialog;
 
 import org.bitcoinj.base.Coin;
 
@@ -181,7 +179,7 @@ public class MarketChartActivity extends Activity
         {
             return;
         }
-        BottomSheetDialog dialog = new BottomSheetDialog(this);
+        Dialog dialog = new Dialog(this);
         View view = getLayoutInflater().inflate(R.layout.bottom_sheet_ma_settings, null);
         RecyclerView recycler = view.findViewById(R.id.recycler_ma_popup);
         recycler.setLayoutManager(new LinearLayoutManager(this));
@@ -463,9 +461,9 @@ public class MarketChartActivity extends Activity
         int[] intervalLabels = {R.string.time, R.string.interval_1m, R.string.interval_3m, R.string.interval_5m, R.string.interval_15m, R.string.interval_30m, R.string.interval_1h, R.string.interval_2h, R.string.interval_4h, R.string.interval_6h, R.string.interval_12h, R.string.interval_1d, R.string.interval_1w, R.string.interval_1M};
 
         AlertDialog dialog = new AlertDialog.Builder(this)
-             .setView(root)
-             .setNegativeButton(R.string.close, (d, w) -> d.dismiss())
-             .create();
+            .setView(root)
+            .setNegativeButton(R.string.close, (d, w) -> d.dismiss())
+            .create();
 
         for (int i = 0; i < realLoad.length; i++)
         {
