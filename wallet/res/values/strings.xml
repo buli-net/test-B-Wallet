@@ -499,6 +499,7 @@
     <string name="chart_countdown_default">Close in: --</string>
     <string name="chart_high_default">24h High --</string>
     <string name="chart_low_default">24h Low --</string>
+    <string name="chart_vol_default">Vol --</string>
     <string name="chart_vol_base_default">Vol(--) --</string>
     <string name="chart_vol_quote_default">Vol(--) --</string>
     <string name="chart_vol_base_format">Vol(%1$s) %2$s</string>
