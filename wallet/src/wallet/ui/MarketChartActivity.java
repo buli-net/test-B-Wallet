@@ -7,6 +7,7 @@ import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.util.TypedValue;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -172,6 +173,12 @@ public class MarketChartActivity extends Activity {
         }
     }
 
+    private int getThemeColor(int attr) {
+        TypedValue tv = new TypedValue();
+        getTheme().resolveAttribute(attr, tv, true);
+        return tv.data;
+    }
+
     private void setupTimeframeChips() {
         if (chipGroupTimeframe == null) {
             return;
@@ -190,10 +197,10 @@ public class MarketChartActivity extends Activity {
             tv.setPadding(padH, padV, padH, padV);
 
             if (label.equals("1h") || realInterval.equals(currentInterval)) {
-                tv.setTextColor(res.getColor(R.color.fg_bright));
+                tv.setTextColor(getThemeColor(android.R.attr.colorBackground));
                 tv.setBackgroundResource(R.drawable.bg_time_selected);
             } else {
-                tv.setTextColor(res.getColor(R.color.chart_text));
+                tv.setTextColor(getThemeColor(android.R.attr.textColorSecondary));
                 tv.setBackgroundColor(res.getColor(android.R.color.transparent));
             }
 
@@ -204,17 +211,18 @@ public class MarketChartActivity extends Activity {
             tv.setLayoutParams(lp);
 
             final String intervalToLoad = realInterval;
+            final String selectedLabel = label;
             tv.setOnClickListener(v -> {
                 currentInterval = intervalToLoad;
                 for (int i = 0; i < chipGroupTimeframe.getChildCount(); i++) {
                     View child = chipGroupTimeframe.getChildAt(i);
                     if (child instanceof TextView) {
                         TextView t = (TextView) child;
-                        if (t.getText().toString().equals(label)) {
-                            t.setTextColor(res.getColor(R.color.fg_bright));
+                        if (t.getText().toString().equals(selectedLabel)) {
+                            t.setTextColor(getThemeColor(android.R.attr.colorBackground));
                             t.setBackgroundResource(R.drawable.bg_time_selected);
                         } else {
-                            t.setTextColor(res.getColor(R.color.chart_text));
+                            t.setTextColor(getThemeColor(android.R.attr.textColorSecondary));
                             t.setBackgroundColor(res.getColor(android.R.color.transparent));
                         }
                     }
@@ -253,7 +261,7 @@ public class MarketChartActivity extends Activity {
                                 textCurrentPrice.setText(String.format(Locale.US, "%s%,.2f", symbol, priceInFiat));
                                 int color;
                                 if (lastDisplayPrice == 0f) {
-                                    color = res.getColor(R.color.fg_bright);
+                                    color = getThemeColor(android.R.attr.textColorPrimary);
                                 } else if (priceInFiat > lastDisplayPrice) {
                                     color = res.getColor(R.color.chart_bull);
                                 } else if (priceInFiat < lastDisplayPrice) {
@@ -295,7 +303,7 @@ public class MarketChartActivity extends Activity {
                     }
                     popupCandleDetail.setVisibility(View.VISIBLE);
                     GradientDrawable bg = new GradientDrawable();
-                    bg.setColor(res.getColor(R.color.chart_bg));
+                    bg.setColor(getThemeColor(android.R.attr.colorBackground));
                     bg.setCornerRadius(12f * res.getDisplayMetrics().density);
                     bg.setStroke((int)(1 * res.getDisplayMetrics().density), res.getColor(R.color.chart_grid));
                     popupCandleDetail.setBackground(bg);
