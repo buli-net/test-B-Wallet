@@ -169,8 +169,8 @@
 <!-- maket chart -->
         <activity
             android:name="wallet.ui.MarketChartActivity"
-            android:configChanges="keyboard|keyboardHidden"
-            android:label="@string/app_name"
+            android:parentActivityName="wallet.ui.WalletActivity"
+            android:label="@string/market_chart_title"
             android:theme="@style/My.Preference" />
 <!-- end chart -->
         <activity
