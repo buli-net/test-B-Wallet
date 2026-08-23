@@ -3,6 +3,8 @@ package wallet.ui;
 import android.app.Activity;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -10,6 +12,11 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 import wallet.R;
+import wallet.WalletApplication;
+import wallet.Configuration;
+import wallet.exchangerate.ExchangeRateDao;
+import wallet.exchangerate.ExchangeRateEntry;
+import wallet.exchangerate.ExchangeRatesRepository;
 
 public class MarketChartActivity extends Activity {
 
@@ -34,6 +41,13 @@ public class MarketChartActivity extends Activity {
     private final String[] intervals = {"Time","15m","1h","4h","1D","1M","More"};
     private final String[] realIntervals = {"15m","15m","1h","4h","1d","1M","1M"};
     private SimpleDateFormat fullTimeFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US);
+
+    private ExchangeRateDao exchangeRateDao;
+    private Configuration config;
+    private String currentFiatCode = "USD";
+    private double currentFiatPerBtc = 0d;
+    private final Handler mainHandler = new Handler(Looper.getMainLooper());
+    private float lastDisplayPrice = 0f;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,12 +74,39 @@ public class MarketChartActivity extends Activity {
             currentSymbol = getIntent().getStringExtra("symbol");
         }
 
+        WalletApplication application = (WalletApplication) getApplication();
+        config = application.getConfiguration();
+        exchangeRateDao = ExchangeRatesRepository.get(application).exchangeRateDao();
+
+        config.getExchangeCurrencyCodeLiveData().observe(this, fiatCode -> {
+            if (fiatCode != null) {
+                currentFiatCode = fiatCode;
+                loadFiatRate();
+            }
+        });
+
         setupTimeframeChips();
         setupChartListener();
 
         if (marketChartView!= null) {
             marketChartView.loadChart(currentSymbol, currentInterval);
         }
+
+        loadFiatRate();
+    }
+
+    private void loadFiatRate() {
+        new Thread(() -> {
+            ExchangeRateEntry entry = exchangeRateDao.findByCurrencyCode(currentFiatCode);
+            if (entry != null && entry.getRate() != null) {
+                currentFiatPerBtc = entry.getRate().value;
+            }
+            mainHandler.post(() -> {
+                if (textVND != null) {
+                    textVND.setText(currentFiatCode);
+                }
+            });
+        }).start();
     }
 
     private void setupTimeframeChips() {
@@ -99,7 +140,6 @@ public class MarketChartActivity extends Activity {
             final String intervalToLoad = realInterval;
             tv.setOnClickListener(v -> {
                 currentInterval = intervalToLoad;
-                // update all chips color
                 for (int i = 0; i < chipGroupTimeframe.getChildCount(); i++) {
                     View child = chipGroupTimeframe.getChildAt(i);
                     if (child instanceof TextView) {
@@ -127,20 +167,55 @@ public class MarketChartActivity extends Activity {
             @Override
             public void onPriceUpdate(float price, float high24h, float low24h) {
                 runOnUiThread(() -> {
-                    if (textCurrentPrice!= null)
-                        textCurrentPrice.setText(String.format(Locale.US, "$%,.2f", price));
-                    if (textHigh24h!= null)
-                        textHigh24h.setText(String.format(Locale.US, "24h High %,.2f", high24h));
-                    if (textLow24h!= null)
-                        textLow24h.setText(String.format(Locale.US, "24h Low %,.2f", low24h));
-                    if (textVND!= null) {
-                        // fake VND như Binance
-                        double vnd = price * 26100;
-                        textVND.setText(String.format(Locale.US, "₫%,.2f -1.38%%", vnd));
-                    }
-                    if (textMaLabel!= null) {
-                        textMaLabel.setText(String.format(Locale.US, "MA(7): %.2f MA(25): %.2f MA(99): %.2f", price*0.998f, price*1.01f, price*0.96f));
-                    }
+                    new Thread(() -> {
+                        ExchangeRateEntry fiatEntry = exchangeRateDao.findByCurrencyCode(currentFiatCode);
+                        ExchangeRateEntry usdEntry = exchangeRateDao.findByCurrencyCode("USD");
+                        double fiatPerBtc = 0d;
+                        double usdPerBtc = 0d;
+                        if (fiatEntry != null && fiatEntry.getRate() != null) fiatPerBtc = fiatEntry.getRate().value;
+                        if (usdEntry != null && usdEntry.getRate() != null) usdPerBtc = usdEntry.getRate().value;
+                        if (fiatPerBtc == 0d) fiatPerBtc = price;
+                        if (usdPerBtc == 0d) usdPerBtc = price;
+
+                        double usdToFiat = fiatPerBtc / usdPerBtc;
+                        double priceInFiat = price * usdToFiat;
+
+                        mainHandler.post(() -> {
+                            if (textCurrentPrice!= null) {
+                                String symbol = "";
+                                if (currentFiatCode.equals("USD")) symbol = "$";
+                                else if (currentFiatCode.equals("VND")) symbol = "₫";
+                                else if (currentFiatCode.equals("EUR")) symbol = "€";
+                                else if (currentFiatCode.equals("RON")) symbol = "lei ";
+                                else if (currentFiatCode.equals("RUB")) symbol = "₽";
+                                else symbol = currentFiatCode + " ";
+
+                                textCurrentPrice.setText(String.format(Locale.US, "%s%,.2f", symbol, priceInFiat));
+
+                                int color;
+                                if (lastDisplayPrice == 0f) color = Color.parseColor("#EAECEF");
+                                else if (priceInFiat > lastDisplayPrice) color = Color.parseColor("#0ECB81");
+                                else if (priceInFiat < lastDisplayPrice) color = Color.parseColor("#F6465D");
+                                else color = Color.parseColor("#F0B90B");
+                                textCurrentPrice.setTextColor(color);
+                                lastDisplayPrice = (float) priceInFiat;
+                            }
+                            if (textHigh24h!= null) {
+                                double highInFiat = high24h * (fiatPerBtc / usdPerBtc);
+                                textHigh24h.setText(String.format(Locale.US, "24h High %,.2f %s", highInFiat, currentFiatCode));
+                            }
+                            if (textLow24h!= null) {
+                                double lowInFiat = low24h * (fiatPerBtc / usdPerBtc);
+                                textLow24h.setText(String.format(Locale.US, "24h Low %,.2f %s", lowInFiat, currentFiatCode));
+                            }
+                            if (textVND!= null) {
+                                textVND.setText(currentFiatCode);
+                            }
+                            if (textMaLabel!= null) {
+                                textMaLabel.setText(String.format(Locale.US, "MA(7): %.2f MA(25): %.2f MA(99): %.2f", price*0.998f, price*1.01f, price*0.96f));
+                            }
+                        });
+                    }).start();
                 });
             }
 
