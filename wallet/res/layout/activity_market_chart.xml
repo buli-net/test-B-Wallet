@@ -8,9 +8,9 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="56dp"
-        android:background="?android:attr/colorBackgroundFloating"
+        android:background="@color/chart_bg"
         android:text="@string/market_chart_title"
-        android:textColor="?android:attr/textColorPrimary"
+        android:textColor="@color/fg_bright"
         android:gravity="center_vertical"
         android:padding="16dp"
         android:textStyle="bold"
@@ -26,19 +26,19 @@
             android:id="@+id/textCurrentPrice"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="$0.00"
+            android:text="0.00"
             android:textSize="@dimen/chart_price_large_size"
             android:textStyle="bold"
-            android:textColor="?android:attr/textColorPrimary" />
+            android:textColor="@color/fg_bright" />
 
         <TextView
-            android:id="@+id/textVND"
+            android:id="@+id/textFiat"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="2dp"
-            android:text="₫0.00 -0.00%"
+            android:text="USD"
             android:textSize="@dimen/chart_text_size"
-            android:textColor="?android:attr/textColorSecondary" />
+            android:textColor="@color/chart_text" />
 
         <TextView
             android:id="@+id/textCountdown"
@@ -61,7 +61,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="@string/chart_high_default"
-                android:textColor="?android:attr/textColorSecondary"
+                android:textColor="@color/chart_text"
                 android:textSize="@dimen/chart_text_size" />
 
             <TextView
@@ -70,7 +70,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="@string/chart_low_default"
-                android:textColor="?android:attr/textColorSecondary"
+                android:textColor="@color/chart_text"
                 android:textSize="@dimen/chart_text_size" />
         </LinearLayout>
 
@@ -116,7 +116,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:background="?android:attr/colorBackgroundFloating"
+            android:background="@color/chart_bg"
             android:padding="@dimen/chart_popup_padding"
             android:visibility="gone"
             android:layout_margin="@dimen/chart_small_margin">
@@ -125,7 +125,7 @@
                 android:id="@+id/popupTime"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textColor="?android:attr/textColorPrimary"
+                android:textColor="@color/fg_bright"
                 android:textSize="@dimen/chart_popup_time_size" />
 
             <TextView
@@ -153,7 +153,7 @@
                 android:id="@+id/popupClose"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textColor="?android:attr/textColorPrimary"
+                android:textColor="@color/fg_bright"
                 android:textSize="@dimen/chart_popup_size"
                 android:textStyle="bold" />
 
@@ -161,7 +161,7 @@
                 android:id="@+id/popupVolume"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textColor="?android:attr/textColorSecondary"
+                android:textColor="@color/chart_text"
                 android:textSize="@dimen/chart_popup_time_size" />
 
         </LinearLayout>
