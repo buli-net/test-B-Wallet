@@ -549,4 +549,12 @@
 <string name="rsi_desc">Relative Strength Index</string>
 <string name="kdj">KDJ</string>
 <string name="kdj_desc">Stochastic Oscillator</string>
+
+<string name="ma_settings_title">MA - Moving Average</string>
+<string name="column_index">Index</string>
+<string name="column_value">Value</string>
+<string name="column_width">Width</string>
+<string name="column_color">Color</string>
+<string name="reset">Reset</string>
+<string name="confirm">Confirm</string>
 </resources>
