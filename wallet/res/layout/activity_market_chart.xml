@@ -3,7 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="?android:attr/colorBackground">
+    android:background="@color/chart_bg">
 
     <TextView
         android:layout_width="match_parent"
@@ -32,12 +32,22 @@
             android:textColor="?android:attr/textColorPrimary" />
 
         <TextView
+            android:id="@+id/textVND"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:text="₫0.00 -0.00%"
+            android:textSize="@dimen/chart_text_size"
+            android:textColor="?android:attr/textColorSecondary" />
+
+        <TextView
             android:id="@+id/textCountdown"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
             android:text="@string/chart_countdown_default"
             android:textSize="@dimen/chart_text_size"
-            android:textColor="@android:color/holo_orange_light" />
+            android:textColor="@color/chart_ma5" />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -64,14 +74,30 @@
                 android:textSize="@dimen/chart_text_size" />
         </LinearLayout>
 
-        <!-- FIX: Đổi ChipGroup thành LinearLayout để không văng InflateException -->
-        <LinearLayout
-            android:id="@+id/chipGroupTimeframe"
+        <TextView
+            android:id="@+id/textMaLabel"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_marginTop="@dimen/chart_small_margin" />
+            android:layout_marginTop="@dimen/chart_small_margin"
+            android:text="MA(7): -- MA(25): -- MA(99): --"
+            android:textSize="@dimen/chart_popup_time_size"
+            android:textColor="@color/chart_ma5"
+            android:singleLine="true"
+            android:ellipsize="end" />
 
+        <HorizontalScrollView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/chart_small_margin"
+            android:scrollbars="none">
+
+            <LinearLayout
+                android:id="@+id/chipGroupTimeframe"
+                android:layout_width="wrap_content"
+                android:layout_height="32dp"
+                android:orientation="horizontal"
+                android:gravity="center_vertical" />
+        </HorizontalScrollView>
     </LinearLayout>
 
     <FrameLayout
@@ -83,7 +109,7 @@
             android:id="@+id/marketChartView"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="?android:attr/colorBackground" />
+            android:background="@color/chart_bg" />
 
         <LinearLayout
             android:id="@+id/popupCandleDetail"
@@ -95,12 +121,49 @@
             android:visibility="gone"
             android:layout_margin="@dimen/chart_small_margin">
 
-            <TextView android:id="@+id/popupTime" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="?android:attr/textColorPrimary" android:textSize="@dimen/chart_popup_time_size" />
-            <TextView android:id="@+id/popupOpen" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="@android:color/holo_green_light" android:textSize="@dimen/chart_popup_size" />
-            <TextView android:id="@+id/popupHigh" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="@android:color/holo_green_light" android:textSize="@dimen/chart_popup_size" />
-            <TextView android:id="@+id/popupLow" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="@android:color/holo_red_light" android:textSize="@dimen/chart_popup_size" />
-            <TextView android:id="@+id/popupClose" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="?android:attr/textColorPrimary" android:textSize="@dimen/chart_popup_size" android:textStyle="bold" />
-            <TextView android:id="@+id/popupVolume" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="?android:attr/textColorSecondary" android:textSize="@dimen/chart_popup_time_size" />
+            <TextView
+                android:id="@+id/popupTime"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="?android:attr/textColorPrimary"
+                android:textSize="@dimen/chart_popup_time_size" />
+
+            <TextView
+                android:id="@+id/popupOpen"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/chart_bull"
+                android:textSize="@dimen/chart_popup_size" />
+
+            <TextView
+                android:id="@+id/popupHigh"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/chart_bull"
+                android:textSize="@dimen/chart_popup_size" />
+
+            <TextView
+                android:id="@+id/popupLow"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/chart_bear"
+                android:textSize="@dimen/chart_popup_size" />
+
+            <TextView
+                android:id="@+id/popupClose"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="?android:attr/textColorPrimary"
+                android:textSize="@dimen/chart_popup_size"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/popupVolume"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="?android:attr/textColorSecondary"
+                android:textSize="@dimen/chart_popup_time_size" />
+
         </LinearLayout>
     </FrameLayout>
 </LinearLayout>
