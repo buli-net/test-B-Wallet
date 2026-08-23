@@ -239,9 +239,8 @@
            android:label="@string/menu_web_browser"
            android:theme="@style/My.Preference" />
 
-<!-- Setting ma chart-->
-      <activity 
-          android:name=".ui.indicator.MaSettingsActivity"/>
+<!-- end -->
+
         
         <provider
             android:name="androidx.core.content.FileProvider"
