@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <array name="ma_default_colors">
+        <item>@color/ma_yellow</item>
+        <item>@color/ma_purple</item>
+        <item>@color/ma_blue</item>
+        <item>@color/ma_green</item>
+        <item>@color/ma_red</item>
+        <item>@color/ma_teal</item>
+    </array>
+    <integer-array name="ma_default_periods">
+        <item>7</item>
+        <item>25</item>
+        <item>99</item>
+    </integer-array>
+</resources>
