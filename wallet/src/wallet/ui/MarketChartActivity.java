@@ -165,7 +165,6 @@ public class MarketChartActivity extends Activity
         if (marketChartView!= null)
         {
             marketChartView.loadChart(currentSymbol, currentInterval);
-            marketChartView.setFiatCode(currentFiatCode);
         }
 
         loadFiatRate();
@@ -342,17 +341,28 @@ public class MarketChartActivity extends Activity
 
     private void loadFiatRate()
     {
-        mainHandler.post(() ->
+        new Thread(() ->
         {
-            if (textFiat!= null)
+            double fiatPerBtc = getFiatPerBtc(currentFiatCode);
+            double basePerBtc = getFiatPerBtc("USD");
+            if (fiatPerBtc == 0d || basePerBtc == 0d)
             {
-                textFiat.setText(currentFiatCode);
+                return;
             }
-            if (marketChartView!= null)
+            double usdToFiat = fiatPerBtc / basePerBtc;
+            mainHandler.post(() ->
             {
-                marketChartView.setFiatCode(currentFiatCode);
-            }
-        });
+                if (textFiat!= null)
+                {
+                    textFiat.setText(currentFiatCode);
+                }
+                if (marketChartView!= null)
+                {
+                    marketChartView.setFiatCode(currentFiatCode);
+                    marketChartView.setFiatMultiplier((float) usdToFiat);
+                }
+            });
+        }).start();
     }
 
     private double getFiatPerBtc(String fiatCode)
