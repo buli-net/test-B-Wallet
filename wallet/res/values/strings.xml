@@ -535,5 +535,6 @@
 <string name="add_ma">+ ADD MA</string>
 <string name="apply">APPLY</string>
 <string name="delete">X</string>
-
+    
+<string name="max_ma_reached">Maximum 6 MAs</string>
 </resources>
