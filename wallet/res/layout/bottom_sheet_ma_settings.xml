@@ -3,36 +3,38 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:padding="16dp"
-    android:background="?android:attr/colorBackground">
+    android:background="?android:attr/colorBackground"
+    android:padding="16dp">
 
     <TextView
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/ma_settings"
         android:textSize="18sp"
         android:textStyle="bold"
         android:textColor="?android:attr/textColorPrimary"
-        android:paddingBottom="12dp"/>
+        android:layout_marginBottom="16dp" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recycler_ma_popup"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:maxHeight="300dp"/>
+        android:overScrollMode="never" />
 
     <Button
         android:id="@+id/btn_add_ma"
         android:layout_width="match_parent"
         android:layout_height="48dp"
-        android:layout_marginTop="12dp"
-        android:text="@string/add_ma"/>
+        android:text="@string/add_ma"
+        android:textAllCaps="false"
+        android:layout_marginTop="16dp" />
 
     <Button
         android:id="@+id/btn_apply"
         android:layout_width="match_parent"
         android:layout_height="48dp"
-        android:layout_marginTop="8dp"
-        android:backgroundTint="@color/ma_yellow"
-        android:text="@string/apply"/>
+        android:text="@string/apply"
+        android:textAllCaps="true"
+        android:layout_marginTop="12dp" />
+
 </LinearLayout>
