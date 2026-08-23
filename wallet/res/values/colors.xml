@@ -48,7 +48,6 @@
     <color name="appicon_gradient_end">#999999</color>
 
     <!-- Chart market -->
-    <!-- CHART CHO LIGHT THEME  -->
     <color name="chart_bg">#FFFFFF</color>
     <color name="chart_grid">#E0E0E0</color>
     <color name="chart_text">#616161</color>
@@ -59,4 +58,6 @@
     <color name="chart_ma5">#8E24AA</color>
     <color name="chart_ma10">#0288D1</color>
     <color name="chart_ma20">#F57F17</color>
+    <color name="chart_popup_bg">#CCFFFFFF</color>
+    <color name="chart_popup_text">#000000</color>
 </resources>
