@@ -28,9 +28,9 @@
 
     <!-- market chart -->
     <!-- CHART CORE -->
-    <dimen name="chart_wick_width">2dp</dimen>
-    <dimen name="chart_grid_width">1dp</dimen>
-    <dimen name="chart_text_size">12sp</dimen>
+    <dimen name="chart_wick_width">0.6dp</dimen>
+    <dimen name="chart_grid_width">0.5dp</dimen>
+    <dimen name="chart_text_size">11sp</dimen>
     <dimen name="chart_last_price_width">2dp</dimen>
     <dimen name="chart_ma_width">2.5dp</dimen>
     <dimen name="chart_selected_width">1dp</dimen>
@@ -48,4 +48,13 @@
     <dimen name="chart_popup_padding">10dp</dimen>
     <dimen name="chart_popup_size">12sp</dimen>
     <dimen name="chart_popup_time_size">11sp</dimen>
+
+    <!-- MarketChartView -->
+    <dimen name="chart_last_price_line_width">1dp</dimen>
+    <dimen name="chart_ma_line_width">1dp</dimen>
+    <dimen name="chart_body_min_width">2.5dp</dimen>
+    <dimen name="chart_body_max_width">12dp</dimen>
+    <dimen name="chart_candle_min_height">1.2dp</dimen>
+    <dimen name="chart_price_text_margin">8dp</dimen>
+    <dimen name="chart_time_text_margin">16dp</dimen>
 </resources>
