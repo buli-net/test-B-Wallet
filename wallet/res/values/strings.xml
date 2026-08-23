@@ -531,9 +531,9 @@
     <string name="interval_1M">1M</string>
 
 <string name="ma_settings">MA Settings</string>
-<string name="add_ma">+ Add MA</string>
-<string name="apply">Apply</string>
+<string name="ma">MA</string>
+<string name="add_ma">+ ADD MA</string>
+<string name="apply">APPLY</string>
 <string name="delete">X</string>
-<string name="ma_label">MA</string>
 
 </resources>
