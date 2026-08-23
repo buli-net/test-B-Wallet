@@ -486,5 +486,13 @@
 <string name="market_chart_title">Market Chart</string>
 <string name="loading">Loading...</string>
 <string name="chart_loading">Loading chart...</string>
-    
+
+<string name="chart_close_in">Đóng nến sau: %1$s</string>
+<string name="chart_high_label">High: %1$s</string>
+<string name="chart_low_label">Low: %1$s</string>
+<string name="chart_open_label">O: %1$s</string>
+<string name="chart_high_detail">H: %1$s</string>
+<string name="chart_low_detail">L: %1$s</string>
+<string name="chart_close_label">C: %1$s</string>
+<string name="chart_volume_label">V: %1$s</string>
 </resources>
