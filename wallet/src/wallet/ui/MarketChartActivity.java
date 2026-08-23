@@ -1,6 +1,7 @@
 package wallet.ui;
 
 import android.app.Activity;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
@@ -11,6 +12,7 @@ import android.widget.TextView;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
+import org.bitcoinj.base.Coin;
 import wallet.R;
 import wallet.WalletApplication;
 import wallet.Configuration;
@@ -44,8 +46,11 @@ public class MarketChartActivity extends Activity {
 
     private ExchangeRateDao exchangeRateDao;
     private Configuration config;
+    private SharedPreferences prefs;
+    private SharedPreferences.OnSharedPreferenceChangeListener prefsListener;
     private String currentFiatCode = "USD";
     private double currentFiatPerBtc = 0d;
+    private double currentUsdPerBtc = 0d;
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
     private float lastDisplayPrice = 0f;
 
@@ -76,14 +81,20 @@ public class MarketChartActivity extends Activity {
 
         WalletApplication application = (WalletApplication) getApplication();
         config = application.getConfiguration();
+        prefs = application.getSharedPreferences("wallet_preferences", MODE_PRIVATE);
         exchangeRateDao = ExchangeRatesRepository.get(application).exchangeRateDao();
 
-        config.getExchangeCurrencyCodeLiveData().observe(this, fiatCode -> {
-            if (fiatCode != null) {
-                currentFiatCode = fiatCode;
+        currentFiatCode = config.getExchangeCurrencyCode();
+        if (currentFiatCode == null) currentFiatCode = "USD";
+
+        prefsListener = (sharedPreferences, key) -> {
+            if (Configuration.PREFS_KEY_EXCHANGE_CURRENCY.equals(key)) {
+                currentFiatCode = config.getExchangeCurrencyCode();
+                if (currentFiatCode == null) currentFiatCode = "USD";
                 loadFiatRate();
             }
-        });
+        };
+        prefs.registerOnSharedPreferenceChangeListener(prefsListener);
 
         setupTimeframeChips();
         setupChartListener();
@@ -95,14 +106,40 @@ public class MarketChartActivity extends Activity {
         loadFiatRate();
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (prefs!= null && prefsListener!= null) {
+            prefs.unregisterOnSharedPreferenceChangeListener(prefsListener);
+        }
+    }
+
     private void loadFiatRate() {
         new Thread(() -> {
-            ExchangeRateEntry entry = exchangeRateDao.findByCurrencyCode(currentFiatCode);
-            if (entry != null && entry.getRate() != null) {
-                currentFiatPerBtc = entry.getRate().value;
+            ExchangeRateEntry fiatEntry = exchangeRateDao.findByCurrencyCode(currentFiatCode);
+            ExchangeRateEntry usdEntry = exchangeRateDao.findByCurrencyCode("USD");
+
+            if (fiatEntry!= null) {
+                try {
+                    double fiatPerCoin = fiatEntry.exchangeRate().coinToFiat(Coin.COIN).value / Math.pow(10, fiatEntry.fiat().getSmallestUnitExponent());
+                    currentFiatPerBtc = fiatPerCoin;
+                } catch (Exception e) {
+                    currentFiatPerBtc = fiatEntry.getRateFiat() / 100d;
+                }
             }
+            if (usdEntry!= null) {
+                try {
+                    double usdPerCoin = usdEntry.exchangeRate().coinToFiat(Coin.COIN).value / Math.pow(10, usdEntry.fiat().getSmallestUnitExponent());
+                    currentUsdPerBtc = usdPerCoin;
+                } catch (Exception e) {
+                    currentUsdPerBtc = usdEntry.getRateFiat() / 100d;
+                }
+            }
+            if (currentUsdPerBtc == 0d) currentUsdPerBtc = 76275.89d;
+            if (currentFiatPerBtc == 0d) currentFiatPerBtc = currentUsdPerBtc;
+
             mainHandler.post(() -> {
-                if (textVND != null) {
+                if (textVND!= null) {
                     textVND.setText(currentFiatCode);
                 }
             });
@@ -170,15 +207,24 @@ public class MarketChartActivity extends Activity {
                     new Thread(() -> {
                         ExchangeRateEntry fiatEntry = exchangeRateDao.findByCurrencyCode(currentFiatCode);
                         ExchangeRateEntry usdEntry = exchangeRateDao.findByCurrencyCode("USD");
-                        double fiatPerBtc = 0d;
-                        double usdPerBtc = 0d;
-                        if (fiatEntry != null && fiatEntry.getRate() != null) fiatPerBtc = fiatEntry.getRate().value;
-                        if (usdEntry != null && usdEntry.getRate() != null) usdPerBtc = usdEntry.getRate().value;
-                        if (fiatPerBtc == 0d) fiatPerBtc = price;
-                        if (usdPerBtc == 0d) usdPerBtc = price;
-
-                        double usdToFiat = fiatPerBtc / usdPerBtc;
+                        double fiatPerBtcLocal = currentFiatPerBtc;
+                        double usdPerBtcLocal = currentUsdPerBtc;
+                        if (fiatEntry!= null) {
+                            try {
+                                fiatPerBtcLocal = fiatEntry.exchangeRate().coinToFiat(Coin.COIN).value / Math.pow(10, fiatEntry.fiat().getSmallestUnitExponent());
+                            } catch (Exception ignored) {}
+                        }
+                        if (usdEntry!= null) {
+                            try {
+                                usdPerBtcLocal = usdEntry.exchangeRate().coinToFiat(Coin.COIN).value / Math.pow(10, usdEntry.fiat().getSmallestUnitExponent());
+                            } catch (Exception ignored) {}
+                        }
+                        if (fiatPerBtcLocal == 0d) fiatPerBtcLocal = price;
+                        if (usdPerBtcLocal == 0d) usdPerBtcLocal = price;
+                        double usdToFiat = fiatPerBtcLocal / usdPerBtcLocal;
                         double priceInFiat = price * usdToFiat;
+                        double highInFiat = high24h * usdToFiat;
+                        double lowInFiat = low24h * usdToFiat;
 
                         mainHandler.post(() -> {
                             if (textCurrentPrice!= null) {
@@ -201,11 +247,9 @@ public class MarketChartActivity extends Activity {
                                 lastDisplayPrice = (float) priceInFiat;
                             }
                             if (textHigh24h!= null) {
-                                double highInFiat = high24h * (fiatPerBtc / usdPerBtc);
                                 textHigh24h.setText(String.format(Locale.US, "24h High %,.2f %s", highInFiat, currentFiatCode));
                             }
                             if (textLow24h!= null) {
-                                double lowInFiat = low24h * (fiatPerBtc / usdPerBtc);
                                 textLow24h.setText(String.format(Locale.US, "24h Low %,.2f %s", lowInFiat, currentFiatCode));
                             }
                             if (textVND!= null) {
@@ -233,6 +277,8 @@ public class MarketChartActivity extends Activity {
                 runOnUiThread(() -> {
                     if (popupCandleDetail == null || candle == null) return;
                     popupCandleDetail.setVisibility(View.VISIBLE);
+                    popupCandleDetail.setBackgroundResource(R.drawable.bg_popup);
+                    popupCandleDetail.setElevation(8f * getResources().getDisplayMetrics().density);
                     if (popupTime!= null) popupTime.setText(fullTimeFormat.format(new Date(candle.openTime)));
                     if (popupOpen!= null) popupOpen.setText(String.format(Locale.US, "Open %.2f", candle.open));
                     if (popupHigh!= null) popupHigh.setText(String.format(Locale.US, "High %.2f", candle.high));
