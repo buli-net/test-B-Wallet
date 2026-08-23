@@ -46,4 +46,12 @@
     <!-- app icon -->
     <color name="appicon_gradient_start">#bbbbbb</color>
     <color name="appicon_gradient_end">#999999</color>
+
+    <!-- Chart colors - light theme -->
+    <color name="chart_bg">#FFFFFF</color>
+    <color name="chart_grid">#E0E0E0</color>
+    <color name="chart_text">#616161</color>
+    <color name="chart_bull">#26A69A</color>
+    <color name="chart_bear">#EF5350</color>
+    <color name="chart_wick">#757575</color>
 </resources>
