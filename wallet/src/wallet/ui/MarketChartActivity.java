@@ -58,15 +58,22 @@ public class MarketChartActivity extends Activity {
         setupTimeframeChips();
         setupChartListener();
 
-        marketChartView.loadChart(currentSymbol, currentInterval);
+        // FIX: check null để không văng nếu MarketChartView chưa init xong
+        if (marketChartView != null) {
+            try {
+                marketChartView.loadChart(currentSymbol, currentInterval);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     private void setupTimeframeChips() {
+        if (chipGroupTimeframe == null) return;
         chipGroupTimeframe.removeAllViews();
         for (String interval : intervals) {
             Button btn = new Button(this);
             btn.setText(interval);
-            // highlight cái đang chọn
             if (interval.equals(currentInterval)) {
                 btn.setAlpha(1f);
             } else {
@@ -80,7 +87,6 @@ public class MarketChartActivity extends Activity {
 
             btn.setOnClickListener(v -> {
                 currentInterval = interval;
-                // update alpha cho tất cả button
                 for (int i = 0; i < chipGroupTimeframe.getChildCount(); i++) {
                     View child = chipGroupTimeframe.getChildAt(i);
                     if (child instanceof Button) {
@@ -88,47 +94,74 @@ public class MarketChartActivity extends Activity {
                         b.setAlpha(b.getText().toString().equals(interval) ? 1f : 0.6f);
                     }
                 }
-                marketChartView.loadChart(currentSymbol, currentInterval);
+                if (marketChartView != null) {
+                    marketChartView.loadChart(currentSymbol, currentInterval);
+                }
             });
             chipGroupTimeframe.addView(btn);
         }
     }
 
     private void setupChartListener() {
+        if (marketChartView == null) return;
         marketChartView.setOnChartUpdateListener(new MarketChartView.OnChartUpdateListener() {
             @Override
             public void onPriceUpdate(float price, float high24h, float low24h) {
                 runOnUiThread(() -> {
-                    textCurrentPrice.setText(String.format(Locale.US, "$%.2f", price));
-                    textHigh24h.setText(getString(R.string.chart_high_label, String.format(Locale.US, "%.2f", high24h)));
-                    textLow24h.setText(getString(R.string.chart_low_label, String.format(Locale.US, "%.2f", low24h)));
+                    try {
+                        if (textCurrentPrice != null)
+                            textCurrentPrice.setText(String.format(Locale.US, "$%.2f", price));
+                        if (textHigh24h != null) {
+                            // FIX: fallback nếu string resource chưa có thì không văng
+                            try {
+                                textHigh24h.setText(getString(R.string.chart_high_label, String.format(Locale.US, "%.2f", high24h)));
+                            } catch (Exception e) {
+                                textHigh24h.setText("High: " + high24h);
+                            }
+                        }
+                        if (textLow24h != null) {
+                            try {
+                                textLow24h.setText(getString(R.string.chart_low_label, String.format(Locale.US, "%.2f", low24h)));
+                            } catch (Exception e) {
+                                textLow24h.setText("Low: " + low24h);
+                            }
+                        }
+                    } catch (Exception e) { e.printStackTrace(); }
                 });
             }
 
             @Override
             public void onCountdownUpdate(String countdown) {
                 runOnUiThread(() -> {
-                    textCountdown.setText(getString(R.string.chart_close_in, countdown));
+                    if (textCountdown == null) return;
+                    try {
+                        textCountdown.setText(getString(R.string.chart_close_in, countdown));
+                    } catch (Exception e) {
+                        textCountdown.setText("Close in: " + countdown);
+                    }
                 });
             }
 
             @Override
             public void onCandleSelected(MarketChartView.Candle candle) {
                 runOnUiThread(() -> {
-                    popupCandleDetail.setVisibility(View.VISIBLE);
-                    popupTime.setText(fullTimeFormat.format(new Date(candle.openTime)));
-                    popupOpen.setText(getString(R.string.chart_open_label, String.valueOf(candle.open)));
-                    popupHigh.setText(getString(R.string.chart_high_detail, String.valueOf(candle.high)));
-                    popupLow.setText(getString(R.string.chart_low_detail, String.valueOf(candle.low)));
-                    popupClose.setText(getString(R.string.chart_close_label, String.valueOf(candle.close)));
-                    popupVolume.setText(getString(R.string.chart_volume_label, String.valueOf(candle.volume)));
+                    if (popupCandleDetail == null || candle == null) return;
+                    try {
+                        popupCandleDetail.setVisibility(View.VISIBLE);
+                        if (popupTime != null) popupTime.setText(fullTimeFormat.format(new Date(candle.openTime)));
+                        if (popupOpen != null) popupOpen.setText("O: " + candle.open);
+                        if (popupHigh != null) popupHigh.setText("H: " + candle.high);
+                        if (popupLow != null) popupLow.setText("L: " + candle.low);
+                        if (popupClose != null) popupClose.setText("C: " + candle.close);
+                        if (popupVolume != null) popupVolume.setText("V: " + candle.volume);
+                    } catch (Exception e) { e.printStackTrace(); }
                 });
             }
 
             @Override
             public void onNothingSelected() {
                 runOnUiThread(() -> {
-                    popupCandleDetail.setVisibility(View.GONE);
+                    if (popupCandleDetail != null) popupCandleDetail.setVisibility(View.GONE);
                 });
             }
         });
