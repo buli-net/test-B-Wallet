@@ -13,7 +13,9 @@ import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.view.View;
+
 import org.json.JSONArray;
+
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
@@ -21,6 +23,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+
 import wallet.R;
 
 public class MarketChartView extends View {
@@ -32,12 +35,19 @@ public class MarketChartView extends View {
         public final float close;
         public final float volume;
         public final long openTime;
+
         public Candle(float open, float high, float low, float close, float volume, long openTime) {
-            this.open = open; this.high = high; this.low = low; this.close = close; this.volume = volume; this.openTime = openTime;
+            this.open = open;
+            this.high = high;
+            this.low = low;
+            this.close = close;
+            this.volume = volume;
+            this.openTime = openTime;
         }
     }
 
     private List<Candle> data = new ArrayList<>();
+
     private Paint bullishPaint;
     private Paint bearishPaint;
     private Paint wickPaint;
@@ -64,6 +74,7 @@ public class MarketChartView extends View {
     private Handler mainHandler = new Handler(Looper.getMainLooper());
     private Handler liveHandler = new Handler(Looper.getMainLooper());
     private Runnable liveRunnable;
+
     private String currentSymbol;
     private String currentInterval;
 
@@ -75,6 +86,7 @@ public class MarketChartView extends View {
 
     private void initPaints(Context context) {
         Resources res = context.getResources();
+
         int colorBackground = res.getColor(R.color.chart_bg);
         int colorGrid = res.getColor(R.color.chart_grid);
         int colorText = res.getColor(R.color.chart_text);
@@ -123,6 +135,7 @@ public class MarketChartView extends View {
                 return true;
             }
         });
+
         gestureDetector = new GestureDetector(context, new GestureDetector.SimpleOnGestureListener() {
             @Override
             public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
@@ -139,7 +152,8 @@ public class MarketChartView extends View {
         fetchCandles();
         if (liveRunnable == null) {
             liveRunnable = new Runnable() {
-                @Override public void run() {
+                @Override
+                public void run() {
                     fetchCandles();
                     liveHandler.postDelayed(this, LIVE_REFRESH_INTERVAL_MS);
                 }
@@ -162,6 +176,7 @@ public class MarketChartView extends View {
                 String line;
                 while ((line = reader.readLine()) != null) builder.append(line);
                 reader.close();
+
                 JSONArray jsonArray = new JSONArray(builder.toString());
                 List<Candle> newData = new ArrayList<>(jsonArray.length());
                 for (int i = 0; i < jsonArray.length(); i++) {
@@ -174,6 +189,7 @@ public class MarketChartView extends View {
                     long openTime = kline.getLong(0);
                     newData.add(new Candle(open, high, low, close, volume, openTime));
                 }
+
                 mainHandler.post(() -> {
                     data = newData;
                     if (!data.isEmpty()) {
@@ -217,7 +233,8 @@ public class MarketChartView extends View {
         }
 
         if (data.isEmpty()) {
-            canvas.drawText(getResources().getString(R.string.chart_loading), width / 2f - 100f, height / 2f, textPaint);
+            String loadingText = getResources().getString(R.string.chart_loading);
+            canvas.drawText(loadingText, width / 2f - 100f, height / 2f, textPaint);
             return;
         }
 
@@ -236,6 +253,7 @@ public class MarketChartView extends View {
             if (dataIndex >= data.size()) break;
             Candle candle = data.get(dataIndex);
             float x = i * candleWidth + candleWidth / 2f;
+
             float highY = TOP_PADDING_PX + chartHeight - ((candle.high - minPrice) / priceRange * chartHeight);
             float lowY = TOP_PADDING_PX + chartHeight - ((candle.low - minPrice) / priceRange * chartHeight);
             float openY = TOP_PADDING_PX + chartHeight - ((candle.open - minPrice) / priceRange * chartHeight);
@@ -258,8 +276,10 @@ public class MarketChartView extends View {
             canvas.drawText(lastPriceText, 12f, lastPriceY - 12f, textPaint);
         }
 
-        canvas.drawText(String.format(Locale.US, "%.2f", maxPrice), 12f, TOP_PADDING_PX + 30f, textPaint);
-        canvas.drawText(String.format(Locale.US, "%.2f", minPrice), 12f, height - 12f, textPaint);
+        String maxPriceText = String.format(Locale.US, "%.2f", maxPrice);
+        String minPriceText = String.format(Locale.US, "%.2f", minPrice);
+        canvas.drawText(maxPriceText, 12f, TOP_PADDING_PX + 30f, textPaint);
+        canvas.drawText(minPriceText, 12f, height - 12f, textPaint);
     }
 
     @Override
