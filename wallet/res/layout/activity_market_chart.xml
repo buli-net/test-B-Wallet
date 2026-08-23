@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="?attr/colorBackground">
+    android:background="@color/chart_bg">
 
     <wallet.ui.MarketChartView
         android:id="@+id/chartView"
@@ -16,7 +16,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:text="@string/loading"
-        android:textColor="?attr/colorControlNormal"
+        android:textColor="@color/chart_text"
         android:textSize="@dimen/font_size_small"
         android:visibility="gone"
         tools:visibility="visible" />
