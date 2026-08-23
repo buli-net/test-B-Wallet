@@ -53,6 +53,18 @@ public class MarketChartView extends View
         }
     }
 
+    public static class MaLine
+    {
+        public int period;
+        public int color;
+
+        public MaLine(int period, int color)
+        {
+            this.period = period;
+            this.color = color;
+        }
+    }
+
     public interface OnChartUpdateListener
     {
         void onPriceUpdate(float price, float high24h, float low24h);
@@ -82,6 +94,7 @@ public class MarketChartView extends View
     }
 
     private List<Candle> data = new ArrayList<>();
+    private List<MaLine> maLines = new ArrayList<>();
 
     private Paint bullishPaint;
     private Paint bearishPaint;
@@ -137,8 +150,47 @@ public class MarketChartView extends View
     public MarketChartView(Context context, AttributeSet attrs)
     {
         super(context, attrs);
+        initMaLines(context);
         initPaints(context);
         initGestures(context);
+    }
+
+    private void initMaLines(Context context)
+    {
+        try
+        {
+            int[] periods = context.getResources().getIntArray(R.array.ma_default_periods);
+            int[] colors = context.getResources().getIntArray(R.array.ma_default_colors);
+            maLines.clear();
+            for (int i = 0; i < periods.length; i++)
+            {
+                int color = colors[i % colors.length];
+                maLines.add(new MaLine(periods[i], color));
+            }
+        }
+        catch (Resources.NotFoundException e)
+        {
+            maLines.clear();
+            maLines.add(new MaLine(7, context.getResources().getColor(R.color.ma_yellow, null)));
+            maLines.add(new MaLine(25, context.getResources().getColor(R.color.ma_purple, null)));
+            maLines.add(new MaLine(99, context.getResources().getColor(R.color.ma_blue, null)));
+        }
+    }
+
+    public List<MaLine> getMaLines()
+    {
+        return new ArrayList<>(maLines);
+    }
+
+    public void setMaLines(List<MaLine> list)
+    {
+        if (list == null)
+        {
+            return;
+        }
+        this.maLines = new ArrayList<>(list);
+        invalidate();
+        notifyMa();
     }
 
     private int getThemeColor(int attr)
@@ -169,37 +221,37 @@ public class MarketChartView extends View
         setBackgroundColor(bgColor);
 
         bullishPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        bullishPaint.setColor(res.getColor(R.color.chart_bull));
+        bullishPaint.setColor(res.getColor(R.color.chart_bull, null));
         bullishPaint.setStyle(Paint.Style.FILL);
 
         bearishPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        bearishPaint.setColor(res.getColor(R.color.chart_bear));
+        bearishPaint.setColor(res.getColor(R.color.chart_bear, null));
         bearishPaint.setStyle(Paint.Style.FILL);
 
         volumeBullishPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        volumeBullishPaint.setColor(res.getColor(R.color.chart_bull));
+        volumeBullishPaint.setColor(res.getColor(R.color.chart_bull, null));
         volumeBullishPaint.setAlpha(255);
         volumeBullishPaint.setStyle(Paint.Style.FILL);
 
         volumeBearishPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        volumeBearishPaint.setColor(res.getColor(R.color.chart_bear));
+        volumeBearishPaint.setColor(res.getColor(R.color.chart_bear, null));
         volumeBearishPaint.setAlpha(255);
         volumeBearishPaint.setStyle(Paint.Style.FILL);
 
         wickPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        wickPaint.setColor(res.getColor(R.color.chart_wick));
+        wickPaint.setColor(res.getColor(R.color.chart_wick, null));
         wickPaint.setStrokeWidth(res.getDimension(R.dimen.chart_wick_width));
 
         wickBullishPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        wickBullishPaint.setColor(res.getColor(R.color.chart_bull));
+        wickBullishPaint.setColor(res.getColor(R.color.chart_bull, null));
         wickBullishPaint.setStrokeWidth(res.getDimension(R.dimen.chart_wick_width));
 
         wickBearishPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        wickBearishPaint.setColor(res.getColor(R.color.chart_bear));
+        wickBearishPaint.setColor(res.getColor(R.color.chart_bear, null));
         wickBearishPaint.setStrokeWidth(res.getDimension(R.dimen.chart_wick_width));
 
         gridPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        gridPaint.setColor(res.getColor(R.color.chart_grid));
+        gridPaint.setColor(res.getColor(R.color.chart_grid, null));
         gridPaint.setStrokeWidth(res.getDimension(R.dimen.chart_grid_width));
 
         textPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
@@ -207,30 +259,40 @@ public class MarketChartView extends View
         textPaint.setTextSize(res.getDimension(R.dimen.chart_text_size));
 
         lastPriceLinePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        lastPriceLinePaint.setColor(res.getColor(R.color.chart_last_price_line));
+        lastPriceLinePaint.setColor(res.getColor(R.color.chart_last_price_line, null));
         lastPriceLinePaint.setStrokeWidth(1f * res.getDisplayMetrics().density);
         lastPriceLinePaint.setStyle(Paint.Style.STROKE);
         lastPriceLinePaint.setPathEffect(new DashPathEffect(new float[]{10f, 6f}, 0f));
 
-        float thin = 1f * res.getDisplayMetrics().density;
+        float thin = res.getDimension(R.dimen.chart_ma_width);
 
         movingAverage5Paint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        movingAverage5Paint.setColor(res.getColor(R.color.chart_ma5));
         movingAverage5Paint.setStyle(Paint.Style.STROKE);
         movingAverage5Paint.setStrokeWidth(thin);
 
         movingAverage10Paint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        movingAverage10Paint.setColor(res.getColor(R.color.chart_ma10));
         movingAverage10Paint.setStyle(Paint.Style.STROKE);
         movingAverage10Paint.setStrokeWidth(thin);
 
         movingAverage20Paint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        movingAverage20Paint.setColor(res.getColor(R.color.chart_ma20));
         movingAverage20Paint.setStyle(Paint.Style.STROKE);
         movingAverage20Paint.setStrokeWidth(thin);
 
+        if (maLines.size() > 0)
+        {
+            movingAverage5Paint.setColor(maLines.get(0).color);
+        }
+        if (maLines.size() > 1)
+        {
+            movingAverage10Paint.setColor(maLines.get(1).color);
+        }
+        if (maLines.size() > 2)
+        {
+            movingAverage20Paint.setColor(maLines.get(2).color);
+        }
+
         selectedLinePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        selectedLinePaint.setColor(res.getColor(R.color.chart_text));
+        selectedLinePaint.setColor(res.getColor(R.color.chart_text, null));
         selectedLinePaint.setStrokeWidth(res.getDimension(R.dimen.chart_selected_width));
         selectedLinePaint.setAlpha(100);
     }
@@ -565,9 +627,21 @@ public class MarketChartView extends View
             return;
         }
         int last = data.size() - 1;
-        float ma7 = calculateMovingAverage(last, 7);
-        float ma25 = calculateMovingAverage(last, 25);
-        float ma99 = calculateMovingAverage(last, 99);
+        float ma7 = 0f;
+        float ma25 = 0f;
+        float ma99 = 0f;
+        if (maLines.size() > 0)
+        {
+            ma7 = calculateMovingAverage(last, maLines.get(0).period);
+        }
+        if (maLines.size() > 1)
+        {
+            ma25 = calculateMovingAverage(last, maLines.get(1).period);
+        }
+        if (maLines.size() > 2)
+        {
+            ma99 = calculateMovingAverage(last, maLines.get(2).period);
+        }
         updateListener.onMaUpdate(ma7, ma25, ma99);
     }
 
@@ -871,12 +945,24 @@ public class MarketChartView extends View
             canvas.drawRect(x - bodyWidth / 2f, top, x + bodyWidth / 2f, bottom, bodyPaint);
         }
 
-        int[] maPeriods = {7, 25, 99};
-        Paint[] maPaints = {movingAverage5Paint, movingAverage10Paint, movingAverage20Paint};
-        for (int periodIndex = 0; periodIndex < maPeriods.length; periodIndex++)
+        for (int maIndex = 0; maIndex < maLines.size(); maIndex++)
         {
-            int period = maPeriods[periodIndex];
-            Paint paint = maPaints[periodIndex];
+            MaLine maLine = maLines.get(maIndex);
+            int period = maLine.period;
+            Paint paint;
+            if (maIndex == 0)
+            {
+                paint = movingAverage5Paint;
+            }
+            else if (maIndex == 1)
+            {
+                paint = movingAverage10Paint;
+            }
+            else
+            {
+                paint = movingAverage20Paint;
+            }
+            paint.setColor(maLine.color);
             float previousX = 0f;
             float previousY = 0f;
             boolean isFirstPoint = true;
