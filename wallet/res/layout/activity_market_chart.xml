@@ -5,7 +5,6 @@
     android:orientation="vertical"
     android:background="?android:attr/colorBackground">
 
-    <!-- Thay Toolbar bằng TextView cho chắc -->
     <TextView
         android:layout_width="match_parent"
         android:layout_height="56dp"
@@ -65,10 +64,12 @@
                 android:textSize="@dimen/chart_text_size" />
         </LinearLayout>
 
-        <com.google.android.material.chip.ChipGroup
+        <!-- FIX: Đổi ChipGroup thành LinearLayout để không văng InflateException -->
+        <LinearLayout
             android:id="@+id/chipGroupTimeframe"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:orientation="horizontal"
             android:layout_marginTop="@dimen/chart_small_margin" />
 
     </LinearLayout>
