@@ -2,7 +2,7 @@ package wallet.ui;
 
 import android.app.Activity;
 import android.content.SharedPreferences;
-import android.graphics.Color;
+import android.content.res.Resources;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.os.Handler;
@@ -164,6 +164,7 @@ public class MarketChartActivity extends Activity {
 
     private void setupTimeframeChips() {
         if (chipGroupTimeframe == null) return;
+        Resources res = getResources();
         chipGroupTimeframe.removeAllViews();
         for (int idx = 0; idx < intervals.length; idx++) {
             String label = intervals[idx];
@@ -172,16 +173,16 @@ public class MarketChartActivity extends Activity {
             TextView tv = new TextView(this);
             tv.setText(label);
             tv.setTextSize(13f);
-            int padH = (int)(16 * getResources().getDisplayMetrics().density);
-            int padV = (int)(6 * getResources().getDisplayMetrics().density);
+            int padH = (int)(16 * res.getDisplayMetrics().density);
+            int padV = (int)(6 * res.getDisplayMetrics().density);
             tv.setPadding(padH, padV, padH, padV);
 
             if (label.equals("1h") || realInterval.equals(currentInterval)) {
-                tv.setTextColor(Color.WHITE);
+                tv.setTextColor(res.getColor(R.color.chart_text_bright));
                 tv.setBackgroundResource(R.drawable.bg_time_selected);
             } else {
-                tv.setTextColor(Color.parseColor("#848E9C"));
-                tv.setBackgroundColor(Color.TRANSPARENT);
+                tv.setTextColor(res.getColor(R.color.chart_text));
+                tv.setBackgroundColor(res.getColor(android.R.color.transparent));
             }
 
             LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
@@ -198,11 +199,11 @@ public class MarketChartActivity extends Activity {
                     if (child instanceof TextView) {
                         TextView t = (TextView) child;
                         if (t.getText().toString().equals(label)) {
-                            t.setTextColor(Color.WHITE);
+                            t.setTextColor(res.getColor(R.color.chart_text_bright));
                             t.setBackgroundResource(R.drawable.bg_time_selected);
                         } else {
-                            t.setTextColor(Color.parseColor("#848E9C"));
-                            t.setBackgroundColor(Color.TRANSPARENT);
+                            t.setTextColor(res.getColor(R.color.chart_text));
+                            t.setBackgroundColor(res.getColor(android.R.color.transparent));
                         }
                     }
                 }
@@ -216,13 +217,18 @@ public class MarketChartActivity extends Activity {
 
     private void setupChartListener() {
         if (marketChartView == null) return;
+        Resources res = getResources();
         marketChartView.setOnChartUpdateListener(new MarketChartView.OnChartUpdateListener() {
             @Override
             public void onPriceUpdate(float price, float high24h, float low24h) {
                 runOnUiThread(() -> {
                     new Thread(() -> {
                         double fiatPerBtc = getFiatPerBtc(currentFiatCode);
-                        double usdPerBtc = getFiatPerBtc("USD");
+                        String quoteFiat = "USD";
+                        if (currentSymbol!= null && currentSymbol.endsWith("USDT")) {
+                            quoteFiat = "USD";
+                        }
+                        double usdPerBtc = getFiatPerBtc(quoteFiat);
 
                         if (fiatPerBtc == 0d || usdPerBtc == 0d) {
                             return;
@@ -239,10 +245,10 @@ public class MarketChartActivity extends Activity {
                                 textCurrentPrice.setText(String.format(Locale.US, "%s%,.2f", symbol, priceInFiat));
 
                                 int color;
-                                if (lastDisplayPrice == 0f) color = Color.parseColor("#EAECEF");
-                                else if (priceInFiat > lastDisplayPrice) color = Color.parseColor("#0ECB81");
-                                else if (priceInFiat < lastDisplayPrice) color = Color.parseColor("#F6465D");
-                                else color = Color.parseColor("#F0B90B");
+                                if (lastDisplayPrice == 0f) color = res.getColor(R.color.chart_text_bright);
+                                else if (priceInFiat > lastDisplayPrice) color = res.getColor(R.color.chart_bull);
+                                else if (priceInFiat < lastDisplayPrice) color = res.getColor(R.color.chart_bear);
+                                else color = res.getColor(R.color.chart_last_price_line);
                                 textCurrentPrice.setTextColor(color);
                                 lastDisplayPrice = (float) priceInFiat;
                             }
@@ -275,11 +281,11 @@ public class MarketChartActivity extends Activity {
                     if (popupCandleDetail == null || candle == null) return;
                     popupCandleDetail.setVisibility(View.VISIBLE);
                     GradientDrawable bg = new GradientDrawable();
-                    bg.setColor(Color.parseColor("#FF1E2329"));
-                    bg.setCornerRadius(12f * getResources().getDisplayMetrics().density);
-                    bg.setStroke((int)(1 * getResources().getDisplayMetrics().density), Color.parseColor("#333A47"));
+                    bg.setColor(res.getColor(R.color.chart_bg));
+                    bg.setCornerRadius(12f * res.getDisplayMetrics().density);
+                    bg.setStroke((int)(1 * res.getDisplayMetrics().density), res.getColor(R.color.chart_grid));
                     popupCandleDetail.setBackground(bg);
-                    popupCandleDetail.setElevation(8f * getResources().getDisplayMetrics().density);
+                    popupCandleDetail.setElevation(8f * res.getDisplayMetrics().density);
                     if (popupTime!= null) popupTime.setText(fullTimeFormat.format(new Date(candle.openTime)));
                     if (popupOpen!= null) popupOpen.setText(String.format(Locale.US, "Open %.2f", candle.open));
                     if (popupHigh!= null) popupHigh.setText(String.format(Locale.US, "High %.2f", candle.high));
