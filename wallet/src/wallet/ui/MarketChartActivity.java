@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
+import android.graphics.Typeface;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.os.Handler;
@@ -37,7 +38,6 @@ import wallet.exchangerate.ExchangeRatesRepository;
 public class MarketChartActivity extends Activity
 {
     private MarketChartView marketChartView;
-    private TextView textTitle;
     private TextView textCurrentPrice;
     private TextView textFiat;
     private TextView textCountdown;
@@ -88,7 +88,6 @@ public class MarketChartActivity extends Activity
         setContentView(R.layout.activity_market_chart);
 
         marketChartView = findViewById(R.id.marketChartView);
-        textTitle = findViewById(R.id.textMarketTitle);
         textCurrentPrice = findViewById(R.id.textCurrentPrice);
         textFiat = findViewById(R.id.textFiat);
         textCountdown = findViewById(R.id.textCountdown);
@@ -167,10 +166,6 @@ public class MarketChartActivity extends Activity
             if (textFiat!= null)
             {
                 textFiat.setText(currentFiatCode);
-            }
-            if (textTitle!= null)
-            {
-                textTitle.setText("BTC/" + currentFiatCode);
             }
             if (marketChartView!= null)
             {
@@ -279,7 +274,7 @@ public class MarketChartActivity extends Activity
         TextView title = new TextView(this);
         title.setText(R.string.intervals_title);
         title.setTextSize(18f);
-        title.setTextStyle(android.graphics.Typeface.BOLD);
+        title.setTypeface(null, Typeface.BOLD);
         title.setTextColor(getThemeColor(android.R.attr.textColorPrimary));
         LinearLayout.LayoutParams titleLp = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
         titleLp.bottomMargin = pad;
@@ -349,9 +344,9 @@ public class MarketChartActivity extends Activity
         root.addView(grid);
 
         AlertDialog dialog = new AlertDialog.Builder(this)
-              .setView(root)
-              .setNegativeButton(R.string.close, (d, w) -> d.dismiss())
-              .create();
+             .setView(root)
+             .setNegativeButton(R.string.close, (d, w) -> d.dismiss())
+             .create();
         dialog.show();
     }
 
