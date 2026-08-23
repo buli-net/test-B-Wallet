@@ -636,6 +636,36 @@ public class BrowserActivity extends AbstractWalletActivity {
         }
     }
 
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+
+        if (toolbarContainer!= null) {
+            ViewGroup.LayoutParams params = toolbarContainer.getLayoutParams();
+            params.width = ViewGroup.LayoutParams.MATCH_PARENT;
+            toolbarContainer.setLayoutParams(params);
+            toolbarContainer.requestLayout();
+        }
+
+        if (urlBar!= null) {
+            urlBar.requestLayout();
+        }
+
+        if (rootLayout!= null) {
+            rootLayout.requestLayout();
+        }
+
+        updateAllColors();
+        invalidateOptionsMenu();
+
+        getWindow().getDecorView().post(new Runnable() {
+            @Override
+            public void run() {
+                getWindow().getDecorView().requestLayout();
+            }
+        });
+    }
+
     private void handleUrlInput() {
         String input = urlBar.getText().toString().trim();
         hideKeyboard();
@@ -722,9 +752,9 @@ public class BrowserActivity extends AbstractWalletActivity {
     private void showHistoryDialog() {
         if (historyList.isEmpty()) {
             new AlertDialog.Builder(this)
-                .setMessage(R.string.browser_no_history)
-                .setPositiveButton(R.string.browser_close, null)
-                .show();
+                 .setMessage(R.string.browser_no_history)
+                 .setPositiveButton(R.string.browser_close, null)
+                 .show();
             return;
         }
 
@@ -743,10 +773,10 @@ public class BrowserActivity extends AbstractWalletActivity {
         listView.setLayoutParams(params);
 
         final AlertDialog dialog = new AlertDialog.Builder(this)
-            .setTitle(R.string.browser_history_title)
-            .setView(listView)
-            .setPositiveButton(R.string.browser_close, null)
-            .setNegativeButton(R.string.browser_clear_history, new android.content.DialogInterface.OnClickListener() {
+             .setTitle(R.string.browser_history_title)
+             .setView(listView)
+             .setPositiveButton(R.string.browser_close, null)
+             .setNegativeButton(R.string.browser_clear_history, new android.content.DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(android.content.DialogInterface d, int which) {
                         historyList.clear();
@@ -754,7 +784,7 @@ public class BrowserActivity extends AbstractWalletActivity {
                         Toast.makeText(BrowserActivity.this, R.string.browser_clear_history, Toast.LENGTH_SHORT).show();
                     }
                 })
-            .create();
+             .create();
 
         listView.setOnItemClickListener(new android.widget.AdapterView.OnItemClickListener() {
             @Override
@@ -978,9 +1008,9 @@ public class BrowserActivity extends AbstractWalletActivity {
         }
 
         new AlertDialog.Builder(this)
-            .setTitle(R.string.browser_set_home_title)
-            .setView(input)
-            .setPositiveButton(R.string.browser_save, new android.content.DialogInterface.OnClickListener() {
+             .setTitle(R.string.browser_set_home_title)
+             .setView(input)
+             .setPositiveButton(R.string.browser_save, new android.content.DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(android.content.DialogInterface dialog, int which) {
                         String url = input.getText().toString().trim();
@@ -1001,7 +1031,7 @@ public class BrowserActivity extends AbstractWalletActivity {
                         edit.apply();
                     }
                 })
-            .setNegativeButton(R.string.browser_cancel, null)
-            .show();
+             .setNegativeButton(R.string.browser_cancel, null)
+             .show();
     }
 }
