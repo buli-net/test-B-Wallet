@@ -27,6 +27,9 @@
     <dimen name="shortcut_icon_size">32dp</dimen>
 
     <!-- market chart -->
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- CHART CORE -->
     <dimen name="chart_wick_width">2dp</dimen>
     <dimen name="chart_grid_width">1dp</dimen>
     <dimen name="chart_text_size">12sp</dimen>
@@ -38,4 +41,13 @@
     <dimen name="chart_time_margin">50dp</dimen>
     <dimen name="chart_volume_top">10dp</dimen>
     <dimen name="chart_volume_offset">20dp</dimen>
+
+    <!-- ACTIVITY LAYOUT -->
+    <dimen name="chart_screen_padding">12dp</dimen>
+    <dimen name="chart_small_margin">8dp</dimen>
+    <dimen name="chart_chip_spacing">4dp</dimen>
+    <dimen name="chart_price_large_size">24sp</dimen>
+    <dimen name="chart_popup_padding">10dp</dimen>
+    <dimen name="chart_popup_size">12sp</dimen>
+    <dimen name="chart_popup_time_size">11sp</dimen>
 </resources>
