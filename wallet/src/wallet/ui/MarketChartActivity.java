@@ -286,9 +286,14 @@ public class MarketChartActivity extends Activity
         grid.setUseDefaultMargins(false);
 
         Resources res = getResources();
-        String[] intervalValues = {"Time","1m","3m","5m","15m","30m","1h","2h","4h","6h","12h","1D","1W","1M"};
-        int[] intervalLabels = {R.string.time,R.string.interval_1m,R.string.interval_3m,R.string.interval_5m,R.string.interval_15m,R.string.interval_30m,R.string.interval_1h,R.string.interval_2h,R.string.interval_4h,R.string.interval_6h,R.string.interval_12h,R.string.interval_1d,R.string.interval_1w,R.string.interval_1M};
-        String[] realLoad = {"","1m","3m","5m","15m","30m","1h","2h","4h","6h","12h","1d","1w","1M"};
+        String[] intervalValues = {"Time", "1m", "3m", "5m", "15m", "30m", "1h", "2h", "4h", "6h", "12h", "1D", "1W", "1M"};
+        int[] intervalLabels = {R.string.time, R.string.interval_1m, R.string.interval_3m, R.string.interval_5m, R.string.interval_15m, R.string.interval_30m, R.string.interval_1h, R.string.interval_2h, R.string.interval_4h, R.string.interval_6h, R.string.interval_12h, R.string.interval_1d, R.string.interval_1w, R.string.interval_1M};
+        String[] realLoad = {"", "1m", "3m", "5m", "15m", "30m", "1h", "2h", "4h", "6h", "12h", "1d", "1w", "1M"};
+
+        AlertDialog dialog = new AlertDialog.Builder(this)
+               .setView(root)
+               .setNegativeButton(R.string.close, (d, w) -> d.dismiss())
+               .create();
 
         for (int i = 0; i < intervalValues.length; i++)
         {
@@ -337,16 +342,12 @@ public class MarketChartActivity extends Activity
                     marketChartView.loadChart(currentSymbol, currentInterval);
                 }
                 setupTimeframeChips();
+                dialog.dismiss();
             });
             grid.addView(tv);
         }
 
         root.addView(grid);
-
-        AlertDialog dialog = new AlertDialog.Builder(this)
-             .setView(root)
-             .setNegativeButton(R.string.close, (d, w) -> d.dismiss())
-             .create();
         dialog.show();
     }
 
@@ -359,61 +360,46 @@ public class MarketChartActivity extends Activity
         Resources res = getResources();
         chipGroupTimeframe.removeAllViews();
 
-        int[] labelResIds =
-        {
-            R.string.time,
-            R.string.interval_15m,
-            R.string.interval_1h,
-            R.string.interval_4h,
-            R.string.interval_1d,
-            R.string.interval_1M,
-            R.string.more
-        };
-        String[] realValues =
-        {
-            "",
-            "15m",
-            "1h",
-            "4h",
-            "1d",
-            "1M",
-            ""
-        };
+        String[] outerValues = {"15m", "1h", "4h", "1d", "1M"};
+        int[] outerLabels = {R.string.interval_15m, R.string.interval_1h, R.string.interval_4h, R.string.interval_1d, R.string.interval_1M};
 
-        for (int idx = 0; idx < labelResIds.length; idx++)
+        boolean isOuter = false;
+        for (String v : outerValues)
         {
-            int resId = labelResIds[idx];
-            String realInterval = realValues[idx];
+            if (v.equalsIgnoreCase(currentInterval))
+            {
+                isOuter = true;
+                break;
+            }
+        }
+
+        int padH = (int) (12 * res.getDisplayMetrics().density);
+        int padV = (int) (8 * res.getDisplayMetrics().density);
+
+        TextView tvTime = new TextView(this);
+        tvTime.setText(R.string.time);
+        tvTime.setTextSize(13f);
+        tvTime.setSingleLine(true);
+        tvTime.setPadding(padH, padV, padH, padV);
+        tvTime.setTextColor(getThemeColor(android.R.attr.textColorSecondary));
+        tvTime.setBackgroundColor(res.getColor(android.R.color.transparent));
+        LinearLayout.LayoutParams lpTime = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        lpTime.setMargins(2, 0, 2, 0);
+        tvTime.setLayoutParams(lpTime);
+        tvTime.setOnClickListener(v -> showMoreIntervalsDialog());
+        chipGroupTimeframe.addView(tvTime);
+
+        for (int idx = 0; idx < outerValues.length; idx++)
+        {
+            String realInterval = outerValues[idx];
+            int resId = outerLabels[idx];
             TextView tv = new TextView(this);
             tv.setText(resId);
             tv.setTextSize(13f);
             tv.setSingleLine(true);
-            int padH = (int) (12 * res.getDisplayMetrics().density);
-            int padV = (int) (8 * res.getDisplayMetrics().density);
             tv.setPadding(padH, padV, padH, padV);
 
-            boolean isSelected = false;
-            if (resId == R.string.interval_15m && currentInterval.equals("15m"))
-            {
-                isSelected = true;
-            }
-            if (resId == R.string.interval_1h && currentInterval.equals("1h"))
-            {
-                isSelected = true;
-            }
-            if (resId == R.string.interval_4h && currentInterval.equals("4h"))
-            {
-                isSelected = true;
-            }
-            if (resId == R.string.interval_1d && (currentInterval.equals("1d") || currentInterval.equals("1D")))
-            {
-                isSelected = true;
-            }
-            if (resId == R.string.interval_1M && currentInterval.equals("1M"))
-            {
-                isSelected = true;
-            }
-
+            boolean isSelected = realInterval.equalsIgnoreCase(currentInterval);
             if (isSelected)
             {
                 tv.setTextColor(getThemeColor(android.R.attr.colorBackground));
@@ -425,49 +411,46 @@ public class MarketChartActivity extends Activity
                 tv.setBackgroundColor(res.getColor(android.R.color.transparent));
             }
 
-            LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
-                    LinearLayout.LayoutParams.WRAP_CONTENT,
-                    LinearLayout.LayoutParams.WRAP_CONTENT
-            );
+            LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
             lp.setMargins(2, 0, 2, 0);
             tv.setLayoutParams(lp);
 
-            final String intervalToLoad = realInterval;
-            final int finalResId = resId;
+            final String load = realInterval;
             tv.setOnClickListener(v ->
             {
-                if (finalResId == R.string.time || finalResId == R.string.more)
-                {
-                    showMoreIntervalsDialog();
-                    return;
-                }
-                currentInterval = intervalToLoad;
-                for (int i = 0; i < chipGroupTimeframe.getChildCount(); i++)
-                {
-                    View child = chipGroupTimeframe.getChildAt(i);
-                    if (child instanceof TextView)
-                    {
-                        TextView t = (TextView) child;
-                        int childResId = labelResIds[i];
-                        if (childResId == finalResId)
-                        {
-                            t.setTextColor(getThemeColor(android.R.attr.colorBackground));
-                            t.setBackgroundResource(R.drawable.bg_time_selected);
-                        }
-                        else
-                        {
-                            t.setTextColor(getThemeColor(android.R.attr.textColorSecondary));
-                            t.setBackgroundColor(res.getColor(android.R.color.transparent));
-                        }
-                    }
-                }
+                currentInterval = load;
                 if (marketChartView!= null)
                 {
                     marketChartView.loadChart(currentSymbol, currentInterval);
                 }
+                setupTimeframeChips();
             });
             chipGroupTimeframe.addView(tv);
         }
+
+        TextView tvMore = new TextView(this);
+        tvMore.setTextSize(13f);
+        tvMore.setSingleLine(true);
+        tvMore.setPadding(padH, padV, padH, padV);
+        LinearLayout.LayoutParams lpMore = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        lpMore.setMargins(2, 0, 2, 0);
+        tvMore.setLayoutParams(lpMore);
+
+        if (isOuter)
+        {
+            tvMore.setText(R.string.more);
+            tvMore.setTextColor(getThemeColor(android.R.attr.textColorSecondary));
+            tvMore.setBackgroundColor(res.getColor(android.R.color.transparent));
+        }
+        else
+        {
+            String display = currentInterval.toUpperCase(Locale.US);
+            tvMore.setText(display);
+            tvMore.setTextColor(getThemeColor(android.R.attr.colorBackground));
+            tvMore.setBackgroundResource(R.drawable.bg_time_selected);
+        }
+        tvMore.setOnClickListener(v -> showMoreIntervalsDialog());
+        chipGroupTimeframe.addView(tvMore);
     }
 
     private void setupChartListener()
