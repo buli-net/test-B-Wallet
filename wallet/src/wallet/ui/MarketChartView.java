@@ -69,7 +69,7 @@ public class MarketChartView extends View
     {
         void onPriceUpdate(float price, float high24h, float low24h);
         void onTickerUpdate(float high24h, float low24h, float volBtc, float volUsdt, float changePercent);
-        void onMaUpdate(float ma7, float ma25, float ma99);
+        void onMaUpdate(List<Float> maValues);
         void onCountdownUpdate(String countdown);
         void onCandleSelected(Candle candle);
         void onNothingSelected();
@@ -110,6 +110,7 @@ public class MarketChartView extends View
     private Paint volumeBullishPaint;
     private Paint volumeBearishPaint;
     private Paint selectedLinePaint;
+    private List<Paint> maExtraPaints = new ArrayList<>();
 
     private static final int DEFAULT_VISIBLE_CANDLE_COUNT = 80;
     private static final int MIN_VISIBLE_CANDLE_COUNT = 20;
@@ -189,6 +190,7 @@ public class MarketChartView extends View
             return;
         }
         this.maLines = new ArrayList<>(list);
+        initPaints(getContext());
         invalidate();
         notifyMa();
     }
@@ -264,31 +266,44 @@ public class MarketChartView extends View
         lastPriceLinePaint.setStyle(Paint.Style.STROKE);
         lastPriceLinePaint.setPathEffect(new DashPathEffect(new float[]{10f, 6f}, 0f));
 
-        float thin = res.getDimension(R.dimen.chart_ma_width);
+        float thin = 1.0f * res.getDisplayMetrics().density;
 
         movingAverage5Paint = new Paint(Paint.ANTI_ALIAS_FLAG);
         movingAverage5Paint.setStyle(Paint.Style.STROKE);
         movingAverage5Paint.setStrokeWidth(thin);
+        movingAverage5Paint.setStrokeCap(Paint.Cap.ROUND);
+        movingAverage5Paint.setStrokeJoin(Paint.Join.ROUND);
 
         movingAverage10Paint = new Paint(Paint.ANTI_ALIAS_FLAG);
         movingAverage10Paint.setStyle(Paint.Style.STROKE);
         movingAverage10Paint.setStrokeWidth(thin);
+        movingAverage10Paint.setStrokeCap(Paint.Cap.ROUND);
+        movingAverage10Paint.setStrokeJoin(Paint.Join.ROUND);
 
         movingAverage20Paint = new Paint(Paint.ANTI_ALIAS_FLAG);
         movingAverage20Paint.setStyle(Paint.Style.STROKE);
         movingAverage20Paint.setStrokeWidth(thin);
+        movingAverage20Paint.setStrokeCap(Paint.Cap.ROUND);
+        movingAverage20Paint.setStrokeJoin(Paint.Join.ROUND);
 
-        if (maLines.size() > 0)
+        maExtraPaints.clear();
+
+        for (int i = 0; i < maLines.size(); i++)
         {
-            movingAverage5Paint.setColor(maLines.get(0).color);
-        }
-        if (maLines.size() > 1)
-        {
-            movingAverage10Paint.setColor(maLines.get(1).color);
-        }
-        if (maLines.size() > 2)
-        {
-            movingAverage20Paint.setColor(maLines.get(2).color);
+            Paint p;
+            if (i == 0) p = movingAverage5Paint;
+            else if (i == 1) p = movingAverage10Paint;
+            else if (i == 2) p = movingAverage20Paint;
+            else
+            {
+                p = new Paint(Paint.ANTI_ALIAS_FLAG);
+                p.setStyle(Paint.Style.STROKE);
+                p.setStrokeWidth(thin);
+                p.setStrokeCap(Paint.Cap.ROUND);
+                p.setStrokeJoin(Paint.Join.ROUND);
+                maExtraPaints.add(p);
+            }
+            p.setColor(maLines.get(i).color);
         }
 
         selectedLinePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
@@ -627,22 +642,12 @@ public class MarketChartView extends View
             return;
         }
         int last = data.size() - 1;
-        float ma7 = 0f;
-        float ma25 = 0f;
-        float ma99 = 0f;
-        if (maLines.size() > 0)
+        List<Float> values = new ArrayList<>();
+        for (int i = 0; i < maLines.size(); i++)
         {
-            ma7 = calculateMovingAverage(last, maLines.get(0).period);
+            values.add(calculateMovingAverage(last, maLines.get(i).period));
         }
-        if (maLines.size() > 1)
-        {
-            ma25 = calculateMovingAverage(last, maLines.get(1).period);
-        }
-        if (maLines.size() > 2)
-        {
-            ma99 = calculateMovingAverage(last, maLines.get(2).period);
-        }
-        updateListener.onMaUpdate(ma7, ma25, ma99);
+        updateListener.onMaUpdate(values);
     }
 
     private void fetchCandles()
@@ -958,9 +963,21 @@ public class MarketChartView extends View
             {
                 paint = movingAverage10Paint;
             }
-            else
+            else if (maIndex == 2)
             {
                 paint = movingAverage20Paint;
+            }
+            else
+            {
+                int extraIdx = maIndex - 3;
+                if (extraIdx < maExtraPaints.size())
+                {
+                    paint = maExtraPaints.get(extraIdx);
+                }
+                else
+                {
+                    paint = movingAverage20Paint;
+                }
             }
             paint.setColor(maLine.color);
             float previousX = 0f;
