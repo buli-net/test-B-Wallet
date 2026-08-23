@@ -630,15 +630,17 @@ public class MarketChartActivity extends Activity
             }
             else
             {
-                tv.setTextColor(getThemeColor(android.R.attr.textColorPrimary));
+                tv.setTextColor(getThemeColor(android.R.attr.textColorSecondary));
                 tv.setBackgroundColor(res.getColor(android.R.color.transparent));
             }
 
+            // Fix khung time cho đều full - dùng weight
             LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+                    0,
                     LinearLayout.LayoutParams.WRAP_CONTENT,
-                    LinearLayout.LayoutParams.WRAP_CONTENT
+                    1f
             );
-            lp.setMargins(8, 0, 8, 0);
+            lp.setMargins(4, 0, 4, 0);
             tv.setLayoutParams(lp);
 
             final String intervalToLoad = realInterval;
@@ -668,7 +670,7 @@ public class MarketChartActivity extends Activity
                         }
                         else
                         {
-                            t.setTextColor(getThemeColor(android.R.attr.textColorPrimary));
+                            t.setTextColor(getThemeColor(android.R.attr.textColorSecondary));
                             t.setBackgroundColor(res.getColor(android.R.color.transparent));
                         }
                     }
@@ -692,6 +694,35 @@ public class MarketChartActivity extends Activity
         }
 
         Resources res = getResources();
+
+        // Fix volume chỉ báo phải live click xem được
+        marketChartView.setOnVolumeClickListener(candle ->
+        {
+            runOnUiThread(() ->
+            {
+                if (popupCandleDetail == null || candle == null)
+                {
+                    return;
+                }
+                popupCandleDetail.setVisibility(View.VISIBLE);
+
+                GradientDrawable bg = new GradientDrawable();
+                bg.setColor(getThemeColor(android.R.attr.colorBackground));
+                bg.setCornerRadius(12f * res.getDisplayMetrics().density);
+                bg.setStroke((int) (1 * res.getDisplayMetrics().density), res.getColor(R.color.chart_grid));
+                popupCandleDetail.setBackground(bg);
+                popupCandleDetail.setElevation(8f * res.getDisplayMetrics().density);
+
+                if (popupTime!= null)
+                {
+                    popupTime.setText(fullTimeFormat.format(new Date(candle.openTime)));
+                }
+                if (popupVolume!= null)
+                {
+                    popupVolume.setText(getString(R.string.chart_volume_label, String.format(Locale.US, "%.2f", candle.volume)));
+                }
+            });
+        });
 
         marketChartView.setOnChartUpdateListener(new MarketChartView.OnChartUpdateListener()
         {
