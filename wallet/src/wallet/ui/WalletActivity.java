@@ -308,9 +308,9 @@ public final class WalletActivity extends AbstractWalletActivity {
                     return true;
              //add maket 2/2
                 } else if (itemId == R.id.menu_market_chart) {
-                    Toast.makeText(WalletActivity.this, "Market Chart clicked", Toast.LENGTH_SHORT).show();
-                    return true;
-
+                     Intent intent = new Intent(WalletActivity.this, MarketChartActivity.class);
+                     startActivity(intent);
+                     return true;
                 // end maket 2/2
                 
             //add create paper wallet
