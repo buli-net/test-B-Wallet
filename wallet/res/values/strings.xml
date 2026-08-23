@@ -482,9 +482,6 @@
     <!-- maket chart-->
 <string name="market_chart_title">Market Chart</string>
 <string name="chart_loading">Loading chart...</string>
-<string name="chart_countdown_default">Close in: 00:00:00</string>
-<string name="chart_high_default">High: 0.00</string>
-<string name="chart_low_default">Low: 0.00</string>
 <string name="chart_close_in">Close in: %1$s</string>
 <string name="chart_high_label">High: %1$s</string>
 <string name="chart_low_label">Low: %1$s</string>
