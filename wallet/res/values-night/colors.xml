@@ -22,4 +22,13 @@
     <color name="fg_password_strength_fair">#ffdfa870</color>
     <color name="fg_password_strength_good">#ffa0a8a0</color>
     <color name="fg_password_strength_strong">#ffa3e08c</color>
+
+    <!-- Chart colors - dark theme -->
+    <color name="chart_bg">#121212</color>
+    <color name="chart_grid">#333333</color>
+    <color name="chart_text">#9E9E9E</color>
+    <color name="chart_bull">#26A69A</color>
+    <color name="chart_bear">#EF5350</color>
+    <color name="chart_wick">#BDBDBD</color>
+
 </resources>
