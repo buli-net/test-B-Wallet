@@ -149,6 +149,19 @@ public class MarketChartActivity extends Activity {
         }
     }
 
+    private String getCurrencySymbol(String fiatCode) {
+        try {
+            Currency currency = Currency.getInstance(fiatCode);
+            String symbol = currency.getSymbol(Locale.US);
+            if (symbol.equals(fiatCode)) {
+                symbol = currency.getSymbol();
+            }
+            return symbol;
+        } catch (Exception e) {
+            return fiatCode + " ";
+        }
+    }
+
     private void setupTimeframeChips() {
         if (chipGroupTimeframe == null) return;
         chipGroupTimeframe.removeAllViews();
@@ -222,11 +235,7 @@ public class MarketChartActivity extends Activity {
 
                         mainHandler.post(() -> {
                             if (textCurrentPrice!= null) {
-                                String symbol = currentFiatCode + " ";
-                                if (currentFiatCode.equals("USD")) symbol = "$";
-                                else if (currentFiatCode.equals("VND")) symbol = "₫";
-                                else if (currentFiatCode.equals("EUR")) symbol = "€";
-
+                                String symbol = getCurrencySymbol(currentFiatCode);
                                 textCurrentPrice.setText(String.format(Locale.US, "%s%,.2f", symbol, priceInFiat));
 
                                 int color;
