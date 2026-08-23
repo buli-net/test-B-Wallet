@@ -48,16 +48,17 @@
     <color name="appicon_gradient_end">#999999</color>
 
     <!-- Chart market -->
-    <color name="chart_bg">#FFFFFF</color>
-    <color name="chart_grid">#E0E0E0</color>
-    <color name="chart_text">#616161</color>
-    <color name="chart_bull">#26A69A</color>
-    <color name="chart_bear">#EF5350</color>
-    <color name="chart_wick">#424242</color>
-    <color name="chart_last_price_line">#FF9800</color>
-    <color name="chart_ma5">#8E24AA</color>
-    <color name="chart_ma10">#0288D1</color>
-    <color name="chart_ma20">#F57F17</color>
-    <color name="chart_popup_bg">#CCFFFFFF</color>
-    <color name="chart_popup_text">#000000</color>
+    <!-- Chart maket - full system colors -->
+<color name="chart_bg">?android:attr/colorBackground</color>
+<color name="chart_grid">?android:attr/textColorHint</color>
+<color name="chart_text">?android:attr/textColorSecondary</color>
+<color name="chart_bull">@android:color/holo_green_light</color>
+<color name="chart_bear">@android:color/holo_red_light</color>
+<color name="chart_wick">?android:attr/textColorPrimary</color>
+<color name="chart_last_price_line">@android:color/holo_orange_light</color>
+<color name="chart_ma5">@android:color/holo_purple</color>
+<color name="chart_ma10">@android:color/holo_blue_light</color>
+<color name="chart_ma20">@android:color/holo_orange_dark</color>
+<color name="chart_popup_bg">?android:attr/colorBackgroundFloating</color>
+<color name="chart_popup_text">?android:attr/textColorPrimary</color>
 </resources>
