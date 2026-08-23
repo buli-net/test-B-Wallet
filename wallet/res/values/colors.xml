@@ -47,11 +47,12 @@
     <color name="appicon_gradient_start">#bbbbbb</color>
     <color name="appicon_gradient_end">#999999</color>
 
-    <!-- Chart colors - light theme -->
-    <color name="chart_bg">#FFFFFF</color>
-    <color name="chart_grid">#E0E0E0</color>
-    <color name="chart_text">#616161</color>
+    <!-- Chart market -->
+    <color name="chart_bg">#121212</color>
+    <color name="chart_grid">#2A2A2A</color>
+    <color name="chart_text">#BDBDBD</color>
     <color name="chart_bull">#26A69A</color>
     <color name="chart_bear">#EF5350</color>
-    <color name="chart_wick">#757575</color>
+    <color name="chart_wick">#9E9E9E</color>
+    <color name="chart_last_price_line">#FF9800</color>
 </resources>
