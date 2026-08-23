@@ -218,15 +218,13 @@ public class MarketChartView extends View {
                 int priceAxisW = (int) (PRICE_AXIS_WIDTH_DP * density);
                 int chartW = getWidth() - priceAxisW;
                 if (chartW <= 0) return false;
-
-                translationX += distanceX;
+                // Fix kéo ngược: đổi dấu
+                translationX -= distanceX;
                 clampTranslationX();
-
                 if (selectedIndex!= -1) {
                     selectedIndex = -1;
                     if (updateListener!= null) updateListener.onNothingSelected();
                 }
-
                 invalidate();
                 return true;
             }
@@ -239,7 +237,6 @@ public class MarketChartView extends View {
                 int chartW = getWidth() - priceAxisW;
                 int count = Math.min(visibleCandleCount, data.size());
                 if (count == 0) return false;
-
                 if (e.getX() > chartW) {
                     if (selectedIndex!= -1) {
                         selectedIndex = -1;
@@ -248,7 +245,6 @@ public class MarketChartView extends View {
                     }
                     return false;
                 }
-
                 float candleWidth = chartW / (float) count;
                 int index = (int) (e.getX() / candleWidth) + startIndexCache;
                 if (index >= 0 && index < data.size()) {
@@ -276,9 +272,9 @@ public class MarketChartView extends View {
         if (chartW <= 0) return;
         int count = Math.min(visibleCandleCount, data.size());
         float candleWidth = chartW / (float) count;
-        // Cho phép kéo về trái xem nến cũ và hở khoảng trống bên phải như Binance
-        float maxScroll = (data.size() - count) * candleWidth; // kéo max về trái
-        float minScroll = -chartW * 0.5f; // cho hở 50% bên phải
+        // Fix bám lề phải: cho phép kéo trái xem nến cũ và hở khoảng phải 50% như Binance
+        float maxScroll = (data.size() - count) * candleWidth;
+        float minScroll = -chartW * 0.5f;
         if (translationX < minScroll) translationX = minScroll;
         if (translationX > maxScroll) translationX = maxScroll;
     }
@@ -579,7 +575,6 @@ public class MarketChartView extends View {
             canvas.drawRect(x - bodyWidth / 2f, top, x + bodyWidth / 2f, bottom, bodyPaint);
         }
 
-        // MA 7,25,99 như Binance
         int[] maPeriods = {7, 25, 99};
         Paint[] maPaints = {movingAverage5Paint, movingAverage10Paint, movingAverage20Paint};
         for (int periodIndex = 0; periodIndex < maPeriods.length; periodIndex++) {
