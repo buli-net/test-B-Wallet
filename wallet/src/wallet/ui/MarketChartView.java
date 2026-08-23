@@ -41,15 +41,7 @@ public class MarketChartView extends View
         public final long openTime;
         public final long closeTime;
 
-        public Candle(
-                float open,
-                float high,
-                float low,
-                float close,
-                float volume,
-                long openTime,
-                long closeTime
-        )
+        public Candle(float open, float high, float low, float close, float volume, long openTime, long closeTime)
         {
             this.open = open;
             this.high = high;
@@ -186,12 +178,12 @@ public class MarketChartView extends View
 
         volumeBullishPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         volumeBullishPaint.setColor(res.getColor(R.color.chart_bull));
-        volumeBullishPaint.setAlpha(150);
+        volumeBullishPaint.setAlpha(255);
         volumeBullishPaint.setStyle(Paint.Style.FILL);
 
         volumeBearishPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         volumeBearishPaint.setColor(res.getColor(R.color.chart_bear));
-        volumeBearishPaint.setAlpha(150);
+        volumeBearishPaint.setAlpha(255);
         volumeBearishPaint.setStyle(Paint.Style.FILL);
 
         wickPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
@@ -220,20 +212,22 @@ public class MarketChartView extends View
         lastPriceLinePaint.setStyle(Paint.Style.STROKE);
         lastPriceLinePaint.setPathEffect(new DashPathEffect(new float[]{15f, 10f}, 0f));
 
+        float thin = 1f * res.getDisplayMetrics().density;
+
         movingAverage5Paint = new Paint(Paint.ANTI_ALIAS_FLAG);
         movingAverage5Paint.setColor(res.getColor(R.color.chart_ma5));
         movingAverage5Paint.setStyle(Paint.Style.STROKE);
-        movingAverage5Paint.setStrokeWidth(res.getDimension(R.dimen.chart_ma_width));
+        movingAverage5Paint.setStrokeWidth(thin);
 
         movingAverage10Paint = new Paint(Paint.ANTI_ALIAS_FLAG);
         movingAverage10Paint.setColor(res.getColor(R.color.chart_ma10));
         movingAverage10Paint.setStyle(Paint.Style.STROKE);
-        movingAverage10Paint.setStrokeWidth(res.getDimension(R.dimen.chart_ma_width));
+        movingAverage10Paint.setStrokeWidth(thin);
 
         movingAverage20Paint = new Paint(Paint.ANTI_ALIAS_FLAG);
         movingAverage20Paint.setColor(res.getColor(R.color.chart_ma20));
         movingAverage20Paint.setStyle(Paint.Style.STROKE);
-        movingAverage20Paint.setStrokeWidth(res.getDimension(R.dimen.chart_ma_width));
+        movingAverage20Paint.setStrokeWidth(thin);
 
         selectedLinePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         selectedLinePaint.setColor(res.getColor(R.color.chart_text));
