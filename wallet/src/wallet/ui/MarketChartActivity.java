@@ -276,32 +276,19 @@ public class MarketChartActivity extends Activity
         int pad = (int) (16 * getResources().getDisplayMetrics().density);
         root.setPadding(pad, pad, pad, pad);
 
-        LinearLayout header = new LinearLayout(this);
-        header.setOrientation(LinearLayout.HORIZONTAL);
-        header.setGravity(Gravity.CENTER_VERTICAL);
         TextView title = new TextView(this);
         title.setText(R.string.intervals_title);
         title.setTextSize(18f);
         title.setTextStyle(android.graphics.Typeface.BOLD);
         title.setTextColor(getThemeColor(android.R.attr.textColorPrimary));
-        LinearLayout.LayoutParams titleLp = new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f);
+        LinearLayout.LayoutParams titleLp = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        titleLp.bottomMargin = pad;
         title.setLayoutParams(titleLp);
-
-        TextView edit = new TextView(this);
-        edit.setText(R.string.edit);
-        edit.setTextSize(14f);
-        edit.setTextColor(getResources().getColor(R.color.chart_bull));
-        edit.setPadding(pad, 0, 0, 0);
-        header.addView(title);
-        header.addView(edit);
-        root.addView(header);
+        root.addView(title);
 
         GridLayout grid = new GridLayout(this);
         grid.setColumnCount(4);
         grid.setUseDefaultMargins(false);
-        LinearLayout.LayoutParams gridLp = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-        gridLp.topMargin = pad;
-        grid.setLayoutParams(gridLp);
 
         Resources res = getResources();
         String[] intervalValues = {"Time","1m","3m","5m","15m","30m","1h","2h","4h","6h","12h","1D","1W","1M"};
@@ -361,37 +348,10 @@ public class MarketChartActivity extends Activity
 
         root.addView(grid);
 
-        TextView customTitle = new TextView(this);
-        customTitle.setText(R.string.custom_intervals);
-        customTitle.setTextSize(14f);
-        customTitle.setTextStyle(android.graphics.Typeface.BOLD);
-        customTitle.setTextColor(getThemeColor(android.R.attr.textColorPrimary));
-        LinearLayout.LayoutParams ctLp = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-        ctLp.topMargin = (int) (20 * res.getDisplayMetrics().density);
-        customTitle.setLayoutParams(ctLp);
-        root.addView(customTitle);
-
-        TextView plus = new TextView(this);
-        plus.setText("+");
-        plus.setTextSize(22f);
-        plus.setGravity(Gravity.CENTER);
-        plus.setTextColor(getThemeColor(android.R.attr.textColorPrimary));
-        int plusPad = (int) (10 * res.getDisplayMetrics().density);
-        plus.setPadding(plusPad, plusPad, plusPad, plusPad);
-        GradientDrawable plusBg = new GradientDrawable();
-        plusBg.setCornerRadius(10f * res.getDisplayMetrics().density);
-        plusBg.setColor(getThemeColor(android.R.attr.colorBackground));
-        plusBg.setStroke((int) (1 * res.getDisplayMetrics().density), res.getColor(R.color.chart_grid));
-        plus.setBackground(plusBg);
-        LinearLayout.LayoutParams plusLp = new LinearLayout.LayoutParams((int) (80 * res.getDisplayMetrics().density), LinearLayout.LayoutParams.WRAP_CONTENT);
-        plusLp.topMargin = (int) (8 * res.getDisplayMetrics().density);
-        plus.setLayoutParams(plusLp);
-        root.addView(plus);
-
         AlertDialog dialog = new AlertDialog.Builder(this)
-               .setView(root)
-               .setNegativeButton(R.string.close, (d, w) -> d.dismiss())
-               .create();
+              .setView(root)
+              .setNegativeButton(R.string.close, (d, w) -> d.dismiss())
+              .create();
         dialog.show();
     }
 
