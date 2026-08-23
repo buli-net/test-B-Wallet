@@ -126,6 +126,7 @@ public class MarketChartView extends View
     private float maxVolume = 0f;
     private int selectedIndex = -1;
     private int startIndexCache = 0;
+    private float extraOffsetX = 0f;
 
     private ScaleGestureDetector scaleGestureDetector;
     private GestureDetector gestureDetector;
@@ -139,7 +140,6 @@ public class MarketChartView extends View
     private String currentInterval;
     private SimpleDateFormat timeFormat = new SimpleDateFormat("MM-dd HH:mm", Locale.US);
     private long currentCandleCloseTime = 0L;
-
     private String fiatCode = "USD";
 
     public MarketChartView(Context context, AttributeSet attrs)
@@ -173,8 +173,6 @@ public class MarketChartView extends View
     private void initPaints(Context context)
     {
         Resources res = context.getResources();
-
-        // Fix nền đổi màu theo theme
         int bgColor = getThemeColor(android.R.attr.colorBackground);
         setBackgroundColor(bgColor);
 
@@ -332,7 +330,8 @@ public class MarketChartView extends View
                     return false;
                 }
                 float candleWidth = chartW / (float) count;
-                int index = (int) (e.getX() / candleWidth) + startIndexCache;
+                float xWithOffset = e.getX() - extraOffsetX;
+                int index = (int) (xWithOffset / candleWidth) + startIndexCache;
                 if (index >= 0 && index < data.size())
                 {
                     selectedIndex = index;
@@ -340,7 +339,6 @@ public class MarketChartView extends View
                     {
                         updateListener.onCandleSelected(data.get(index));
                     }
-                    // Fix volume live click xem được
                     if (volumeClickListener!= null)
                     {
                         volumeClickListener.onVolumeClick(data.get(index));
@@ -366,6 +364,7 @@ public class MarketChartView extends View
         if (data.isEmpty())
         {
             translationX = 0f;
+            extraOffsetX = 0f;
             return;
         }
         float density = getResources().getDisplayMetrics().density;
@@ -377,11 +376,8 @@ public class MarketChartView extends View
         }
         int count = Math.min(visibleCandleCount, data.size());
         float candleWidth = chartW / (float) count;
-
-        // Fix bám lề phải: cho phép kéo trái xem nến cũ và hở khoảng phải 50% như Binance
         float maxScroll = (data.size() - count) * candleWidth;
-        // Fix lỗi kéo nến cách lề phải: thêm extra right offset
-        float minScroll = -chartW * 0.5f;
+        float minScroll = -chartW * 0.6f;
 
         if (translationX < minScroll)
         {
@@ -391,6 +387,15 @@ public class MarketChartView extends View
         {
             translationX = maxScroll;
         }
+
+        if (translationX < 0f)
+        {
+            extraOffsetX = translationX;
+        }
+        else
+        {
+            extraOffsetX = 0f;
+        }
     }
 
     public void loadChart(String symbol, String interval)
@@ -399,6 +404,7 @@ public class MarketChartView extends View
         this.currentInterval = interval;
         this.selectedIndex = -1;
         this.translationX = 0f;
+        this.extraOffsetX = 0f;
         stopLive();
         fetchCandles();
         startLive();
@@ -412,7 +418,6 @@ public class MarketChartView extends View
 
     public void setCountdown(String text)
     {
-        // Để Activity set text countdown, view chỉ invalidate
         invalidate();
     }
 
@@ -761,31 +766,6 @@ public class MarketChartView extends View
                 return true;
             }
         }
-        if (event.getAction() == MotionEvent.ACTION_UP || event.getAction() == MotionEvent.ACTION_CANCEL)
-        {
-            float density = getResources().getDisplayMetrics().density;
-            int priceAxisW = (int) (PRICE_AXIS_WIDTH_DP * density);
-            int chartW = getWidth() - priceAxisW;
-            int timeAxisH = (int) (20 * density);
-            int fullH = getHeight();
-            int volumeH = (int) (VOLUME_CHART_HEIGHT_DP * density);
-            int priceChartH = fullH - TOP_PADDING_PX - BOTTOM_PADDING_PX - VOLUME_TOP_MARGIN_PX - volumeH - timeAxisH;
-            float y = event.getY();
-            if (y < TOP_PADDING_PX || y > TOP_PADDING_PX + priceChartH)
-            {
-                if (selectedIndex!= -1 && event.getAction() == MotionEvent.ACTION_UP)
-                {
-                    // Fix volume chỉ báo phải live click xem được
-                    if (y >= TOP_PADDING_PX + priceChartH)
-                    {
-                        if (volumeClickListener!= null && selectedIndex >= 0 && selectedIndex < data.size())
-                        {
-                            volumeClickListener.onVolumeClick(data.get(selectedIndex));
-                        }
-                    }
-                }
-            }
-        }
         return true;
     }
 
@@ -827,7 +807,17 @@ public class MarketChartView extends View
 
         int count = Math.min(visibleCandleCount, data.size());
         float candleWidth = chartWidth / (float) count;
-        int startIndex = data.size() - count - (int) (translationX / candleWidth);
+
+        int startIndex = 0;
+        if (translationX >= 0f)
+        {
+            startIndex = data.size() - count - (int) (translationX / candleWidth);
+        }
+        else
+        {
+            startIndex = data.size() - count;
+        }
+
         if (startIndex < 0)
         {
             startIndex = 0;
@@ -866,7 +856,7 @@ public class MarketChartView extends View
                 break;
             }
             Candle candle = data.get(dataIndex);
-            float x = i * candleWidth + candleWidth / 2f;
+            float x = i * candleWidth + candleWidth / 2f + extraOffsetX;
             float highY = TOP_PADDING_PX + priceChartHeight - ((candle.high - minPrice) / priceRange * priceChartHeight);
             float lowY = TOP_PADDING_PX + priceChartHeight - ((candle.low - minPrice) / priceRange * priceChartHeight);
             float openY = TOP_PADDING_PX + priceChartHeight - ((candle.open - minPrice) / priceRange * priceChartHeight);
@@ -908,7 +898,7 @@ public class MarketChartView extends View
                 {
                     continue;
                 }
-                float x = i * candleWidth + candleWidth / 2f;
+                float x = i * candleWidth + candleWidth / 2f + extraOffsetX;
                 float y = TOP_PADDING_PX + priceChartHeight - ((movingAverage - minPrice) / priceRange * priceChartHeight);
                 if (!isFirstPoint)
                 {
@@ -922,7 +912,7 @@ public class MarketChartView extends View
 
         if (selectedIndex >= startIndex && selectedIndex < startIndex + count)
         {
-            float selectedX = (selectedIndex - startIndex) * candleWidth + candleWidth / 2f;
+            float selectedX = (selectedIndex - startIndex) * candleWidth + candleWidth / 2f + extraOffsetX;
             canvas.drawLine(selectedX, TOP_PADDING_PX, selectedX, TOP_PADDING_PX + priceChartHeight, selectedLinePaint);
         }
 
@@ -949,7 +939,7 @@ public class MarketChartView extends View
             {
                 break;
             }
-            float x = i * candleWidth;
+            float x = i * candleWidth + extraOffsetX;
             String timeText = timeFormat.format(new Date(data.get(dataIndex).openTime));
             canvas.drawText(timeText, x, TOP_PADDING_PX + priceChartHeight + volumeHeightPx + VOLUME_TOP_MARGIN_PX + 16f * density, textPaint);
         }
@@ -968,7 +958,7 @@ public class MarketChartView extends View
                 break;
             }
             Candle candle = data.get(dataIndex);
-            float x = i * candleWidth + candleWidth / 2f;
+            float x = i * candleWidth + candleWidth / 2f + extraOffsetX;
             float volumeBarHeight = volumeHeight * (candle.volume / maxVolume);
             Paint volumePaint = candle.close >= candle.open? volumeBullishPaint : volumeBearishPaint;
             canvas.drawRect(x - bodyWidth / 2f, volumeTop + volumeHeight - volumeBarHeight, x + bodyWidth / 2f, volumeTop + volumeHeight, volumePaint);
