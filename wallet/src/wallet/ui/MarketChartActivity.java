@@ -479,9 +479,9 @@ public class MarketChartActivity extends Activity
         int[] intervalLabels = {R.string.time, R.string.interval_1m, R.string.interval_3m, R.string.interval_5m, R.string.interval_15m, R.string.interval_30m, R.string.interval_1h, R.string.interval_2h, R.string.interval_4h, R.string.interval_6h, R.string.interval_12h, R.string.interval_1d, R.string.interval_1w, R.string.interval_1M};
 
         AlertDialog dialog = new AlertDialog.Builder(this)
-          .setView(root)
-          .setNegativeButton(R.string.close, (d, w) -> d.dismiss())
-          .create();
+               .setView(root)
+               .setNegativeButton(R.string.close, (d, w) -> d.dismiss())
+               .create();
 
         for (int i = 0; i < realLoad.length; i++)
         {
@@ -822,13 +822,13 @@ public class MarketChartActivity extends Activity
             }
 
             @Override
-            public void onMaUpdate(float ma7, float ma25, float ma99)
+            public void onMaUpdate(List<Float> maValues)
             {
                 runOnUiThread(() ->
                 {
                     if (textMaLabel!= null)
                     {
-                        if (ma7 == 0f)
+                        if (maValues == null || maValues.isEmpty())
                         {
                             textMaLabel.setText(getString(R.string.chart_ma_default));
                         }
@@ -838,18 +838,14 @@ public class MarketChartActivity extends Activity
                             SpannableStringBuilder sb = new SpannableStringBuilder();
                             for (int i = 0; i < lines.size(); i++)
                             {
-                                MarketChartView.MaLine line = lines.get(i);
-                                float value;
-                                if (i == 0) value = ma7;
-                                else if (i == 1) value = ma25;
-                                else if (i == 2) value = ma99;
-                                else value = 0f;
-                                if (value == 0f && lines.size() > 3) continue;
-                                String label = String.format(Locale.US, "MA%d: %.2f", line.period, value == 0f? 0f : (i==0?ma7:i==1?ma25:ma99));
+                                if (i >= maValues.size()) break;
+                                float value = maValues.get(i);
+                                if (value == 0f) continue;
+                                String label = String.format(Locale.US, "MA%d: %.2f", lines.get(i).period, value);
                                 if (sb.length() > 0) sb.append(" • ");
                                 int start = sb.length();
                                 sb.append(label);
-                                sb.setSpan(new ForegroundColorSpan(line.color), start, start + label.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                                sb.setSpan(new ForegroundColorSpan(lines.get(i).color), start, start + label.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
                             }
                             textMaLabel.setText(sb);
                         }
