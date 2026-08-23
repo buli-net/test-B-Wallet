@@ -60,4 +60,11 @@
 <color name="chart_text">#FF000000</color>
 <color name="chart_candle_up">#FF26A69A</color>
 <color name="chart_candle_down">#FFEF5350</color>
+
+<color name="ma_yellow">#F0B90B</color>
+<color name="ma_purple">#9B59B6</color>
+<color name="ma_blue">#5DADE2</color>
+<color name="ma_green">#2ECC71</color>
+<color name="ma_red">#E74C3C</color>
+<color name="ma_teal">#1ABC9C</color>
 </resources>
