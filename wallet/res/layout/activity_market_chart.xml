@@ -152,28 +152,18 @@
 
     </LinearLayout>
 
-    <HorizontalScrollView
+    <LinearLayout
+        android:id="@+id/chipGroupTimeframe"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:scrollbars="none"
-        android:clipChildren="false"
-        android:clipToPadding="false"
-        android:background="?android:attr/colorBackground">
-
-        <LinearLayout
-            android:id="@+id/chipGroupTimeframe"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical"
-            android:weightSum="7"
-            android:paddingStart="@dimen/chart_small_margin"
-            android:paddingEnd="80dp"
-            android:paddingTop="@dimen/list_entry_padding_vertical_cram"
-            android:paddingBottom="@dimen/list_entry_padding_vertical_cram"
-            android:background="?android:attr/colorBackground" />
-
-    </HorizontalScrollView>
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:weightSum="7"
+        android:paddingStart="@dimen/chart_small_margin"
+        android:paddingEnd="@dimen/chart_small_margin"
+        android:paddingTop="@dimen/list_entry_padding_vertical_cram"
+        android:paddingBottom="@dimen/list_entry_padding_vertical_cram"
+        android:background="?android:attr/colorBackground" />
 
     <FrameLayout
         android:layout_width="match_parent"
