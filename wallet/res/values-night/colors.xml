@@ -24,14 +24,15 @@
     <color name="fg_password_strength_strong">#ffa3e08c</color>
 
     <!-- Chart maket -->
+    <!-- CHART DARK THEME -->
     <color name="chart_bg">#000000</color>
-    <color name="chart_grid">#1E1E1E</color>
+    <color name="chart_grid">#212121</color>
     <color name="chart_text">#9E9E9E</color>
-    <color name="chart_bull">#00C896</color>
-    <color name="chart_bear">#FF5252</color>
+    <color name="chart_bull">#26A69A</color>
+    <color name="chart_bear">#EF5350</color>
     <color name="chart_wick">#757575</color>
-    <color name="chart_last_price_line">#FFA000</color>
-    <color name="chart_ma5">#9C27B0</color>
-    <color name="chart_ma10">#03A9F4</color>
-    <color name="chart_ma20">#FFEB3B</color>
+    <color name="chart_last_price_line">#FF9800</color>
+    <color name="chart_ma5">#BA68C8</color>
+    <color name="chart_ma10">#4FC3F7</color>
+    <color name="chart_ma20">#FFD54F</color>
 </resources>
