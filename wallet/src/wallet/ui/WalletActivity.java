@@ -305,6 +305,12 @@ public final class WalletActivity extends AbstractWalletActivity {
                 } else if (itemId == R.id.wallet_options_exchange_rates) {
                     startActivity(new Intent(WalletActivity.this, ExchangeRatesActivity.class));
                     return true;
+             //add maket
+                } else if (id == R.id.menu_market_chart) {
+                    // tạm thời chưa có Activity, để toast test menu
+                     Toast.makeText(this, "Market Chart clicked", Toast.LENGTH_SHORT).show();
+                     return true;
+                // end maket
                 } else if (itemId == R.id.wallet_options_sweep_wallet) {
                     SweepWalletActivity.start(WalletActivity.this);
                     return true;
