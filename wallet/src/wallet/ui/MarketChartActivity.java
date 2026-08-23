@@ -1,10 +1,10 @@
 package wallet.ui;
 
+import android.app.Activity;
 import android.os.Bundle;
-import androidx.appcompat.app.AppCompatActivity;
 import wallet.R;
 
-public class MarketChartActivity extends AppCompatActivity {
+public class MarketChartActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
