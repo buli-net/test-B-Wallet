@@ -19,7 +19,9 @@ import android.widget.TextView;
 import java.text.SimpleDateFormat;
 import java.util.Currency;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 import org.bitcoinj.base.Coin;
 import wallet.R;
 import wallet.WalletApplication;
@@ -31,6 +33,7 @@ import wallet.exchangerate.ExchangeRatesRepository;
 public class MarketChartActivity extends Activity {
 
     private MarketChartView marketChartView;
+    private TextView textTitle;
     private TextView textCurrentPrice;
     private TextView textFiat;
     private TextView textCountdown;
@@ -63,12 +66,42 @@ public class MarketChartActivity extends Activity {
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
     private float lastDisplayPrice = 0f;
 
+    private static final Map<String,String> FIAT_SYMBOLS = new HashMap<String,String>() {{
+        put("USD","$"); put("EUR","€"); put("VND","₫"); put("GBP","£"); put("JPY","¥"); put("CNY","¥");
+        put("CHF","Fr"); put("AUD","A$"); put("CAD","C$"); put("SGD","S$"); put("HKD","HK$"); put("KRW","₩");
+        put("INR","₹"); put("RUB","₽"); put("TRY","₺"); put("BRL","R$"); put("RON","lei"); put("LEU","lei");
+        put("SEK","kr"); put("NOK","kr"); put("DKK","kr"); put("PLN","zł"); put("THB","฿"); put("PHP","₱");
+        put("CZK","Kč"); put("HUF","Ft"); put("ILS","₪"); put("ZAR","R"); put("MXN","$"); put("NZD","NZ$");
+        put("AED","AED"); put("AFN","؋"); put("ALL","L"); put("AMD","֏"); put("ANG","ƒ"); put("AOA","Kz");
+        put("ARS","$"); put("AWG","ƒ"); put("AZN","₼"); put("BAM","KM"); put("BBD","$"); put("BDT","৳");
+        put("BGN","лв"); put("BHD",".د.ب"); put("BIF","FBu"); put("BMD","$"); put("BND","$"); put("BOB","Bs");
+        put("BSD","$"); put("BTN","Nu"); put("BWP","P"); put("BYN","Br"); put("BZD","BZ$"); put("CDF","FC");
+        put("CLP","$"); put("COP","$"); put("CRC","₡"); put("CUP","₱"); put("CVE","$"); put("DJF","Fdj");
+        put("DOP","RD$"); put("DZD","دج"); put("EGP","£"); put("ERN","Nfk"); put("ETB","Br"); put("FJD","$");
+        put("FKP","£"); put("GEL","₾"); put("GHS","₵"); put("GIP","£"); put("GMD","D"); put("GNF","FG");
+        put("GTQ","Q"); put("GYD","$"); put("HNL","L"); put("HRK","kn"); put("HTG","G"); put("IDR","Rp");
+        put("IQD","ع.د"); put("IRR","﷼"); put("JMD","J$"); put("JOD","JD"); put("KES","KSh"); put("KGS","с");
+        put("KHR","៛"); put("KMF","CF"); put("KPW","₩"); put("KWD","KD"); put("KYD","$"); put("KZT","₸");
+        put("LAK","₭"); put("LBP","£"); put("LKR","₨"); put("LRD","$"); put("LSL","M"); put("LYD","LD");
+        put("MAD","MAD"); put("MDL","L"); put("MGA","Ar"); put("MKD","ден"); put("MMK","K"); put("MNT","₮");
+        put("MOP","MOP$"); put("MRU","UM"); put("MUR","₨"); put("MVR","Rf"); put("MWK","MK"); put("MYR","RM");
+        put("MZN","MT"); put("NAD","$"); put("NGN","₦"); put("NIO","C$"); put("NPR","₨"); put("OMR","﷼");
+        put("PAB","B/."); put("PEN","S/"); put("PGK","K"); put("PKR","₨"); put("PYG","Gs"); put("QAR","﷼");
+        put("RSD","дин"); put("RWF","R₣"); put("SAR","﷼"); put("SBD","$"); put("SCR","₨"); put("SDG","ج.س");
+        put("SHP","£"); put("SLL","Le"); put("SOS","S"); put("SRD","$"); put("SSP","£"); put("STN","Db");
+        put("SVC","$"); put("SYP","£"); put("SZL","E"); put("TJS","SM"); put("TMT","T"); put("TND","د.ت");
+        put("TOP","T$"); put("TTD","TT$"); put("TWD","NT$"); put("TZS","TSh"); put("UAH","₴"); put("UGX","USh");
+        put("UYU","$U"); put("UZS","лв"); put("VES","Bs"); put("VUV","VT"); put("WST","WS$"); put("XAF","FCFA");
+        put("XCD","$"); put("XOF","CFA"); put("XPF","₣"); put("YER","﷼"); put("ZMW","ZK"); put("ZWL","$");
+    }};
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_market_chart);
 
         marketChartView = findViewById(R.id.marketChartView);
+        textTitle = findViewById(R.id.textMarketTitle);
         textCurrentPrice = findViewById(R.id.textCurrentPrice);
         textFiat = findViewById(R.id.textFiat);
         textCountdown = findViewById(R.id.textCountdown);
@@ -130,6 +163,7 @@ public class MarketChartActivity extends Activity {
     private void loadFiatRate() {
         mainHandler.post(() -> {
             if (textFiat!= null) textFiat.setText(currentFiatCode);
+            if (textTitle!= null) textTitle.setText("BTC/" + currentFiatCode);
         });
     }
 
@@ -158,28 +192,11 @@ public class MarketChartActivity extends Activity {
 
     private String getCurrencySymbol(String fiatCode) {
         try {
-            switch (fiatCode) {
-                case "USD": return "$";
-                case "EUR": return "€";
-                case "VND": return "₫";
-                case "GBP": return "£";
-                case "JPY": return "¥";
-                case "CNY": return "¥";
-                case "CHF": return "Fr";
-                case "AUD": return "A$";
-                case "CAD": return "C$";
-                case "SGD": return "S$";
-                case "HKD": return "HK$";
-                case "KRW": return "₩";
-                case "INR": return "₹";
-                case "RUB": return "₽";
-                case "TRY": return "₺";
-                case "BRL": return "R$";
-            }
+            if (FIAT_SYMBOLS.containsKey(fiatCode)) return FIAT_SYMBOLS.get(fiatCode);
             Currency currency = Currency.getInstance(fiatCode);
             String sym = currency.getSymbol(Locale.US);
             if (sym.equals(fiatCode)) sym = currency.getSymbol();
-            if (sym.equals(fiatCode) || sym.length() > 4) return fiatCode + " ";
+            if (sym.equals(fiatCode) || sym.length() > 6) return fiatCode + " ";
             return sym;
         } catch (Exception e) {
             return fiatCode + " ";
@@ -337,24 +354,31 @@ public class MarketChartActivity extends Activity {
                 runOnUiThread(() -> {
                     if (textMaLabel!= null) {
                         if (ma7 == 0f) {
-                            textMaLabel.setText("MA(7): -- MA(25): -- MA(99): --");
+                            textMaLabel.setText("MA(7): -- • MA(25): -- • MA(99): --");
                         } else {
                             int colorMa7 = res.getColor(R.color.chart_ma5);
                             int colorMa25 = res.getColor(R.color.chart_ma10);
                             int colorMa99 = res.getColor(R.color.chart_ma20);
-                            String s7 = String.format(Locale.US, "MA7: %.2f ", ma7);
-                            String s25 = String.format(Locale.US, "MA25: %.2f ", ma25);
+                            String s7 = String.format(Locale.US, "MA7: %.2f", ma7);
+                            String sep = " • ";
+                            String s25 = String.format(Locale.US, "MA25: %.2f", ma25);
                             String s99 = String.format(Locale.US, "MA99: %.2f", ma99);
                             SpannableStringBuilder sb = new SpannableStringBuilder();
                             int start = 0;
                             sb.append(s7);
                             sb.setSpan(new ForegroundColorSpan(colorMa7), start, start + s7.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
                             start += s7.length();
+                            sb.append(sep);
+                            int sepStart = start;
+                            start += sep.length();
                             sb.append(s25);
                             sb.setSpan(new ForegroundColorSpan(colorMa25), start, start + s25.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
                             start += s25.length();
+                            sb.append(sep);
+                            start += sep.length();
                             sb.append(s99);
                             sb.setSpan(new ForegroundColorSpan(colorMa99), start, start + s99.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                            sb.setSpan(new ForegroundColorSpan(res.getColor(R.color.chart_text)), sepStart, sepStart+sep.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
                             textMaLabel.setText(sb);
                         }
                     }
