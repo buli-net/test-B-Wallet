@@ -12,6 +12,7 @@ import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.style.ForegroundColorSpan;
 import android.util.TypedValue;
+import android.view.Gravity;
 import android.view.View;
 import android.widget.GridLayout;
 import android.widget.LinearLayout;
@@ -58,34 +59,6 @@ public class MarketChartActivity extends Activity
     private String currentSymbol = "BTCUSDT";
     private String currentInterval = "15m";
 
-    private final String[] realIntervals =
-    {
-        "15m",
-        "15m",
-        "1h",
-        "4h",
-        "1d",
-        "1M",
-        "1M"
-    };
-
-    private final String[] allIntervals =
-    {
-        "1m",
-        "3m",
-        "5m",
-        "15m",
-        "30m",
-        "1h",
-        "2h",
-        "4h",
-        "6h",
-        "12h",
-        "1D",
-        "1W",
-        "1M"
-    };
-
     private SimpleDateFormat fullTimeFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US);
 
     private ExchangeRateDao exchangeRateDao;
@@ -104,156 +77,8 @@ public class MarketChartActivity extends Activity
         put("GBP", "£");
         put("JPY", "¥");
         put("CNY", "¥");
-        put("CHF", "Fr");
-        put("AUD", "A$");
-        put("CAD", "C$");
-        put("SGD", "S$");
-        put("HKD", "HK$");
-        put("KRW", "₩");
-        put("INR", "₹");
-        put("RUB", "₽");
-        put("TRY", "₺");
-        put("BRL", "R$");
         put("RON", "lei");
         put("LEU", "lei");
-        put("SEK", "kr");
-        put("NOK", "kr");
-        put("DKK", "kr");
-        put("PLN", "zł");
-        put("THB", "฿");
-        put("PHP", "₱");
-        put("CZK", "Kč");
-        put("HUF", "Ft");
-        put("ILS", "₪");
-        put("ZAR", "R");
-        put("MXN", "$");
-        put("NZD", "NZ$");
-        put("AED", "AED");
-        put("AFN", "؋");
-        put("ALL", "L");
-        put("AMD", "֏");
-        put("ANG", "ƒ");
-        put("AOA", "Kz");
-        put("ARS", "$");
-        put("AWG", "ƒ");
-        put("AZN", "₼");
-        put("BAM", "KM");
-        put("BBD", "$");
-        put("BDT", "৳");
-        put("BGN", "лв");
-        put("BHD", ".د.ب");
-        put("BIF", "FBu");
-        put("BMD", "$");
-        put("BND", "$");
-        put("BOB", "Bs");
-        put("BSD", "$");
-        put("BTN", "Nu");
-        put("BWP", "P");
-        put("BYN", "Br");
-        put("BZD", "BZ$");
-        put("CDF", "FC");
-        put("CLP", "$");
-        put("COP", "$");
-        put("CRC", "₡");
-        put("CUP", "₱");
-        put("CVE", "$");
-        put("DJF", "Fdj");
-        put("DOP", "RD$");
-        put("DZD", "د.ج");
-        put("EGP", "E£");
-        put("ERN", "Nfk");
-        put("ETB", "Br");
-        put("FJD", "$");
-        put("FKP", "£");
-        put("GEL", "₾");
-        put("GHS", "₵");
-        put("GIP", "£");
-        put("GMD", "D");
-        put("GNF", "FG");
-        put("GTQ", "Q");
-        put("GYD", "$");
-        put("HNL", "L");
-        put("HRK", "kn");
-        put("HTG", "G");
-        put("IDR", "Rp");
-        put("IQD", "ع.د");
-        put("IRR", "﷼");
-        put("JMD", "J$");
-        put("JOD", "JD");
-        put("KES", "KSh");
-        put("KGS", "с");
-        put("KHR", "៛");
-        put("KMF", "CF");
-        put("KPW", "₩");
-        put("KWD", "KD");
-        put("KYD", "$");
-        put("KZT", "₸");
-        put("LAK", "₭");
-        put("LBP", "£");
-        put("LKR", "Rs");
-        put("LRD", "$");
-        put("LSL", "M");
-        put("LYD", "LD");
-        put("MAD", "MAD");
-        put("MDL", "L");
-        put("MGA", "Ar");
-        put("MKD", "ден");
-        put("MMK", "K");
-        put("MNT", "₮");
-        put("MOP", "MOP$");
-        put("MRU", "UM");
-        put("MUR", "₨");
-        put("MVR", "Rf");
-        put("MWK", "MK");
-        put("MYR", "RM");
-        put("MZN", "MT");
-        put("NAD", "$");
-        put("NGN", "₦");
-        put("NIO", "C$");
-        put("NPR", "Rs");
-        put("OMR", "﷼");
-        put("PAB", "B/.");
-        put("PEN", "S/");
-        put("PGK", "K");
-        put("PKR", "₨");
-        put("PYG", "Gs");
-        put("QAR", "﷼");
-        put("RSD", "Дин");
-        put("RWF", "RF");
-        put("SAR", "﷼");
-        put("SBD", "$");
-        put("SCR", "₨");
-        put("SDG", "ج.س.");
-        put("SHP", "£");
-        put("SLL", "Le");
-        put("SOS", "S");
-        put("SRD", "$");
-        put("SSP", "£");
-        put("STN", "Db");
-        put("SVC", "$");
-        put("SYP", "£E");
-        put("SZL", "E");
-        put("TJS", "SM");
-        put("TMT", "T");
-        put("TND", "د.ت");
-        put("TOP", "T$");
-        put("TTD", "TT$");
-        put("TWD", "NT$");
-        put("TZS", "TSh");
-        put("UAH", "₴");
-        put("UGX", "USh");
-        put("UYU", "$U");
-        put("UZS", "лв");
-        put("VES", "Bs");
-        put("VUV", "VT");
-        put("WST", "WS$");
-        put("XAF", "FCFA");
-        put("XCD", "$");
-        put("XOF", "CFA");
-        put("XPF", "₣");
-        put("YER", "﷼");
-        put("ZMW", "ZK");
-        put("ZWL", "$");
     }};
 
     @Override
@@ -445,115 +270,129 @@ public class MarketChartActivity extends Activity
 
     private void showMoreIntervalsDialog()
     {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle(R.string.intervals_title);
+        LinearLayout root = new LinearLayout(this);
+        root.setOrientation(LinearLayout.VERTICAL);
+        root.setBackgroundColor(getThemeColor(android.R.attr.colorBackground));
+        int pad = (int) (16 * getResources().getDisplayMetrics().density);
+        root.setPadding(pad, pad, pad, pad);
+
+        LinearLayout header = new LinearLayout(this);
+        header.setOrientation(LinearLayout.HORIZONTAL);
+        header.setGravity(Gravity.CENTER_VERTICAL);
+        TextView title = new TextView(this);
+        title.setText(R.string.intervals_title);
+        title.setTextSize(18f);
+        title.setTextStyle(android.graphics.Typeface.BOLD);
+        title.setTextColor(getThemeColor(android.R.attr.textColorPrimary));
+        LinearLayout.LayoutParams titleLp = new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f);
+        title.setLayoutParams(titleLp);
+
+        TextView edit = new TextView(this);
+        edit.setText(R.string.edit);
+        edit.setTextSize(14f);
+        edit.setTextColor(getResources().getColor(R.color.chart_bull));
+        edit.setPadding(pad, 0, 0, 0);
+        header.addView(title);
+        header.addView(edit);
+        root.addView(header);
 
         GridLayout grid = new GridLayout(this);
         grid.setColumnCount(4);
         grid.setUseDefaultMargins(false);
-        grid.setAlignmentMode(GridLayout.ALIGN_BOUNDS);
-        grid.setPadding(24, 24, 24, 24);
-        grid.setBackgroundColor(getThemeColor(android.R.attr.colorBackground));
+        LinearLayout.LayoutParams gridLp = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        gridLp.topMargin = pad;
+        grid.setLayoutParams(gridLp);
 
         Resources res = getResources();
-
-        String[] intervalValues =
-        {
-            "1m",
-            "3m",
-            "5m",
-            "15m",
-            "30m",
-            "1h",
-            "2h",
-            "4h",
-            "6h",
-            "12h",
-            "1D",
-            "1W",
-            "1M"
-        };
-
-        int[] intervalLabels =
-        {
-            R.string.interval_1m,
-            R.string.interval_3m,
-            R.string.interval_5m,
-            R.string.interval_15m,
-            R.string.interval_30m,
-            R.string.interval_1h,
-            R.string.interval_2h,
-            R.string.interval_4h,
-            R.string.interval_6h,
-            R.string.interval_12h,
-            R.string.interval_1d,
-            R.string.interval_1w,
-            R.string.interval_1M
-        };
+        String[] intervalValues = {"Time","1m","3m","5m","15m","30m","1h","2h","4h","6h","12h","1D","1W","1M"};
+        int[] intervalLabels = {R.string.time,R.string.interval_1m,R.string.interval_3m,R.string.interval_5m,R.string.interval_15m,R.string.interval_30m,R.string.interval_1h,R.string.interval_2h,R.string.interval_4h,R.string.interval_6h,R.string.interval_12h,R.string.interval_1d,R.string.interval_1w,R.string.interval_1M};
+        String[] realLoad = {"","1m","3m","5m","15m","30m","1h","2h","4h","6h","12h","1d","1w","1M"};
 
         for (int i = 0; i < intervalValues.length; i++)
         {
-            String interval = intervalValues[i];
             TextView tv = new TextView(this);
             tv.setText(intervalLabels[i]);
-            tv.setTextSize(14f);
-            tv.setGravity(android.view.Gravity.CENTER);
-            tv.setPadding(0, 28, 0, 28);
-            tv.setTextColor(getThemeColor(android.R.attr.textColorPrimary));
+            tv.setTextSize(13f);
+            tv.setGravity(Gravity.CENTER);
+            tv.setSingleLine(true);
+            int vPad = (int) (14 * res.getDisplayMetrics().density);
+            tv.setPadding(0, vPad, 0, vPad);
 
-            boolean isSelected = interval.equals(currentInterval) || (interval.equals("1D") && currentInterval.equals("1d"));
+            boolean isSelected = realLoad[i].equalsIgnoreCase(currentInterval);
+            GradientDrawable bg = new GradientDrawable();
+            bg.setCornerRadius(10f * res.getDisplayMetrics().density);
+            bg.setColor(getThemeColor(android.R.attr.colorBackground));
             if (isSelected)
             {
-                tv.setBackgroundResource(R.drawable.bg_time_selected);
-                tv.setTextColor(getThemeColor(android.R.attr.colorBackground));
+                bg.setStroke((int) (2 * res.getDisplayMetrics().density), getThemeColor(android.R.attr.textColorPrimary));
+                tv.setTextColor(getThemeColor(android.R.attr.textColorPrimary));
             }
             else
             {
-                tv.setBackgroundColor(res.getColor(android.R.color.transparent));
+                bg.setStroke((int) (1 * res.getDisplayMetrics().density), res.getColor(R.color.chart_grid));
+                tv.setTextColor(getThemeColor(android.R.attr.textColorSecondary));
             }
+            tv.setBackground(bg);
 
-            GridLayout.Spec rowSpec = GridLayout.spec(GridLayout.UNDEFINED, 1f);
-            GridLayout.Spec colSpec = GridLayout.spec(GridLayout.UNDEFINED, 1f);
-            GridLayout.LayoutParams lp = new GridLayout.LayoutParams(rowSpec, colSpec);
+            GridLayout.LayoutParams lp = new GridLayout.LayoutParams();
             lp.width = 0;
             lp.height = GridLayout.LayoutParams.WRAP_CONTENT;
-            lp.setGravity(android.view.Gravity.FILL);
-            lp.setMargins(12, 12, 12, 12);
+            lp.columnSpec = GridLayout.spec(GridLayout.UNDEFINED, 1f);
+            lp.setMargins(8, 8, 8, 8);
             tv.setLayoutParams(lp);
 
-            final String intervalToLoad;
-            if (interval.equals("1D"))
-            {
-                intervalToLoad = "1d";
-            }
-            else if (interval.equals("1W"))
-            {
-                intervalToLoad = "1w";
-            }
-            else
-            {
-                intervalToLoad = interval;
-            }
-
+            final String load = realLoad[i];
+            final String display = intervalValues[i];
             tv.setOnClickListener(v ->
             {
-                currentInterval = intervalToLoad;
+                if (display.equals("Time"))
+                {
+                    return;
+                }
+                currentInterval = load;
                 if (marketChartView!= null)
                 {
                     marketChartView.loadChart(currentSymbol, currentInterval);
                 }
                 setupTimeframeChips();
             });
-
             grid.addView(tv);
         }
 
-        builder.setView(grid);
-        builder.setNegativeButton(R.string.close, (dialog, which) ->
-        {
-            dialog.dismiss();
-        });
-        builder.show();
+        root.addView(grid);
+
+        TextView customTitle = new TextView(this);
+        customTitle.setText(R.string.custom_intervals);
+        customTitle.setTextSize(14f);
+        customTitle.setTextStyle(android.graphics.Typeface.BOLD);
+        customTitle.setTextColor(getThemeColor(android.R.attr.textColorPrimary));
+        LinearLayout.LayoutParams ctLp = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        ctLp.topMargin = (int) (20 * res.getDisplayMetrics().density);
+        customTitle.setLayoutParams(ctLp);
+        root.addView(customTitle);
+
+        TextView plus = new TextView(this);
+        plus.setText("+");
+        plus.setTextSize(22f);
+        plus.setGravity(Gravity.CENTER);
+        plus.setTextColor(getThemeColor(android.R.attr.textColorPrimary));
+        int plusPad = (int) (10 * res.getDisplayMetrics().density);
+        plus.setPadding(plusPad, plusPad, plusPad, plusPad);
+        GradientDrawable plusBg = new GradientDrawable();
+        plusBg.setCornerRadius(10f * res.getDisplayMetrics().density);
+        plusBg.setColor(getThemeColor(android.R.attr.colorBackground));
+        plusBg.setStroke((int) (1 * res.getDisplayMetrics().density), res.getColor(R.color.chart_grid));
+        plus.setBackground(plusBg);
+        LinearLayout.LayoutParams plusLp = new LinearLayout.LayoutParams((int) (80 * res.getDisplayMetrics().density), LinearLayout.LayoutParams.WRAP_CONTENT);
+        plusLp.topMargin = (int) (8 * res.getDisplayMetrics().density);
+        plus.setLayoutParams(plusLp);
+        root.addView(plus);
+
+        AlertDialog dialog = new AlertDialog.Builder(this)
+               .setView(root)
+               .setNegativeButton(R.string.close, (d, w) -> d.dismiss())
+               .create();
+        dialog.show();
     }
 
     private void setupTimeframeChips()
@@ -562,7 +401,6 @@ public class MarketChartActivity extends Activity
         {
             return;
         }
-
         Resources res = getResources();
         chipGroupTimeframe.removeAllViews();
 
@@ -576,7 +414,6 @@ public class MarketChartActivity extends Activity
             R.string.interval_1M,
             R.string.more
         };
-
         String[] realValues =
         {
             "",
@@ -592,13 +429,12 @@ public class MarketChartActivity extends Activity
         {
             int resId = labelResIds[idx];
             String realInterval = realValues[idx];
-            String label = getString(resId);
-
             TextView tv = new TextView(this);
-            tv.setText(label);
+            tv.setText(resId);
             tv.setTextSize(13f);
-            int padH = (int) (16 * res.getDisplayMetrics().density);
-            int padV = (int) (6 * res.getDisplayMetrics().density);
+            tv.setSingleLine(true);
+            int padH = (int) (12 * res.getDisplayMetrics().density);
+            int padV = (int) (8 * res.getDisplayMetrics().density);
             tv.setPadding(padH, padV, padH, padV);
 
             boolean isSelected = false;
@@ -634,18 +470,15 @@ public class MarketChartActivity extends Activity
                 tv.setBackgroundColor(res.getColor(android.R.color.transparent));
             }
 
-            // Fix khung time cho đều full - dùng weight
             LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
-                    0,
                     LinearLayout.LayoutParams.WRAP_CONTENT,
-                    1f
+                    LinearLayout.LayoutParams.WRAP_CONTENT
             );
-            lp.setMargins(4, 0, 4, 0);
+            lp.setMargins(2, 0, 2, 0);
             tv.setLayoutParams(lp);
 
             final String intervalToLoad = realInterval;
             final int finalResId = resId;
-
             tv.setOnClickListener(v ->
             {
                 if (finalResId == R.string.time || finalResId == R.string.more)
@@ -653,9 +486,7 @@ public class MarketChartActivity extends Activity
                     showMoreIntervalsDialog();
                     return;
                 }
-
                 currentInterval = intervalToLoad;
-
                 for (int i = 0; i < chipGroupTimeframe.getChildCount(); i++)
                 {
                     View child = chipGroupTimeframe.getChildAt(i);
@@ -675,13 +506,11 @@ public class MarketChartActivity extends Activity
                         }
                     }
                 }
-
                 if (marketChartView!= null)
                 {
                     marketChartView.loadChart(currentSymbol, currentInterval);
                 }
             });
-
             chipGroupTimeframe.addView(tv);
         }
     }
@@ -692,10 +521,8 @@ public class MarketChartActivity extends Activity
         {
             return;
         }
-
         Resources res = getResources();
 
-        // Fix volume chỉ báo phải live click xem được
         marketChartView.setOnVolumeClickListener(candle ->
         {
             runOnUiThread(() ->
@@ -705,14 +532,12 @@ public class MarketChartActivity extends Activity
                     return;
                 }
                 popupCandleDetail.setVisibility(View.VISIBLE);
-
                 GradientDrawable bg = new GradientDrawable();
                 bg.setColor(getThemeColor(android.R.attr.colorBackground));
                 bg.setCornerRadius(12f * res.getDisplayMetrics().density);
                 bg.setStroke((int) (1 * res.getDisplayMetrics().density), res.getColor(R.color.chart_grid));
                 popupCandleDetail.setBackground(bg);
                 popupCandleDetail.setElevation(8f * res.getDisplayMetrics().density);
-
                 if (popupTime!= null)
                 {
                     popupTime.setText(fullTimeFormat.format(new Date(candle.openTime)));
@@ -741,14 +566,12 @@ public class MarketChartActivity extends Activity
                         }
                         double usdToFiat = fiatPerBtc / basePerBtc;
                         double priceInFiat = price * usdToFiat;
-
                         mainHandler.post(() ->
                         {
                             if (textCurrentPrice!= null)
                             {
                                 String symbol = getCurrencySymbol(currentFiatCode);
                                 textCurrentPrice.setText(String.format(Locale.US, "%s%,.2f", symbol, priceInFiat));
-
                                 int color;
                                 if (lastDisplayPrice == 0f)
                                 {
@@ -766,7 +589,6 @@ public class MarketChartActivity extends Activity
                                 {
                                     color = res.getColor(R.color.chart_last_price_line);
                                 }
-
                                 textCurrentPrice.setTextColor(color);
                                 lastDisplayPrice = (float) priceInFiat;
                             }
@@ -784,12 +606,10 @@ public class MarketChartActivity extends Activity
                     {
                         textHigh24h.setText(getString(R.string.chart_high_label, String.format(Locale.US, "%.2f", high24h)));
                     }
-
                     if (textLow24h!= null)
                     {
                         textLow24h.setText(getString(R.string.chart_low_label, String.format(Locale.US, "%.2f", low24h)));
                     }
-
                     if (textChange24h!= null)
                     {
                         textChange24h.setText(String.format(Locale.US, "%.2f%%", changePercent));
@@ -804,7 +624,6 @@ public class MarketChartActivity extends Activity
                         }
                         textChange24h.setTextColor(c);
                     }
-
                     new Thread(() ->
                     {
                         double fiatPerBtc = getFiatPerBtc(currentFiatCode);
@@ -815,7 +634,6 @@ public class MarketChartActivity extends Activity
                         }
                         double usdToFiat = fiatPerBtc / basePerBtc;
                         double volFiat = volUsdt * usdToFiat;
-
                         String baseAsset = currentSymbol;
                         if (baseAsset.endsWith("USDT"))
                         {
@@ -829,10 +647,8 @@ public class MarketChartActivity extends Activity
                         {
                             baseAsset = baseAsset.substring(0, 3);
                         }
-
                         String volBtcStr = getString(R.string.chart_vol_base_format, baseAsset, String.format(Locale.US, "%.2f", volBtc));
                         String volFiatStr;
-
                         if (volFiat >= 1_000_000_000)
                         {
                             volFiatStr = getString(R.string.chart_vol_quote_format, currentFiatCode, String.format(Locale.US, "%.2fB", volFiat / 1_000_000_000));
@@ -845,7 +661,6 @@ public class MarketChartActivity extends Activity
                         {
                             volFiatStr = getString(R.string.chart_vol_quote_format, currentFiatCode, String.format(Locale.US, "%.2f", volFiat));
                         }
-
                         mainHandler.post(() ->
                         {
                             if (textVolBtc!= null)
@@ -877,15 +692,12 @@ public class MarketChartActivity extends Activity
                             int colorMa7 = res.getColor(R.color.chart_ma5);
                             int colorMa25 = res.getColor(R.color.chart_ma10);
                             int colorMa99 = res.getColor(R.color.chart_ma20);
-
                             String s7 = String.format(Locale.US, "MA7: %.2f", ma7);
                             String sep = " • ";
                             String s25 = String.format(Locale.US, "MA25: %.2f", ma25);
                             String s99 = String.format(Locale.US, "MA99: %.2f", ma99);
-
                             SpannableStringBuilder sb = new SpannableStringBuilder();
                             int start = 0;
-
                             sb.append(s7);
                             sb.setSpan(new ForegroundColorSpan(colorMa7), start, start + s7.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
                             start += s7.length();
@@ -898,7 +710,6 @@ public class MarketChartActivity extends Activity
                             start += sep.length();
                             sb.append(s99);
                             sb.setSpan(new ForegroundColorSpan(colorMa99), start, start + s99.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-
                             textMaLabel.setText(sb);
                         }
                     }
@@ -930,16 +741,13 @@ public class MarketChartActivity extends Activity
                     {
                         return;
                     }
-
                     popupCandleDetail.setVisibility(View.VISIBLE);
-
                     GradientDrawable bg = new GradientDrawable();
                     bg.setColor(getThemeColor(android.R.attr.colorBackground));
                     bg.setCornerRadius(12f * res.getDisplayMetrics().density);
                     bg.setStroke((int) (1 * res.getDisplayMetrics().density), res.getColor(R.color.chart_grid));
                     popupCandleDetail.setBackground(bg);
                     popupCandleDetail.setElevation(8f * res.getDisplayMetrics().density);
-
                     if (popupTime!= null)
                     {
                         popupTime.setText(fullTimeFormat.format(new Date(candle.openTime)));
