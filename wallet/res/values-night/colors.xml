@@ -24,16 +24,18 @@
     <color name="fg_password_strength_strong">#ffa3e08c</color>
 
     <!-- Chart maket -->
-<color name="chart_bg">#000000</color>
-<color name="chart_grid">#212121</color>
-<color name="chart_text">#9E9E9E</color>
-<color name="chart_bull">#26A69A</color>
-<color name="chart_bear">#EF5350</color>
-<color name="chart_wick">#757575</color>
-<color name="chart_last_price_line">#FF9800</color>
-<color name="chart_ma5">#BA68C8</color>
-<color name="chart_ma10">#4FC3F7</color>
-<color name="chart_ma20">#FFD54F</color>
-<color name="chart_popup_bg">#CC000000</color>
-<color name="chart_popup_text">#FFFFFF</color>
+
+<!-- Chart maket - full system colors -->
+<color name="chart_bg">?android:attr/colorBackground</color>
+<color name="chart_grid">?android:attr/textColorHint</color>
+<color name="chart_text">?android:attr/textColorSecondary</color>
+<color name="chart_bull">@android:color/holo_green_light</color>
+<color name="chart_bear">@android:color/holo_red_light</color>
+<color name="chart_wick">?android:attr/textColorPrimary</color>
+<color name="chart_last_price_line">@android:color/holo_orange_light</color>
+<color name="chart_ma5">@android:color/holo_purple</color>
+<color name="chart_ma10">@android:color/holo_blue_light</color>
+<color name="chart_ma20">@android:color/holo_orange_dark</color>
+<color name="chart_popup_bg">?android:attr/colorBackgroundFloating</color>
+<color name="chart_popup_text">?android:attr/textColorPrimary</color>
 </resources>
