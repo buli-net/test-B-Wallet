@@ -49,8 +49,6 @@ public class MarketChartActivity extends Activity {
     private SharedPreferences prefs;
     private SharedPreferences.OnSharedPreferenceChangeListener prefsListener;
     private String currentFiatCode = "USD";
-    private double currentFiatPerBtc = 0d;
-    private double currentUsdPerBtc = 0d;
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
     private float lastDisplayPrice = 0f;
 
@@ -89,9 +87,11 @@ public class MarketChartActivity extends Activity {
 
         prefsListener = (sharedPreferences, key) -> {
             if (Configuration.PREFS_KEY_EXCHANGE_CURRENCY.equals(key)) {
-                currentFiatCode = config.getExchangeCurrencyCode();
-                if (currentFiatCode == null) currentFiatCode = "USD";
-                loadFiatRate();
+                String newCode = config.getExchangeCurrencyCode();
+                if (newCode!= null) {
+                    currentFiatCode = newCode;
+                    loadFiatRate();
+                }
             }
         };
         prefs.registerOnSharedPreferenceChangeListener(prefsListener);
@@ -116,34 +116,22 @@ public class MarketChartActivity extends Activity {
 
     private void loadFiatRate() {
         new Thread(() -> {
-            ExchangeRateEntry fiatEntry = exchangeRateDao.findByCurrencyCode(currentFiatCode);
-            ExchangeRateEntry usdEntry = exchangeRateDao.findByCurrencyCode("USD");
-
-            if (fiatEntry!= null) {
-                try {
-                    double fiatPerCoin = fiatEntry.exchangeRate().coinToFiat(Coin.COIN).value / Math.pow(10, fiatEntry.fiat().getSmallestUnitExponent());
-                    currentFiatPerBtc = fiatPerCoin;
-                } catch (Exception e) {
-                    currentFiatPerBtc = fiatEntry.getRateFiat() / 100d;
-                }
-            }
-            if (usdEntry!= null) {
-                try {
-                    double usdPerCoin = usdEntry.exchangeRate().coinToFiat(Coin.COIN).value / Math.pow(10, usdEntry.fiat().getSmallestUnitExponent());
-                    currentUsdPerBtc = usdPerCoin;
-                } catch (Exception e) {
-                    currentUsdPerBtc = usdEntry.getRateFiat() / 100d;
-                }
-            }
-            if (currentUsdPerBtc == 0d) currentUsdPerBtc = 76275.89d;
-            if (currentFiatPerBtc == 0d) currentFiatPerBtc = currentUsdPerBtc;
-
             mainHandler.post(() -> {
                 if (textVND!= null) {
                     textVND.setText(currentFiatCode);
                 }
             });
         }).start();
+    }
+
+    private double getFiatPerBtc(String fiatCode) {
+        ExchangeRateEntry entry = exchangeRateDao.findByCurrencyCode(fiatCode);
+        if (entry == null) return 0d;
+        try {
+            return entry.exchangeRate().coinToFiat(Coin.COIN).value / Math.pow(10, entry.fiat().getSmallestUnitExponent());
+        } catch (Exception e) {
+            return 0d;
+        }
     }
 
     private void setupTimeframeChips() {
@@ -205,36 +193,24 @@ public class MarketChartActivity extends Activity {
             public void onPriceUpdate(float price, float high24h, float low24h) {
                 runOnUiThread(() -> {
                     new Thread(() -> {
-                        ExchangeRateEntry fiatEntry = exchangeRateDao.findByCurrencyCode(currentFiatCode);
-                        ExchangeRateEntry usdEntry = exchangeRateDao.findByCurrencyCode("USD");
-                        double fiatPerBtcLocal = currentFiatPerBtc;
-                        double usdPerBtcLocal = currentUsdPerBtc;
-                        if (fiatEntry!= null) {
-                            try {
-                                fiatPerBtcLocal = fiatEntry.exchangeRate().coinToFiat(Coin.COIN).value / Math.pow(10, fiatEntry.fiat().getSmallestUnitExponent());
-                            } catch (Exception ignored) {}
+                        double fiatPerBtc = getFiatPerBtc(currentFiatCode);
+                        double usdPerBtc = getFiatPerBtc("USD");
+
+                        if (fiatPerBtc == 0d || usdPerBtc == 0d) {
+                            return;
                         }
-                        if (usdEntry!= null) {
-                            try {
-                                usdPerBtcLocal = usdEntry.exchangeRate().coinToFiat(Coin.COIN).value / Math.pow(10, usdEntry.fiat().getSmallestUnitExponent());
-                            } catch (Exception ignored) {}
-                        }
-                        if (fiatPerBtcLocal == 0d) fiatPerBtcLocal = price;
-                        if (usdPerBtcLocal == 0d) usdPerBtcLocal = price;
-                        double usdToFiat = fiatPerBtcLocal / usdPerBtcLocal;
+
+                        double usdToFiat = fiatPerBtc / usdPerBtc;
                         double priceInFiat = price * usdToFiat;
                         double highInFiat = high24h * usdToFiat;
                         double lowInFiat = low24h * usdToFiat;
 
                         mainHandler.post(() -> {
                             if (textCurrentPrice!= null) {
-                                String symbol = "";
+                                String symbol = currentFiatCode + " ";
                                 if (currentFiatCode.equals("USD")) symbol = "$";
                                 else if (currentFiatCode.equals("VND")) symbol = "₫";
                                 else if (currentFiatCode.equals("EUR")) symbol = "€";
-                                else if (currentFiatCode.equals("RON")) symbol = "lei ";
-                                else if (currentFiatCode.equals("RUB")) symbol = "₽";
-                                else symbol = currentFiatCode + " ";
 
                                 textCurrentPrice.setText(String.format(Locale.US, "%s%,.2f", symbol, priceInFiat));
 
@@ -254,9 +230,6 @@ public class MarketChartActivity extends Activity {
                             }
                             if (textVND!= null) {
                                 textVND.setText(currentFiatCode);
-                            }
-                            if (textMaLabel!= null) {
-                                textMaLabel.setText(String.format(Locale.US, "MA(7): %.2f MA(25): %.2f MA(99): %.2f", price*0.998f, price*1.01f, price*0.96f));
                             }
                         });
                     }).start();
