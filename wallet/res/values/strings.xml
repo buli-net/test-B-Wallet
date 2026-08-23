@@ -530,31 +530,4 @@
     <string name="interval_1w">1W</string>
     <string name="interval_1M">1M</string>
 
-<string name="indicator_settings">Indicator Settings</string>
-<string name="main_indicators">Main Indicators</string>
-<string name="sub_indicators">Sub Indicators</string>
-<string name="ma">MA</string>
-<string name="ma_desc">Moving Average</string>
-<string name="ema">EMA</string>
-<string name="ema_desc">Exponential Moving Average</string>
-<string name="boll">BOLL</string>
-<string name="boll_desc">Bollinger Bands</string>
-<string name="sar">SAR</string>
-<string name="sar_desc">Stop and Reverse</string>
-<string name="vol">VOL</string>
-<string name="vol_desc">Volume</string>
-<string name="macd">MACD</string>
-<string name="macd_desc">Moving Average Convergence Divergence</string>
-<string name="rsi">RSI</string>
-<string name="rsi_desc">Relative Strength Index</string>
-<string name="kdj">KDJ</string>
-<string name="kdj_desc">Stochastic Oscillator</string>
-
-<string name="ma_settings_title">MA - Moving Average</string>
-<string name="column_index">Index</string>
-<string name="column_value">Value</string>
-<string name="column_width">Width</string>
-<string name="column_color">Color</string>
-<string name="reset">Reset</string>
-<string name="confirm">Confirm</string>
 </resources>
