@@ -58,7 +58,6 @@ public class MarketChartView extends View {
     }
 
     private OnChartUpdateListener updateListener;
-
     public void setOnChartUpdateListener(OnChartUpdateListener listener) {
         this.updateListener = listener;
     }
@@ -81,10 +80,12 @@ public class MarketChartView extends View {
     private static final int DEFAULT_VISIBLE_CANDLE_COUNT = 80;
     private static final int MIN_VISIBLE_CANDLE_COUNT = 20;
     private static final int MAX_VISIBLE_CANDLE_COUNT = 150;
-    private static final int TOP_PADDING_PX = 50;
-    private static final int BOTTOM_PADDING_PX = 110;
-    private static final int VOLUME_CHART_HEIGHT_PX = 180;
-    private static final int VOLUME_TOP_MARGIN_PX = 30;
+    // FIX UI giống Binance
+    private static final int TOP_PADDING_PX = 12;
+    private static final int BOTTOM_PADDING_PX = 30;
+    private static final int VOLUME_CHART_HEIGHT_DP = 90;
+    private static final int VOLUME_TOP_MARGIN_PX = 12;
+    private static final int PRICE_AXIS_WIDTH_DP = 72;
     private static final int FETCH_LIMIT = 200;
     private static final long LIVE_REFRESH_INTERVAL_MS = 1000L;
     private static final long COUNTDOWN_INTERVAL_MS = 1000L;
@@ -119,7 +120,6 @@ public class MarketChartView extends View {
 
     private void initPaints(Context context) {
         Resources res = context.getResources();
-
         setBackgroundColor(res.getColor(R.color.chart_bg));
 
         bullishPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
@@ -209,10 +209,12 @@ public class MarketChartView extends View {
             @Override
             public boolean onSingleTapUp(MotionEvent e) {
                 if (data.isEmpty()) return false;
-                int width = getWidth();
+                float density = getResources().getDisplayMetrics().density;
+                int priceAxisW = (int) (PRICE_AXIS_WIDTH_DP * density);
+                int chartW = getWidth() - priceAxisW;
                 int count = Math.min(visibleCandleCount, data.size());
                 if (count == 0) return false;
-                float candleWidth = width / (float) count;
+                float candleWidth = chartW / (float) count;
                 int index = (int) (e.getX() / candleWidth) + startIndexCache;
                 if (index >= 0 && index < data.size()) {
                     selectedIndex = index;
@@ -343,7 +345,7 @@ public class MarketChartView extends View {
                         }
                         lastPrice = data.get(data.size() - 1).close;
                         currentCandleCloseTime = data.get(data.size() - 1).closeTime;
-                        float padding = (maxPrice - minPrice) * 0.1f;
+                        float padding = (maxPrice - minPrice) * 0.08f; // giảm padding từ 0.1 xuống 0.08 cho nến cao hơn
                         minPrice -= padding;
                         maxPrice += padding;
                         if (updateListener != null) updateListener.onPriceUpdate(lastPrice, maxPrice, minPrice);
@@ -410,34 +412,47 @@ public class MarketChartView extends View {
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-        int width = getWidth();
-        int height = getHeight();
-        int priceChartHeight = height - TOP_PADDING_PX - BOTTOM_PADDING_PX - VOLUME_CHART_HEIGHT_PX;
+        float density = getResources().getDisplayMetrics().density;
+        int priceAxisWidth = (int) (PRICE_AXIS_WIDTH_DP * density);
+        int timeAxisHeight = (int) (20 * density);
+        int volumeHeightPx = (int) (VOLUME_CHART_HEIGHT_DP * density);
+
+        int fullWidth = getWidth();
+        int fullHeight = getHeight();
+        int chartWidth = fullWidth - priceAxisWidth; // FIX: chừa phải cho giá
+        int priceChartHeight = fullHeight - TOP_PADDING_PX - BOTTOM_PADDING_PX - VOLUME_TOP_MARGIN_PX - volumeHeightPx - timeAxisHeight;
+
         if (priceChartHeight <= 0) return;
 
+        // Grid - chỉ vẽ trong chartWidth
         for (int i = 0; i <= 4; i++) {
             float y = TOP_PADDING_PX + priceChartHeight * i / 4f;
-            canvas.drawLine(0f, y, width, y, gridPaint);
+            canvas.drawLine(0f, y, chartWidth, y, gridPaint);
         }
 
         float volumeSeparatorY = TOP_PADDING_PX + priceChartHeight + VOLUME_TOP_MARGIN_PX;
-        canvas.drawLine(0f, volumeSeparatorY, width, volumeSeparatorY, gridPaint);
+        canvas.drawLine(0f, volumeSeparatorY, chartWidth, volumeSeparatorY, gridPaint);
+        // kẻ dọc ngăn trục giá
+        canvas.drawLine(chartWidth, 0f, chartWidth, fullHeight, gridPaint);
 
         if (data.isEmpty()) {
             String loadingText = getResources().getString(R.string.chart_loading);
-            canvas.drawText(loadingText, width / 2f - 100f, height / 2f, textPaint);
+            canvas.drawText(loadingText, chartWidth / 2f - 100f, fullHeight / 2f, textPaint);
             return;
         }
 
         int count = Math.min(visibleCandleCount, data.size());
-        float candleWidth = width / (float) count;
+        float candleWidth = chartWidth / (float) count;
         int startIndex = data.size() - count - (int) (translationX / candleWidth);
         if (startIndex < 0) startIndex = 0;
         if (startIndex + count > data.size()) startIndex = data.size() - count;
         if (startIndex < 0) startIndex = 0;
         startIndexCache = startIndex;
 
-        float bodyWidth = candleWidth * 0.7f;
+        float bodyWidth = candleWidth * 0.55f; // FIX: thụt lại, không chồng
+        if (bodyWidth < 2f) bodyWidth = 2f;
+        if (bodyWidth > 14f * density) bodyWidth = 14f * density;
+
         float priceRange = maxPrice - minPrice;
         if (priceRange == 0f) priceRange = 1f;
 
@@ -453,7 +468,7 @@ public class MarketChartView extends View {
             canvas.drawLine(x, highY, x, lowY, wickPaint);
             float top = Math.min(openY, closeY);
             float bottom = Math.max(openY, closeY);
-            if (Math.abs(bottom - top) < 3f) bottom = top + 3f;
+            if (Math.abs(bottom - top) < 2f * density) bottom = top + 2f * density;
             Paint bodyPaint = candle.close >= candle.open ? bullishPaint : bearishPaint;
             canvas.drawRect(x - bodyWidth / 2f, top, x + bodyWidth / 2f, bottom, bodyPaint);
         }
@@ -480,23 +495,22 @@ public class MarketChartView extends View {
 
         if (selectedIndex >= startIndex && selectedIndex < startIndex + count) {
             float selectedX = (selectedIndex - startIndex) * candleWidth + candleWidth / 2f;
-            canvas.drawLine(selectedX, TOP_PADDING_PX, selectedX, height, selectedLinePaint);
+            canvas.drawLine(selectedX, TOP_PADDING_PX, selectedX, fullHeight, selectedLinePaint);
         }
 
         if (lastPrice > 0f) {
             float lastPriceY = TOP_PADDING_PX + priceChartHeight - ((lastPrice - minPrice) / priceRange * priceChartHeight);
-            canvas.drawLine(0f, lastPriceY, width, lastPriceY, lastPriceLinePaint);
+            canvas.drawLine(0f, lastPriceY, chartWidth, lastPriceY, lastPriceLinePaint);
             String lastPriceText = String.format(Locale.US, "%.2f", lastPrice);
-            float textWidth = textPaint.measureText(lastPriceText);
-            canvas.drawText(lastPriceText, width - textWidth - getResources().getDimension(R.dimen.chart_price_margin), lastPriceY - getResources().getDimension(R.dimen.chart_price_margin), textPaint);
+            // vẽ giá ở trục phải, không chồng nến
+            canvas.drawText(lastPriceText, chartWidth + 8f * density, lastPriceY - 4f * density, textPaint);
         }
 
         for (int i = 0; i <= 4; i++) {
             float price = maxPrice - (maxPrice - minPrice) * i / 4f;
             float y = TOP_PADDING_PX + priceChartHeight * i / 4f + getResources().getDimension(R.dimen.chart_price_text_offset);
             String priceText = String.format(Locale.US, "%.2f", price);
-            float textWidth = textPaint.measureText(priceText);
-            canvas.drawText(priceText, width - textWidth - getResources().getDimension(R.dimen.chart_price_margin), y, textPaint);
+            canvas.drawText(priceText, chartWidth + 8f * density, y, textPaint);
         }
 
         for (int i = 0; i < count; i += Math.max(1, count / 4)) {
@@ -504,11 +518,11 @@ public class MarketChartView extends View {
             if (dataIndex >= data.size()) break;
             float x = i * candleWidth;
             String timeText = timeFormat.format(new Date(data.get(dataIndex).openTime));
-            canvas.drawText(timeText, x, TOP_PADDING_PX + priceChartHeight + VOLUME_CHART_HEIGHT_PX + getResources().getDimension(R.dimen.chart_time_margin), textPaint);
+            canvas.drawText(timeText, x, TOP_PADDING_PX + priceChartHeight + volumeHeightPx + VOLUME_TOP_MARGIN_PX + 16f * density, textPaint);
         }
 
-        float volumeTop = TOP_PADDING_PX + priceChartHeight + VOLUME_TOP_MARGIN_PX + getResources().getDimension(R.dimen.chart_volume_top);
-        float volumeHeight = VOLUME_CHART_HEIGHT_PX - getResources().getDimension(R.dimen.chart_volume_offset);
+        float volumeTop = TOP_PADDING_PX + priceChartHeight + VOLUME_TOP_MARGIN_PX;
+        float volumeHeight = volumeHeightPx;
         if (maxVolume == 0f) maxVolume = 1f;
         for (int i = 0; i < count; i++) {
             int dataIndex = startIndex + i;
