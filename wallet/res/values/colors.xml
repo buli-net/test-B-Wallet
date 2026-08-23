@@ -55,5 +55,9 @@
 <color name="chart_ma5">@android:color/holo_purple</color>
 <color name="chart_ma10">@android:color/holo_blue_light</color>
 <color name="chart_ma20">@android:color/holo_orange_dark</color>
-    
+<color name="chart_bg">#FFFFFF</color>
+<color name="chart_grid">#1F000000</color>
+<color name="chart_text">#FF000000</color>
+<color name="chart_candle_up">#FF26A69A</color>
+<color name="chart_candle_down">#FFEF5350</color>
 </resources>
