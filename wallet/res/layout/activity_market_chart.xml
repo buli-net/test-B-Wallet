@@ -22,23 +22,39 @@
         android:orientation="vertical"
         android:padding="@dimen/chart_screen_padding">
 
-        <TextView
-            android:id="@+id/textCurrentPrice"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="0.00"
-            android:textSize="@dimen/chart_price_large_size"
-            android:textStyle="bold"
-            android:textColor="?android:attr/textColorPrimary" />
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
 
-        <TextView
-            android:id="@+id/textFiat"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="2dp"
-            android:text="USD"
-            android:textSize="@dimen/chart_text_size"
-            android:textColor="?android:attr/textColorSecondary" />
+            <TextView
+                android:id="@+id/textCurrentPrice"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="0.00"
+                android:textSize="@dimen/chart_price_large_size"
+                android:textStyle="bold"
+                android:textColor="?android:attr/textColorPrimary" />
+
+            <TextView
+                android:id="@+id/textChange24h"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="12dp"
+                android:text="0.00%"
+                android:textSize="@dimen/chart_text_size"
+                android:textColor="@color/chart_bull" />
+
+            <TextView
+                android:id="@+id/textFiat"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:text="USD"
+                android:textSize="@dimen/chart_text_size"
+                android:textColor="?android:attr/textColorSecondary" />
+        </LinearLayout>
 
         <TextView
             android:id="@+id/textCountdown"
@@ -75,13 +91,22 @@
         </LinearLayout>
 
         <TextView
+            android:id="@+id/textVol24h"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:text="Vol(BTC) -- Vol(USDT) --"
+            android:textColor="?android:attr/textColorSecondary"
+            android:textSize="@dimen/chart_popup_time_size" />
+
+        <TextView
             android:id="@+id/textMaLabel"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/chart_small_margin"
             android:text="MA(7): -- MA(25): -- MA(99): --"
             android:textSize="@dimen/chart_popup_time_size"
-            android:textColor="?android:attr/textColorSecondary"
+            android:textColor="@color/chart_ma5"
             android:singleLine="true"
             android:ellipsize="end" />
 
