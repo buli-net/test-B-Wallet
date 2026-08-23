@@ -307,8 +307,8 @@ public final class WalletActivity extends AbstractWalletActivity {
                     startActivity(new Intent(WalletActivity.this, ExchangeRatesActivity.class));
                     return true;
              //add maket 2/2
-                } else if (id == R.id.menu_market_chart) {
-                    Toast.makeText(this, "Market Chart clicked", Toast.LENGTH_SHORT).show();
+                } else if (itemId == R.id.menu_market_chart) {
+                    Toast.makeText(WalletActivity.this, "Market Chart clicked", Toast.LENGTH_SHORT).show();
                     return true;
 
                 // end maket 2/2
