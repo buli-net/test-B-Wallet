@@ -3,6 +3,7 @@ package wallet.ui;
 import android.app.Activity;
 import android.content.SharedPreferences;
 import android.graphics.Color;
+import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -10,6 +11,7 @@ import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import java.text.SimpleDateFormat;
+import java.util.Currency;
 import java.util.Date;
 import java.util.Locale;
 import org.bitcoinj.base.Coin;
@@ -128,7 +130,20 @@ public class MarketChartActivity extends Activity {
         ExchangeRateEntry entry = exchangeRateDao.findByCurrencyCode(fiatCode);
         if (entry == null) return 0d;
         try {
-            return entry.exchangeRate().coinToFiat(Coin.COIN).value / Math.pow(10, entry.fiat().getSmallestUnitExponent());
+            long rateFiat = entry.getRateFiat();
+            long rateCoin = entry.getRateCoin();
+            if (rateCoin == 0) return 0d;
+            int fractionDigits;
+            try {
+                fractionDigits = Currency.getInstance(fiatCode).getDefaultFractionDigits();
+                if (fractionDigits < 0) fractionDigits = 2;
+            } catch (Exception e) {
+                fractionDigits = 2;
+            }
+            double fiatMajor = rateFiat / Math.pow(10, fractionDigits);
+            double coinMajor = (double) rateCoin / Coin.COIN.value;
+            if (coinMajor == 0d) return 0d;
+            return fiatMajor / coinMajor;
         } catch (Exception e) {
             return 0d;
         }
@@ -250,7 +265,11 @@ public class MarketChartActivity extends Activity {
                 runOnUiThread(() -> {
                     if (popupCandleDetail == null || candle == null) return;
                     popupCandleDetail.setVisibility(View.VISIBLE);
-                    popupCandleDetail.setBackgroundResource(R.drawable.bg_popup);
+                    GradientDrawable bg = new GradientDrawable();
+                    bg.setColor(Color.parseColor("#FF1E2329"));
+                    bg.setCornerRadius(12f * getResources().getDisplayMetrics().density);
+                    bg.setStroke((int)(1 * getResources().getDisplayMetrics().density), Color.parseColor("#333A47"));
+                    popupCandleDetail.setBackground(bg);
                     popupCandleDetail.setElevation(8f * getResources().getDisplayMetrics().density);
                     if (popupTime!= null) popupTime.setText(fullTimeFormat.format(new Date(candle.openTime)));
                     if (popupOpen!= null) popupOpen.setText(String.format(Locale.US, "Open %.2f", candle.open));
