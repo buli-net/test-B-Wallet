@@ -9,22 +9,34 @@ import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.text.Editable;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
+import android.text.TextWatcher;
 import android.text.style.ForegroundColorSpan;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.GridLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
+import com.google.android.material.bottomsheet.BottomSheetDialog;
+
 import org.bitcoinj.base.Coin;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Currency;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
@@ -55,6 +67,7 @@ public class MarketChartActivity extends Activity
     private TextView popupLow;
     private TextView popupClose;
     private TextView popupVolume;
+    private View btnChartSettings;
 
     private String currentSymbol = "BTCUSDT";
     private String currentInterval = "15m";
@@ -105,6 +118,19 @@ public class MarketChartActivity extends Activity
         popupLow = findViewById(R.id.popupLow);
         popupClose = findViewById(R.id.popupClose);
         popupVolume = findViewById(R.id.popupVolume);
+        btnChartSettings = findViewById(R.id.btnChartSettings);
+
+        if (btnChartSettings!= null)
+        {
+            btnChartSettings.setOnClickListener(new View.OnClickListener()
+            {
+                @Override
+                public void onClick(View v)
+                {
+                    showMaSettingsPopup();
+                }
+            });
+        }
 
         if (getIntent()!= null && getIntent().hasExtra("symbol"))
         {
@@ -147,6 +173,126 @@ public class MarketChartActivity extends Activity
         }
 
         loadFiatRate();
+    }
+
+    private void showMaSettingsPopup()
+    {
+        if (marketChartView == null)
+        {
+            return;
+        }
+        BottomSheetDialog dialog = new BottomSheetDialog(this);
+        View view = getLayoutInflater().inflate(R.layout.bottom_sheet_ma_settings, null);
+        RecyclerView recycler = view.findViewById(R.id.recycler_ma_popup);
+        recycler.setLayoutManager(new LinearLayoutManager(this));
+
+        List<MarketChartView.MaLine> tempList = new ArrayList<>(marketChartView.getMaLines());
+        int[] colors = getResources().getIntArray(R.array.ma_default_colors);
+
+        RecyclerView.Adapter adapter = new RecyclerView.Adapter<RecyclerView.ViewHolder>()
+        {
+            @Override
+            public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType)
+            {
+                View v = getLayoutInflater().inflate(R.layout.item_ma_popup, parent, false);
+                return new RecyclerView.ViewHolder(v){};
+            }
+
+            @Override
+            public void onBindViewHolder(RecyclerView.ViewHolder h, int pos)
+            {
+                MarketChartView.MaLine line = tempList.get(pos);
+                EditText et = h.itemView.findViewById(R.id.et_period);
+                View colorView = h.itemView.findViewById(R.id.view_color);
+                et.setText(String.valueOf(line.period));
+                colorView.setBackgroundColor(line.color);
+
+                et.addTextChangedListener(new TextWatcher()
+                {
+                    @Override
+                    public void afterTextChanged(Editable s)
+                    {
+                        try
+                        {
+                            String txt = s.toString().trim();
+                            if (!txt.isEmpty())
+                            {
+                                line.period = Integer.parseInt(txt);
+                            }
+                        }
+                        catch (Exception e)
+                        {
+                        }
+                    }
+                    @Override public void beforeTextChanged(CharSequence a,int b,int c,int d){}
+                    @Override public void onTextChanged(CharSequence a,int b,int c,int d){}
+                });
+
+                colorView.setOnClickListener(new View.OnClickListener()
+                {
+                    @Override
+                    public void onClick(View v)
+                    {
+                        int currentIdx = 0;
+                        for (int i = 0; i < colors.length; i++)
+                        {
+                            if (colors[i] == line.color)
+                            {
+                                currentIdx = i;
+                            }
+                        }
+                        int next = colors[(currentIdx + 1) % colors.length];
+                        line.color = next;
+                        colorView.setBackgroundColor(next);
+                    }
+                });
+
+                View btnDelete = h.itemView.findViewById(R.id.btn_delete);
+                btnDelete.setOnClickListener(new View.OnClickListener()
+                {
+                    @Override
+                    public void onClick(View v)
+                    {
+                        tempList.remove(pos);
+                        notifyDataSetChanged();
+                    }
+                });
+            }
+
+            @Override
+            public int getItemCount()
+            {
+                return tempList.size();
+            }
+        };
+
+        recycler.setAdapter(adapter);
+
+        View btnAdd = view.findViewById(R.id.btn_add_ma);
+        btnAdd.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+                int color = colors[tempList.size() % colors.length];
+                tempList.add(new MarketChartView.MaLine(20, color));
+                adapter.notifyDataSetChanged();
+            }
+        });
+
+        View btnApply = view.findViewById(R.id.btn_apply);
+        btnApply.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+                marketChartView.setMaLines(tempList);
+                dialog.dismiss();
+            }
+        });
+
+        dialog.setContentView(view);
+        dialog.show();
     }
 
     @Override
@@ -317,9 +463,9 @@ public class MarketChartActivity extends Activity
         int[] intervalLabels = {R.string.time, R.string.interval_1m, R.string.interval_3m, R.string.interval_5m, R.string.interval_15m, R.string.interval_30m, R.string.interval_1h, R.string.interval_2h, R.string.interval_4h, R.string.interval_6h, R.string.interval_12h, R.string.interval_1d, R.string.interval_1w, R.string.interval_1M};
 
         AlertDialog dialog = new AlertDialog.Builder(this)
-              .setView(root)
-              .setNegativeButton(R.string.close, (d, w) -> d.dismiss())
-              .create();
+             .setView(root)
+             .setNegativeButton(R.string.close, (d, w) -> d.dismiss())
+             .create();
 
         for (int i = 0; i < realLoad.length; i++)
         {
@@ -349,7 +495,7 @@ public class MarketChartActivity extends Activity
             }
             else
             {
-                bg.setStroke((int) (1 * res.getDisplayMetrics().density), res.getColor(R.color.chart_grid));
+                bg.setStroke((int) (1 * res.getDisplayMetrics().density), res.getColor(R.color.chart_grid, null));
                 tv.setTextColor(getThemeColor(android.R.attr.textColorSecondary));
             }
             tv.setBackground(bg);
@@ -425,7 +571,7 @@ public class MarketChartActivity extends Activity
         tvTime.setSingleLine(true);
         tvTime.setPadding(padH, padV, padH, padV);
         tvTime.setTextColor(getThemeColor(android.R.attr.textColorSecondary));
-        tvTime.setBackgroundColor(res.getColor(android.R.color.transparent));
+        tvTime.setBackgroundColor(res.getColor(android.R.color.transparent, null));
         LinearLayout.LayoutParams lpTime = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
         lpTime.setMargins(2, 0, 2, 0);
         tvTime.setLayoutParams(lpTime);
@@ -453,7 +599,7 @@ public class MarketChartActivity extends Activity
             else
             {
                 tv.setTextColor(getThemeColor(android.R.attr.textColorSecondary));
-                tv.setBackgroundColor(res.getColor(android.R.color.transparent));
+                tv.setBackgroundColor(res.getColor(android.R.color.transparent, null));
             }
 
             LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
@@ -485,7 +631,7 @@ public class MarketChartActivity extends Activity
         {
             tvMore.setText(R.string.more);
             tvMore.setTextColor(getThemeColor(android.R.attr.textColorSecondary));
-            tvMore.setBackgroundColor(res.getColor(android.R.color.transparent));
+            tvMore.setBackgroundColor(res.getColor(android.R.color.transparent, null));
         }
         else
         {
@@ -518,7 +664,7 @@ public class MarketChartActivity extends Activity
                 GradientDrawable bg = new GradientDrawable();
                 bg.setColor(getThemeColor(android.R.attr.colorBackground));
                 bg.setCornerRadius(12f * res.getDisplayMetrics().density);
-                bg.setStroke((int) (1 * res.getDisplayMetrics().density), res.getColor(R.color.chart_grid));
+                bg.setStroke((int) (1 * res.getDisplayMetrics().density), res.getColor(R.color.chart_grid, null));
                 popupCandleDetail.setBackground(bg);
                 popupCandleDetail.setElevation(8f * res.getDisplayMetrics().density);
                 if (popupTime!= null)
@@ -562,15 +708,15 @@ public class MarketChartActivity extends Activity
                                 }
                                 else if (priceInFiat > lastDisplayPrice)
                                 {
-                                    color = res.getColor(R.color.chart_bull);
+                                    color = res.getColor(R.color.chart_bull, null);
                                 }
                                 else if (priceInFiat < lastDisplayPrice)
                                 {
-                                    color = res.getColor(R.color.chart_bear);
+                                    color = res.getColor(R.color.chart_bear, null);
                                 }
                                 else
                                 {
-                                    color = res.getColor(R.color.chart_last_price_line);
+                                    color = res.getColor(R.color.chart_last_price_line, null);
                                 }
                                 textCurrentPrice.setTextColor(color);
                                 lastDisplayPrice = (float) priceInFiat;
@@ -599,11 +745,11 @@ public class MarketChartActivity extends Activity
                         int c;
                         if (changePercent >= 0)
                         {
-                            c = res.getColor(R.color.chart_bull);
+                            c = res.getColor(R.color.chart_bull, null);
                         }
                         else
                         {
-                            c = res.getColor(R.color.chart_bear);
+                            c = res.getColor(R.color.chart_bear, null);
                         }
                         textChange24h.setTextColor(c);
                     }
@@ -672,27 +818,23 @@ public class MarketChartActivity extends Activity
                         }
                         else
                         {
-                            int colorMa7 = res.getColor(R.color.chart_ma5);
-                            int colorMa25 = res.getColor(R.color.chart_ma10);
-                            int colorMa99 = res.getColor(R.color.chart_ma20);
-                            String s7 = String.format(Locale.US, "MA7: %.2f", ma7);
-                            String sep = " • ";
-                            String s25 = String.format(Locale.US, "MA25: %.2f", ma25);
-                            String s99 = String.format(Locale.US, "MA99: %.2f", ma99);
+                            List<MarketChartView.MaLine> lines = marketChartView.getMaLines();
                             SpannableStringBuilder sb = new SpannableStringBuilder();
-                            int start = 0;
-                            sb.append(s7);
-                            sb.setSpan(new ForegroundColorSpan(colorMa7), start, start + s7.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-                            start += s7.length();
-                            sb.append(sep);
-                            start += sep.length();
-                            sb.append(s25);
-                            sb.setSpan(new ForegroundColorSpan(colorMa25), start, start + s25.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-                            start += s25.length();
-                            sb.append(sep);
-                            start += sep.length();
-                            sb.append(s99);
-                            sb.setSpan(new ForegroundColorSpan(colorMa99), start, start + s99.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                            for (int i = 0; i < lines.size(); i++)
+                            {
+                                MarketChartView.MaLine line = lines.get(i);
+                                float value;
+                                if (i == 0) value = ma7;
+                                else if (i == 1) value = ma25;
+                                else if (i == 2) value = ma99;
+                                else value = 0f;
+                                if (value == 0f && lines.size() > 3) continue;
+                                String label = String.format(Locale.US, "MA%d: %.2f", line.period, value == 0f? 0f : (i==0?ma7:i==1?ma25:ma99));
+                                if (sb.length() > 0) sb.append(" • ");
+                                int start = sb.length();
+                                sb.append(label);
+                                sb.setSpan(new ForegroundColorSpan(line.color), start, start + label.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                            }
                             textMaLabel.setText(sb);
                         }
                     }
@@ -728,7 +870,7 @@ public class MarketChartActivity extends Activity
                     GradientDrawable bg = new GradientDrawable();
                     bg.setColor(getThemeColor(android.R.attr.colorBackground));
                     bg.setCornerRadius(12f * res.getDisplayMetrics().density);
-                    bg.setStroke((int) (1 * res.getDisplayMetrics().density), res.getColor(R.color.chart_grid));
+                    bg.setStroke((int) (1 * res.getDisplayMetrics().density), res.getColor(R.color.chart_grid, null));
                     popupCandleDetail.setBackground(bg);
                     popupCandleDetail.setElevation(8f * res.getDisplayMetrics().density);
                     if (popupTime!= null)
