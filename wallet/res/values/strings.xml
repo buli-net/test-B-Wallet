@@ -530,4 +530,10 @@
     <string name="interval_1w">1W</string>
     <string name="interval_1M">1M</string>
 
+<string name="ma_settings">MA Settings</string>
+<string name="add_ma">+ Add MA</string>
+<string name="apply">Apply</string>
+<string name="delete">X</string>
+<string name="ma_label">MA</string>
+
 </resources>
