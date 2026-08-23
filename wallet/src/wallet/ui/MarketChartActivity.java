@@ -263,6 +263,33 @@ public class MarketChartActivity extends Activity
         }
     }
 
+    private int getLabelResForInterval(String interval)
+    {
+        if (interval == null)
+        {
+            return R.string.more;
+        }
+        switch (interval)
+        {
+            case "1m": return R.string.interval_1m;
+            case "3m": return R.string.interval_3m;
+            case "5m": return R.string.interval_5m;
+            case "15m": return R.string.interval_15m;
+            case "30m": return R.string.interval_30m;
+            case "1h": return R.string.interval_1h;
+            case "2h": return R.string.interval_2h;
+            case "4h": return R.string.interval_4h;
+            case "6h": return R.string.interval_6h;
+            case "12h": return R.string.interval_12h;
+            case "1d":
+            case "1D": return R.string.interval_1d;
+            case "1w":
+            case "1W": return R.string.interval_1w;
+            case "1M": return R.string.interval_1M;
+            default: return R.string.more;
+        }
+    }
+
     private void showMoreIntervalsDialog()
     {
         LinearLayout root = new LinearLayout(this);
@@ -286,16 +313,15 @@ public class MarketChartActivity extends Activity
         grid.setUseDefaultMargins(false);
 
         Resources res = getResources();
-        String[] intervalValues = {"Time", "1m", "3m", "5m", "15m", "30m", "1h", "2h", "4h", "6h", "12h", "1D", "1W", "1M"};
-        int[] intervalLabels = {R.string.time, R.string.interval_1m, R.string.interval_3m, R.string.interval_5m, R.string.interval_15m, R.string.interval_30m, R.string.interval_1h, R.string.interval_2h, R.string.interval_4h, R.string.interval_6h, R.string.interval_12h, R.string.interval_1d, R.string.interval_1w, R.string.interval_1M};
         String[] realLoad = {"", "1m", "3m", "5m", "15m", "30m", "1h", "2h", "4h", "6h", "12h", "1d", "1w", "1M"};
+        int[] intervalLabels = {R.string.time, R.string.interval_1m, R.string.interval_3m, R.string.interval_5m, R.string.interval_15m, R.string.interval_30m, R.string.interval_1h, R.string.interval_2h, R.string.interval_4h, R.string.interval_6h, R.string.interval_12h, R.string.interval_1d, R.string.interval_1w, R.string.interval_1M};
 
         AlertDialog dialog = new AlertDialog.Builder(this)
-               .setView(root)
-               .setNegativeButton(R.string.close, (d, w) -> d.dismiss())
-               .create();
+              .setView(root)
+              .setNegativeButton(R.string.close, (d, w) -> d.dismiss())
+              .create();
 
-        for (int i = 0; i < intervalValues.length; i++)
+        for (int i = 0; i < realLoad.length; i++)
         {
             TextView tv = new TextView(this);
             tv.setText(intervalLabels[i]);
@@ -306,6 +332,13 @@ public class MarketChartActivity extends Activity
             tv.setPadding(0, vPad, 0, vPad);
 
             boolean isSelected = realLoad[i].equalsIgnoreCase(currentInterval);
+            if (realLoad[i].equals("1m") && currentInterval.equals("1m")) isSelected = true;
+            if (realLoad[i].equals("1M") && currentInterval.equals("1M")) isSelected = true;
+            if (!realLoad[i].equals("1m") &&!realLoad[i].equals("1M"))
+            {
+                isSelected = realLoad[i].equalsIgnoreCase(currentInterval);
+            }
+
             GradientDrawable bg = new GradientDrawable();
             bg.setCornerRadius(10f * res.getDisplayMetrics().density);
             bg.setColor(getThemeColor(android.R.attr.colorBackground));
@@ -329,10 +362,9 @@ public class MarketChartActivity extends Activity
             tv.setLayoutParams(lp);
 
             final String load = realLoad[i];
-            final String display = intervalValues[i];
             tv.setOnClickListener(v ->
             {
-                if (display.equals("Time"))
+                if (load.isEmpty())
                 {
                     return;
                 }
@@ -366,11 +398,22 @@ public class MarketChartActivity extends Activity
         boolean isOuter = false;
         for (String v : outerValues)
         {
-            if (v.equalsIgnoreCase(currentInterval))
+            if (v.equals(currentInterval) || v.equalsIgnoreCase(currentInterval) &&!currentInterval.equals("1m"))
             {
-                isOuter = true;
-                break;
+                if (v.equals("1M") && currentInterval.equals("1m"))
+                {
+                    continue;
+                }
+                if (v.equalsIgnoreCase(currentInterval))
+                {
+                    if (currentInterval.equals("1m") && v.equals("1M")) { }
+                    else { isOuter = true; break; }
+                }
             }
+        }
+        if (currentInterval.equals("15m") || currentInterval.equals("1h") || currentInterval.equals("4h") || currentInterval.equals("1d") || currentInterval.equals("1M"))
+        {
+            isOuter = true;
         }
 
         int padH = (int) (12 * res.getDisplayMetrics().density);
@@ -399,7 +442,9 @@ public class MarketChartActivity extends Activity
             tv.setSingleLine(true);
             tv.setPadding(padH, padV, padH, padV);
 
-            boolean isSelected = realInterval.equalsIgnoreCase(currentInterval);
+            boolean isSelected = realInterval.equals(currentInterval);
+            if (realInterval.equals("1d") && currentInterval.equalsIgnoreCase("1d")) isSelected = true;
+
             if (isSelected)
             {
                 tv.setTextColor(getThemeColor(android.R.attr.colorBackground));
@@ -444,8 +489,8 @@ public class MarketChartActivity extends Activity
         }
         else
         {
-            String display = currentInterval.toUpperCase(Locale.US);
-            tvMore.setText(display);
+            int labelRes = getLabelResForInterval(currentInterval);
+            tvMore.setText(labelRes);
             tvMore.setTextColor(getThemeColor(android.R.attr.colorBackground));
             tvMore.setBackgroundResource(R.drawable.bg_time_selected);
         }
