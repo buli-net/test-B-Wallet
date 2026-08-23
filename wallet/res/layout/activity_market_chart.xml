@@ -1,20 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:background="?android:attr/colorBackground">
 
-    <TextView
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="56dp"
-        android:background="?android:attr/colorBackground"
-        android:text="@string/market_chart_title"
-        android:textColor="?android:attr/textColorPrimary"
+        android:orientation="horizontal"
         android:gravity="center_vertical"
-        android:padding="16dp"
-        android:textStyle="bold"
-        android:textSize="18sp" />
+        android:paddingStart="@dimen/chart_screen_padding"
+        android:paddingEnd="@dimen/chart_screen_padding"
+        android:background="?android:attr/colorBackground">
+
+        <TextView
+            android:id="@+id/textMarketTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/market_chart_title"
+            android:textSize="@dimen/chart_title_size"
+            android:textStyle="bold"
+            android:textColor="?android:attr/textColorPrimary" />
+
+    </LinearLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -25,105 +35,120 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical">
+            android:orientation="horizontal">
 
-            <TextView
-                android:id="@+id/textCurrentPrice"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="0.00"
-                android:textSize="@dimen/chart_price_large_size"
-                android:textStyle="bold"
-                android:textColor="?android:attr/textColorPrimary" />
-
-            <TextView
-                android:id="@+id/textChange24h"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="12dp"
-                android:text="0.00%"
-                android:textSize="@dimen/chart_text_size"
-                android:textColor="@color/chart_bull" />
-
-            <TextView
-                android:id="@+id/textFiat"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:text="USD"
-                android:textSize="@dimen/chart_text_size"
-                android:textColor="?android:attr/textColorSecondary" />
-        </LinearLayout>
-
-        <TextView
-            android:id="@+id/textCountdown"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="2dp"
-            android:text="@string/chart_countdown_default"
-            android:textSize="@dimen/chart_text_size"
-            android:textColor="?android:attr/textColorSecondary" />
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_marginTop="@dimen/chart_small_margin">
-
-            <TextView
-                android:id="@+id/textHigh24h"
+            <LinearLayout
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="@string/chart_high_default"
-                android:textColor="?android:attr/textColorSecondary"
-                android:textSize="@dimen/chart_text_size" />
+                android:orientation="vertical">
 
-            <TextView
-                android:id="@+id/textLow24h"
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+
+                    <TextView
+                        android:id="@+id/textCurrentPrice"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/chart_price_default"
+                        android:textSize="@dimen/chart_price_large_size"
+                        android:textStyle="bold"
+                        android:textColor="?android:attr/textColorPrimary" />
+
+                    <TextView
+                        android:id="@+id/textChange24h"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/chart_small_margin"
+                        android:text="@string/chart_change_default"
+                        android:textSize="@dimen/chart_text_size"
+                        android:textColor="@color/chart_bull" />
+
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/textCountdown"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/chart_tiny_margin"
+                    android:text="@string/chart_countdown_default"
+                    android:textSize="@dimen/chart_small_text_size"
+                    android:textColor="?android:attr/textColorSecondary" />
+
+            </LinearLayout>
+
+            <LinearLayout
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="@string/chart_low_default"
-                android:textColor="?android:attr/textColorSecondary"
-                android:textSize="@dimen/chart_text_size" />
-        </LinearLayout>
+                android:orientation="vertical"
+                android:gravity="end">
 
-        <TextView
-            android:id="@+id/textVol24h"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="2dp"
-            android:text="Vol(BTC) -- Vol(USDT) --"
-            android:textColor="?android:attr/textColorSecondary"
-            android:textSize="@dimen/chart_popup_time_size" />
+                <TextView
+                    android:id="@+id/textHigh24h"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/chart_high_default"
+                    android:textSize="@dimen/chart_small_text_size"
+                    android:textColor="?android:attr/textColorSecondary" />
+
+                <TextView
+                    android:id="@+id/textLow24h"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/chart_tiny_margin"
+                    android:text="@string/chart_low_default"
+                    android:textSize="@dimen/chart_small_text_size"
+                    android:textColor="?android:attr/textColorSecondary" />
+
+                <TextView
+                    android:id="@+id/textVol24h"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/chart_tiny_margin"
+                    android:text="@string/chart_vol_default"
+                    android:textSize="@dimen/chart_tiny_text_size"
+                    android:textColor="?android:attr/textColorSecondary" />
+
+                <TextView
+                    android:id="@+id/textFiat"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:visibility="gone"
+                    android:text="@string/chart_fiat_default" />
+
+            </LinearLayout>
+
+        </LinearLayout>
 
         <TextView
             android:id="@+id/textMaLabel"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/chart_small_margin"
-            android:text="MA(7): -- MA(25): -- MA(99): --"
-            android:textSize="@dimen/chart_popup_time_size"
-            android:textColor="@color/chart_ma5"
-            android:singleLine="true"
-            android:ellipsize="end" />
+            android:text="@string/chart_ma_default"
+            android:textSize="@dimen/chart_small_text_size" />
 
-        <HorizontalScrollView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/chart_small_margin"
-            android:scrollbars="none">
-
-            <LinearLayout
-                android:id="@+id/chipGroupTimeframe"
-                android:layout_width="wrap_content"
-                android:layout_height="32dp"
-                android:orientation="horizontal"
-                android:gravity="center_vertical" />
-        </HorizontalScrollView>
     </LinearLayout>
+
+    <HorizontalScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:scrollbars="none">
+
+        <LinearLayout
+            android:id="@+id/chipGroupTimeframe"
+            android:layout_width="wrap_content"
+            android:layout_height="@dimen/chart_chip_height"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:paddingStart="@dimen/chart_small_margin"
+            android:paddingEnd="@dimen/chart_small_margin" />
+
+    </HorizontalScrollView>
 
     <FrameLayout
         android:layout_width="match_parent"
@@ -141,54 +166,62 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:background="?android:attr/colorBackground"
-            android:padding="@dimen/chart_popup_padding"
             android:visibility="gone"
-            android:layout_margin="@dimen/chart_small_margin">
+            android:padding="@dimen/chart_popup_padding"
+            android:layout_margin="@dimen/chart_small_margin"
+            android:background="?android:attr/colorBackground">
 
             <TextView
                 android:id="@+id/popupTime"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textColor="?android:attr/textColorPrimary"
-                android:textSize="@dimen/chart_popup_time_size" />
+                android:text="@string/chart_popup_time_default"
+                android:textSize="@dimen/chart_popup_time_size"
+                android:textColor="?android:attr/textColorPrimary" />
 
             <TextView
                 android:id="@+id/popupOpen"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textColor="@color/chart_bull"
-                android:textSize="@dimen/chart_popup_size" />
+                android:text="@string/chart_popup_open_default"
+                android:textSize="@dimen/chart_popup_size"
+                android:textColor="@color/chart_bull" />
 
             <TextView
                 android:id="@+id/popupHigh"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textColor="@color/chart_bull"
-                android:textSize="@dimen/chart_popup_size" />
+                android:text="@string/chart_popup_high_default"
+                android:textSize="@dimen/chart_popup_size"
+                android:textColor="@color/chart_bull" />
 
             <TextView
                 android:id="@+id/popupLow"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textColor="@color/chart_bear"
-                android:textSize="@dimen/chart_popup_size" />
+                android:text="@string/chart_popup_low_default"
+                android:textSize="@dimen/chart_popup_size"
+                android:textColor="@color/chart_bear" />
 
             <TextView
                 android:id="@+id/popupClose"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textColor="?android:attr/textColorPrimary"
+                android:text="@string/chart_popup_close_default"
                 android:textSize="@dimen/chart_popup_size"
-                android:textStyle="bold" />
+                android:textStyle="bold"
+                android:textColor="?android:attr/textColorPrimary" />
 
             <TextView
                 android:id="@+id/popupVolume"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textColor="?android:attr/textColorSecondary"
-                android:textSize="@dimen/chart_popup_time_size" />
+                android:text="@string/chart_popup_volume_default"
+                android:textSize="@dimen/chart_popup_time_size"
+                android:textColor="?android:attr/textColorSecondary" />
 
         </LinearLayout>
+
     </FrameLayout>
+
 </LinearLayout>
