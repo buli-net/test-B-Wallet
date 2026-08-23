@@ -208,9 +208,9 @@ public class MarketChartView extends View
 
         lastPriceLinePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         lastPriceLinePaint.setColor(res.getColor(R.color.chart_last_price_line));
-        lastPriceLinePaint.setStrokeWidth(res.getDimension(R.dimen.chart_last_price_width));
+        lastPriceLinePaint.setStrokeWidth(1f * res.getDisplayMetrics().density);
         lastPriceLinePaint.setStyle(Paint.Style.STROKE);
-        lastPriceLinePaint.setPathEffect(new DashPathEffect(new float[]{15f, 10f}, 0f));
+        lastPriceLinePaint.setPathEffect(new DashPathEffect(new float[]{10f, 6f}, 0f));
 
         float thin = 1f * res.getDisplayMetrics().density;
 
