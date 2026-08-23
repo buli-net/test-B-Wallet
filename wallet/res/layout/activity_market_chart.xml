@@ -1,17 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:background="?android:attr/colorBackground">
 
-    <androidx.appcompat.widget.Toolbar
+    <!-- Thay Toolbar bằng TextView cho chắc -->
+    <TextView
         android:layout_width="match_parent"
-        android:layout_height="?attr/actionBarSize"
+        android:layout_height="56dp"
         android:background="?android:attr/colorBackgroundFloating"
-        app:title="@string/market_chart_title"
-        app:titleTextColor="?android:attr/textColorPrimary" />
+        android:text="@string/market_chart_title"
+        android:textColor="?android:attr/textColorPrimary"
+        android:gravity="center_vertical"
+        android:padding="16dp"
+        android:textStyle="bold"
+        android:textSize="18sp" />
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -65,8 +69,6 @@
             android:id="@+id/chipGroupTimeframe"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:singleSelection="true"
-            app:chipSpacing="@dimen/chart_chip_spacing"
             android:layout_marginTop="@dimen/chart_small_margin" />
 
     </LinearLayout>
