@@ -1,24 +1,24 @@
 package wallet.ui;
 
+import android.app.Activity;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.TextView;
-import androidx.appcompat.app.AppCompatActivity;
-import com.google.android.material.chip.Chip;
-import com.google.android.material.chip.ChipGroup;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 import wallet.R;
 
-public class MarketChartActivity extends AppCompatActivity {
+public class MarketChartActivity extends Activity {
 
     private MarketChartView marketChartView;
     private TextView textCurrentPrice;
     private TextView textCountdown;
     private TextView textHigh24h;
     private TextView textLow24h;
-    private ChipGroup chipGroupTimeframe;
+    private LinearLayout chipGroupTimeframe;
     private View popupCandleDetail;
     private TextView popupTime;
     private TextView popupOpen;
@@ -64,19 +64,33 @@ public class MarketChartActivity extends AppCompatActivity {
     private void setupTimeframeChips() {
         chipGroupTimeframe.removeAllViews();
         for (String interval : intervals) {
-            Chip chip = new Chip(this);
-            chip.setText(interval);
-            chip.setCheckable(true);
-            chip.setChecked(interval.equals(currentInterval));
-            chip.setOnClickListener(v -> {
+            Button btn = new Button(this);
+            btn.setText(interval);
+            // highlight cái đang chọn
+            if (interval.equals(currentInterval)) {
+                btn.setAlpha(1f);
+            } else {
+                btn.setAlpha(0.6f);
+            }
+            LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT);
+            lp.setMargins(8, 0, 8, 0);
+            btn.setLayoutParams(lp);
+
+            btn.setOnClickListener(v -> {
                 currentInterval = interval;
+                // update alpha cho tất cả button
                 for (int i = 0; i < chipGroupTimeframe.getChildCount(); i++) {
-                    Chip childChip = (Chip) chipGroupTimeframe.getChildAt(i);
-                    childChip.setChecked(childChip.getText().toString().equals(interval));
+                    View child = chipGroupTimeframe.getChildAt(i);
+                    if (child instanceof Button) {
+                        Button b = (Button) child;
+                        b.setAlpha(b.getText().toString().equals(interval) ? 1f : 0.6f);
+                    }
                 }
                 marketChartView.loadChart(currentSymbol, currentInterval);
             });
-            chipGroupTimeframe.addView(chip);
+            chipGroupTimeframe.addView(btn);
         }
     }
 
