@@ -39,6 +39,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.LinearLayout;
+import android.widget.Toast; // add maket 1/2
 import androidx.activity.EdgeToEdge;
 import androidx.activity.SystemBarStyle;
 import androidx.activity.result.ActivityResultLauncher;
@@ -305,15 +306,13 @@ public final class WalletActivity extends AbstractWalletActivity {
                 } else if (itemId == R.id.wallet_options_exchange_rates) {
                     startActivity(new Intent(WalletActivity.this, ExchangeRatesActivity.class));
                     return true;
-             //add maket
+             //add maket 2/2
                 } else if (id == R.id.menu_market_chart) {
-                    // tạm thời chưa có Activity, để toast test menu
-                     Toast.makeText(this, "Market Chart clicked", Toast.LENGTH_SHORT).show();
-                     return true;
-                // end maket
-                } else if (itemId == R.id.wallet_options_sweep_wallet) {
-                    SweepWalletActivity.start(WalletActivity.this);
+                    Toast.makeText(this, "Market Chart clicked", Toast.LENGTH_SHORT).show();
                     return true;
+
+                // end maket 2/2
+                
             //add create paper wallet
                 } else if (itemId == R.id.wallet_options_create_paper_wallet) {
                     startActivity(new Intent(WalletActivity.this, wallet.ui.PaperWalletActivity.class));
