@@ -10,10 +10,8 @@ import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.text.Editable;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
-import android.text.TextWatcher;
 import android.text.style.ForegroundColorSpan;
 import android.util.TypedValue;
 import android.view.Gravity;
@@ -183,85 +181,7 @@ public class MarketChartActivity extends Activity
         recycler.setLayoutManager(new LinearLayoutManager(this));
 
         List<MarketChartView.MaLine> tempList = new ArrayList<>(marketChartView.getMaLines());
-        int[] colors = getResources().getIntArray(R.array.ma_default_colors);
-
-        RecyclerView.Adapter adapter = new RecyclerView.Adapter<RecyclerView.ViewHolder>()
-        {
-            @Override
-            public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType)
-            {
-                View v = getLayoutInflater().inflate(R.layout.item_ma_popup, parent, false);
-                return new RecyclerView.ViewHolder(v){};
-            }
-
-            @Override
-            public void onBindViewHolder(RecyclerView.ViewHolder h, int pos)
-            {
-                MarketChartView.MaLine line = tempList.get(pos);
-                EditText et = h.itemView.findViewById(R.id.et_period);
-                View colorView = h.itemView.findViewById(R.id.view_color);
-                et.setText(String.valueOf(line.period));
-                colorView.setBackgroundColor(line.color);
-
-                et.addTextChangedListener(new TextWatcher()
-                {
-                    @Override
-                    public void afterTextChanged(Editable s)
-                    {
-                        try
-                        {
-                            String txt = s.toString().trim();
-                            if (!txt.isEmpty())
-                            {
-                                line.period = Integer.parseInt(txt);
-                            }
-                        }
-                        catch (Exception e)
-                        {
-                        }
-                    }
-                    @Override public void beforeTextChanged(CharSequence a,int b,int c,int d){}
-                    @Override public void onTextChanged(CharSequence a,int b,int c,int d){}
-                });
-
-                colorView.setOnClickListener(new View.OnClickListener()
-                {
-                    @Override
-                    public void onClick(View v)
-                    {
-                        int currentIdx = 0;
-                        for (int i = 0; i < colors.length; i++)
-                        {
-                            if (colors[i] == line.color)
-                            {
-                                currentIdx = i;
-                            }
-                        }
-                        int next = colors[(currentIdx + 1) % colors.length];
-                        line.color = next;
-                        colorView.setBackgroundColor(next);
-                    }
-                });
-
-                View btnDelete = h.itemView.findViewById(R.id.btn_delete);
-                btnDelete.setOnClickListener(new View.OnClickListener()
-                {
-                    @Override
-                    public void onClick(View v)
-                    {
-                        tempList.remove(pos);
-                        notifyDataSetChanged();
-                    }
-                });
-            }
-
-            @Override
-            public int getItemCount()
-            {
-                return tempList.size();
-            }
-        };
-
+        MaPopupAdapter adapter = new MaPopupAdapter(tempList);
         recycler.setAdapter(adapter);
 
         View btnAdd = view.findViewById(R.id.btn_add_ma);
@@ -270,6 +190,7 @@ public class MarketChartActivity extends Activity
             @Override
             public void onClick(View v)
             {
+                int[] colors = getResources().getIntArray(R.array.ma_default_colors);
                 int color = colors[tempList.size() % colors.length];
                 tempList.add(new MarketChartView.MaLine(20, color));
                 adapter.notifyDataSetChanged();
@@ -289,6 +210,105 @@ public class MarketChartActivity extends Activity
 
         dialog.setContentView(view);
         dialog.show();
+    }
+
+    static class MaPopupAdapter extends RecyclerView.Adapter<MaPopupAdapter.Holder>
+    {
+        List<MarketChartView.MaLine> list;
+
+        MaPopupAdapter(List<MarketChartView.MaLine> list)
+        {
+            this.list = list;
+        }
+
+        static class Holder extends RecyclerView.ViewHolder
+        {
+            EditText et;
+            View color;
+            View del;
+
+            Holder(View v)
+            {
+                super(v);
+                et = v.findViewById(R.id.et_period);
+                color = v.findViewById(R.id.view_color);
+                del = v.findViewById(R.id.btn_delete);
+            }
+        }
+
+        @Override
+        public Holder onCreateViewHolder(ViewGroup p, int t)
+        {
+            View v = View.inflate(p.getContext(), R.layout.item_ma_popup, null);
+            return new Holder(v);
+        }
+
+        @Override
+        public void onBindViewHolder(Holder h, int pos)
+        {
+            MarketChartView.MaLine line = list.get(pos);
+            h.et.setText(String.valueOf(line.period));
+            h.color.setBackgroundColor(line.color);
+
+            h.et.setOnFocusChangeListener(new View.OnFocusChangeListener()
+            {
+                @Override
+                public void onFocusChange(View v, boolean hasFocus)
+                {
+                    if (!hasFocus)
+                    {
+                        try
+                        {
+                            String txt = h.et.getText().toString().trim();
+                            if (!txt.isEmpty())
+                            {
+                                line.period = Integer.parseInt(txt);
+                            }
+                        }
+                        catch (Exception e)
+                        {
+                        }
+                    }
+                }
+            });
+
+            h.color.setOnClickListener(new View.OnClickListener()
+            {
+                @Override
+                public void onClick(View v)
+                {
+                    Resources res = v.getContext().getResources();
+                    int[] colors = res.getIntArray(R.array.ma_default_colors);
+                    int idx = 0;
+                    for (int i = 0; i < colors.length; i++)
+                    {
+                        if (colors[i] == line.color)
+                        {
+                            idx = i;
+                        }
+                    }
+                    int next = colors[(idx + 1) % colors.length];
+                    line.color = next;
+                    h.color.setBackgroundColor(next);
+                }
+            });
+
+            h.del.setOnClickListener(new View.OnClickListener()
+            {
+                @Override
+                public void onClick(View v)
+                {
+                    list.remove(pos);
+                    notifyDataSetChanged();
+                }
+            });
+        }
+
+        @Override
+        public int getItemCount()
+        {
+            return list.size();
+        }
     }
 
     @Override
@@ -459,9 +479,9 @@ public class MarketChartActivity extends Activity
         int[] intervalLabels = {R.string.time, R.string.interval_1m, R.string.interval_3m, R.string.interval_5m, R.string.interval_15m, R.string.interval_30m, R.string.interval_1h, R.string.interval_2h, R.string.interval_4h, R.string.interval_6h, R.string.interval_12h, R.string.interval_1d, R.string.interval_1w, R.string.interval_1M};
 
         AlertDialog dialog = new AlertDialog.Builder(this)
-           .setView(root)
-           .setNegativeButton(R.string.close, (d, w) -> d.dismiss())
-           .create();
+          .setView(root)
+          .setNegativeButton(R.string.close, (d, w) -> d.dismiss())
+          .create();
 
         for (int i = 0; i < realLoad.length; i++)
         {
