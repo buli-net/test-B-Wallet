@@ -4,7 +4,9 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="?android:attr/colorBackground">
+    android:background="?android:attr/colorBackground"
+    android:clipChildren="false"
+    android:clipToPadding="false">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -105,13 +107,29 @@
                     android:textColor="?android:attr/textColorSecondary" />
 
                 <TextView
-                    android:id="@+id/textVol24h"
+                    android:id="@+id/textVolBtc"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/list_entry_padding_vertical_cram"
-                    android:text="@string/chart_vol_default"
+                    android:text="@string/chart_vol_base_default"
                     android:textSize="@dimen/font_size_tiny"
                     android:textColor="?android:attr/textColorSecondary" />
+
+                <TextView
+                    android:id="@+id/textVolFiat"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/list_entry_padding_vertical_cram"
+                    android:text="@string/chart_vol_quote_default"
+                    android:textSize="@dimen/font_size_tiny"
+                    android:textColor="?android:attr/textColorSecondary" />
+
+                <TextView
+                    android:id="@+id/textVol24h"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:visibility="gone"
+                    android:text="@string/chart_vol_default" />
 
                 <TextView
                     android:id="@+id/textFiat"
@@ -137,30 +155,38 @@
     <HorizontalScrollView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:scrollbars="none">
+        android:scrollbars="none"
+        android:clipChildren="false"
+        android:clipToPadding="false"
+        android:background="?android:attr/colorBackground">
 
         <LinearLayout
             android:id="@+id/chipGroupTimeframe"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:gravity="center_vertical"
+            android:weightSum="7"
             android:paddingStart="@dimen/chart_small_margin"
-            android:paddingEnd="@dimen/chart_small_margin"
+            android:paddingEnd="80dp"
             android:paddingTop="@dimen/list_entry_padding_vertical_cram"
-            android:paddingBottom="@dimen/list_entry_padding_vertical_cram" />
+            android:paddingBottom="@dimen/list_entry_padding_vertical_cram"
+            android:background="?android:attr/colorBackground" />
 
     </HorizontalScrollView>
 
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1">
+        android:layout_weight="1"
+        android:clipChildren="false"
+        android:clipToPadding="false">
 
         <wallet.ui.MarketChartView
             android:id="@+id/marketChartView"
             android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+            android:layout_height="match_parent"
+            android:layout_marginEnd="0dp" />
 
         <LinearLayout
             android:id="@+id/popupCandleDetail"
