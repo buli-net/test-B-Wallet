@@ -178,7 +178,7 @@ public class MarketChartActivity extends Activity {
             tv.setPadding(padH, padV, padH, padV);
 
             if (label.equals("1h") || realInterval.equals(currentInterval)) {
-                tv.setTextColor(res.getColor(R.color.chart_text_bright));
+                tv.setTextColor(res.getColor(R.color.fg_bright));
                 tv.setBackgroundResource(R.drawable.bg_time_selected);
             } else {
                 tv.setTextColor(res.getColor(R.color.chart_text));
@@ -199,7 +199,7 @@ public class MarketChartActivity extends Activity {
                     if (child instanceof TextView) {
                         TextView t = (TextView) child;
                         if (t.getText().toString().equals(label)) {
-                            t.setTextColor(res.getColor(R.color.chart_text_bright));
+                            t.setTextColor(res.getColor(R.color.fg_bright));
                             t.setBackgroundResource(R.drawable.bg_time_selected);
                         } else {
                             t.setTextColor(res.getColor(R.color.chart_text));
@@ -225,9 +225,6 @@ public class MarketChartActivity extends Activity {
                     new Thread(() -> {
                         double fiatPerBtc = getFiatPerBtc(currentFiatCode);
                         String quoteFiat = "USD";
-                        if (currentSymbol!= null && currentSymbol.endsWith("USDT")) {
-                            quoteFiat = "USD";
-                        }
                         double usdPerBtc = getFiatPerBtc(quoteFiat);
 
                         if (fiatPerBtc == 0d || usdPerBtc == 0d) {
@@ -245,7 +242,7 @@ public class MarketChartActivity extends Activity {
                                 textCurrentPrice.setText(String.format(Locale.US, "%s%,.2f", symbol, priceInFiat));
 
                                 int color;
-                                if (lastDisplayPrice == 0f) color = res.getColor(R.color.chart_text_bright);
+                                if (lastDisplayPrice == 0f) color = res.getColor(R.color.fg_bright);
                                 else if (priceInFiat > lastDisplayPrice) color = res.getColor(R.color.chart_bull);
                                 else if (priceInFiat < lastDisplayPrice) color = res.getColor(R.color.chart_bear);
                                 else color = res.getColor(R.color.chart_last_price_line);
