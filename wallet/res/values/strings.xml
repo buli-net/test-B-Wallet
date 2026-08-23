@@ -478,4 +478,9 @@
 <string name="browser_home_saved">Home page saved</string>
 <string name="browser_home_cleared">Home page cleared</string>
 <string name="browser_settings_title">Settings</string>
+
+    <!-- maket -->
+<string name="menu_market">Market</string>
+<string name="menu_exchange_rates">Exchange Rates</string>
+<string name="menu_price_chart">Price Chart</string>
 </resources>
