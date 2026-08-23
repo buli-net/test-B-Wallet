@@ -65,7 +65,6 @@ public class MarketChartActivity extends Activity
     private TextView popupLow;
     private TextView popupClose;
     private TextView popupVolume;
-    private View btnChartSettings;
 
     private String currentSymbol = "BTCUSDT";
     private String currentInterval = "15m";
@@ -116,11 +115,10 @@ public class MarketChartActivity extends Activity
         popupLow = findViewById(R.id.popupLow);
         popupClose = findViewById(R.id.popupClose);
         popupVolume = findViewById(R.id.popupVolume);
-        btnChartSettings = findViewById(R.id.btnChartSettings);
 
-        if (btnChartSettings!= null)
+        if (textMaLabel!= null)
         {
-            btnChartSettings.setOnClickListener(new View.OnClickListener()
+            textMaLabel.setOnClickListener(new View.OnClickListener()
             {
                 @Override
                 public void onClick(View v)
@@ -461,9 +459,9 @@ public class MarketChartActivity extends Activity
         int[] intervalLabels = {R.string.time, R.string.interval_1m, R.string.interval_3m, R.string.interval_5m, R.string.interval_15m, R.string.interval_30m, R.string.interval_1h, R.string.interval_2h, R.string.interval_4h, R.string.interval_6h, R.string.interval_12h, R.string.interval_1d, R.string.interval_1w, R.string.interval_1M};
 
         AlertDialog dialog = new AlertDialog.Builder(this)
-            .setView(root)
-            .setNegativeButton(R.string.close, (d, w) -> d.dismiss())
-            .create();
+           .setView(root)
+           .setNegativeButton(R.string.close, (d, w) -> d.dismiss())
+           .create();
 
         for (int i = 0; i < realLoad.length; i++)
         {
