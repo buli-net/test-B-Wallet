@@ -481,9 +481,9 @@
 
 
     <!-- maket chart-->
+    
     <string name="market_chart_title">Market Chart</string>
     <string name="chart_loading">Loading chart...</string>
-
     <string name="chart_close_in">Close in: %1$s</string>
     <string name="chart_high_label">High: %1$s</string>
     <string name="chart_low_label">Low: %1$s</string>
@@ -492,32 +492,25 @@
     <string name="chart_low_detail">L: %1$s</string>
     <string name="chart_close_label">C: %1$s</string>
     <string name="chart_volume_label">V: %1$s</string>
-
     <string name="menu_market">Market</string>
     <string name="menu_price_chart">Price Chart</string>
-
     <string name="chart_price_default">--</string>
     <string name="chart_change_default">--</string>
     <string name="chart_countdown_default">Close in: --</string>
     <string name="chart_high_default">24h High --</string>
     <string name="chart_low_default">24h Low --</string>
-    
-    <!-- FIX KHÔNG CỨNG - dùng %1$s = BTC/RON/VND -->
     <string name="chart_vol_base_default">Vol(--) --</string>
     <string name="chart_vol_quote_default">Vol(--) --</string>
     <string name="chart_vol_base_format">Vol(%1$s) %2$s</string>
     <string name="chart_vol_quote_format">Vol(%1$s) %2$s</string>
-    
     <string name="chart_fiat_default">--</string>
     <string name="chart_ma_default">MA(7): -- • MA(25): -- • MA(99): --</string>
-
     <string name="chart_popup_time_default">--</string>
     <string name="chart_popup_open_default">Open --</string>
     <string name="chart_popup_high_default">High --</string>
     <string name="chart_popup_low_default">Low --</string>
     <string name="chart_popup_close_default">Close --</string>
     <string name="chart_popup_volume_default">Vol --</string>
-
     <string name="intervals_title">Intervals</string>
     <string name="close">CLOSE</string>
     <string name="time">Time</string>
@@ -535,5 +528,5 @@
     <string name="interval_1d">1D</string>
     <string name="interval_1w">1W</string>
     <string name="interval_1M">1M</string>
-    
+
 </resources>
