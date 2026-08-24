@@ -327,7 +327,6 @@ public class MarketChartActivity extends Activity
         LinearLayout root = new LinearLayout(this);
         root.setOrientation(LinearLayout.VERTICAL);
         root.setPadding(32, 32, 32, 32);
-        // FIX 1-2: vuông như ví chính - không bo tròn, màu theo theme
         GradientDrawable rootBg = new GradientDrawable();
         rootBg.setCornerRadius(0f);
         rootBg.setColor(getThemeColor(android.R.attr.colorBackground));
@@ -385,7 +384,6 @@ public class MarketChartActivity extends Activity
         rowBear.addView(viewBear);
         root.addView(rowBear);
 
-        // FIX 1-2: divider chỗ gạch đỏ - tách Candle và MA như row ví chính
         View divider = new View(this);
         LinearLayout.LayoutParams lpDiv = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, (int)(1 * getResources().getDisplayMetrics().density));
         lpDiv.topMargin = 16;
@@ -449,13 +447,6 @@ public class MarketChartActivity extends Activity
         root.addView(titleMa);
 
         View maView = getLayoutInflater().inflate(R.layout.bottom_sheet_ma_settings, null);
-        // FIX trùng MA Settings - ẩn title thừa trong layout inflate
-        View dup1 = maView.findViewById(R.id.text_ma_title);
-        if (dup1!= null) dup1.setVisibility(View.GONE);
-        View dup2 = maView.findViewById(R.id.tv_ma_settings);
-        if (dup2!= null) dup2.setVisibility(View.GONE);
-        View dup3 = maView.findViewById(R.id.title_ma_settings);
-        if (dup3!= null) dup3.setVisibility(View.GONE);
 
         RecyclerView recycler = maView.findViewById(R.id.recycler_ma_popup);
         recycler.setLayoutManager(new LinearLayoutManager(this));
@@ -466,7 +457,6 @@ public class MarketChartActivity extends Activity
         recycler.setAdapter(adapter);
 
         View btnAdd = maView.findViewById(R.id.btn_add_ma);
-        // FIX vuông cho nút Add
         GradientDrawable addBg = new GradientDrawable();
         addBg.setCornerRadius(0f);
         addBg.setColor(getResources().getColor(R.color.bg_level2, getTheme()));
@@ -569,7 +559,6 @@ public class MarketChartActivity extends Activity
         {
             MarketChartView.MaLine line = list.get(pos);
             h.et.setText(String.valueOf(line.period));
-            // FIX vuông cho color item
             GradientDrawable gd = new GradientDrawable();
             gd.setCornerRadius(0f);
             gd.setColor(line.color);
@@ -827,9 +816,9 @@ public class MarketChartActivity extends Activity
         int[] intervalLabels = {R.string.time, R.string.interval_1m, R.string.interval_3m, R.string.interval_5m, R.string.interval_15m, R.string.interval_30m, R.string.interval_1h, R.string.interval_2h, R.string.interval_4h, R.string.interval_6h, R.string.interval_12h, R.string.interval_1d, R.string.interval_1w, R.string.interval_1M};
 
         AlertDialog dialog = new AlertDialog.Builder(this)
-      .setView(root)
-      .setNegativeButton(R.string.close, (d, w) -> d.dismiss())
-      .create();
+     .setView(root)
+     .setNegativeButton(R.string.close, (d, w) -> d.dismiss())
+     .create();
 
         for (int i = 0; i < realLoad.length; i++)
         {
@@ -1072,11 +1061,11 @@ public class MarketChartActivity extends Activity
                                 }
                                 else if (priceInFiat > lastDisplayPrice)
                                 {
-                                    color = res.getColor(R.color.chart_bull, null);
+                                    color = res.getColor(R.color.palette_green, null);
                                 }
                                 else if (priceInFiat < lastDisplayPrice)
                                 {
-                                    color = res.getColor(R.color.chart_bear, null);
+                                    color = res.getColor(R.color.palette_red, null);
                                 }
                                 else
                                 {
@@ -1101,11 +1090,11 @@ public class MarketChartActivity extends Activity
                         int c;
                         if (changePercent >= 0)
                         {
-                            c = res.getColor(R.color.chart_bull, null);
+                            c = res.getColor(R.color.palette_green, null);
                         }
                         else
                         {
-                            c = res.getColor(R.color.chart_bear, null);
+                            c = res.getColor(R.color.palette_red, null);
                         }
                         textChange24h.setTextColor(c);
                     }
