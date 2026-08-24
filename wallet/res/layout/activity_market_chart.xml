@@ -136,7 +136,7 @@
         android:singleLine="true"
         android:ellipsize="end" />
 
-    <!-- FIX: Timeframe + 3 nut cai dat giong Binance -->
+    <!-- FIX: Only 1 setting icon vector -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -163,43 +163,14 @@
 
         </HorizontalScrollView>
 
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical"
-            android:paddingEnd="8dp">
-
-            <TextView
-                android:id="@+id/btnChartSettings"
-                android:layout_width="32dp"
-                android:layout_height="32dp"
-                android:gravity="center"
-                android:text="⚙️"
-                android:textSize="18sp"
-                android:background="?android:attr/selectableItemBackgroundBorderless" />
-
-            <TextView
-                android:id="@+id/btnIndicatorSettings"
-                android:layout_width="32dp"
-                android:layout_height="32dp"
-                android:gravity="center"
-                android:text="📊"
-                android:textSize="16sp"
-                android:alpha="0.7"
-                android:background="?android:attr/selectableItemBackgroundBorderless" />
-
-            <TextView
-                android:id="@+id/btnChartType"
-                android:layout_width="32dp"
-                android:layout_height="32dp"
-                android:gravity="center"
-                android:text="◫"
-                android:textSize="16sp"
-                android:alpha="0.7"
-                android:background="?android:attr/selectableItemBackgroundBorderless" />
-
-        </LinearLayout>
+        <ImageView
+            android:id="@+id/btnChartSettings"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:padding="8dp"
+            android:src="@drawable/ic_chart_settings"
+            android:contentDescription="@string/chart_settings_title"
+            android:background="?android:attr/selectableItemBackgroundBorderless" />
 
     </LinearLayout>
 
