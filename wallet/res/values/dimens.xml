@@ -50,4 +50,7 @@
     <dimen name="chart_dash_gap">6dp</dimen>
     <dimen name="chart_loading_offset">100dp</dimen>
 
+    <dimen name="chart_popup_size">120dp</dimen>
+    <dimen name="chart_popup_time_size">10sp</dimen>
+
 </resources>
