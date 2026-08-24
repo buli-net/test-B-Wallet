@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <integer name="chart_visible_default">80</integer>
+    <integer name="chart_visible_min">20</integer>
+    <integer name="chart_visible_max">150</integer>
+    <integer name="chart_fetch_limit">200</integer>
+    <integer name="chart_live_interval">1000</integer>
+    <integer name="chart_countdown_interval">1000</integer>
+    <integer name="chart_grid_lines">4</integer>
+    <integer name="chart_volume_alpha">255</integer>
+    <integer name="chart_time_label_divider">4</integer>
+</resources>
