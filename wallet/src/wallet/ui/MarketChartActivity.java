@@ -329,7 +329,7 @@ public class MarketChartActivity extends Activity
         root.setPadding(32, 32, 32, 32);
         GradientDrawable rootBg = new GradientDrawable();
         rootBg.setCornerRadius(0f);
-        rootBg.setColor(getThemeColor(android.R.attr.colorBackground));
+        rootBg.setColor(getResources().getColor(R.color.chart_bg, getTheme()));
         root.setBackground(rootBg);
 
         TextView title = new TextView(this);
@@ -793,7 +793,7 @@ public class MarketChartActivity extends Activity
     {
         LinearLayout root = new LinearLayout(this);
         root.setOrientation(LinearLayout.VERTICAL);
-        root.setBackgroundColor(getThemeColor(android.R.attr.colorBackground));
+        root.setBackgroundColor(getResources().getColor(R.color.chart_bg, getTheme()));
         int pad = (int) (16 * getResources().getDisplayMetrics().density);
         root.setPadding(pad, pad, pad, pad);
 
@@ -839,15 +839,15 @@ public class MarketChartActivity extends Activity
             }
 
             GradientDrawable bg = new GradientDrawable();
-            bg.setCornerRadius(10f * res.getDisplayMetrics().density);
-            bg.setColor(getThemeColor(android.R.attr.colorBackground));
+            bg.setCornerRadius(0f);
             if (isSelected)
             {
-                bg.setStroke((int) (2 * res.getDisplayMetrics().density), getThemeColor(android.R.attr.textColorPrimary));
-                tv.setTextColor(getThemeColor(android.R.attr.textColorPrimary));
+                bg.setColor(res.getColor(android.R.color.white, null));
+                tv.setTextColor(res.getColor(android.R.color.black, null));
             }
             else
             {
+                bg.setColor(getResources().getColor(R.color.chart_bg, getTheme()));
                 bg.setStroke((int) (1 * res.getDisplayMetrics().density), res.getColor(R.color.chart_grid, null));
                 tv.setTextColor(getThemeColor(android.R.attr.textColorSecondary));
             }
@@ -1015,8 +1015,8 @@ public class MarketChartActivity extends Activity
                 }
                 popupCandleDetail.setVisibility(View.VISIBLE);
                 GradientDrawable bg = new GradientDrawable();
-                bg.setColor(getThemeColor(android.R.attr.colorBackground));
-                bg.setCornerRadius(12f * res.getDisplayMetrics().density);
+                bg.setColor(getResources().getColor(R.color.chart_bg, getTheme()));
+                bg.setCornerRadius(0f);
                 bg.setStroke((int) (1 * res.getDisplayMetrics().density), res.getColor(R.color.chart_grid, null));
                 popupCandleDetail.setBackground(bg);
                 popupCandleDetail.setElevation(8f * res.getDisplayMetrics().density);
@@ -1268,8 +1268,8 @@ public class MarketChartActivity extends Activity
                         {
                             popupCandleDetail.setVisibility(View.VISIBLE);
                             GradientDrawable bg = new GradientDrawable();
-                            bg.setColor(getThemeColor(android.R.attr.colorBackground));
-                            bg.setCornerRadius(12f * res.getDisplayMetrics().density);
+                            bg.setColor(getResources().getColor(R.color.chart_bg, getTheme()));
+                            bg.setCornerRadius(0f);
                             bg.setStroke((int) (1 * res.getDisplayMetrics().density), res.getColor(R.color.chart_grid, null));
                             popupCandleDetail.setBackground(bg);
                             popupCandleDetail.setElevation(8f * res.getDisplayMetrics().density);
