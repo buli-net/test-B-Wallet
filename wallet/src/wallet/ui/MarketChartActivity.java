@@ -343,7 +343,8 @@ public class MarketChartActivity extends Activity
         titleCandle.setPadding(0, 0, 0, 12);
         root.addView(titleCandle);
 
-        int[] candlePalette = new int[]{0xFF26A69A, 0xFF0ECB81, 0xFF00C853, 0xFF00BCD4, 0xFFEF5350, 0xFFF6465D, 0xFFFF1744, 0xFFFFC107};
+        // FIX CHUẨN ANDROID: dùng như hình - đọc từ arrays.xml
+        int[] candlePalette = getResources().getIntArray(R.array.candle_color_palette);
 
         LinearLayout rowBull = new LinearLayout(this);
         rowBull.setOrientation(LinearLayout.HORIZONTAL);
@@ -794,9 +795,9 @@ public class MarketChartActivity extends Activity
         int[] intervalLabels = {R.string.time, R.string.interval_1m, R.string.interval_3m, R.string.interval_5m, R.string.interval_15m, R.string.interval_30m, R.string.interval_1h, R.string.interval_2h, R.string.interval_4h, R.string.interval_6h, R.string.interval_12h, R.string.interval_1d, R.string.interval_1w, R.string.interval_1M};
 
         AlertDialog dialog = new AlertDialog.Builder(this)
-        .setView(root)
-        .setNegativeButton(R.string.close, (d, w) -> d.dismiss())
-        .create();
+       .setView(root)
+       .setNegativeButton(R.string.close, (d, w) -> d.dismiss())
+       .create();
 
         for (int i = 0; i < realLoad.length; i++)
         {
