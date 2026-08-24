@@ -23,21 +23,19 @@
     <color name="fg_password_strength_good">#ffa0a8a0</color>
     <color name="fg_password_strength_strong">#ffa3e08c</color>
 
-<!-- Chart market -->
+    <!-- Chart market -->
+    <color name="chart_wick">#FF9AA0A6</color>
+    <color name="chart_last_price_line">#FFFFC107</color>
+    <color name="chart_bg">#ff1a1e24</color>
+    <color name="chart_grid">#1FFFFFFF</color>
+    <color name="chart_text">#FF9AA0A6</color>
 
-<color name="chart_wick">@android:color/primary_text_light</color>
-<color name="chart_last_price_line">@android:color/holo_orange_light</color>
-
-<color name="chart_bg">#FFFFFF</color>
-<color name="chart_grid">#1F000000</color>
-<color name="chart_text">#FF000000</color>
-
-<!-- setting color maket-->
-<color name="palette_yellow">#FFC107</color>
-<color name="palette_purple">#7C4DFF</color>
-<color name="palette_blue">#2962FF</color>
-<color name="palette_green">#00C853</color>
-<color name="palette_red">#FF1744</color>
-<color name="palette_teal">#26A69A</color>
+    <!-- setting color maket -->
+    <color name="palette_yellow">#FFC107</color>
+    <color name="palette_purple">#7C4DFF</color>
+    <color name="palette_blue">#2962FF</color>
+    <color name="palette_green">#00C853</color>
+    <color name="palette_red">#FF1744</color>
+    <color name="palette_teal">#26A69A</color>
     
 </resources>
