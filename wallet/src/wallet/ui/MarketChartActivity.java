@@ -327,7 +327,11 @@ public class MarketChartActivity extends Activity
         LinearLayout root = new LinearLayout(this);
         root.setOrientation(LinearLayout.VERTICAL);
         root.setPadding(32, 32, 32, 32);
-        root.setBackgroundColor(getThemeColor(android.R.attr.colorBackground));
+        // FIX 1-2: vuông như ví chính - không bo tròn, màu theo theme
+        GradientDrawable rootBg = new GradientDrawable();
+        rootBg.setCornerRadius(0f);
+        rootBg.setColor(getThemeColor(android.R.attr.colorBackground));
+        root.setBackground(rootBg);
 
         TextView title = new TextView(this);
         title.setText(getString(R.string.chart_settings_title));
@@ -343,7 +347,6 @@ public class MarketChartActivity extends Activity
         titleCandle.setPadding(0, 0, 0, 12);
         root.addView(titleCandle);
 
-        // FIX CHUẨN ANDROID: dùng như hình - đọc từ arrays.xml
         int[] candlePalette = getResources().getIntArray(R.array.candle_color_palette);
 
         LinearLayout rowBull = new LinearLayout(this);
@@ -357,7 +360,7 @@ public class MarketChartActivity extends Activity
         View viewBull = new View(this);
         viewBull.setLayoutParams(new LinearLayout.LayoutParams(48, 48));
         GradientDrawable gdBull = new GradientDrawable();
-        gdBull.setCornerRadius(8f);
+        gdBull.setCornerRadius(0f);
         gdBull.setColor(marketChartView.getBullishColor());
         viewBull.setBackground(gdBull);
         rowBull.addView(lbBull);
@@ -367,7 +370,7 @@ public class MarketChartActivity extends Activity
         LinearLayout rowBear = new LinearLayout(this);
         rowBear.setOrientation(LinearLayout.HORIZONTAL);
         rowBear.setGravity(Gravity.CENTER_VERTICAL);
-        rowBear.setPadding(0, 8, 0, 24);
+        rowBear.setPadding(0, 8, 0, 8);
         TextView lbBear = new TextView(this);
         lbBear.setText(getString(R.string.chart_settings_bearish));
         lbBear.setTextSize(13f);
@@ -375,12 +378,21 @@ public class MarketChartActivity extends Activity
         View viewBear = new View(this);
         viewBear.setLayoutParams(new LinearLayout.LayoutParams(48, 48));
         GradientDrawable gdBear = new GradientDrawable();
-        gdBear.setCornerRadius(8f);
+        gdBear.setCornerRadius(0f);
         gdBear.setColor(marketChartView.getBearishColor());
         viewBear.setBackground(gdBear);
         rowBear.addView(lbBear);
         rowBear.addView(viewBear);
         root.addView(rowBear);
+
+        // FIX 1-2: divider chỗ gạch đỏ - tách Candle và MA như row ví chính
+        View divider = new View(this);
+        LinearLayout.LayoutParams lpDiv = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, (int)(1 * getResources().getDisplayMetrics().density));
+        lpDiv.topMargin = 16;
+        lpDiv.bottomMargin = 16;
+        divider.setLayoutParams(lpDiv);
+        divider.setBackgroundColor(getResources().getColor(R.color.chart_grid, getTheme()));
+        root.addView(divider);
 
         final int[] curBull = {marketChartView.getBullishColor()};
         final int[] curBear = {marketChartView.getBearishColor()};
@@ -401,7 +413,7 @@ public class MarketChartActivity extends Activity
                 int next = candlePalette[(idx + 1) % candlePalette.length];
                 curBull[0] = next;
                 GradientDrawable gd = new GradientDrawable();
-                gd.setCornerRadius(8f);
+                gd.setCornerRadius(0f);
                 gd.setColor(next);
                 v.setBackground(gd);
             }
@@ -423,7 +435,7 @@ public class MarketChartActivity extends Activity
                 int next = candlePalette[(idx + 1) % candlePalette.length];
                 curBear[0] = next;
                 GradientDrawable gd = new GradientDrawable();
-                gd.setCornerRadius(8f);
+                gd.setCornerRadius(0f);
                 gd.setColor(next);
                 v.setBackground(gd);
             }
@@ -437,6 +449,14 @@ public class MarketChartActivity extends Activity
         root.addView(titleMa);
 
         View maView = getLayoutInflater().inflate(R.layout.bottom_sheet_ma_settings, null);
+        // FIX trùng MA Settings - ẩn title thừa trong layout inflate
+        View dup1 = maView.findViewById(R.id.text_ma_title);
+        if (dup1!= null) dup1.setVisibility(View.GONE);
+        View dup2 = maView.findViewById(R.id.tv_ma_settings);
+        if (dup2!= null) dup2.setVisibility(View.GONE);
+        View dup3 = maView.findViewById(R.id.title_ma_settings);
+        if (dup3!= null) dup3.setVisibility(View.GONE);
+
         RecyclerView recycler = maView.findViewById(R.id.recycler_ma_popup);
         recycler.setLayoutManager(new LinearLayoutManager(this));
         recycler.setNestedScrollingEnabled(false);
@@ -446,6 +466,11 @@ public class MarketChartActivity extends Activity
         recycler.setAdapter(adapter);
 
         View btnAdd = maView.findViewById(R.id.btn_add_ma);
+        // FIX vuông cho nút Add
+        GradientDrawable addBg = new GradientDrawable();
+        addBg.setCornerRadius(0f);
+        addBg.setColor(getResources().getColor(R.color.bg_level2, getTheme()));
+        btnAdd.setBackground(addBg);
         btnAdd.setOnClickListener(new View.OnClickListener()
         {
             @Override
@@ -476,9 +501,9 @@ public class MarketChartActivity extends Activity
         btnApply.setTextSize(14f);
         btnApply.setGravity(Gravity.CENTER);
         btnApply.setPadding(0, 28, 0, 28);
-        btnApply.setTextColor(getResources().getColor(android.R.color.white));
+        btnApply.setTextColor(getResources().getColor(android.R.color.white, getTheme()));
         GradientDrawable bgApply = new GradientDrawable();
-        bgApply.setCornerRadius(24f);
+        bgApply.setCornerRadius(0f);
         bgApply.setColor(getThemeColor(android.R.attr.colorPrimary));
         btnApply.setBackground(bgApply);
         LinearLayout.LayoutParams lpApply = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
@@ -544,7 +569,11 @@ public class MarketChartActivity extends Activity
         {
             MarketChartView.MaLine line = list.get(pos);
             h.et.setText(String.valueOf(line.period));
-            h.color.setBackgroundColor(line.color);
+            // FIX vuông cho color item
+            GradientDrawable gd = new GradientDrawable();
+            gd.setCornerRadius(0f);
+            gd.setColor(line.color);
+            h.color.setBackground(gd);
 
             h.et.setOnFocusChangeListener(new View.OnFocusChangeListener()
             {
@@ -585,7 +614,10 @@ public class MarketChartActivity extends Activity
                     }
                     int next = colors[(idx + 1) % colors.length];
                     line.color = next;
-                    h.color.setBackgroundColor(next);
+                    GradientDrawable ngd = new GradientDrawable();
+                    ngd.setCornerRadius(0f);
+                    ngd.setColor(next);
+                    h.color.setBackground(ngd);
                 }
             });
 
@@ -795,9 +827,9 @@ public class MarketChartActivity extends Activity
         int[] intervalLabels = {R.string.time, R.string.interval_1m, R.string.interval_3m, R.string.interval_5m, R.string.interval_15m, R.string.interval_30m, R.string.interval_1h, R.string.interval_2h, R.string.interval_4h, R.string.interval_6h, R.string.interval_12h, R.string.interval_1d, R.string.interval_1w, R.string.interval_1M};
 
         AlertDialog dialog = new AlertDialog.Builder(this)
-       .setView(root)
-       .setNegativeButton(R.string.close, (d, w) -> d.dismiss())
-       .create();
+      .setView(root)
+      .setNegativeButton(R.string.close, (d, w) -> d.dismiss())
+      .create();
 
         for (int i = 0; i < realLoad.length; i++)
         {
