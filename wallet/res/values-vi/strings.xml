@@ -45,7 +45,7 @@
     <string name="wallet_options_safety">Lưu ý an toàn</string>
     <string name="wallet_options_technical_notes_title">Ghi chú kỹ thuật</string>
     <string name="wallet_options_donate">Quyên góp</string>
-    <string name="wallet_donate_address_label">Quyên góp cho Bitcoin Wallet Core</string>
+    <string name="wallet_donate_address_label">Quyên góp cho ví Bitcoin</string>
     <string name="alert_dialogs_fragment_insecure_device_title">Cảnh báo bảo mật</string>
     <string name="wallet_low_storage_dialog_title">Dung lượng lưu trữ nội bộ thiết bị thấp!</string>
     <string name="wallet_low_storage_dialog_msg">Ví Bitcoin sử dụng bộ nhớ trong để ghi nhớ các giao dịch và khối. Nếu hết dung lượng, ứng dụng sẽ ngừng hoạt động và Bitcoin của bạn có thể bị rủi ro!\n\nBạn có muốn mở Trình quản lý ứng dụng để gỡ bỏ các ứng dụng không cần thiết không?</string>
@@ -394,6 +394,7 @@
 
 <!-- Copy / Hide / Show -->
 <string name="paper_wallet_copy">Sao chép</string>
+    
 <!-- %1$s = label of copied field -->
 <string name="paper_wallet_copied">Đã sao chép %1$s</string>
 <string name="paper_wallet_hide">Ẩn</string>
@@ -458,19 +459,31 @@
 
 <!-- Menu: Utilities & Web Browser -->
 <string name="menu_utilities">Tiện ích</string>
-<string name="menu_web_browser">Trình duyệt web</string>
+<string name="menu_web_browser">Trình duyệt Web</string>
 
-    <!-- Browser -->
-<string name="browser_no_history">Chưa có lịch sử duyệt web</string>
-<string name="browser_history_title">Lịch sử duyệt web</string>
-<string name="browser_clear_history">Xóa tất cả</string>
+<!-- Browser Activity -->
+<string name="browser_home_title">Trang chủ</string>
+<string name="browser_history_title">Lịch sử</string>
+<string name="browser_set_home_title">Đặt trang chủ</string>
+<string name="browser_url_hint">Tìm kiếm hoặc nhập URL</string>
+<string name="browser_no_history">Không có lịch sử</string>
+<string name="browser_history_title_dialog">Lịch sử duyệt web</string>
+<string name="browser_clear_history">Xóa lịch sử</string>
 <string name="browser_close">Đóng</string>
-<string name="browser_set_home_title">Cài đặt trang chủ</string>
-<string name="browser_home_hint">Nhập URL trang chủ (vd: google.com)</string>
+<string name="browser_set_home_title_dialog">Đặt trang chủ</string>
+<string name="browser_home_hint">Nhập URL, ví dụ: https://example.com</string>
 <string name="browser_save">Lưu</string>
 <string name="browser_cancel">Hủy</string>
 <string name="browser_home_saved">Đã lưu trang chủ</string>
 <string name="browser_home_cleared">Đã xóa trang chủ</string>
-<string name="browser_url_hint">URL...</string>
+<string name="browser_settings_title">Cài đặt</string>
 
+<string name="browser_downloading">Đang tải: %1$s</string>
+<string name="browser_download_complete">Đã tải xong: %1$s</string>
+<string name="browser_download_failed">Tải thất bại: %1$s</string>
+<string name="browser_download_blob_failed">Tải blob thất bại: %1$s</string>
+<string name="browser_download_data_failed">Xử lý Data URL thất bại: %1$s</string>
+<string name="browser_download_save_failed">Lưu file thất bại: %1$s</string>
+<string name="browser_downloading_file">Đang tải file...</string>   
+    
 </resources>
