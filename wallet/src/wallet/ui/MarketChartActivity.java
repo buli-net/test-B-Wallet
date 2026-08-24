@@ -67,8 +67,6 @@ public class MarketChartActivity extends Activity
     private TextView popupClose;
     private TextView popupVolume;
     private View btnChartSettings;
-    private View btnIndicatorSettings;
-    private View btnChartType;
 
     private String currentSymbol = "BTCUSDT";
     private String currentInterval = "15m";
@@ -257,48 +255,10 @@ public class MarketChartActivity extends Activity
         popupClose = findViewById(R.id.popupClose);
         popupVolume = findViewById(R.id.popupVolume);
         btnChartSettings = findViewById(R.id.btnChartSettings);
-        btnIndicatorSettings = findViewById(R.id.btnIndicatorSettings);
-        btnChartType = findViewById(R.id.btnChartType);
-
-        if (textMaLabel!= null)
-        {
-            textMaLabel.setOnClickListener(new View.OnClickListener()
-            {
-                @Override
-                public void onClick(View v)
-                {
-                    showChartSettingsPopup();
-                }
-            });
-        }
 
         if (btnChartSettings!= null)
         {
             btnChartSettings.setOnClickListener(new View.OnClickListener()
-            {
-                @Override
-                public void onClick(View v)
-                {
-                    showChartSettingsPopup();
-                }
-            });
-        }
-
-        if (btnIndicatorSettings!= null)
-        {
-            btnIndicatorSettings.setOnClickListener(new View.OnClickListener()
-            {
-                @Override
-                public void onClick(View v)
-                {
-                    showChartSettingsPopup();
-                }
-            });
-        }
-
-        if (btnChartType!= null)
-        {
-            btnChartType.setOnClickListener(new View.OnClickListener()
             {
                 @Override
                 public void onClick(View v)
@@ -370,14 +330,14 @@ public class MarketChartActivity extends Activity
         root.setBackgroundColor(getThemeColor(android.R.attr.colorBackground));
 
         TextView title = new TextView(this);
-        title.setText("Cài đặt Biểu đồ");
+        title.setText(getString(R.string.chart_settings_title));
         title.setTextSize(18f);
         title.setTypeface(null, Typeface.BOLD);
         title.setPadding(0, 0, 0, 24);
         root.addView(title);
 
         TextView titleCandle = new TextView(this);
-        titleCandle.setText("Cài đặt Nến");
+        titleCandle.setText(getString(R.string.chart_settings_candle));
         titleCandle.setTextSize(14f);
         titleCandle.setTypeface(null, Typeface.BOLD);
         titleCandle.setPadding(0, 0, 0, 12);
@@ -390,7 +350,7 @@ public class MarketChartActivity extends Activity
         rowBull.setGravity(Gravity.CENTER_VERTICAL);
         rowBull.setPadding(0, 8, 0, 8);
         TextView lbBull = new TextView(this);
-        lbBull.setText("Màu nến tăng: ");
+        lbBull.setText(getString(R.string.chart_settings_bullish));
         lbBull.setTextSize(13f);
         lbBull.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
         View viewBull = new View(this);
@@ -408,7 +368,7 @@ public class MarketChartActivity extends Activity
         rowBear.setGravity(Gravity.CENTER_VERTICAL);
         rowBear.setPadding(0, 8, 0, 24);
         TextView lbBear = new TextView(this);
-        lbBear.setText("Màu nến giảm: ");
+        lbBear.setText(getString(R.string.chart_settings_bearish));
         lbBear.setTextSize(13f);
         lbBear.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
         View viewBear = new View(this);
@@ -469,7 +429,7 @@ public class MarketChartActivity extends Activity
         });
 
         TextView titleMa = new TextView(this);
-        titleMa.setText("Cài đặt MA");
+        titleMa.setText(getString(R.string.chart_settings_ma));
         titleMa.setTextSize(14f);
         titleMa.setTypeface(null, Typeface.BOLD);
         titleMa.setPadding(0, 8, 0, 12);
@@ -511,7 +471,7 @@ public class MarketChartActivity extends Activity
         root.addView(maView);
 
         TextView btnApply = new TextView(this);
-        btnApply.setText("Áp dụng");
+        btnApply.setText(getString(R.string.chart_settings_apply));
         btnApply.setTextSize(14f);
         btnApply.setGravity(Gravity.CENTER);
         btnApply.setPadding(0, 28, 0, 28);
@@ -834,9 +794,9 @@ public class MarketChartActivity extends Activity
         int[] intervalLabels = {R.string.time, R.string.interval_1m, R.string.interval_3m, R.string.interval_5m, R.string.interval_15m, R.string.interval_30m, R.string.interval_1h, R.string.interval_2h, R.string.interval_4h, R.string.interval_6h, R.string.interval_12h, R.string.interval_1d, R.string.interval_1w, R.string.interval_1M};
 
         AlertDialog dialog = new AlertDialog.Builder(this)
-         .setView(root)
-         .setNegativeButton(R.string.close, (d, w) -> d.dismiss())
-         .create();
+        .setView(root)
+        .setNegativeButton(R.string.close, (d, w) -> d.dismiss())
+        .create();
 
         for (int i = 0; i < realLoad.length; i++)
         {
