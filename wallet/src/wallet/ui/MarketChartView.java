@@ -119,7 +119,7 @@ public class MarketChartView extends View
     private static final int MIN_VISIBLE_CANDLE_COUNT = 20;
     private static final int MAX_VISIBLE_CANDLE_COUNT = 150;
     private static final int TOP_PADDING_PX = 12;
-    private static final int BOTTOM_PADDING_PX = 30;
+    private static final int BOTTOM_PADDING_PX = 48; // FIX: 30 -> 48 de tao khoang trong doi time xuong
     private static final int VOLUME_CHART_HEIGHT_DP = 90;
     private static final int VOLUME_TOP_MARGIN_PX = 12;
     private static final int PRICE_AXIS_WIDTH_DP = 72;
@@ -1104,18 +1104,6 @@ public class MarketChartView extends View
             canvas.drawText(priceText, chartWidth + getResources().getDimension(R.dimen.chart_price_text_margin), y, textPaint);
         }
 
-        for (int i = 0; i < count; i += Math.max(1, count / 4))
-        {
-            int dataIndex = startIndex + i;
-            if (dataIndex >= data.size())
-            {
-                break;
-            }
-            float x = i * candleWidth + extraOffsetX;
-            String timeText = timeFormat.format(new Date(data.get(dataIndex).openTime));
-            canvas.drawText(timeText, x, TOP_PADDING_PX + priceChartHeight + volumeHeightPx + VOLUME_TOP_MARGIN_PX + getResources().getDimension(R.dimen.chart_time_text_margin), textPaint);
-        }
-
         float volumeTop = TOP_PADDING_PX + priceChartHeight + VOLUME_TOP_MARGIN_PX;
         float volumeHeight = volumeHeightPx;
         if (maxVolume == 0f)
@@ -1134,6 +1122,20 @@ public class MarketChartView extends View
             float volumeBarHeight = volumeHeight * (candle.volume / maxVolume);
             Paint volumePaint = candle.close >= candle.open? volumeBullishPaint : volumeBearishPaint;
             canvas.drawRect(x - bodyWidth / 2f, volumeTop + volumeHeight - volumeBarHeight, x + bodyWidth / 2f, volumeTop + volumeHeight, volumePaint);
+        }
+
+        // FIX: chi doi time xuong, giu nguyen logic ve nhu cu
+        for (int i = 0; i < count; i += Math.max(1, count / 4))
+        {
+            int dataIndex = startIndex + i;
+            if (dataIndex >= data.size())
+            {
+                break;
+            }
+            float x = i * candleWidth + extraOffsetX;
+            String timeText = timeFormat.format(new Date(data.get(dataIndex).openTime));
+            float timeY = volumeTop + volumeHeight + 16 * density; // FIX: truoc 4dp -> 16dp, doi time xuong cach vol
+            canvas.drawText(timeText, x, timeY, textPaint);
         }
     }
 
