@@ -339,7 +339,7 @@ public class MarketChartView extends View
         lastPriceBgPaint.setStyle(Paint.Style.FILL);
 
         lastPriceTextPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        lastPriceTextPaint.setColor(res.getColor(R.color.chart_background, null));
+        lastPriceTextPaint.setColor(getThemeColor(android.R.attr.textColorPrimaryInverse));
         lastPriceTextPaint.setTextSize(res.getDimension(R.dimen.chart_text_size));
         lastPriceTextPaint.setFakeBoldText(true);
 
@@ -578,11 +578,6 @@ public class MarketChartView extends View
         return fiatMultiplier;
     }
 
-    public String getFiatCode()
-    {
-        return fiatCode;
-    }
-
     public void setFiatMultiplier(float mult)
     {
         if (mult <= 0f)
@@ -721,7 +716,7 @@ public class MarketChartView extends View
         {
             try
             {
-                String urlString = String.format(Locale.US, "https://api.binance.com/api/v3/klines?symbol=%s&interval=%s&limit=%d", currentSymbol, currentInterval, FETCH_LIMIT);
+                String urlString = String.format(Locale.US, "https://api.binance.com/api/v3/klines?symbol=%s&interval=%s&limit=%d", currentSymbol, currentInterval, fetchLimit);
                 URL url = new URL(urlString);
                 HttpURLConnection connection = (HttpURLConnection) url.openConnection();
                 connection.setConnectTimeout(8000);
@@ -1085,30 +1080,27 @@ public class MarketChartView extends View
             float lastPriceY = TOP_PADDING_PX + priceChartHeight - ((lastPrice * fiatMultiplier - displayMin) / priceRange * priceChartHeight);
             canvas.drawLine(0f, lastPriceY, chartWidth, lastPriceY, lastPriceLinePaint);
 
+            boolean isBigFiat = fiatMultiplier > 100f;
+            String fmt = isBigFiat? "%,.0f" : "%,.2f";
+
             float labelH = getResources().getDimension(R.dimen.chart_price_text_offset) + getResources().getDimension(R.dimen.chart_text_size);
             float top = lastPriceY - labelH;
             float bottom = lastPriceY + labelH;
             canvas.drawRect(chartWidth, top, fullWidth, bottom, lastPriceBgPaint);
 
-            String label = String.format(Locale.US, "%.2f", lastPrice * fiatMultiplier);
-            if (fiatCode.equals("VND") && label.length() > 12)
-            {
-                label = String.format(Locale.US, "%.0f", lastPrice * fiatMultiplier);
-            }
+            String label = String.format(Locale.US, fmt, lastPrice * fiatMultiplier);
             float tx = chartWidth + getResources().getDimension(R.dimen.chart_price_text_margin) / 2f;
             float ty = lastPriceY + getResources().getDimension(R.dimen.chart_text_size) / 3f;
             canvas.drawText(label, tx, ty, lastPriceTextPaint);
         }
 
+        boolean isBigFiatAxis = fiatMultiplier > 100f;
+        String axisFmt = isBigFiatAxis? "%,.0f" : "%,.2f";
         for (int i = 0; i <= 4; i++)
         {
             float price = displayMax - (displayMax - displayMin) * i / 4f;
             float y = TOP_PADDING_PX + priceChartHeight * i / 4f + getResources().getDimension(R.dimen.chart_price_text_offset);
-            String priceText = String.format(Locale.US, "%.2f", price);
-            if (fiatCode.equals("VND"))
-            {
-                priceText = String.format(Locale.US, "%.0f", price);
-            }
+            String priceText = String.format(Locale.US, axisFmt, price);
             canvas.drawText(priceText, chartWidth + getResources().getDimension(R.dimen.chart_price_text_margin), y, textPaint);
         }
 
