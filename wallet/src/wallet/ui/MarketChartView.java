@@ -119,7 +119,7 @@ public class MarketChartView extends View
     private static final int MIN_VISIBLE_CANDLE_COUNT = 20;
     private static final int MAX_VISIBLE_CANDLE_COUNT = 150;
     private static final int TOP_PADDING_PX = 12;
-    private static final int BOTTOM_PADDING_PX = 48; // FIX: 30 -> 48 de tao khoang trong doi time xuong
+    private static final int BOTTOM_PADDING_PX = 48;
     private static final int VOLUME_CHART_HEIGHT_DP = 90;
     private static final int VOLUME_TOP_MARGIN_PX = 12;
     private static final int PRICE_AXIS_WIDTH_DP = 72;
@@ -175,16 +175,25 @@ public class MarketChartView extends View
         {
             SharedPreferences sp = context.getSharedPreferences(PREFS_CANDLE, Context.MODE_PRIVATE);
             Resources res = context.getResources();
-            int defaultBull = res.getColor(R.color.chart_bull, null);
-            int defaultBear = res.getColor(R.color.chart_bear, null);
+            int[] palette = res.getIntArray(R.array.candle_color_palette);
+            int defaultBull = palette.length > 3? palette[3] : 0xFF00C853;
+            int defaultBear = palette.length > 4? palette[4] : 0xFFFF1744;
             bullishColor = sp.getInt(KEY_BULL, defaultBull);
             bearishColor = sp.getInt(KEY_BEAR, defaultBear);
         }
         catch (Exception e)
         {
-            Resources res = context.getResources();
-            bullishColor = res.getColor(R.color.chart_bull, null);
-            bearishColor = res.getColor(R.color.chart_bear, null);
+            try
+            {
+                int[] palette = context.getResources().getIntArray(R.array.candle_color_palette);
+                bullishColor = palette[3];
+                bearishColor = palette[4];
+            }
+            catch (Exception ex)
+            {
+                bullishColor = 0xFF00C853;
+                bearishColor = 0xFFFF1744;
+            }
         }
     }
 
@@ -290,10 +299,22 @@ public class MarketChartView extends View
         }
         catch (Resources.NotFoundException e)
         {
-            maLines.clear();
-            maLines.add(new MaLine(7, context.getResources().getColor(R.color.ma_yellow, null)));
-            maLines.add(new MaLine(25, context.getResources().getColor(R.color.ma_purple, null)));
-            maLines.add(new MaLine(99, context.getResources().getColor(R.color.ma_blue, null)));
+            // FIX: không dùng R.color.ma_yellow nữa, dùng palette chung
+            try
+            {
+                int[] colors = context.getResources().getIntArray(R.array.ma_default_colors);
+                maLines.clear();
+                maLines.add(new MaLine(7, colors[0]));
+                maLines.add(new MaLine(25, colors[1 % colors.length]));
+                maLines.add(new MaLine(99, colors[2 % colors.length]));
+            }
+            catch (Exception ex)
+            {
+                maLines.clear();
+                maLines.add(new MaLine(7, 0xFFFFC107));
+                maLines.add(new MaLine(25, 0xFF7C4DFF));
+                maLines.add(new MaLine(99, 0xFF2962FF));
+            }
         }
     }
 
@@ -1176,7 +1197,6 @@ public class MarketChartView extends View
             canvas.drawRect(x - bodyWidth / 2f, volumeTop + volumeHeight - volumeBarHeight, x + bodyWidth / 2f, volumeTop + volumeHeight, volumePaint);
         }
 
-        // FIX: chi doi time xuong, giu nguyen logic ve nhu cu
         for (int i = 0; i < count; i += Math.max(1, count / 4))
         {
             int dataIndex = startIndex + i;
@@ -1186,7 +1206,7 @@ public class MarketChartView extends View
             }
             float x = i * candleWidth + extraOffsetX;
             String timeText = timeFormat.format(new Date(data.get(dataIndex).openTime));
-            float timeY = volumeTop + volumeHeight + 16 * density; // FIX: truoc 4dp -> 16dp, doi time xuong cach vol
+            float timeY = volumeTop + volumeHeight + 16 * density;
             canvas.drawText(timeText, x, timeY, textPaint);
         }
     }
