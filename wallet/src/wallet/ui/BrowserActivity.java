@@ -380,7 +380,7 @@ public class BrowserActivity extends AbstractWalletActivity {
             if (cookies!= null) {
                 request.addRequestHeader("Cookie", cookies);
             }
-            request.setDescription("Downloading file...");
+            request.setDescription(getString(R.string.browser_downloading_file));
             request.setTitle(fileName);
             request.allowScanningByMediaScanner();
             request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
@@ -389,10 +389,10 @@ public class BrowserActivity extends AbstractWalletActivity {
             DownloadManager dm = (DownloadManager) getSystemService(DOWNLOAD_SERVICE);
             if (dm!= null) {
                 dm.enqueue(request);
-                Toast.makeText(getApplicationContext(), "Đang tải: " + fileName, Toast.LENGTH_LONG).show();
+                Toast.makeText(getApplicationContext(), getString(R.string.browser_downloading, fileName), Toast.LENGTH_LONG).show();
             }
         } catch (Exception e) {
-            Toast.makeText(this, "Lỗi tải file: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, getString(R.string.browser_download_failed, e.getMessage()), Toast.LENGTH_SHORT).show();
             try {
                 Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
                 startActivity(intent);
@@ -452,7 +452,7 @@ public class BrowserActivity extends AbstractWalletActivity {
             saveBase64File(fileData, fileName, mimetype);
 
         } catch (Exception e) {
-            Toast.makeText(this, "Lỗi xử lý data URL: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, getString(R.string.browser_download_data_failed, e.getMessage()), Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -474,7 +474,7 @@ public class BrowserActivity extends AbstractWalletActivity {
                         byte[] fileData = Base64.decode(pureBase64, Base64.DEFAULT);
                         saveBase64File(fileData, fileName, mimetype);
                     } catch (Exception e) {
-                        Toast.makeText(BrowserActivity.this, "Lỗi tải blob: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(BrowserActivity.this, getString(R.string.browser_download_blob_failed, e.getMessage()), Toast.LENGTH_SHORT).show();
                     }
                 }
             });
@@ -504,10 +504,10 @@ public class BrowserActivity extends AbstractWalletActivity {
             intent.setData(Uri.fromFile(file));
             sendBroadcast(intent);
 
-            Toast.makeText(this, "Đã tải xong: " + fileName, Toast.LENGTH_LONG).show();
+            Toast.makeText(this, getString(R.string.browser_download_complete, fileName), Toast.LENGTH_LONG).show();
 
         } catch (Exception e) {
-            Toast.makeText(this, "Lỗi lưu file: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, getString(R.string.browser_download_save_failed, e.getMessage()), Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -921,9 +921,9 @@ public class BrowserActivity extends AbstractWalletActivity {
     private void showHistoryDialog() {
         if (historyList.isEmpty()) {
             new AlertDialog.Builder(this)
-                .setMessage(R.string.browser_no_history)
-                .setPositiveButton(R.string.browser_close, null)
-                .show();
+               .setMessage(R.string.browser_no_history)
+               .setPositiveButton(R.string.browser_close, null)
+               .show();
             return;
         }
 
@@ -942,10 +942,10 @@ public class BrowserActivity extends AbstractWalletActivity {
         listView.setLayoutParams(params);
 
         final AlertDialog dialog = new AlertDialog.Builder(this)
-            .setTitle(R.string.browser_history_title)
-            .setView(listView)
-            .setPositiveButton(R.string.browser_close, null)
-            .setNegativeButton(R.string.browser_clear_history, new android.content.DialogInterface.OnClickListener() {
+           .setTitle(R.string.browser_history_title)
+           .setView(listView)
+           .setPositiveButton(R.string.browser_close, null)
+           .setNegativeButton(R.string.browser_clear_history, new android.content.DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(android.content.DialogInterface d, int which) {
                         historyList.clear();
@@ -953,7 +953,7 @@ public class BrowserActivity extends AbstractWalletActivity {
                         Toast.makeText(BrowserActivity.this, R.string.browser_clear_history, Toast.LENGTH_SHORT).show();
                     }
                 })
-            .create();
+           .create();
 
         listView.setOnItemClickListener(new android.widget.AdapterView.OnItemClickListener() {
             @Override
@@ -1177,9 +1177,9 @@ public class BrowserActivity extends AbstractWalletActivity {
         }
 
         new AlertDialog.Builder(this)
-            .setTitle(R.string.browser_set_home_title)
-            .setView(input)
-            .setPositiveButton(R.string.browser_save, new android.content.DialogInterface.OnClickListener() {
+           .setTitle(R.string.browser_set_home_title)
+           .setView(input)
+           .setPositiveButton(R.string.browser_save, new android.content.DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(android.content.DialogInterface dialog, int which) {
                         String url = input.getText().toString().trim();
@@ -1200,7 +1200,7 @@ public class BrowserActivity extends AbstractWalletActivity {
                         edit.apply();
                     }
                 })
-            .setNegativeButton(R.string.browser_cancel, null)
-            .show();
+           .setNegativeButton(R.string.browser_cancel, null)
+           .show();
     }
 }
