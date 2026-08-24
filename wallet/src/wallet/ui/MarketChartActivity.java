@@ -223,125 +223,9 @@ public class MarketChartActivity extends Activity
         put("BND", "B$");
         put("BTN", "Nu.");
         put("MVR", "Rf");
-        put("LAK", "₭");
-        put("KHR", "៛");
-        put("MMK", "K");
-        put("LKR", "Rs");
-        put("NPR", "₨");
-        put("BDT", "৳");
-        put("PKR", "₨");
-        put("AFN", "؋");
         put("KGS", "с");
         put("TJS", "SM");
         put("TMT", "m");
-        put("UZS", "soʻm");
-        put("AZN", "₼");
-        put("GEL", "₾");
-        put("AMD", "֏");
-        put("BYN", "Br");
-        put("MDL", "L");
-        put("UAH", "₴");
-        put("BYN", "Br");
-        put("RSD", "din");
-        put("BAM", "KM");
-        put("MKD", "den");
-        put("ALL", "L");
-        put("HRK", "kn");
-        put("CZK", "Kč");
-        put("HUF", "Ft");
-        put("PLN", "zł");
-        put("RON", "lei");
-        put("BGN", "лв");
-        put("TRY", "₺");
-        put("ILS", "₪");
-        put("JOD", "JD");
-        put("KWD", "KD");
-        put("BHD", "BD");
-        put("QAR", "QR");
-        put("OMR", "﷼");
-        put("SAR", "﷼");
-        put("AED", "AED");
-        put("EGP", "E£");
-        put("SDG", "SDG");
-        put("DZD", "DA");
-        put("MAD", "DH");
-        put("TND", "DT");
-        put("LYD", "LD");
-        put("ETB", "Br");
-        put("KES", "KSh");
-        put("TZS", "TSh");
-        put("UGX", "USh");
-        put("RWF", "FRw");
-        put("BIF", "FBu");
-        put("MUR", "₨");
-        put("SCR", "₨");
-        put("MZN", "MT");
-        put("AOA", "Kz");
-        put("BWP", "P");
-        put("NAD", "N$");
-        put("ZMW", "ZK");
-        put("ZWL", "Z$");
-        put("ZAR", "R");
-        put("NGN", "₦");
-        put("GHS", "₵");
-        put("XOF", "CFA");
-        put("XAF", "FCFA");
-        put("XPF", "₣");
-        put("GMD", "D");
-        put("LRD", "L$");
-        put("SLL", "Le");
-        put("GNF", "FG");
-        put("CDF", "FC");
-        put("DJF", "Fdj");
-        put("KMF", "CF");
-        put("MGA", "Ar");
-        put("MWK", "MK");
-        put("LSL", "L");
-        put("SZL", "L");
-        put("MVR", "Rf");
-        put("BTN", "Nu.");
-        put("BND", "B$");
-        put("SGD", "S$");
-        put("MYR", "RM");
-        put("IDR", "Rp");
-        put("PHP", "₱");
-        put("THB", "฿");
-        put("VND", "₫");
-        put("LAK", "₭");
-        put("KHR", "៛");
-        put("MMK", "K");
-        put("BDT", "৳");
-        put("NPR", "₨");
-        put("LKR", "Rs");
-        put("PKR", "₨");
-        put("INR", "₹");
-        put("NZD", "NZ$");
-        put("AUD", "A$");
-        put("FJD", "FJ$");
-        put("PGK", "K");
-        put("SBD", "SI$");
-        put("VUV", "VT");
-        put("WST", "WS$");
-        put("TOP", "T$");
-        put("MOP", "MOP$");
-        put("HKD", "HK$");
-        put("TWD", "NT$");
-        put("KRW", "₩");
-        put("JPY", "¥");
-        put("CNY", "¥");
-        put("MNT", "₮");
-        put("KZT", "₸");
-        put("KGS", "с");
-        put("TJS", "SM");
-        put("TMT", "m");
-        put("UZS", "soʻm");
-        put("GEL", "₾");
-        put("AZN", "₼");
-        put("AMD", "֏");
-        put("BYN", "Br");
-        put("MDL", "L");
-        put("RUB", "₽");
-        put("BYN", "Br");
     }};
 
     @Override
@@ -636,8 +520,13 @@ public class MarketChartActivity extends Activity
             int fractionDigits;
             try
             {
-                fractionDigits = Currency.getInstance(fiatCode).getDefaultFractionDigits();
+                Currency currency = Currency.getInstance(fiatCode);
+                fractionDigits = currency.getDefaultFractionDigits();
                 if (fractionDigits < 0)
+                {
+                    fractionDigits = 2;
+                }
+                else if (fractionDigits == 0)
                 {
                     fractionDigits = 2;
                 }
@@ -761,9 +650,9 @@ public class MarketChartActivity extends Activity
         int[] intervalLabels = {R.string.time, R.string.interval_1m, R.string.interval_3m, R.string.interval_5m, R.string.interval_15m, R.string.interval_30m, R.string.interval_1h, R.string.interval_2h, R.string.interval_4h, R.string.interval_6h, R.string.interval_12h, R.string.interval_1d, R.string.interval_1w, R.string.interval_1M};
 
         AlertDialog dialog = new AlertDialog.Builder(this)
-           .setView(root)
-           .setNegativeButton(R.string.close, (d, w) -> d.dismiss())
-           .create();
+          .setView(root)
+          .setNegativeButton(R.string.close, (d, w) -> d.dismiss())
+          .create();
 
         for (int i = 0; i < realLoad.length; i++)
         {
