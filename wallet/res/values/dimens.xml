@@ -55,5 +55,5 @@
 <dimen name="chart_popup_padding">8dp</dimen>
 <dimen name="chart_popup_time_size">10sp</dimen>
 <dimen name="chart_popup_size">12sp</dimen>
-<dimen name="font_size_tiny">10sp</dimen>
+
 </resources>
