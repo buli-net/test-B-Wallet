@@ -544,4 +544,11 @@
 <string name="delete">X</string>
     
 <string name="max_ma_reached">Maximum 6 MAs</string>
+
+<string name="chart_settings_title">Chart Settings</string>
+<string name="chart_settings_candle">Candle Settings</string>
+<string name="chart_settings_bullish">Bullish Color</string>
+<string name="chart_settings_bearish">Bearish Color</string>
+<string name="chart_settings_ma">MA Settings</string>
+<string name="chart_settings_apply">Apply</string>
 </resources>
