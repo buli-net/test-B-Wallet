@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <fraction name="chart_body_width_fraction">48%</fraction>
+    <fraction name="chart_scroll_ratio">60%</fraction>
+    <fraction name="chart_price_padding_ratio">8%</fraction>
+    <fraction name="chart_selected_alpha">39%</fraction>
+</resources>
