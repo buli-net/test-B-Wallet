@@ -21,6 +21,7 @@ import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.GridLayout;
 import android.widget.LinearLayout;
+import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -65,6 +66,9 @@ public class MarketChartActivity extends Activity
     private TextView popupLow;
     private TextView popupClose;
     private TextView popupVolume;
+    private View btnChartSettings;
+    private View btnIndicatorSettings;
+    private View btnChartType;
 
     private String currentSymbol = "BTCUSDT";
     private String currentInterval = "15m";
@@ -252,6 +256,9 @@ public class MarketChartActivity extends Activity
         popupLow = findViewById(R.id.popupLow);
         popupClose = findViewById(R.id.popupClose);
         popupVolume = findViewById(R.id.popupVolume);
+        btnChartSettings = findViewById(R.id.btnChartSettings);
+        btnIndicatorSettings = findViewById(R.id.btnIndicatorSettings);
+        btnChartType = findViewById(R.id.btnChartType);
 
         if (textMaLabel!= null)
         {
@@ -260,7 +267,43 @@ public class MarketChartActivity extends Activity
                 @Override
                 public void onClick(View v)
                 {
-                    showMaSettingsPopup();
+                    showChartSettingsPopup();
+                }
+            });
+        }
+
+        if (btnChartSettings!= null)
+        {
+            btnChartSettings.setOnClickListener(new View.OnClickListener()
+            {
+                @Override
+                public void onClick(View v)
+                {
+                    showChartSettingsPopup();
+                }
+            });
+        }
+
+        if (btnIndicatorSettings!= null)
+        {
+            btnIndicatorSettings.setOnClickListener(new View.OnClickListener()
+            {
+                @Override
+                public void onClick(View v)
+                {
+                    showChartSettingsPopup();
+                }
+            });
+        }
+
+        if (btnChartType!= null)
+        {
+            btnChartType.setOnClickListener(new View.OnClickListener()
+            {
+                @Override
+                public void onClick(View v)
+                {
+                    showChartSettingsPopup();
                 }
             });
         }
@@ -309,13 +352,131 @@ public class MarketChartActivity extends Activity
 
     private void showMaSettingsPopup()
     {
+        showChartSettingsPopup();
+    }
+
+    private void showChartSettingsPopup()
+    {
         if (marketChartView == null)
         {
             return;
         }
+
         Dialog dialog = new Dialog(this);
-        View view = getLayoutInflater().inflate(R.layout.bottom_sheet_ma_settings, null);
-        RecyclerView recycler = view.findViewById(R.id.recycler_ma_popup);
+        ScrollView scrollView = new ScrollView(this);
+        LinearLayout root = new LinearLayout(this);
+        root.setOrientation(LinearLayout.VERTICAL);
+        root.setPadding(32, 32, 32, 32);
+        root.setBackgroundColor(getThemeColor(android.R.attr.colorBackground));
+
+        TextView title = new TextView(this);
+        title.setText("Cài đặt Biểu đồ");
+        title.setTextSize(18f);
+        title.setTypeface(null, Typeface.BOLD);
+        title.setPadding(0, 0, 0, 24);
+        root.addView(title);
+
+        TextView titleCandle = new TextView(this);
+        titleCandle.setText("Cài đặt Nến");
+        titleCandle.setTextSize(14f);
+        titleCandle.setTypeface(null, Typeface.BOLD);
+        titleCandle.setPadding(0, 0, 0, 12);
+        root.addView(titleCandle);
+
+        int[] candlePalette = new int[]{0xFF26A69A, 0xFF0ECB81, 0xFF00C853, 0xFF00BCD4, 0xFFEF5350, 0xFFF6465D, 0xFFFF1744, 0xFFFFC107};
+
+        LinearLayout rowBull = new LinearLayout(this);
+        rowBull.setOrientation(LinearLayout.HORIZONTAL);
+        rowBull.setGravity(Gravity.CENTER_VERTICAL);
+        rowBull.setPadding(0, 8, 0, 8);
+        TextView lbBull = new TextView(this);
+        lbBull.setText("Màu nến tăng: ");
+        lbBull.setTextSize(13f);
+        lbBull.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
+        View viewBull = new View(this);
+        viewBull.setLayoutParams(new LinearLayout.LayoutParams(48, 48));
+        GradientDrawable gdBull = new GradientDrawable();
+        gdBull.setCornerRadius(8f);
+        gdBull.setColor(marketChartView.getBullishColor());
+        viewBull.setBackground(gdBull);
+        rowBull.addView(lbBull);
+        rowBull.addView(viewBull);
+        root.addView(rowBull);
+
+        LinearLayout rowBear = new LinearLayout(this);
+        rowBear.setOrientation(LinearLayout.HORIZONTAL);
+        rowBear.setGravity(Gravity.CENTER_VERTICAL);
+        rowBear.setPadding(0, 8, 0, 24);
+        TextView lbBear = new TextView(this);
+        lbBear.setText("Màu nến giảm: ");
+        lbBear.setTextSize(13f);
+        lbBear.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
+        View viewBear = new View(this);
+        viewBear.setLayoutParams(new LinearLayout.LayoutParams(48, 48));
+        GradientDrawable gdBear = new GradientDrawable();
+        gdBear.setCornerRadius(8f);
+        gdBear.setColor(marketChartView.getBearishColor());
+        viewBear.setBackground(gdBear);
+        rowBear.addView(lbBear);
+        rowBear.addView(viewBear);
+        root.addView(rowBear);
+
+        final int[] curBull = {marketChartView.getBullishColor()};
+        final int[] curBear = {marketChartView.getBearishColor()};
+
+        viewBull.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+                int idx = 0;
+                for (int i = 0; i < candlePalette.length; i++)
+                {
+                    if (candlePalette[i] == curBull[0])
+                    {
+                        idx = i;
+                    }
+                }
+                int next = candlePalette[(idx + 1) % candlePalette.length];
+                curBull[0] = next;
+                GradientDrawable gd = new GradientDrawable();
+                gd.setCornerRadius(8f);
+                gd.setColor(next);
+                v.setBackground(gd);
+            }
+        });
+
+        viewBear.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+                int idx = 0;
+                for (int i = 0; i < candlePalette.length; i++)
+                {
+                    if (candlePalette[i] == curBear[0])
+                    {
+                        idx = i;
+                    }
+                }
+                int next = candlePalette[(idx + 1) % candlePalette.length];
+                curBear[0] = next;
+                GradientDrawable gd = new GradientDrawable();
+                gd.setCornerRadius(8f);
+                gd.setColor(next);
+                v.setBackground(gd);
+            }
+        });
+
+        TextView titleMa = new TextView(this);
+        titleMa.setText("Cài đặt MA");
+        titleMa.setTextSize(14f);
+        titleMa.setTypeface(null, Typeface.BOLD);
+        titleMa.setPadding(0, 8, 0, 12);
+        root.addView(titleMa);
+
+        View maView = getLayoutInflater().inflate(R.layout.bottom_sheet_ma_settings, null);
+        RecyclerView recycler = maView.findViewById(R.id.recycler_ma_popup);
         recycler.setLayoutManager(new LinearLayoutManager(this));
         recycler.setNestedScrollingEnabled(false);
 
@@ -323,7 +484,7 @@ public class MarketChartActivity extends Activity
         MaPopupAdapter adapter = new MaPopupAdapter(tempList);
         recycler.setAdapter(adapter);
 
-        View btnAdd = view.findViewById(R.id.btn_add_ma);
+        View btnAdd = maView.findViewById(R.id.btn_add_ma);
         btnAdd.setOnClickListener(new View.OnClickListener()
         {
             @Override
@@ -341,18 +502,41 @@ public class MarketChartActivity extends Activity
             }
         });
 
-        View btnApply = view.findViewById(R.id.btn_apply);
+        View btnApplyOld = maView.findViewById(R.id.btn_apply);
+        if (btnApplyOld!= null)
+        {
+            btnApplyOld.setVisibility(View.GONE);
+        }
+
+        root.addView(maView);
+
+        TextView btnApply = new TextView(this);
+        btnApply.setText("Áp dụng");
+        btnApply.setTextSize(14f);
+        btnApply.setGravity(Gravity.CENTER);
+        btnApply.setPadding(0, 28, 0, 28);
+        btnApply.setTextColor(getResources().getColor(android.R.color.white));
+        GradientDrawable bgApply = new GradientDrawable();
+        bgApply.setCornerRadius(24f);
+        bgApply.setColor(getThemeColor(android.R.attr.colorPrimary));
+        btnApply.setBackground(bgApply);
+        LinearLayout.LayoutParams lpApply = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        lpApply.topMargin = 24;
+        btnApply.setLayoutParams(lpApply);
         btnApply.setOnClickListener(new View.OnClickListener()
         {
             @Override
             public void onClick(View v)
             {
+                marketChartView.setCandleColors(curBull[0], curBear[0]);
                 marketChartView.setMaLines(tempList);
                 dialog.dismiss();
             }
         });
+        root.addView(btnApply);
 
-        dialog.setContentView(view);
+        scrollView.addView(root);
+        dialog.setContentView(scrollView);
         if (dialog.getWindow()!= null)
         {
             int width = ViewGroup.LayoutParams.MATCH_PARENT;
@@ -650,9 +834,9 @@ public class MarketChartActivity extends Activity
         int[] intervalLabels = {R.string.time, R.string.interval_1m, R.string.interval_3m, R.string.interval_5m, R.string.interval_15m, R.string.interval_30m, R.string.interval_1h, R.string.interval_2h, R.string.interval_4h, R.string.interval_6h, R.string.interval_12h, R.string.interval_1d, R.string.interval_1w, R.string.interval_1M};
 
         AlertDialog dialog = new AlertDialog.Builder(this)
-          .setView(root)
-          .setNegativeButton(R.string.close, (d, w) -> d.dismiss())
-          .create();
+         .setView(root)
+         .setNegativeButton(R.string.close, (d, w) -> d.dismiss())
+         .create();
 
         for (int i = 0; i < realLoad.length; i++)
         {
