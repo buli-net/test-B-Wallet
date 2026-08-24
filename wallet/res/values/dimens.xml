@@ -26,32 +26,41 @@
     <dimen name="shortcut_size">48dp</dimen>
     <dimen name="shortcut_icon_size">32dp</dimen>
 
-    <!-- market chart -->
-    <!-- market chart -->
+    <!-- market chart - 0 hardcore -->
     <dimen name="chart_wick_width">0.6dp</dimen>
     <dimen name="chart_grid_width">0.5dp</dimen>
     <dimen name="chart_text_size">11sp</dimen>
-    <dimen name="chart_last_price_width">2dp</dimen>
-    <dimen name="chart_ma_width">2.5dp</dimen>
-    <dimen name="chart_selected_width">1dp</dimen>
-    <dimen name="chart_price_margin">8dp</dimen>
-    <dimen name="chart_price_text_offset">12dp</dimen>
-    <dimen name="chart_time_margin">50dp</dimen>
-    <dimen name="chart_volume_top">10dp</dimen>
-    <dimen name="chart_volume_offset">20dp</dimen>
-    <dimen name="chart_screen_padding">12dp</dimen>
-    <dimen name="chart_small_margin">8dp</dimen>
-    <dimen name="chart_chip_spacing">4dp</dimen>
-    <dimen name="chart_price_large_size">24sp</dimen>
-    <dimen name="chart_popup_padding">10dp</dimen>
-    <dimen name="chart_popup_size">12sp</dimen>
-    <dimen name="chart_popup_time_size">11sp</dimen>
     <dimen name="chart_last_price_line_width">1dp</dimen>
     <dimen name="chart_ma_line_width">1dp</dimen>
+    <dimen name="chart_selected_width">1dp</dimen>
     <dimen name="chart_body_min_width">2.5dp</dimen>
     <dimen name="chart_body_max_width">12dp</dimen>
     <dimen name="chart_candle_min_height">1.2dp</dimen>
+    <dimen name="chart_price_text_offset">4dp</dimen>
     <dimen name="chart_price_text_margin">8dp</dimen>
     <dimen name="chart_time_text_margin">16dp</dimen>
+    <dimen name="chart_top_padding">12dp</dimen>
+    <dimen name="chart_bottom_padding">30dp</dimen>
+    <dimen name="chart_volume_height">90dp</dimen>
+    <dimen name="chart_volume_top_margin">12dp</dimen>
+    <dimen name="chart_price_axis_width">72dp</dimen>
+    <dimen name="chart_time_axis_height">20dp</dimen>
+    <dimen name="chart_dash_length">10dp</dimen>
+    <dimen name="chart_dash_gap">6dp</dimen>
+    <dimen name="chart_loading_offset">100dp</dimen>
+
     <fraction name="chart_body_width_fraction">48%</fraction>
+    <fraction name="chart_scroll_ratio">60%</fraction>
+    <fraction name="chart_price_padding_ratio">8%</fraction>
+    <fraction name="chart_selected_alpha">39%</fraction>
+
+    <integer name="chart_visible_default">80</integer>
+    <integer name="chart_visible_min">20</integer>
+    <integer name="chart_visible_max">150</integer>
+    <integer name="chart_fetch_limit">200</integer>
+    <integer name="chart_live_interval">1000</integer>
+    <integer name="chart_countdown_interval">1000</integer>
+    <integer name="chart_grid_lines">4</integer>
+    <integer name="chart_volume_alpha">255</integer>
+    <integer name="chart_time_label_divider">4</integer>
 </resources>
