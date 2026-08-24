@@ -105,6 +105,8 @@ public class MarketChartView extends View
     private Paint gridPaint;
     private Paint textPaint;
     private Paint lastPriceLinePaint;
+    private Paint lastPriceBgPaint;
+    private Paint lastPriceTextPaint;
     private Paint movingAverage5Paint;
     private Paint movingAverage10Paint;
     private Paint movingAverage20Paint;
@@ -331,6 +333,15 @@ public class MarketChartView extends View
         lastPriceLinePaint.setStrokeWidth(res.getDimension(R.dimen.chart_last_price_line_width));
         lastPriceLinePaint.setStyle(Paint.Style.STROKE);
         lastPriceLinePaint.setPathEffect(new DashPathEffect(new float[]{10f, 6f}, 0f));
+
+        lastPriceBgPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        lastPriceBgPaint.setColor(res.getColor(R.color.chart_last_price_line, null));
+        lastPriceBgPaint.setStyle(Paint.Style.FILL);
+
+        lastPriceTextPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        lastPriceTextPaint.setColor(res.getColor(R.color.chart_background, null));
+        lastPriceTextPaint.setTextSize(res.getDimension(R.dimen.chart_text_size));
+        lastPriceTextPaint.setFakeBoldText(true);
 
         float thin = res.getDimension(R.dimen.chart_ma_line_width);
 
@@ -560,6 +571,16 @@ public class MarketChartView extends View
     public void setFiatCode(String code)
     {
         this.fiatCode = code;
+    }
+
+    public float getFiatMultiplier()
+    {
+        return fiatMultiplier;
+    }
+
+    public String getFiatCode()
+    {
+        return fiatCode;
     }
 
     public void setFiatMultiplier(float mult)
@@ -1063,6 +1084,20 @@ public class MarketChartView extends View
         {
             float lastPriceY = TOP_PADDING_PX + priceChartHeight - ((lastPrice * fiatMultiplier - displayMin) / priceRange * priceChartHeight);
             canvas.drawLine(0f, lastPriceY, chartWidth, lastPriceY, lastPriceLinePaint);
+
+            float labelH = getResources().getDimension(R.dimen.chart_price_text_offset) + getResources().getDimension(R.dimen.chart_text_size);
+            float top = lastPriceY - labelH;
+            float bottom = lastPriceY + labelH;
+            canvas.drawRect(chartWidth, top, fullWidth, bottom, lastPriceBgPaint);
+
+            String label = String.format(Locale.US, "%.2f", lastPrice * fiatMultiplier);
+            if (fiatCode.equals("VND") && label.length() > 12)
+            {
+                label = String.format(Locale.US, "%.0f", lastPrice * fiatMultiplier);
+            }
+            float tx = chartWidth + getResources().getDimension(R.dimen.chart_price_text_margin) / 2f;
+            float ty = lastPriceY + getResources().getDimension(R.dimen.chart_text_size) / 3f;
+            canvas.drawText(label, tx, ty, lastPriceTextPaint);
         }
 
         for (int i = 0; i <= 4; i++)
@@ -1070,6 +1105,10 @@ public class MarketChartView extends View
             float price = displayMax - (displayMax - displayMin) * i / 4f;
             float y = TOP_PADDING_PX + priceChartHeight * i / 4f + getResources().getDimension(R.dimen.chart_price_text_offset);
             String priceText = String.format(Locale.US, "%.2f", price);
+            if (fiatCode.equals("VND"))
+            {
+                priceText = String.format(Locale.US, "%.0f", price);
+            }
             canvas.drawText(priceText, chartWidth + getResources().getDimension(R.dimen.chart_price_text_margin), y, textPaint);
         }
 
