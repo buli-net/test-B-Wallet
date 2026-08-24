@@ -128,6 +128,9 @@ public class MarketChartView extends View
     private static final long COUNTDOWN_INTERVAL_MS = 1000L;
     private static final String PREFS_MA = "ma_prefs";
     private static final String KEY_MA = "ma_lines";
+    private static final String PREFS_CANDLE = "candle_prefs";
+    private static final String KEY_BULL = "bull_color";
+    private static final String KEY_BEAR = "bear_color";
 
     private int visibleCandleCount = DEFAULT_VISIBLE_CANDLE_COUNT;
     private float translationX = 0f;
@@ -154,12 +157,61 @@ public class MarketChartView extends View
     private String fiatCode = "USD";
     private float fiatMultiplier = 1f;
 
+    private int bullishColor;
+    private int bearishColor;
+
     public MarketChartView(Context context, AttributeSet attrs)
     {
         super(context, attrs);
         initMaLines(context);
+        initCandleColors(context);
         initPaints(context);
         initGestures(context);
+    }
+
+    private void initCandleColors(Context context)
+    {
+        try
+        {
+            SharedPreferences sp = context.getSharedPreferences(PREFS_CANDLE, Context.MODE_PRIVATE);
+            Resources res = context.getResources();
+            int defaultBull = res.getColor(R.color.chart_bull, null);
+            int defaultBear = res.getColor(R.color.chart_bear, null);
+            bullishColor = sp.getInt(KEY_BULL, defaultBull);
+            bearishColor = sp.getInt(KEY_BEAR, defaultBear);
+        }
+        catch (Exception e)
+        {
+            Resources res = context.getResources();
+            bullishColor = res.getColor(R.color.chart_bull, null);
+            bearishColor = res.getColor(R.color.chart_bear, null);
+        }
+    }
+
+    public int getBullishColor()
+    {
+        return bullishColor;
+    }
+
+    public int getBearishColor()
+    {
+        return bearishColor;
+    }
+
+    public void setCandleColors(int bull, int bear)
+    {
+        this.bullishColor = bull;
+        this.bearishColor = bear;
+        try
+        {
+            SharedPreferences sp = getContext().getSharedPreferences(PREFS_CANDLE, Context.MODE_PRIVATE);
+            sp.edit().putInt(KEY_BULL, bull).putInt(KEY_BEAR, bear).apply();
+        }
+        catch (Exception e)
+        {
+        }
+        initPaints(getContext());
+        invalidate();
     }
 
     private void saveMaLines(Context context)
@@ -291,20 +343,20 @@ public class MarketChartView extends View
         setBackgroundColor(bgColor);
 
         bullishPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        bullishPaint.setColor(res.getColor(R.color.chart_bull, null));
+        bullishPaint.setColor(bullishColor);
         bullishPaint.setStyle(Paint.Style.FILL);
 
         bearishPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        bearishPaint.setColor(res.getColor(R.color.chart_bear, null));
+        bearishPaint.setColor(bearishColor);
         bearishPaint.setStyle(Paint.Style.FILL);
 
         volumeBullishPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        volumeBullishPaint.setColor(res.getColor(R.color.chart_bull, null));
+        volumeBullishPaint.setColor(bullishColor);
         volumeBullishPaint.setAlpha(255);
         volumeBullishPaint.setStyle(Paint.Style.FILL);
 
         volumeBearishPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        volumeBearishPaint.setColor(res.getColor(R.color.chart_bear, null));
+        volumeBearishPaint.setColor(bearishColor);
         volumeBearishPaint.setAlpha(255);
         volumeBearishPaint.setStyle(Paint.Style.FILL);
 
@@ -313,11 +365,11 @@ public class MarketChartView extends View
         wickPaint.setStrokeWidth(res.getDimension(R.dimen.chart_wick_width));
 
         wickBullishPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        wickBullishPaint.setColor(res.getColor(R.color.chart_bull, null));
+        wickBullishPaint.setColor(bullishColor);
         wickBullishPaint.setStrokeWidth(res.getDimension(R.dimen.chart_wick_width));
 
         wickBearishPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        wickBearishPaint.setColor(res.getColor(R.color.chart_bear, null));
+        wickBearishPaint.setColor(bearishColor);
         wickBearishPaint.setStrokeWidth(res.getDimension(R.dimen.chart_wick_width));
 
         gridPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
