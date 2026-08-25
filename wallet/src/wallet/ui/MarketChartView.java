@@ -140,7 +140,7 @@ public class MarketChartView extends View
     private static final String KEY_SHOW_GRID = "show_grid";
     private static final String KEY_SHOW_VOLUME = "show_volume";
     private static final String KEY_VISIBLE_COUNT = "visible_count";
-private static final String KEY_SHOW_LAST_PRICE = "show_last_price";
+    private static final String KEY_SHOW_LAST_PRICE = "show_last_price";
     private static final String KEY_LAST_PRICE_LINE_COLOR = "last_price_line_color";
     private static final String KEY_LAST_PRICE_BG_COLOR = "last_price_bg_color";
     private static final String KEY_PRICE_TEXT_SIZE = "price_text_size";
@@ -184,7 +184,7 @@ private static final String KEY_SHOW_LAST_PRICE = "show_last_price";
     private float maLineWidthPx = -1f;
     private boolean showGrid = true;
     private boolean showVolume = true;
-private boolean showLastPriceLine = true;
+    private boolean showLastPriceLine = true;
     private int lastPriceLineColor = 0xFFFFC107;
     private int lastPriceBgColor = 0xFFFFC107;
     private float priceTextSizePx = -1f;
@@ -211,8 +211,8 @@ private boolean showLastPriceLine = true;
             SharedPreferences sp = context.getSharedPreferences(PREFS_CANDLE, Context.MODE_PRIVATE);
             Resources res = context.getResources();
             int[] palette = res.getIntArray(R.array.candle_color_palette);
-            int defaultBull = palette.length > 3 ? palette[3] : 0xFF00C853;
-            int defaultBear = palette.length > 4 ? palette[4] : 0xFFFF1744;
+            int defaultBull = palette.length > 3? palette[3] : 0xFF00C853;
+            int defaultBear = palette.length > 4? palette[4] : 0xFFFF1744;
             bullishColor = sp.getInt(KEY_BULL, defaultBull);
             bearishColor = sp.getInt(KEY_BEAR, defaultBear);
         }
@@ -312,7 +312,7 @@ private boolean showLastPriceLine = true;
     {
         return visibleCandleCount;
     }
-public boolean isShowLastPriceLine() { return showLastPriceLine; }
+    public boolean isShowLastPriceLine() { return showLastPriceLine; }
     public int getLastPriceLineColor() { return lastPriceLineColor; }
     public int getLastPriceBgColor() { return lastPriceBgColor; }
     public float getPriceTextSizePx() { return priceTextSizePx; }
@@ -321,7 +321,6 @@ public boolean isShowLastPriceLine() { return showLastPriceLine; }
     public int getBgColor() { return bgColor; }
     public float getLastLineWidthPx() { return lastLineWidthPx; }
     public boolean isLastLineDashed() { return lastLineDashed; }
-
 
     public void setChartAppearance(boolean sLastPrice, int lastLineColor, int lastBgColor, float txtSize, int txtColor, int gColor, int bColor, float lastW, boolean lastDash)
     {
@@ -357,7 +356,6 @@ public boolean isShowLastPriceLine() { return showLastPriceLine; }
     {
         setChartAppearance(sLastPrice, lastLineColor, lastBgColor, txtSize, txtColor, gColor, bgColor, lastLineWidthPx, lastLineDashed);
     }
-
 
     public void setCandleColors(int bull, int bear)
     {
@@ -451,7 +449,7 @@ public boolean isShowLastPriceLine() { return showLastPriceLine; }
             for (String p : parts)
             {
                 String[] kv = p.split(",");
-                if (kv.length != 2)
+                if (kv.length!= 2)
                 {
                     continue;
                 }
@@ -551,7 +549,7 @@ public boolean isShowLastPriceLine() { return showLastPriceLine; }
     {
         Resources res = context.getResources();
         int defaultBg = getThemeColor(android.R.attr.colorBackground);
-        int finalBg = bgColor != -1 ? bgColor : defaultBg;
+        int finalBg = bgColor!= -1? bgColor : defaultBg;
         setBackgroundColor(finalBg);
 
         bullishPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
@@ -573,7 +571,7 @@ public boolean isShowLastPriceLine() { return showLastPriceLine; }
         volumeBearishPaint.setStyle(Paint.Style.FILL);
 
         float defaultWickWidth = res.getDimension(R.dimen.chart_wick_width);
-        float finalWickWidth = (wickWidthPx > 0f) ? wickWidthPx : defaultWickWidth;
+        float finalWickWidth = (wickWidthPx > 0f)? wickWidthPx : defaultWickWidth;
 
         wickPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         wickPaint.setColor(res.getColor(R.color.chart_wick, null));
@@ -588,28 +586,26 @@ public boolean isShowLastPriceLine() { return showLastPriceLine; }
         wickBearishPaint.setStrokeWidth(finalWickWidth);
 
         gridPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        gridPaint.setColor(gridColor != -1 ? gridColor : res.getColor(R.color.chart_grid, null));
+        gridPaint.setColor(gridColor!= -1? gridColor : res.getColor(R.color.chart_grid, null));
         gridPaint.setStrokeWidth(res.getDimension(R.dimen.chart_grid_width));
 
         textPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        textPaint.setColor(priceTextColor != -1 ? priceTextColor : getThemeColor(android.R.attr.textColorSecondary));
-        textPaint.setTextSize(priceTextSizePx > 0 ? priceTextSizePx : res.getDimension(R.dimen.chart_text_size));
+        textPaint.setColor(priceTextColor!= -1? priceTextColor : getThemeColor(android.R.attr.textColorSecondary));
+        textPaint.setTextSize(priceTextSizePx > 0? priceTextSizePx : res.getDimension(R.dimen.chart_text_size));
 
         lastPriceLinePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        lastPriceLinePaint.setColor(lastPriceLineColor != -1 ? lastPriceLineColor : res.getColor(R.color.chart_last_price_line, null));
+        lastPriceLinePaint.setColor(lastPriceLineColor!= -1? lastPriceLineColor : res.getColor(R.color.chart_last_price_line, null));
         float defaultLastW = res.getDimension(R.dimen.chart_last_price_line_width);
-        lastPriceLinePaint.setStrokeWidth(lastLineWidthPx > 0 ? lastLineWidthPx : defaultLastW);
+        lastPriceLinePaint.setStrokeWidth(lastLineWidthPx > 0? lastLineWidthPx : defaultLastW);
+        lastPriceLinePaint.setStyle(Paint.Style.STROKE);
         if (lastLineDashed) {
             lastPriceLinePaint.setPathEffect(new DashPathEffect(new float[]{10f, 6f}, 0f));
         } else {
             lastPriceLinePaint.setPathEffect(null);
         }
-        lastPriceLinePaint.setStrokeWidth(res.getDimension(R.dimen.chart_last_price_line_width));
-        lastPriceLinePaint.setStyle(Paint.Style.STROKE);
-        lastPriceLinePaint.setPathEffect(new DashPathEffect(new float[]{10f, 6f}, 0f));
 
         lastPriceBgPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        lastPriceBgPaint.setColor(lastPriceBgColor != -1 ? lastPriceBgColor : res.getColor(R.color.chart_last_price_line, null));
+        lastPriceBgPaint.setColor(lastPriceBgColor!= -1? lastPriceBgColor : res.getColor(R.color.chart_last_price_line, null));
         lastPriceBgPaint.setStyle(Paint.Style.FILL);
 
         lastPriceTextPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
@@ -618,7 +614,7 @@ public boolean isShowLastPriceLine() { return showLastPriceLine; }
         lastPriceTextPaint.setFakeBoldText(true);
 
         float defaultMaWidth = res.getDimension(R.dimen.chart_ma_line_width);
-        float thin = (maLineWidthPx > 0f) ? maLineWidthPx : defaultMaWidth;
+        float thin = (maLineWidthPx > 0f)? maLineWidthPx : defaultMaWidth;
 
         movingAverage5Paint = new Paint(Paint.ANTI_ALIAS_FLAG);
         movingAverage5Paint.setStyle(Paint.Style.STROKE);
@@ -677,6 +673,17 @@ public boolean isShowLastPriceLine() { return showLastPriceLine; }
     protected void onConfigurationChanged(android.content.res.Configuration newConfig)
     {
         super.onConfigurationChanged(newConfig);
+        loadChartOptions(getContext());
+        initCandleColors(getContext());
+        initPaints(getContext());
+        invalidate();
+    }
+
+    // FIX: Gọi khi đổi theme sáng/tối bằng AppCompatDelegate
+    public void refreshTheme()
+    {
+        loadChartOptions(getContext());
+        initCandleColors(getContext());
         initPaints(getContext());
         invalidate();
     }
@@ -721,10 +728,10 @@ public boolean isShowLastPriceLine() { return showLastPriceLine; }
                 }
                 translationX -= distanceX;
                 clampTranslationX();
-                if (selectedIndex != -1)
+                if (selectedIndex!= -1)
                 {
                     selectedIndex = -1;
-                    if (updateListener != null)
+                    if (updateListener!= null)
                     {
                         updateListener.onNothingSelected();
                     }
@@ -750,10 +757,10 @@ public boolean isShowLastPriceLine() { return showLastPriceLine; }
                 }
                 if (e.getX() > chartW)
                 {
-                    if (selectedIndex != -1)
+                    if (selectedIndex!= -1)
                     {
                         selectedIndex = -1;
-                        if (updateListener != null)
+                        if (updateListener!= null)
                         {
                             updateListener.onNothingSelected();
                         }
@@ -767,11 +774,11 @@ public boolean isShowLastPriceLine() { return showLastPriceLine; }
                 if (index >= 0 && index < data.size())
                 {
                     selectedIndex = index;
-                    if (updateListener != null)
+                    if (updateListener!= null)
                     {
                         updateListener.onCandleSelected(data.get(index));
                     }
-                    if (volumeClickListener != null)
+                    if (volumeClickListener!= null)
                     {
                         volumeClickListener.onVolumeClick(data.get(index));
                     }
@@ -780,7 +787,7 @@ public boolean isShowLastPriceLine() { return showLastPriceLine; }
                 else
                 {
                     selectedIndex = -1;
-                    if (updateListener != null)
+                    if (updateListener!= null)
                     {
                         updateListener.onNothingSelected();
                     }
@@ -896,7 +903,7 @@ public boolean isShowLastPriceLine() { return showLastPriceLine; }
 
     private void startCountdown()
     {
-        if (countdownRunnable != null)
+        if (countdownRunnable!= null)
         {
             countdownHandler.removeCallbacks(countdownRunnable);
         }
@@ -925,7 +932,7 @@ public boolean isShowLastPriceLine() { return showLastPriceLine; }
                     {
                         text = String.format(Locale.US, "%02d:%02d:%02d", hours, minutes, seconds);
                     }
-                    if (updateListener != null)
+                    if (updateListener!= null)
                     {
                         updateListener.onCountdownUpdate(text);
                     }
@@ -938,7 +945,7 @@ public boolean isShowLastPriceLine() { return showLastPriceLine; }
 
     private void startLive()
     {
-        if (liveRunnable != null)
+        if (liveRunnable!= null)
         {
             liveHandler.removeCallbacks(liveRunnable);
         }
@@ -956,11 +963,11 @@ public boolean isShowLastPriceLine() { return showLastPriceLine; }
 
     private void stopLive()
     {
-        if (liveRunnable != null)
+        if (liveRunnable!= null)
         {
             liveHandler.removeCallbacks(liveRunnable);
         }
-        if (countdownRunnable != null)
+        if (countdownRunnable!= null)
         {
             countdownHandler.removeCallbacks(countdownRunnable);
         }
@@ -1002,7 +1009,7 @@ public boolean isShowLastPriceLine() { return showLastPriceLine; }
                     BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
                     StringBuilder builder = new StringBuilder();
                     String line;
-                    while ((line = reader.readLine()) != null)
+                    while ((line = reader.readLine())!= null)
                     {
                         builder.append(line);
                     }
@@ -1053,7 +1060,7 @@ public boolean isShowLastPriceLine() { return showLastPriceLine; }
                                 float padding = (maxPrice - minPrice) * 0.08f;
                                 minPrice -= padding;
                                 maxPrice += padding;
-                                if (updateListener != null)
+                                if (updateListener!= null)
                                 {
                                     updateListener.onPriceUpdate(lastPrice, maxPrice, minPrice);
                                 }
@@ -1091,7 +1098,7 @@ public boolean isShowLastPriceLine() { return showLastPriceLine; }
                     BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
                     StringBuilder builder = new StringBuilder();
                     String line;
-                    while ((line = reader.readLine()) != null)
+                    while ((line = reader.readLine())!= null)
                     {
                         builder.append(line);
                     }
@@ -1131,7 +1138,7 @@ public boolean isShowLastPriceLine() { return showLastPriceLine; }
                                 {
                                     invalidate();
                                 }
-                                if (updateListener != null)
+                                if (updateListener!= null)
                                 {
                                     updateListener.onPriceUpdate(price, high, low);
                                     updateListener.onTickerUpdate(high, low, volBtc, volUsdt, changePercent);
@@ -1174,10 +1181,10 @@ public boolean isShowLastPriceLine() { return showLastPriceLine; }
             int chartW = getWidth() - priceAxisW;
             if (event.getX() > chartW)
             {
-                if (selectedIndex != -1)
+                if (selectedIndex!= -1)
                 {
                     selectedIndex = -1;
-                    if (updateListener != null)
+                    if (updateListener!= null)
                     {
                         updateListener.onNothingSelected();
                     }
@@ -1255,7 +1262,7 @@ public boolean isShowLastPriceLine() { return showLastPriceLine; }
         startIndexCache = startIndex;
 
         float bodyFraction = 0.48f;
-        float finalBodyFraction = bodyWidthFraction > 0 ? bodyWidthFraction : bodyFraction;
+        float finalBodyFraction = bodyWidthFraction > 0? bodyWidthFraction : bodyFraction;
         float bodyWidth = candleWidth * finalBodyFraction;
         float minBody = getResources().getDimension(R.dimen.chart_body_min_width);
         float maxBody = getResources().getDimension(R.dimen.chart_body_max_width);
@@ -1292,8 +1299,8 @@ public boolean isShowLastPriceLine() { return showLastPriceLine; }
             float closeY = TOP_PADDING_PX + priceChartHeight - ((candle.close * fiatMultiplier - displayMin) / priceRange * priceChartHeight);
 
             boolean isBullish = candle.close >= candle.open;
-            Paint currentWickPaint = isBullish ? wickBullishPaint : wickBearishPaint;
-            Paint bodyPaint = isBullish ? bullishPaint : bearishPaint;
+            Paint currentWickPaint = isBullish? wickBullishPaint : wickBearishPaint;
+            Paint bodyPaint = isBullish? bullishPaint : bearishPaint;
 
             canvas.drawLine(x, highY, x, lowY, currentWickPaint);
 
@@ -1376,7 +1383,7 @@ public boolean isShowLastPriceLine() { return showLastPriceLine; }
             canvas.drawLine(0f, lastPriceY, chartWidth, lastPriceY, lastPriceLinePaint);
 
             boolean isBigFiat = fiatMultiplier > 100f;
-            String fmt = isBigFiat ? "%,.0f" : "%,.2f";
+            String fmt = isBigFiat? "%,.0f" : "%,.2f";
 
             float labelH = getResources().getDimension(R.dimen.chart_price_text_offset) + getResources().getDimension(R.dimen.chart_text_size);
             float top = lastPriceY - labelH;
@@ -1390,7 +1397,7 @@ public boolean isShowLastPriceLine() { return showLastPriceLine; }
         }
 
         boolean isBigFiatAxis = fiatMultiplier > 100f;
-        String axisFmt = isBigFiatAxis ? "%,.0f" : "%,.2f";
+        String axisFmt = isBigFiatAxis? "%,.0f" : "%,.2f";
         for (int i = 0; i <= 4; i++)
         {
             float price = displayMax - (displayMax - displayMin) * i / 4f;
@@ -1417,7 +1424,7 @@ public boolean isShowLastPriceLine() { return showLastPriceLine; }
                 Candle candle = data.get(dataIndex);
                 float x = i * candleWidth + candleWidth / 2f + extraOffsetX;
                 float volumeBarHeight = volumeHeight * (candle.volume / maxVolume);
-                Paint volumePaint = candle.close >= candle.open ? volumeBullishPaint : volumeBearishPaint;
+                Paint volumePaint = candle.close >= candle.open? volumeBullishPaint : volumeBearishPaint;
                 canvas.drawRect(x - bodyWidth / 2f, volumeTop + volumeHeight - volumeBarHeight, x + bodyWidth / 2f, volumeTop + volumeHeight, volumePaint);
             }
 
