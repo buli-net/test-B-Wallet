@@ -559,13 +559,12 @@
 <string name="chart_show_volume">Show Volume</string>
 <string name="chart_visible_candles">Visible candles: %1$d</string>
 
-<string name="chart_show_last_price">Show Last Price Line</string>
-<string name="chart_last_price_color">Last Price Color</string>
-<string name="chart_price_text_size">Price Text Size: %1$dpx</string>
-<string name="chart_grid_color">Grid Color</string>
-<string name="chart_bg_color">Chart Background</string>
-<string name="chart_price_text_color">Price Text Color</string>
-<string name="chart_last_line_width">Last Line Width: %1$dpx</string>
-<string name="chart_last_line_dashed">Dashed Last Line</string>
-<string name="chart_last_price_section">Last Price Line</string>
+
+<string name="chart_settings_current_price">Current Price Bar</string>
+<string name="chart_show_current_price_bar">Show Current Price Bar</string>
+<string name="chart_current_price_bar_color">Bar Color</string>
+<string name="chart_current_price_bar_size">Bar Size: %1$dpx</string>
+<string name="chart_current_price_text_color">Price Text Color</string>
+
+
 </resources>
