@@ -1,5 +1,3 @@
-Copy All FIXED COLOR
-MarketChartActivity - color cycle fixed - no stuck yellow
 package wallet.ui;
 
 import android.app.Activity;
