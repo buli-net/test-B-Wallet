@@ -1,5 +1,3 @@
-Copy All MarketChartView FINAL NO DUP
-MarketChartView FINAL NO DUP
 package wallet.ui;
 
 import android.content.Context;
