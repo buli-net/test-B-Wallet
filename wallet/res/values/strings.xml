@@ -567,4 +567,15 @@
 <string name="chart_current_price_text_color">Price Text Color</string>
 
 
+
+    <string name="chart_last_price_section">Last Price Line</string>
+<string name="chart_show_last_price">Show Last Price Line</string>
+<string name="chart_last_price_color">Last Price Color</string>
+<string name="chart_price_text_size">Price Text Size: %1$dpx</string>
+<string name="chart_grid_color">Grid Color</string>
+<string name="chart_price_text_color">Price Text Color</string>
+<string name="chart_last_line_width">Last Line Width: %1$dpx</string>
+<string name="chart_last_line_dashed">Dashed Last Line</string>
+
+
 </resources>
