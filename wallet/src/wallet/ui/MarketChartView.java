@@ -1,5 +1,3 @@
-Copy All MarketChartView
-FIXED - No R.fraction / R.integer - Build OK
 package wallet.ui;
 
 import android.content.Context;
