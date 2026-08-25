@@ -360,14 +360,14 @@ public class MarketChartActivity extends Activity
         candleHeader.setBackgroundResource(outValue.resourceId);
 
         final TextView titleCandle = new TextView(this);
-        titleCandle.setText("▶ " + getString(R.string.chart_settings_candle));
+        titleCandle.setText("\u25B6 " + getString(R.string.chart_settings_candle));
         titleCandle.setTextSize(14f);
         titleCandle.setTypeface(null, Typeface.BOLD);
         LinearLayout.LayoutParams lpTitleCandle = new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f);
         titleCandle.setLayoutParams(lpTitleCandle);
 
         TextView arrowCandle = new TextView(this);
-        arrowCandle.setText("▼");
+        arrowCandle.setText("\u25BC");
         arrowCandle.setTextSize(12f);
 
         candleHeader.addView(titleCandle);
@@ -480,13 +480,13 @@ public class MarketChartActivity extends Activity
         maHeader.setBackgroundResource(outValue.resourceId);
 
         final TextView titleMa = new TextView(this);
-        titleMa.setText("▶ " + getString(R.string.chart_settings_ma));
+        titleMa.setText("\u25B6 " + getString(R.string.chart_settings_ma));
         titleMa.setTextSize(14f);
         titleMa.setTypeface(null, Typeface.BOLD);
         titleMa.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
 
         TextView arrowMa = new TextView(this);
-        arrowMa.setText("▼");
+        arrowMa.setText("\u25BC");
         arrowMa.setTextSize(12f);
 
         maHeader.addView(titleMa);
@@ -561,13 +561,13 @@ public class MarketChartActivity extends Activity
         chartHeader.setBackgroundResource(outValue.resourceId);
 
         final TextView titleChart = new TextView(this);
-        titleChart.setText("▶ Chart Options");
+        titleChart.setText("\u25B6 " + getString(R.string.chart_settings_chart_options));
         titleChart.setTextSize(14f);
         titleChart.setTypeface(null, Typeface.BOLD);
         titleChart.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
 
         TextView arrowChart = new TextView(this);
-        arrowChart.setText("▼");
+        arrowChart.setText("\u25BC");
         arrowChart.setTextSize(12f);
 
         chartHeader.addView(titleChart);
@@ -581,7 +581,7 @@ public class MarketChartActivity extends Activity
 
         // Body fraction
         TextView lbBody = new TextView(this);
-        lbBody.setText("Body width: " + marketChartView.getBodyWidthFraction());
+        lbBody.setText(getString(R.string.chart_body_width, String.valueOf(marketChartView.getBodyWidthFraction())));
         lbBody.setTextSize(12f);
         containerChart.addView(lbBody);
 
@@ -593,7 +593,7 @@ public class MarketChartActivity extends Activity
         // Wick width
         final float[] curWick = {marketChartView.getWickWidthPx() > 0 ? marketChartView.getWickWidthPx() : getResources().getDimension(R.dimen.chart_wick_width)};
         TextView lbWick = new TextView(this);
-        lbWick.setText("Wick width: " + (int) curWick[0] + "px");
+        lbWick.setText(getString(R.string.chart_wick_width, (int)curWick[0]));
         lbWick.setTextSize(12f);
         containerChart.addView(lbWick);
 
@@ -605,7 +605,7 @@ public class MarketChartActivity extends Activity
         // MA width
         final float[] curMaW = {marketChartView.getMaLineWidthPx() > 0 ? marketChartView.getMaLineWidthPx() : getResources().getDimension(R.dimen.chart_ma_line_width)};
         TextView lbMaW = new TextView(this);
-        lbMaW.setText("MA line width: " + (int) curMaW[0] + "px");
+        lbMaW.setText(getString(R.string.chart_ma_line_width, (int)curMaW[0]));
         lbMaW.setTextSize(12f);
         containerChart.addView(lbMaW);
 
@@ -619,7 +619,7 @@ public class MarketChartActivity extends Activity
         rowGrid.setOrientation(LinearLayout.HORIZONTAL);
         rowGrid.setGravity(Gravity.CENTER_VERTICAL);
         TextView lbGrid = new TextView(this);
-        lbGrid.setText("Show Grid");
+        lbGrid.setText(getString(R.string.chart_show_grid));
         lbGrid.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
         final android.widget.Switch swGrid = new android.widget.Switch(this);
         swGrid.setChecked(marketChartView.isShowGrid());
@@ -632,7 +632,7 @@ public class MarketChartActivity extends Activity
         rowVol.setOrientation(LinearLayout.HORIZONTAL);
         rowVol.setGravity(Gravity.CENTER_VERTICAL);
         TextView lbVol = new TextView(this);
-        lbVol.setText("Show Volume");
+        lbVol.setText(getString(R.string.chart_show_volume));
         lbVol.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
         final android.widget.Switch swVol = new android.widget.Switch(this);
         swVol.setChecked(marketChartView.isShowVolume());
@@ -642,7 +642,7 @@ public class MarketChartActivity extends Activity
 
         // Visible count
         TextView lbVis = new TextView(this);
-        lbVis.setText("Visible candles: " + marketChartView.getVisibleCandleCountValue());
+        lbVis.setText(getString(R.string.chart_visible_candles, marketChartView.getVisibleCandleCountValue()));
         lbVis.setTextSize(12f);
         containerChart.addView(lbVis);
 
@@ -657,7 +657,7 @@ public class MarketChartActivity extends Activity
             public void onProgressChanged(android.widget.SeekBar seekBar, int progress, boolean fromUser)
             {
                 float fraction = 0.3f + progress / 100f;
-                lbBody.setText("Body width: " + String.format(Locale.US, "%.2f", fraction));
+                lbBody.setText(getString(R.string.chart_body_width, String.format(Locale.US, "%.2f", fraction)));
             }
             @Override public void onStartTrackingTouch(android.widget.SeekBar seekBar) {}
             @Override public void onStopTrackingTouch(android.widget.SeekBar seekBar) {}
@@ -670,7 +670,7 @@ public class MarketChartActivity extends Activity
             {
                 if (progress < 1) progress = 1;
                 curWick[0] = progress;
-                lbWick.setText("Wick width: " + progress + "px");
+                lbWick.setText(getString(R.string.chart_wick_width, progress));
             }
             @Override public void onStartTrackingTouch(android.widget.SeekBar seekBar) {}
             @Override public void onStopTrackingTouch(android.widget.SeekBar seekBar) {}
@@ -683,7 +683,7 @@ public class MarketChartActivity extends Activity
             {
                 if (progress < 1) progress = 1;
                 curMaW[0] = progress;
-                lbMaW.setText("MA line width: " + progress + "px");
+                lbMaW.setText(getString(R.string.chart_ma_line_width, progress));
             }
             @Override public void onStartTrackingTouch(android.widget.SeekBar seekBar) {}
             @Override public void onStopTrackingTouch(android.widget.SeekBar seekBar) {}
@@ -695,7 +695,7 @@ public class MarketChartActivity extends Activity
             public void onProgressChanged(android.widget.SeekBar seekBar, int progress, boolean fromUser)
             {
                 int count = 20 + progress;
-                lbVis.setText("Visible candles: " + count);
+                lbVis.setText(getString(R.string.chart_visible_candles, count));
             }
             @Override public void onStartTrackingTouch(android.widget.SeekBar seekBar) {}
             @Override public void onStopTrackingTouch(android.widget.SeekBar seekBar) {}
@@ -717,12 +717,12 @@ public class MarketChartActivity extends Activity
                 if (isCandleExpanded[0])
                 {
                     containerCandle.setVisibility(View.VISIBLE);
-                    titleCandle.setText("▼ " + getString(R.string.chart_settings_candle));
+                    titleCandle.setText("\u25BC " + getString(R.string.chart_settings_candle));
                 }
                 else
                 {
                     containerCandle.setVisibility(View.GONE);
-                    titleCandle.setText("▶ " + getString(R.string.chart_settings_candle));
+                    titleCandle.setText("\u25B6 " + getString(R.string.chart_settings_candle));
                 }
             }
         });
@@ -736,12 +736,12 @@ public class MarketChartActivity extends Activity
                 if (isMaExpanded[0])
                 {
                     containerMa.setVisibility(View.VISIBLE);
-                    titleMa.setText("▼ " + getString(R.string.chart_settings_ma));
+                    titleMa.setText("\u25BC " + getString(R.string.chart_settings_ma));
                 }
                 else
                 {
                     containerMa.setVisibility(View.GONE);
-                    titleMa.setText("▶ " + getString(R.string.chart_settings_ma));
+                    titleMa.setText("\u25B6 " + getString(R.string.chart_settings_ma));
                 }
             }
         });
@@ -755,12 +755,12 @@ public class MarketChartActivity extends Activity
                 if (isChartExpanded[0])
                 {
                     containerChart.setVisibility(View.VISIBLE);
-                    titleChart.setText("▼ Chart Options");
+                    titleChart.setText("\u25BC " + getString(R.string.chart_settings_chart_options));
                 }
                 else
                 {
                     containerChart.setVisibility(View.GONE);
-                    titleChart.setText("▶ Chart Options");
+                    titleChart.setText("\u25B6 " + getString(R.string.chart_settings_chart_options));
                 }
             }
         });
