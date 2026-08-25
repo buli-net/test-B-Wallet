@@ -1,3 +1,5 @@
+Copy All FIXED COLOR
+MarketChartActivity - color cycle fixed - no stuck yellow
 package wallet.ui;
 
 import android.app.Activity;
@@ -414,21 +416,19 @@ public class MarketChartActivity extends Activity
         rowBear.addView(viewBear);
         containerCandle.addView(rowBear);
 
+        final int[] bullIdx = {0};
+        final int[] bearIdx = {0};
+        // init idx
+        for (int i = 0; i < candlePalette.length; i++) { if (candlePalette[i] == curBull[0]) { bullIdx[0]=i; break; } }
+        for (int i = 0; i < candlePalette.length; i++) { if (candlePalette[i] == curBear[0]) { bearIdx[0]=i; break; } }
+
         viewBull.setOnClickListener(new View.OnClickListener()
         {
             @Override
             public void onClick(View v)
             {
-                int idx = 0;
-                for (int i = 0; i < candlePalette.length; i++)
-                {
-                    if (candlePalette[i] == curBull[0])
-                    {
-                        idx = i;
-                        break;
-                    }
-                }
-                int next = candlePalette[(idx + 1) % candlePalette.length];
+                bullIdx[0] = (bullIdx[0] + 1) % candlePalette.length;
+                int next = candlePalette[bullIdx[0]];
                 curBull[0] = next;
                 GradientDrawable gd = new GradientDrawable();
                 gd.setCornerRadius(8f);
@@ -442,16 +442,8 @@ public class MarketChartActivity extends Activity
             @Override
             public void onClick(View v)
             {
-                int idx = 0;
-                for (int i = 0; i < candlePalette.length; i++)
-                {
-                    if (candlePalette[i] == curBear[0])
-                    {
-                        idx = i;
-                        break;
-                    }
-                }
-                int next = candlePalette[(idx + 1) % candlePalette.length];
+                bearIdx[0] = (bearIdx[0] + 1) % candlePalette.length;
+                int next = candlePalette[bearIdx[0]];
                 curBear[0] = next;
                 GradientDrawable gd = new GradientDrawable();
                 gd.setCornerRadius(8f);
