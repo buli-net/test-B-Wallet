@@ -319,6 +319,14 @@ public boolean isShowLastPriceLine() { return showLastPriceLine; }
     public int getPriceTextColor() { return priceTextColor; }
     public int getGridColor() { return gridColor; }
     public int getBgColor() { return bgColor; }
+
+    public void updateThemeColors()
+    {
+        this.bgColor = getResources().getColor(R.color.chart_bg, getContext().getTheme());
+        this.gridColor = getResources().getColor(R.color.chart_grid, getContext().getTheme());
+        this.priceTextColor = getThemeColor(android.R.attr.textColorSecondary);
+        invalidate();
+    }
     public float getLastLineWidthPx() { return lastLineWidthPx; }
     public boolean isLastLineDashed() { return lastLineDashed; }
 
