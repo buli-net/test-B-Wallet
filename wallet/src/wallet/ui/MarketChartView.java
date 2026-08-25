@@ -673,17 +673,30 @@ public class MarketChartView extends View
     protected void onConfigurationChanged(android.content.res.Configuration newConfig)
     {
         super.onConfigurationChanged(newConfig);
+        // CHỈ FIX NỀN CHART - không đụng lưới và text
+        try
+        {
+            SharedPreferences sp = getContext().getSharedPreferences(PREFS_CHART, Context.MODE_PRIVATE);
+            sp.edit().remove(KEY_BG_COLOR).apply();
+        }
+        catch (Exception e) {}
         loadChartOptions(getContext());
-        initCandleColors(getContext());
+        bgColor = -1;
         initPaints(getContext());
         invalidate();
     }
 
-    // FIX: Gọi khi đổi theme sáng/tối bằng AppCompatDelegate
+    // Gọi khi đổi theme sáng/tối bằng AppCompatDelegate - CHỈ FIX NỀN
     public void refreshTheme()
     {
+        try
+        {
+            SharedPreferences sp = getContext().getSharedPreferences(PREFS_CHART, Context.MODE_PRIVATE);
+            sp.edit().remove(KEY_BG_COLOR).apply();
+        }
+        catch (Exception e) {}
         loadChartOptions(getContext());
-        initCandleColors(getContext());
+        bgColor = -1;
         initPaints(getContext());
         invalidate();
     }
