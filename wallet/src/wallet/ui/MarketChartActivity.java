@@ -1,3 +1,5 @@
+Copy All MarketChartActivity FULL EN
+MarketChartActivity FULL EN
 package wallet.ui;
 
 import android.app.Activity;
@@ -691,6 +693,190 @@ public class MarketChartActivity extends Activity
             @Override public void onStopTrackingTouch(android.widget.SeekBar seekBar) {}
         });
 
+
+        // === LAST PRICE LINE SETTINGS ===
+        TextView lbLastPrice = new TextView(this);
+        lbLastPrice.setText(getString(R.string.chart_last_price_section));
+        lbLastPrice.setTextSize(12f);
+        lbLastPrice.setTypeface(null, Typeface.BOLD);
+        lbLastPrice.setPadding(0,16,0,8);
+        containerChart.addView(lbLastPrice);
+
+        LinearLayout rowLast = new LinearLayout(this);
+        rowLast.setOrientation(LinearLayout.HORIZONTAL);
+        rowLast.setGravity(Gravity.CENTER_VERTICAL);
+        TextView lbShowLast = new TextView(this);
+        lbShowLast.setText(getString(R.string.chart_show_volume).replace("Volume","Last Price"));
+        lbShowLast.setText(getString(R.string.chart_show_last_price));
+        lbShowLast.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
+        final android.widget.Switch swLast = new android.widget.Switch(this);
+        swLast.setChecked(marketChartView.isShowLastPriceLine());
+        rowLast.addView(lbShowLast);
+        rowLast.addView(swLast);
+        containerChart.addView(rowLast);
+
+        LinearLayout rowLastColor = new LinearLayout(this);
+        rowLastColor.setOrientation(LinearLayout.HORIZONTAL);
+        rowLastColor.setGravity(Gravity.CENTER_VERTICAL);
+        rowLastColor.setPadding(0,8,0,8);
+        TextView lbLastColor = new TextView(this);
+        lbLastColor.setText(getString(R.string.chart_last_price_color));
+        lbLastColor.setTextSize(13f);
+        lbLastColor.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
+        final View viewLastColor = new View(this);
+        viewLastColor.setLayoutParams(new LinearLayout.LayoutParams(48,48));
+        GradientDrawable gdLast = new GradientDrawable(); gdLast.setCornerRadius(8f); gdLast.setColor(marketChartView.getLastPriceLineColor());
+        viewLastColor.setBackground(gdLast);
+        rowLastColor.addView(lbLastColor);
+        rowLastColor.addView(viewLastColor);
+        containerChart.addView(rowLastColor);
+
+        // Price text size
+        TextView lbTxtSize = new TextView(this);
+        final float[] curTxtSize = {marketChartView.getPriceTextSizePx() > 0 ? marketChartView.getPriceTextSizePx() : getResources().getDimension(R.dimen.chart_text_size)};
+        lbTxtSize.setText(getString(R.string.chart_price_text_size, (int)curTxtSize[0]));
+        lbTxtSize.setTextSize(12f);
+        containerChart.addView(lbTxtSize);
+        android.widget.SeekBar sbTxtSize = new android.widget.SeekBar(this);
+        sbTxtSize.setMax(30);
+        sbTxtSize.setProgress((int)curTxtSize[0]);
+        containerChart.addView(sbTxtSize);
+
+        // Grid color
+        LinearLayout rowGridColor = new LinearLayout(this);
+        rowGridColor.setOrientation(LinearLayout.HORIZONTAL);
+        rowGridColor.setGravity(Gravity.CENTER_VERTICAL);
+        rowGridColor.setPadding(0,8,0,8);
+        TextView lbGridColor = new TextView(this);
+        lbGridColor.setText(getString(R.string.chart_grid_color));
+        lbGridColor.setTextSize(13f);
+        lbGridColor.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
+        final View viewGridColor = new View(this);
+        viewGridColor.setLayoutParams(new LinearLayout.LayoutParams(48,48));
+        GradientDrawable gdGrid = new GradientDrawable(); gdGrid.setCornerRadius(8f);
+        int curGrid = marketChartView.getGridColor() != -1 ? marketChartView.getGridColor() : getResources().getColor(R.color.chart_grid, getTheme());
+        gdGrid.setColor(curGrid);
+        viewGridColor.setBackground(gdGrid);
+        rowGridColor.addView(lbGridColor);
+        rowGridColor.addView(viewGridColor);
+        containerChart.addView(rowGridColor);
+
+        final int[] curLastColor = {marketChartView.getLastPriceLineColor()};
+        final int[] curGridColor = {curGrid};
+        final float[] finalTxtSize = {curTxtSize[0]};
+
+        // BG Color
+        LinearLayout rowBgColor = new LinearLayout(this);
+        rowBgColor.setOrientation(LinearLayout.HORIZONTAL);
+        rowBgColor.setGravity(Gravity.CENTER_VERTICAL);
+        rowBgColor.setPadding(0,8,0,8);
+        TextView lbBgColor = new TextView(this);
+        lbBgColor.setText(getString(R.string.chart_bg_color));
+        lbBgColor.setTextSize(13f);
+        lbBgColor.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
+        final View viewBgColor = new View(this);
+        viewBgColor.setLayoutParams(new LinearLayout.LayoutParams(48,48));
+        GradientDrawable gdBg = new GradientDrawable(); gdBg.setCornerRadius(8f);
+        int curBg = marketChartView.getBgColor() != -1 ? marketChartView.getBgColor() : getThemeColor(android.R.attr.colorBackground);
+        gdBg.setColor(curBg);
+        viewBgColor.setBackground(gdBg);
+        rowBgColor.addView(lbBgColor);
+        rowBgColor.addView(viewBgColor);
+        containerChart.addView(rowBgColor);
+
+        // Price text color
+        LinearLayout rowTxtColor = new LinearLayout(this);
+        rowTxtColor.setOrientation(LinearLayout.HORIZONTAL);
+        rowTxtColor.setGravity(Gravity.CENTER_VERTICAL);
+        rowTxtColor.setPadding(0,8,0,8);
+        TextView lbTxtColor = new TextView(this);
+        lbTxtColor.setText(getString(R.string.chart_price_text_color));
+        lbTxtColor.setTextSize(13f);
+        lbTxtColor.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
+        final View viewTxtColor = new View(this);
+        viewTxtColor.setLayoutParams(new LinearLayout.LayoutParams(48,48));
+        GradientDrawable gdTxtC = new GradientDrawable(); gdTxtC.setCornerRadius(8f);
+        int curTxtC = marketChartView.getPriceTextColor() != -1 ? marketChartView.getPriceTextColor() : getThemeColor(android.R.attr.textColorSecondary);
+        gdTxtC.setColor(curTxtC);
+        viewTxtColor.setBackground(gdTxtC);
+        rowTxtColor.addView(lbTxtColor);
+        rowTxtColor.addView(viewTxtColor);
+        containerChart.addView(rowTxtColor);
+
+        // Last line width
+        TextView lbLastW = new TextView(this);
+        final float[] curLastW = {marketChartView.getLastLineWidthPx() > 0 ? marketChartView.getLastLineWidthPx() : getResources().getDimension(R.dimen.chart_last_price_line_width)};
+        lbLastW.setText(getString(R.string.chart_last_line_width, (int)curLastW[0]));
+        lbLastW.setTextSize(12f);
+        containerChart.addView(lbLastW);
+        android.widget.SeekBar sbLastW = new android.widget.SeekBar(this);
+        sbLastW.setMax(10);
+        sbLastW.setProgress((int)curLastW[0]);
+        containerChart.addView(sbLastW);
+
+        // Dashed switch
+        LinearLayout rowDash = new LinearLayout(this);
+        rowDash.setOrientation(LinearLayout.HORIZONTAL);
+        rowDash.setGravity(Gravity.CENTER_VERTICAL);
+        TextView lbDash = new TextView(this);
+        lbDash.setText(getString(R.string.chart_last_line_dashed));
+        lbDash.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
+        final android.widget.Switch swDash = new android.widget.Switch(this);
+        swDash.setChecked(marketChartView.isLastLineDashed());
+        rowDash.addView(lbDash);
+        rowDash.addView(swDash);
+        containerChart.addView(rowDash);
+
+        final int[] curBgColor = {curBg};
+        final int[] curPriceTxtColor = {curTxtC};
+
+
+        viewLastColor.setOnClickListener(new View.OnClickListener(){
+            @Override public void onClick(View v){
+                int idx=0; for(int i=0;i<candlePalette.length;i++){ if(candlePalette[i]==curLastColor[0]){idx=i;break;}}
+                int next=candlePalette[(idx+1)%candlePalette.length]; curLastColor[0]=next;
+                GradientDrawable gd=new GradientDrawable(); gd.setCornerRadius(8f); gd.setColor(next); v.setBackground(gd);
+            }
+        });
+        viewGridColor.setOnClickListener(new View.OnClickListener(){
+            @Override public void onClick(View v){
+                int idx=0; for(int i=0;i<candlePalette.length;i++){ if(candlePalette[i]==curGridColor[0]){idx=i;break;}}
+                int next=candlePalette[(idx+1)%candlePalette.length]; curGridColor[0]=next;
+                GradientDrawable gd=new GradientDrawable(); gd.setCornerRadius(8f); gd.setColor(next); v.setBackground(gd);
+            }
+        });
+
+        viewBgColor.setOnClickListener(new View.OnClickListener(){
+            @Override public void onClick(View v){
+                int idx=0; for(int i=0;i<candlePalette.length;i++){ if(candlePalette[i]==curBgColor[0]){idx=i;break;}}
+                int next=candlePalette[(idx+1)%candlePalette.length]; curBgColor[0]=next;
+                GradientDrawable gd=new GradientDrawable(); gd.setCornerRadius(8f); gd.setColor(next); v.setBackground(gd);
+            }
+        });
+        viewTxtColor.setOnClickListener(new View.OnClickListener(){
+            @Override public void onClick(View v){
+                int idx=0; for(int i=0;i<candlePalette.length;i++){ if(candlePalette[i]==curPriceTxtColor[0]){idx=i;break;}}
+                int next=candlePalette[(idx+1)%candlePalette.length]; curPriceTxtColor[0]=next;
+                GradientDrawable gd=new GradientDrawable(); gd.setCornerRadius(8f); gd.setColor(next); v.setBackground(gd);
+            }
+        });
+        sbLastW.setOnSeekBarChangeListener(new android.widget.SeekBar.OnSeekBarChangeListener(){
+            @Override public void onProgressChanged(android.widget.SeekBar seekBar, int progress, boolean fromUser){
+                if(progress<1) progress=1; curLastW[0]=progress; lbLastW.setText(getString(R.string.chart_last_line_width, progress));
+            }
+            @Override public void onStartTrackingTouch(android.widget.SeekBar seekBar){}
+            @Override public void onStopTrackingTouch(android.widget.SeekBar seekBar){}
+        });
+
+        sbTxtSize.setOnSeekBarChangeListener(new android.widget.SeekBar.OnSeekBarChangeListener(){
+            @Override public void onProgressChanged(android.widget.SeekBar seekBar, int progress, boolean fromUser){
+                if(progress<8) progress=8; finalTxtSize[0]=progress; lbTxtSize.setText(getString(R.string.chart_price_text_size, progress));
+            }
+            @Override public void onStartTrackingTouch(android.widget.SeekBar seekBar){}
+            @Override public void onStopTrackingTouch(android.widget.SeekBar seekBar){}
+        });
+
+
         root.addView(containerChart);
 
         // ===================== TOGGLE LOGIC =====================
@@ -825,9 +1011,11 @@ public class MarketChartActivity extends Activity
                 int visCount = 20 + sbVis.getProgress();
                 boolean showG = swGrid.isChecked();
                 boolean showV = swVol.isChecked();
+                boolean showLast = swLast.isChecked();
 
                 marketChartView.setCandleColors(curBull[0], curBear[0]);
                 marketChartView.setChartOptions(bodyFraction, wickW, maW, showG, showV, visCount);
+                marketChartView.setChartAppearance(showLast, curLastColor[0], curLastColor[0], finalTxtSize[0], curPriceTxtColor[0], curGridColor[0], curBgColor[0], curLastW[0], swDash.isChecked());
                 marketChartView.setMaLines(tempList);
                 dialog.dismiss();
             }
