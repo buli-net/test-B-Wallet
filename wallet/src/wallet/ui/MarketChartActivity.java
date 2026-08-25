@@ -1,5 +1,3 @@
-Copy All MarketChartActivity FULL EN
-MarketChartActivity FULL EN
 package wallet.ui;
 
 import android.app.Activity;
