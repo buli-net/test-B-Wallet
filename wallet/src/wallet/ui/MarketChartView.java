@@ -140,15 +140,6 @@ public class MarketChartView extends View
     private static final String KEY_SHOW_GRID = "show_grid";
     private static final String KEY_SHOW_VOLUME = "show_volume";
     private static final String KEY_VISIBLE_COUNT = "visible_count";
-private static final String KEY_SHOW_LAST_PRICE = "show_last_price";
-    private static final String KEY_LAST_PRICE_LINE_COLOR = "last_price_line_color";
-    private static final String KEY_LAST_PRICE_BG_COLOR = "last_price_bg_color";
-    private static final String KEY_PRICE_TEXT_SIZE = "price_text_size";
-    private static final String KEY_PRICE_TEXT_COLOR = "price_text_color";
-    private static final String KEY_GRID_COLOR = "grid_color";
-    private static final String KEY_BG_COLOR = "bg_color";
-    private static final String KEY_LAST_LINE_WIDTH = "last_line_width";
-    private static final String KEY_LAST_LINE_DASH = "last_line_dash";
 
     private int visibleCandleCount = DEFAULT_VISIBLE_CANDLE_COUNT;
     private float translationX = 0f;
@@ -184,15 +175,6 @@ private static final String KEY_SHOW_LAST_PRICE = "show_last_price";
     private float maLineWidthPx = -1f;
     private boolean showGrid = true;
     private boolean showVolume = true;
-private boolean showLastPriceLine = true;
-    private int lastPriceLineColor = 0xFFFFC107;
-    private int lastPriceBgColor = 0xFFFFC107;
-    private float priceTextSizePx = -1f;
-    private int priceTextColor = -1;
-    private int gridColor = -1;
-    private int bgColor = -1;
-    private float lastLineWidthPx = -1f;
-    private boolean lastLineDashed = true;
 
     public MarketChartView(Context context, AttributeSet attrs)
     {
@@ -243,15 +225,6 @@ private boolean showLastPriceLine = true;
             showGrid = sp.getBoolean(KEY_SHOW_GRID, true);
             showVolume = sp.getBoolean(KEY_SHOW_VOLUME, true);
             visibleCandleCount = sp.getInt(KEY_VISIBLE_COUNT, DEFAULT_VISIBLE_CANDLE_COUNT);
-            showLastPriceLine = sp.getBoolean(KEY_SHOW_LAST_PRICE, true);
-            lastPriceLineColor = sp.getInt(KEY_LAST_PRICE_LINE_COLOR, 0xFFFFC107);
-            lastPriceBgColor = sp.getInt(KEY_LAST_PRICE_BG_COLOR, 0xFFFFC107);
-            priceTextSizePx = sp.getFloat(KEY_PRICE_TEXT_SIZE, -1f);
-            priceTextColor = sp.getInt(KEY_PRICE_TEXT_COLOR, -1);
-            gridColor = sp.getInt(KEY_GRID_COLOR, -1);
-            bgColor = sp.getInt(KEY_BG_COLOR, -1);
-            lastLineWidthPx = sp.getFloat(KEY_LAST_LINE_WIDTH, -1f);
-            lastLineDashed = sp.getBoolean(KEY_LAST_LINE_DASH, true);
         }
         catch (Exception e)
         {
@@ -261,15 +234,6 @@ private boolean showLastPriceLine = true;
             showGrid = true;
             showVolume = true;
             visibleCandleCount = DEFAULT_VISIBLE_CANDLE_COUNT;
-            showLastPriceLine = true;
-            lastPriceLineColor = 0xFFFFC107;
-            lastPriceBgColor = 0xFFFFC107;
-            priceTextSizePx = -1f;
-            priceTextColor = -1;
-            gridColor = -1;
-            bgColor = -1;
-            lastLineWidthPx = -1f;
-            lastLineDashed = true;
         }
     }
 
@@ -312,52 +276,6 @@ private boolean showLastPriceLine = true;
     {
         return visibleCandleCount;
     }
-public boolean isShowLastPriceLine() { return showLastPriceLine; }
-    public int getLastPriceLineColor() { return lastPriceLineColor; }
-    public int getLastPriceBgColor() { return lastPriceBgColor; }
-    public float getPriceTextSizePx() { return priceTextSizePx; }
-    public int getPriceTextColor() { return priceTextColor; }
-    public int getGridColor() { return gridColor; }
-    public int getBgColor() { return bgColor; }
-    public float getLastLineWidthPx() { return lastLineWidthPx; }
-    public boolean isLastLineDashed() { return lastLineDashed; }
-
-
-    public void setChartAppearance(boolean sLastPrice, int lastLineColor, int lastBgColor, float txtSize, int txtColor, int gColor, int bColor, float lastW, boolean lastDash)
-    {
-        this.showLastPriceLine = sLastPrice;
-        this.lastPriceLineColor = lastLineColor;
-        this.lastPriceBgColor = lastBgColor;
-        this.priceTextSizePx = txtSize;
-        this.priceTextColor = txtColor;
-        this.gridColor = gColor;
-        this.bgColor = bColor;
-        this.lastLineWidthPx = lastW;
-        this.lastLineDashed = lastDash;
-        try
-        {
-            SharedPreferences sp = getContext().getSharedPreferences(PREFS_CHART, Context.MODE_PRIVATE);
-            SharedPreferences.Editor ed = sp.edit();
-            ed.putBoolean(KEY_SHOW_LAST_PRICE, sLastPrice);
-            ed.putInt(KEY_LAST_PRICE_LINE_COLOR, lastLineColor);
-            ed.putInt(KEY_LAST_PRICE_BG_COLOR, lastBgColor);
-            ed.putFloat(KEY_PRICE_TEXT_SIZE, txtSize);
-            ed.putInt(KEY_PRICE_TEXT_COLOR, txtColor);
-            ed.putInt(KEY_GRID_COLOR, gColor);
-            ed.putInt(KEY_BG_COLOR, bColor);
-            ed.putFloat(KEY_LAST_LINE_WIDTH, lastW);
-            ed.putBoolean(KEY_LAST_LINE_DASH, lastDash);
-            ed.apply();
-        } catch (Exception e) {}
-        initPaints(getContext());
-        invalidate();
-    }
-    // keep old signature for compatibility
-    public void setChartAppearance(boolean sLastPrice, int lastLineColor, int lastBgColor, float txtSize, int txtColor, int gColor)
-    {
-        setChartAppearance(sLastPrice, lastLineColor, lastBgColor, txtSize, txtColor, gColor, bgColor, lastLineWidthPx, lastLineDashed);
-    }
-
 
     public void setCandleColors(int bull, int bear)
     {
@@ -550,9 +468,8 @@ public boolean isShowLastPriceLine() { return showLastPriceLine; }
     private void initPaints(Context context)
     {
         Resources res = context.getResources();
-        int defaultBg = getThemeColor(android.R.attr.colorBackground);
-        int finalBg = bgColor != -1 ? bgColor : defaultBg;
-        setBackgroundColor(finalBg);
+        int bgColor = getThemeColor(android.R.attr.colorBackground);
+        setBackgroundColor(bgColor);
 
         bullishPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         bullishPaint.setColor(bullishColor);
@@ -588,28 +505,21 @@ public boolean isShowLastPriceLine() { return showLastPriceLine; }
         wickBearishPaint.setStrokeWidth(finalWickWidth);
 
         gridPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        gridPaint.setColor(gridColor != -1 ? gridColor : res.getColor(R.color.chart_grid, null));
+        gridPaint.setColor(res.getColor(R.color.chart_grid, null));
         gridPaint.setStrokeWidth(res.getDimension(R.dimen.chart_grid_width));
 
         textPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        textPaint.setColor(priceTextColor != -1 ? priceTextColor : getThemeColor(android.R.attr.textColorSecondary));
-        textPaint.setTextSize(priceTextSizePx > 0 ? priceTextSizePx : res.getDimension(R.dimen.chart_text_size));
+        textPaint.setColor(getThemeColor(android.R.attr.textColorSecondary));
+        textPaint.setTextSize(res.getDimension(R.dimen.chart_text_size));
 
         lastPriceLinePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        lastPriceLinePaint.setColor(lastPriceLineColor != -1 ? lastPriceLineColor : res.getColor(R.color.chart_last_price_line, null));
-        float defaultLastW = res.getDimension(R.dimen.chart_last_price_line_width);
-        lastPriceLinePaint.setStrokeWidth(lastLineWidthPx > 0 ? lastLineWidthPx : defaultLastW);
-        if (lastLineDashed) {
-            lastPriceLinePaint.setPathEffect(new DashPathEffect(new float[]{10f, 6f}, 0f));
-        } else {
-            lastPriceLinePaint.setPathEffect(null);
-        }
+        lastPriceLinePaint.setColor(res.getColor(R.color.chart_last_price_line, null));
         lastPriceLinePaint.setStrokeWidth(res.getDimension(R.dimen.chart_last_price_line_width));
         lastPriceLinePaint.setStyle(Paint.Style.STROKE);
         lastPriceLinePaint.setPathEffect(new DashPathEffect(new float[]{10f, 6f}, 0f));
 
         lastPriceBgPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        lastPriceBgPaint.setColor(lastPriceBgColor != -1 ? lastPriceBgColor : res.getColor(R.color.chart_last_price_line, null));
+        lastPriceBgPaint.setColor(res.getColor(R.color.chart_last_price_line, null));
         lastPriceBgPaint.setStyle(Paint.Style.FILL);
 
         lastPriceTextPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
@@ -1370,7 +1280,7 @@ public boolean isShowLastPriceLine() { return showLastPriceLine; }
             canvas.drawLine(selectedX, TOP_PADDING_PX, selectedX, TOP_PADDING_PX + priceChartHeight, selectedLinePaint);
         }
 
-        if (lastPrice > 0f && showLastPriceLine)
+        if (lastPrice > 0f)
         {
             float lastPriceY = TOP_PADDING_PX + priceChartHeight - ((lastPrice * fiatMultiplier - displayMin) / priceRange * priceChartHeight);
             canvas.drawLine(0f, lastPriceY, chartWidth, lastPriceY, lastPriceLinePaint);
