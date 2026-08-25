@@ -1,3 +1,4 @@
+Copy
 package wallet.ui;
 
 import android.content.Context;
@@ -1531,4 +1532,47 @@ public boolean isShowLastPriceLine() { return showLastPriceLine; }
         super.onDetachedFromWindow();
         stopLive();
     }
+
+    // ==== Current Price Bar - getters/setters for Activity (array riêng + prefs riêng) ====
+    public boolean isShowCurrentPriceBar() {
+        return showCurrentPriceBar;
+    }
+    public void setShowCurrentPriceBar(boolean show) {
+        this.showCurrentPriceBar = show;
+        getPrefs().edit().putBoolean("show_current_price_bar", show).apply();
+        if (show) drawCurrentPriceBar(lastPrice);
+        else invalidate();
+    }
+    public int getCurrentPriceBarColor() {
+        return currentPriceBarColor;
+    }
+    public void setCurrentPriceBarColor(int color) {
+        this.currentPriceBarColor = color;
+        getPrefs().edit().putInt("current_price_bar_color", color).apply();
+        currentPriceLinePaint.setColor(color);
+        currentPriceTextBgPaint.setColor(color);
+        invalidate();
+    }
+    public float getCurrentPriceBarHeightPx() {
+        return currentPriceBarHeight;
+    }
+    public void setCurrentPriceBarHeight(float h) {
+        this.currentPriceBarHeight = h;
+        getPrefs().edit().putFloat("current_price_bar_height", h).apply();
+        currentPriceLinePaint.setStrokeWidth(h);
+        invalidate();
+    }
+    public int getCurrentPriceTextColor() {
+        return currentPriceTextColor;
+    }
+    public void setCurrentPriceTextColor(int color) {
+        this.currentPriceTextColor = color;
+        getPrefs().edit().putInt("current_price_text_color", color).apply();
+        currentPriceTextPaint.setColor(color);
+        invalidate();
+    }
+    private SharedPreferences getPrefs() {
+        return getContext().getSharedPreferences("market_chart_prefs", Context.MODE_PRIVATE);
+    }
+
 }
