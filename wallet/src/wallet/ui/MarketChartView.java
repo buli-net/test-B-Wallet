@@ -1,4 +1,3 @@
-Copy
 package wallet.ui;
 
 import android.content.Context;
