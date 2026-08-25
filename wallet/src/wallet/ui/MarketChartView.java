@@ -1,3 +1,5 @@
+Copy All MarketChartView FINAL NO YELLOW - keep original + price bar prefs like candle
+MarketChartView FINAL NO YELLOW - keep original + price bar prefs like candle
 package wallet.ui;
 
 import android.content.Context;
@@ -131,6 +133,11 @@ public class MarketChartView extends View
     private static final String PREFS_CANDLE = "candle_prefs";
     private static final String KEY_BULL = "bull_color";
     private static final String KEY_BEAR = "bear_color";
+    private static final String PREFS_CURRENT_BAR = "current_price_bar_prefs";
+    private static final String KEY_BAR_COLOR = "bar_color";
+    private static final String KEY_BAR_HEIGHT = "bar_height";
+    private static final String KEY_BAR_TEXT_COLOR = "bar_text_color";
+    private static final String KEY_SHOW_BAR = "show_bar";
 
     // ===== NEW: CHART OPTIONS PREFS =====
     private static final String PREFS_CHART = "chart_options_prefs";
@@ -189,12 +196,12 @@ private boolean showLastPriceLine = true;
     private int lastPriceBgColor = 0xFFFFC107;
     private float priceTextSizePx = -1f;
     private int priceTextColor = -1;
+    private int gridColor = -1;
+    private int bgColor = -1;
     private int currentPriceBarColor;
     private float currentPriceBarHeightPx;
     private int currentPriceTextColor;
     private boolean showCurrentPriceBar = true;
-    private int gridColor = -1;
-    private int bgColor = -1;
     private float lastLineWidthPx = -1f;
     private boolean lastLineDashed = true;
 
@@ -203,6 +210,7 @@ private boolean showLastPriceLine = true;
         super(context, attrs);
         initMaLines(context);
         initCandleColors(context);
+        loadCurrentPriceBarOptions(context);
         loadChartOptions(context);
         initPaints(context);
         initGestures(context);
@@ -235,6 +243,62 @@ private boolean showLastPriceLine = true;
             }
         }
     }
+
+
+    private void loadCurrentPriceBarOptions(Context context)
+    {
+        try
+        {
+            SharedPreferences sp = context.getSharedPreferences(PREFS_CURRENT_BAR, Context.MODE_PRIVATE);
+            Resources res = context.getResources();
+            int defaultBar = res.getColor(R.color.chart_last_price_line, null);
+            int defaultText = res.getColor(android.R.color.white, null);
+            float defaultHeight = res.getDimension(R.dimen.chart_last_price_line_width);
+            try
+            {
+                float h = res.getDimension(R.dimen.chart_current_price_bar_height);
+                defaultHeight = h;
+            }
+            catch (Exception e)
+            {
+            }
+            currentPriceBarColor = sp.getInt(KEY_BAR_COLOR, defaultBar);
+            currentPriceBarHeightPx = sp.getFloat(KEY_BAR_HEIGHT, defaultHeight);
+            currentPriceTextColor = sp.getInt(KEY_BAR_TEXT_COLOR, defaultText);
+            showCurrentPriceBar = sp.getBoolean(KEY_SHOW_BAR, true);
+        }
+        catch (Exception e)
+        {
+            try
+            {
+                Resources res = context.getResources();
+                currentPriceBarColor = res.getColor(R.color.chart_last_price_line, null);
+                currentPriceTextColor = res.getColor(android.R.color.white, null);
+                currentPriceBarHeightPx = res.getDimension(R.dimen.chart_last_price_line_width);
+                showCurrentPriceBar = true;
+            }
+            catch (Exception ex)
+            {
+                currentPriceBarColor = 0xFFFFC107;
+                currentPriceTextColor = 0xFFFFFFFF;
+                currentPriceBarHeightPx = 2f;
+                showCurrentPriceBar = true;
+            }
+        }
+    }
+
+    private void saveCurrentPriceBarOptions(Context context)
+    {
+        try
+        {
+            SharedPreferences sp = context.getSharedPreferences(PREFS_CURRENT_BAR, Context.MODE_PRIVATE);
+            sp.edit().putInt(KEY_BAR_COLOR, currentPriceBarColor).putFloat(KEY_BAR_HEIGHT, currentPriceBarHeightPx).putInt(KEY_BAR_TEXT_COLOR, currentPriceTextColor).putBoolean(KEY_SHOW_BAR, showCurrentPriceBar).apply();
+        }
+        catch (Exception e)
+        {
+        }
+    }
+
 
     private void loadChartOptions(Context context)
     {
@@ -326,7 +390,7 @@ public boolean isShowLastPriceLine() { return showLastPriceLine; }
 
     public void updateThemeColors()
     {
-        this.bgColor = getResources().getColor(R.color.chart_bg, getContext().getTheme());
+        this.bgColor = getResources().getColor(android.R.color.transparent, getContext().getTheme());
         this.gridColor = getResources().getColor(R.color.chart_grid, getContext().getTheme());
         this.priceTextColor = getThemeColor(android.R.attr.textColorSecondary);
         invalidate();
@@ -1469,63 +1533,4 @@ public boolean isShowLastPriceLine() { return showLastPriceLine; }
         super.onDetachedFromWindow();
         stopLive();
     }
-
-    public boolean isShowCurrentPriceBar()
-    {
-        return showCurrentPriceBar;
-    }
-
-    public int getCurrentPriceBarColor()
-    {
-        if (currentPriceBarColor == 0)
-        {
-            return getResources().getColor(R.color.chart_last_price_line, getContext().getTheme());
-        }
-        return currentPriceBarColor;
-    }
-
-    public float getCurrentPriceBarHeightPx()
-    {
-        if (currentPriceBarHeightPx <= 0)
-        {
-            return getResources().getDimension(R.dimen.chart_current_price_bar_height);
-        }
-        return currentPriceBarHeightPx;
-    }
-
-    public int getCurrentPriceTextColor()
-    {
-        if (currentPriceTextColor == 0)
-        {
-            return getResources().getColor(android.R.color.white, getContext().getTheme());
-        }
-        return currentPriceTextColor;
-    }
-
-    public void setShowCurrentPriceBar(boolean show)
-    {
-        this.showCurrentPriceBar = show;
-        invalidate();
-    }
-
-    public void setCurrentPriceBarColor(int color)
-    {
-        this.currentPriceBarColor = color;
-        this.lastPriceLineColor = color;
-        invalidate();
-    }
-
-    public void setCurrentPriceBarHeight(float heightPx)
-    {
-        this.currentPriceBarHeightPx = heightPx;
-        invalidate();
-    }
-
-    public void setCurrentPriceTextColor(int color)
-    {
-        this.currentPriceTextColor = color;
-        invalidate();
-    }
-
-
 }
