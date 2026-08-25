@@ -3,7 +3,6 @@ package wallet.ui;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.graphics.Typeface;
@@ -285,12 +284,8 @@ public class MarketChartActivity extends Activity
             currentFiatCode = "USD";
         }
 
-        prefsListener = new SharedPreferences.OnSharedPreferenceChangeListener()
+        prefsListener = (sharedPreferences, key) ->
         {
-            @Override
-            public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key)
-            {
-
             if (Configuration.PREFS_KEY_EXCHANGE_CURRENCY.equals(key))
             {
                 String newCode = config.getExchangeCurrencyCode();
@@ -299,7 +294,6 @@ public class MarketChartActivity extends Activity
                     currentFiatCode = newCode;
                     loadFiatRate();
                 }
-            }
             }
         };
 
@@ -420,19 +414,21 @@ public class MarketChartActivity extends Activity
         rowBear.addView(viewBear);
         containerCandle.addView(rowBear);
 
-        final int[] bullIdx = {0};
-        final int[] bearIdx = {0};
-        // init idx
-        for (int i = 0; i < candlePalette.length; i++) { if (candlePalette[i] == curBull[0]) { bullIdx[0]=i; break; } }
-        for (int i = 0; i < candlePalette.length; i++) { if (candlePalette[i] == curBear[0]) { bearIdx[0]=i; break; } }
-
         viewBull.setOnClickListener(new View.OnClickListener()
         {
             @Override
             public void onClick(View v)
             {
-                bullIdx[0] = (bullIdx[0] + 1) % candlePalette.length;
-                int next = candlePalette[bullIdx[0]];
+                int idx = 0;
+                for (int i = 0; i < candlePalette.length; i++)
+                {
+                    if (candlePalette[i] == curBull[0])
+                    {
+                        idx = i;
+                        break;
+                    }
+                }
+                int next = candlePalette[(idx + 1) % candlePalette.length];
                 curBull[0] = next;
                 GradientDrawable gd = new GradientDrawable();
                 gd.setCornerRadius(8f);
@@ -446,8 +442,16 @@ public class MarketChartActivity extends Activity
             @Override
             public void onClick(View v)
             {
-                bearIdx[0] = (bearIdx[0] + 1) % candlePalette.length;
-                int next = candlePalette[bearIdx[0]];
+                int idx = 0;
+                for (int i = 0; i < candlePalette.length; i++)
+                {
+                    if (candlePalette[i] == curBear[0])
+                    {
+                        idx = i;
+                        break;
+                    }
+                }
+                int next = candlePalette[(idx + 1) % candlePalette.length];
                 curBear[0] = next;
                 GradientDrawable gd = new GradientDrawable();
                 gd.setCornerRadius(8f);
@@ -697,164 +701,6 @@ public class MarketChartActivity extends Activity
             @Override public void onStopTrackingTouch(android.widget.SeekBar seekBar) {}
         });
 
-
-        // === LAST PRICE LINE SETTINGS ===
-        TextView lbLastPrice = new TextView(this);
-        lbLastPrice.setText(getString(R.string.chart_last_price_section));
-        lbLastPrice.setTextSize(12f);
-        lbLastPrice.setTypeface(null, Typeface.BOLD);
-        lbLastPrice.setPadding(0,16,0,8);
-        containerChart.addView(lbLastPrice);
-
-        LinearLayout rowLast = new LinearLayout(this);
-        rowLast.setOrientation(LinearLayout.HORIZONTAL);
-        rowLast.setGravity(Gravity.CENTER_VERTICAL);
-        TextView lbShowLast = new TextView(this);
-        lbShowLast.setText(getString(R.string.chart_show_volume).replace("Volume","Last Price"));
-        lbShowLast.setText(getString(R.string.chart_show_last_price));
-        lbShowLast.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
-        final android.widget.Switch swLast = new android.widget.Switch(this);
-        swLast.setChecked(marketChartView.isShowLastPriceLine());
-        rowLast.addView(lbShowLast);
-        rowLast.addView(swLast);
-        containerChart.addView(rowLast);
-
-        LinearLayout rowLastColor = new LinearLayout(this);
-        rowLastColor.setOrientation(LinearLayout.HORIZONTAL);
-        rowLastColor.setGravity(Gravity.CENTER_VERTICAL);
-        rowLastColor.setPadding(0,8,0,8);
-        TextView lbLastColor = new TextView(this);
-        lbLastColor.setText(getString(R.string.chart_last_price_color));
-        lbLastColor.setTextSize(13f);
-        lbLastColor.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
-        final View viewLastColor = new View(this);
-        viewLastColor.setLayoutParams(new LinearLayout.LayoutParams(48,48));
-        GradientDrawable gdLast = new GradientDrawable(); gdLast.setCornerRadius(8f); gdLast.setColor(marketChartView.getLastPriceLineColor());
-        viewLastColor.setBackground(gdLast);
-        rowLastColor.addView(lbLastColor);
-        rowLastColor.addView(viewLastColor);
-        containerChart.addView(rowLastColor);
-
-        // Price text size
-        TextView lbTxtSize = new TextView(this);
-        final float[] curTxtSize = {marketChartView.getPriceTextSizePx() > 0 ? marketChartView.getPriceTextSizePx() : getResources().getDimension(R.dimen.chart_text_size)};
-        lbTxtSize.setText(getString(R.string.chart_price_text_size, (int)curTxtSize[0]));
-        lbTxtSize.setTextSize(12f);
-        containerChart.addView(lbTxtSize);
-        android.widget.SeekBar sbTxtSize = new android.widget.SeekBar(this);
-        sbTxtSize.setMax(30);
-        sbTxtSize.setProgress((int)curTxtSize[0]);
-        containerChart.addView(sbTxtSize);
-
-        // Grid color
-        LinearLayout rowGridColor = new LinearLayout(this);
-        rowGridColor.setOrientation(LinearLayout.HORIZONTAL);
-        rowGridColor.setGravity(Gravity.CENTER_VERTICAL);
-        rowGridColor.setPadding(0,8,0,8);
-        TextView lbGridColor = new TextView(this);
-        lbGridColor.setText(getString(R.string.chart_grid_color));
-        lbGridColor.setTextSize(13f);
-        lbGridColor.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
-        final View viewGridColor = new View(this);
-        viewGridColor.setLayoutParams(new LinearLayout.LayoutParams(48,48));
-        GradientDrawable gdGrid = new GradientDrawable(); gdGrid.setCornerRadius(8f);
-        int curGrid = marketChartView.getGridColor() != -1 ? marketChartView.getGridColor() : getResources().getColor(R.color.chart_grid, getTheme());
-        gdGrid.setColor(curGrid);
-        viewGridColor.setBackground(gdGrid);
-        rowGridColor.addView(lbGridColor);
-        rowGridColor.addView(viewGridColor);
-        containerChart.addView(rowGridColor);
-
-        final int[] curLastColor = {marketChartView.getLastPriceLineColor()};
-        final int[] curGridColor = {curGrid};
-        final float[] finalTxtSize = {curTxtSize[0]};
-
-                // Price text color
-        LinearLayout rowTxtColor = new LinearLayout(this);
-        rowTxtColor.setOrientation(LinearLayout.HORIZONTAL);
-        rowTxtColor.setGravity(Gravity.CENTER_VERTICAL);
-        rowTxtColor.setPadding(0,8,0,8);
-        TextView lbTxtColor = new TextView(this);
-        lbTxtColor.setText(getString(R.string.chart_price_text_color));
-        lbTxtColor.setTextSize(13f);
-        lbTxtColor.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
-        final View viewTxtColor = new View(this);
-        viewTxtColor.setLayoutParams(new LinearLayout.LayoutParams(48,48));
-        GradientDrawable gdTxtC = new GradientDrawable(); gdTxtC.setCornerRadius(8f);
-        int curTxtC = marketChartView.getPriceTextColor() != -1 ? marketChartView.getPriceTextColor() : getThemeColor(android.R.attr.textColorSecondary);
-        gdTxtC.setColor(curTxtC);
-        viewTxtColor.setBackground(gdTxtC);
-        rowTxtColor.addView(lbTxtColor);
-        rowTxtColor.addView(viewTxtColor);
-        containerChart.addView(rowTxtColor);
-
-        // Last line width
-        TextView lbLastW = new TextView(this);
-        final float[] curLastW = {marketChartView.getLastLineWidthPx() > 0 ? marketChartView.getLastLineWidthPx() : getResources().getDimension(R.dimen.chart_last_price_line_width)};
-        lbLastW.setText(getString(R.string.chart_last_line_width, (int)curLastW[0]));
-        lbLastW.setTextSize(12f);
-        containerChart.addView(lbLastW);
-        android.widget.SeekBar sbLastW = new android.widget.SeekBar(this);
-        sbLastW.setMax(10);
-        sbLastW.setProgress((int)curLastW[0]);
-        containerChart.addView(sbLastW);
-
-        // Dashed switch
-        LinearLayout rowDash = new LinearLayout(this);
-        rowDash.setOrientation(LinearLayout.HORIZONTAL);
-        rowDash.setGravity(Gravity.CENTER_VERTICAL);
-        TextView lbDash = new TextView(this);
-        lbDash.setText(getString(R.string.chart_last_line_dashed));
-        lbDash.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
-        final android.widget.Switch swDash = new android.widget.Switch(this);
-        swDash.setChecked(marketChartView.isLastLineDashed());
-        rowDash.addView(lbDash);
-        rowDash.addView(swDash);
-        containerChart.addView(rowDash);
-
-        // bg removed
-        final int[] curPriceTxtColor = {curTxtC};
-
-
-        viewLastColor.setOnClickListener(new View.OnClickListener(){
-            @Override public void onClick(View v){
-                int idx=0; for(int i=0;i<candlePalette.length;i++){ if(candlePalette[i]==curLastColor[0]){idx=i;break;}}
-                int next=candlePalette[(idx+1)%candlePalette.length]; curLastColor[0]=next;
-                GradientDrawable gd=new GradientDrawable(); gd.setCornerRadius(8f); gd.setColor(next); v.setBackground(gd);
-            }
-        });
-        viewGridColor.setOnClickListener(new View.OnClickListener(){
-            @Override public void onClick(View v){
-                int idx=0; for(int i=0;i<candlePalette.length;i++){ if(candlePalette[i]==curGridColor[0]){idx=i;break;}}
-                int next=candlePalette[(idx+1)%candlePalette.length]; curGridColor[0]=next;
-                GradientDrawable gd=new GradientDrawable(); gd.setCornerRadius(8f); gd.setColor(next); v.setBackground(gd);
-            }
-        });
-
-                viewTxtColor.setOnClickListener(new View.OnClickListener(){
-            @Override public void onClick(View v){
-                int idx=0; for(int i=0;i<candlePalette.length;i++){ if(candlePalette[i]==curPriceTxtColor[0]){idx=i;break;}}
-                int next=candlePalette[(idx+1)%candlePalette.length]; curPriceTxtColor[0]=next;
-                GradientDrawable gd=new GradientDrawable(); gd.setCornerRadius(8f); gd.setColor(next); v.setBackground(gd);
-            }
-        });
-        sbLastW.setOnSeekBarChangeListener(new android.widget.SeekBar.OnSeekBarChangeListener(){
-            @Override public void onProgressChanged(android.widget.SeekBar seekBar, int progress, boolean fromUser){
-                if(progress<1) progress=1; curLastW[0]=progress; lbLastW.setText(getString(R.string.chart_last_line_width, progress));
-            }
-            @Override public void onStartTrackingTouch(android.widget.SeekBar seekBar){}
-            @Override public void onStopTrackingTouch(android.widget.SeekBar seekBar){}
-        });
-
-        sbTxtSize.setOnSeekBarChangeListener(new android.widget.SeekBar.OnSeekBarChangeListener(){
-            @Override public void onProgressChanged(android.widget.SeekBar seekBar, int progress, boolean fromUser){
-                if(progress<8) progress=8; finalTxtSize[0]=progress; lbTxtSize.setText(getString(R.string.chart_price_text_size, progress));
-            }
-            @Override public void onStartTrackingTouch(android.widget.SeekBar seekBar){}
-            @Override public void onStopTrackingTouch(android.widget.SeekBar seekBar){}
-        });
-
-
         root.addView(containerChart);
 
         // ===================== TOGGLE LOGIC =====================
@@ -989,12 +835,9 @@ public class MarketChartActivity extends Activity
                 int visCount = 20 + sbVis.getProgress();
                 boolean showG = swGrid.isChecked();
                 boolean showV = swVol.isChecked();
-                boolean showLast = swLast.isChecked();
 
                 marketChartView.setCandleColors(curBull[0], curBear[0]);
                 marketChartView.setChartOptions(bodyFraction, wickW, maW, showG, showV, visCount);
-                int bgColorForApply = getThemeColor(android.R.attr.colorBackground);
-                marketChartView.setChartAppearance(showLast, curLastColor[0], curLastColor[0], finalTxtSize[0], curPriceTxtColor[0], curGridColor[0], bgColorForApply, curLastW[0], swDash.isChecked());
                 marketChartView.setMaLines(tempList);
                 dialog.dismiss();
             }
@@ -1124,8 +967,6 @@ public class MarketChartActivity extends Activity
         }
     }
 
-
-
     @Override
     protected void onDestroy()
     {
@@ -1138,35 +979,27 @@ public class MarketChartActivity extends Activity
 
     private void loadFiatRate()
     {
-        new Thread(new Runnable()
+        new Thread(() ->
         {
-            @Override
-            public void run()
+            double fiatPerBtc = getFiatPerBtc(currentFiatCode);
+            double basePerBtc = getFiatPerBtc("USD");
+            if (fiatPerBtc == 0d || basePerBtc == 0d)
             {
-                double fiatPerBtc = getFiatPerBtc(currentFiatCode);
-                double basePerBtc = getFiatPerBtc("USD");
-                if (fiatPerBtc == 0d || basePerBtc == 0d)
-                {
-                    return;
-                }
-                double usdToFiat = fiatPerBtc / basePerBtc;
-                mainHandler.post(new Runnable()
-                {
-                    @Override
-                    public void run()
-                    {
-                        if (textFiat!= null)
-                        {
-                            textFiat.setText(currentFiatCode);
-                        }
-                        if (marketChartView!= null)
-                        {
-                            marketChartView.setFiatCode(currentFiatCode);
-                            marketChartView.setFiatMultiplier((float) usdToFiat);
-                        }
-                    }
-                });
+                return;
             }
+            double usdToFiat = fiatPerBtc / basePerBtc;
+            mainHandler.post(() ->
+            {
+                if (textFiat!= null)
+                {
+                    textFiat.setText(currentFiatCode);
+                }
+                if (marketChartView!= null)
+                {
+                    marketChartView.setFiatCode(currentFiatCode);
+                    marketChartView.setFiatMultiplier((float) usdToFiat);
+                }
+            });
         }).start();
     }
 
@@ -1317,17 +1150,10 @@ public class MarketChartActivity extends Activity
         String[] realLoad = {"", "1m", "3m", "5m", "15m", "30m", "1h", "2h", "4h", "6h", "12h", "1d", "1w", "1M"};
         int[] intervalLabels = {R.string.time, R.string.interval_1m, R.string.interval_3m, R.string.interval_5m, R.string.interval_15m, R.string.interval_30m, R.string.interval_1h, R.string.interval_2h, R.string.interval_4h, R.string.interval_6h, R.string.interval_12h, R.string.interval_1d, R.string.interval_1w, R.string.interval_1M};
 
-        final AlertDialog dialog = new AlertDialog.Builder(this)
-                .setView(root)
-                .setNegativeButton(R.string.close, new android.content.DialogInterface.OnClickListener()
-                {
-                    @Override
-                    public void onClick(android.content.DialogInterface d, int w)
-                    {
-                        d.dismiss();
-                    }
-                })
-                .create();
+        AlertDialog dialog = new AlertDialog.Builder(this)
+     .setView(root)
+     .setNegativeButton(R.string.close, (d, w) -> d.dismiss())
+     .create();
 
         for (int i = 0; i < realLoad.length; i++)
         {
@@ -1342,7 +1168,7 @@ public class MarketChartActivity extends Activity
             boolean isSelected = realLoad[i].equalsIgnoreCase(currentInterval);
             if (realLoad[i].equals("1m") && currentInterval.equals("1m")) isSelected = true;
             if (realLoad[i].equals("1M") && currentInterval.equals("1M")) isSelected = true;
-            if (!realLoad[i].equals("1m") && !realLoad[i].equals("1M"))
+            if (!realLoad[i].equals("1m") &&!realLoad[i].equals("1M"))
             {
                 isSelected = realLoad[i].equalsIgnoreCase(currentInterval);
             }
@@ -1370,23 +1196,19 @@ public class MarketChartActivity extends Activity
             tv.setLayoutParams(lp);
 
             final String load = realLoad[i];
-            tv.setOnClickListener(new View.OnClickListener()
+            tv.setOnClickListener(v ->
             {
-                @Override
-                public void onClick(View v)
+                if (load.isEmpty())
                 {
-                    if (load.isEmpty())
-                    {
-                        return;
-                    }
-                    currentInterval = load;
-                    if (marketChartView!= null)
-                    {
-                        marketChartView.loadChart(currentSymbol, currentInterval);
-                    }
-                    setupTimeframeChips();
-                    dialog.dismiss();
+                    return;
                 }
+                currentInterval = load;
+                if (marketChartView!= null)
+                {
+                    marketChartView.loadChart(currentSymbol, currentInterval);
+                }
+                setupTimeframeChips();
+                dialog.dismiss();
             });
             grid.addView(tv);
         }
@@ -1410,7 +1232,7 @@ public class MarketChartActivity extends Activity
         boolean isOuter = false;
         for (String v : outerValues)
         {
-            if (v.equals(currentInterval) || v.equalsIgnoreCase(currentInterval) && !currentInterval.equals("1m"))
+            if (v.equals(currentInterval) || v.equalsIgnoreCase(currentInterval) &&!currentInterval.equals("1m"))
             {
                 if (v.equals("1M") && currentInterval.equals("1m"))
                 {
@@ -1441,14 +1263,7 @@ public class MarketChartActivity extends Activity
         LinearLayout.LayoutParams lpTime = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
         lpTime.setMargins(2, 0, 2, 0);
         tvTime.setLayoutParams(lpTime);
-        tvTime.setOnClickListener(new View.OnClickListener()
-        {
-            @Override
-            public void onClick(View v)
-            {
-                showMoreIntervalsDialog();
-            }
-        });
+        tvTime.setOnClickListener(v -> showMoreIntervalsDialog());
         chipGroupTimeframe.addView(tvTime);
 
         for (int idx = 0; idx < outerValues.length; idx++)
@@ -1480,18 +1295,14 @@ public class MarketChartActivity extends Activity
             tv.setLayoutParams(lp);
 
             final String load = realInterval;
-            tv.setOnClickListener(new View.OnClickListener()
+            tv.setOnClickListener(v ->
             {
-                @Override
-                public void onClick(View v)
+                currentInterval = load;
+                if (marketChartView!= null)
                 {
-                    currentInterval = load;
-                    if (marketChartView!= null)
-                    {
-                        marketChartView.loadChart(currentSymbol, currentInterval);
-                    }
-                    setupTimeframeChips();
+                    marketChartView.loadChart(currentSymbol, currentInterval);
                 }
+                setupTimeframeChips();
             });
             chipGroupTimeframe.addView(tv);
         }
@@ -1517,14 +1328,7 @@ public class MarketChartActivity extends Activity
             tvMore.setTextColor(getThemeColor(android.R.attr.colorBackground));
             tvMore.setBackgroundResource(R.drawable.bg_time_selected);
         }
-        tvMore.setOnClickListener(new View.OnClickListener()
-        {
-            @Override
-            public void onClick(View v)
-            {
-                showMoreIntervalsDialog();
-            }
-        });
+        tvMore.setOnClickListener(v -> showMoreIntervalsDialog());
         chipGroupTimeframe.addView(tvMore);
     }
 
@@ -1534,378 +1338,314 @@ public class MarketChartActivity extends Activity
         {
             return;
         }
-        final Resources res = getResources();
+        Resources res = getResources();
 
-        marketChartView.setOnVolumeClickListener(new MarketChartView.OnVolumeClickListener()
+        marketChartView.setOnVolumeClickListener(candle ->
         {
-            @Override
-            public void onVolumeClick(final MarketChartView.Candle candle)
+            runOnUiThread(() ->
             {
-                runOnUiThread(new Runnable()
+                if (popupCandleDetail == null || candle == null)
                 {
-                    @Override
-                    public void run()
-                    {
-                        if (popupCandleDetail == null || candle == null)
-                        {
-                            return;
-                        }
-                        popupCandleDetail.setVisibility(View.VISIBLE);
-                        GradientDrawable bg = new GradientDrawable();
-                        bg.setColor(getResources().getColor(R.color.chart_bg, getTheme()));
-                        bg.setCornerRadius(0f);
-                        bg.setStroke((int) (1 * res.getDisplayMetrics().density), res.getColor(R.color.chart_grid, null));
-                        popupCandleDetail.setBackground(bg);
-                        popupCandleDetail.setElevation(8f * res.getDisplayMetrics().density);
-                        if (popupTime!= null)
-                        {
-                            popupTime.setText(fullTimeFormat.format(new Date(candle.openTime)));
-                        }
-                        if (popupVolume!= null)
-                        {
-                            popupVolume.setText(getString(R.string.chart_volume_label, String.format(Locale.US, "%.2f", candle.volume)));
-                        }
-                    }
-                });
-            }
+                    return;
+                }
+                popupCandleDetail.setVisibility(View.VISIBLE);
+                GradientDrawable bg = new GradientDrawable();
+                bg.setColor(getResources().getColor(R.color.chart_bg, getTheme()));
+                bg.setCornerRadius(0f);
+                bg.setStroke((int) (1 * res.getDisplayMetrics().density), res.getColor(R.color.chart_grid, null));
+                popupCandleDetail.setBackground(bg);
+                popupCandleDetail.setElevation(8f * res.getDisplayMetrics().density);
+                if (popupTime!= null)
+                {
+                    popupTime.setText(fullTimeFormat.format(new Date(candle.openTime)));
+                }
+                if (popupVolume!= null)
+                {
+                    popupVolume.setText(getString(R.string.chart_volume_label, String.format(Locale.US, "%.2f", candle.volume)));
+                }
+            });
         });
 
         marketChartView.setOnChartUpdateListener(new MarketChartView.OnChartUpdateListener()
         {
             @Override
-            public void onPriceUpdate(final float price, float high24h, float low24h)
+            public void onPriceUpdate(float price, float high24h, float low24h)
             {
-                runOnUiThread(new Runnable()
+                runOnUiThread(() ->
                 {
-                    @Override
-                    public void run()
+                    new Thread(() ->
                     {
-                        new Thread(new Runnable()
-                        {
-                            @Override
-                            public void run()
-                            {
-                                double fiatPerBtc = getFiatPerBtc(currentFiatCode);
-                                double basePerBtc = getFiatPerBtc("USD");
-                                if (fiatPerBtc == 0d || basePerBtc == 0d)
-                                {
-                                    return;
-                                }
-                                double usdToFiat = fiatPerBtc / basePerBtc;
-                                final double priceInFiat = price * usdToFiat;
-                                mainHandler.post(new Runnable()
-                                {
-                                    @Override
-                                    public void run()
-                                    {
-                                        if (textCurrentPrice!= null)
-                                        {
-                                            String symbol = getCurrencySymbol(currentFiatCode);
-                                            textCurrentPrice.setText(String.format(Locale.US, "%s%,.2f", symbol, priceInFiat));
-                                            int color;
-                                            if (lastDisplayPrice == 0f)
-                                            {
-                                                color = getThemeColor(android.R.attr.textColorPrimary);
-                                            }
-                                            else if (priceInFiat > lastDisplayPrice)
-                                            {
-                                                color = res.getColor(R.color.palette_green, null);
-                                            }
-                                            else if (priceInFiat < lastDisplayPrice)
-                                            {
-                                                color = res.getColor(R.color.palette_red, null);
-                                            }
-                                            else
-                                            {
-                                                color = res.getColor(R.color.chart_last_price_line, null);
-                                            }
-                                            textCurrentPrice.setTextColor(color);
-                                            lastDisplayPrice = (float) priceInFiat;
-                                        }
-                                    }
-                                });
-                            }
-                        }).start();
-                    }
-                });
-            }
-
-            @Override
-            public void onTickerUpdate(final float high24h, final float low24h, final float volBtc, final float volUsdt, final float changePercent)
-            {
-                runOnUiThread(new Runnable()
-                {
-                    @Override
-                    public void run()
-                    {
-                        if (textChange24h!= null)
-                        {
-                            textChange24h.setText(String.format(Locale.US, "%.2f%%", changePercent));
-                            int c;
-                            if (changePercent >= 0)
-                            {
-                                c = res.getColor(R.color.palette_green, null);
-                            }
-                            else
-                            {
-                                c = res.getColor(R.color.palette_red, null);
-                            }
-                            textChange24h.setTextColor(c);
-                        }
-
-                        new Thread(new Runnable()
-                        {
-                            @Override
-                            public void run()
-                            {
-                                double fiatPerBtc = getFiatPerBtc(currentFiatCode);
-                                double basePerBtc = getFiatPerBtc("USD");
-                                if (fiatPerBtc == 0d || basePerBtc == 0d)
-                                {
-                                    return;
-                                }
-                                double usdToFiat = fiatPerBtc / basePerBtc;
-                                final double highFiat = high24h * usdToFiat;
-                                final double lowFiat = low24h * usdToFiat;
-                                final double volFiat = volUsdt * usdToFiat;
-
-                                String baseAsset = currentSymbol;
-                                if (baseAsset.endsWith("USDT"))
-                                {
-                                    baseAsset = baseAsset.substring(0, baseAsset.length() - 4);
-                                }
-                                else if (baseAsset.endsWith("BUSD"))
-                                {
-                                    baseAsset = baseAsset.substring(0, baseAsset.length() - 4);
-                                }
-                                else if (baseAsset.length() > 3)
-                                {
-                                    baseAsset = baseAsset.substring(0, 3);
-                                }
-
-                                final String highStr = getString(R.string.chart_high_label, String.format(Locale.US, "%,.2f", highFiat));
-                                final String lowStr = getString(R.string.chart_low_label, String.format(Locale.US, "%,.2f", lowFiat));
-                                final String volBtcStr = getString(R.string.chart_vol_base_format, baseAsset, String.format(Locale.US, "%.2f", volBtc));
-                                final String volFiatStr;
-                                if (volFiat >= 1_000_000_000)
-                                {
-                                    volFiatStr = getString(R.string.chart_vol_quote_format, currentFiatCode, String.format(Locale.US, "%.2fB", volFiat / 1_000_000_000));
-                                }
-                                else if (volFiat >= 1_000_000)
-                                {
-                                    volFiatStr = getString(R.string.chart_vol_quote_format, currentFiatCode, String.format(Locale.US, "%.2fM", volFiat / 1_000_000));
-                                }
-                                else
-                                {
-                                    volFiatStr = getString(R.string.chart_vol_quote_format, currentFiatCode, String.format(Locale.US, "%.2f", volFiat));
-                                }
-
-                                mainHandler.post(new Runnable()
-                                {
-                                    @Override
-                                    public void run()
-                                    {
-                                        if (textHigh24h!= null)
-                                        {
-                                            textHigh24h.setText(highStr);
-                                        }
-                                        if (textLow24h!= null)
-                                        {
-                                            textLow24h.setText(lowStr);
-                                        }
-                                        if (textVolBtc!= null)
-                                        {
-                                            textVolBtc.setText(volBtcStr);
-                                        }
-                                        if (textVolFiat!= null)
-                                        {
-                                            textVolFiat.setText(volFiatStr);
-                                        }
-                                    }
-                                });
-                            }
-                        }).start();
-                    }
-                });
-            }
-
-            @Override
-            public void onMaUpdate(final List<Float> maValues)
-            {
-                runOnUiThread(new Runnable()
-                {
-                    @Override
-                    public void run()
-                    {
-                        new Thread(new Runnable()
-                        {
-                            @Override
-                            public void run()
-                            {
-                                double fiatPerBtc = getFiatPerBtc(currentFiatCode);
-                                double basePerBtc = getFiatPerBtc("USD");
-                                double usdToFiat = 1d;
-                                if (fiatPerBtc!= 0d && basePerBtc!= 0d)
-                                {
-                                    usdToFiat = fiatPerBtc / basePerBtc;
-                                }
-
-                                final double finalUsdToFiat = usdToFiat;
-                                mainHandler.post(new Runnable()
-                                {
-                                    @Override
-                                    public void run()
-                                    {
-                                        if (textMaLabel!= null)
-                                        {
-                                            if (maValues == null || maValues.isEmpty())
-                                            {
-                                                textMaLabel.setText(getString(R.string.chart_ma_default));
-                                            }
-                                            else
-                                            {
-                                                List<MarketChartView.MaLine> lines = marketChartView.getMaLines();
-                                                SpannableStringBuilder sb = new SpannableStringBuilder();
-                                                for (int i = 0; i < lines.size(); i++)
-                                                {
-                                                    if (i >= maValues.size())
-                                                    {
-                                                        break;
-                                                    }
-                                                    float value = maValues.get(i);
-                                                    if (value == 0f)
-                                                    {
-                                                        continue;
-                                                    }
-                                                    double fiatVal = value * finalUsdToFiat;
-                                                    String label = String.format(Locale.US, "MA%d: %,.2f", lines.get(i).period, fiatVal);
-                                                    if (sb.length() > 0)
-                                                    {
-                                                        sb.append(" \u2022 ");
-                                                    }
-                                                    int start = sb.length();
-                                                    sb.append(label);
-                                                    sb.setSpan(new ForegroundColorSpan(lines.get(i).color), start, start + label.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-                                                }
-                                                textMaLabel.setText(sb);
-                                            }
-                                        }
-                                    }
-                                });
-                            }
-                        }).start();
-                    }
-                });
-            }
-
-            @Override
-            public void onCountdownUpdate(final String countdown)
-            {
-                runOnUiThread(new Runnable()
-                {
-                    @Override
-                    public void run()
-                    {
-                        if (textCountdown!= null)
-                        {
-                            textCountdown.setText(getString(R.string.chart_close_in, countdown));
-                        }
-                        if (marketChartView!= null)
-                        {
-                            marketChartView.setCountdown(countdown);
-                        }
-                    }
-                });
-            }
-
-            @Override
-            public void onCandleSelected(final MarketChartView.Candle candle)
-            {
-                runOnUiThread(new Runnable()
-                {
-                    @Override
-                    public void run()
-                    {
-                        if (popupCandleDetail == null || candle == null)
+                        double fiatPerBtc = getFiatPerBtc(currentFiatCode);
+                        double basePerBtc = getFiatPerBtc("USD");
+                        if (fiatPerBtc == 0d || basePerBtc == 0d)
                         {
                             return;
                         }
-
-                        new Thread(new Runnable()
+                        double usdToFiat = fiatPerBtc / basePerBtc;
+                        double priceInFiat = price * usdToFiat;
+                        mainHandler.post(() ->
                         {
-                            @Override
-                            public void run()
+                            if (textCurrentPrice!= null)
                             {
-                                double fiatPerBtc = getFiatPerBtc(currentFiatCode);
-                                double basePerBtc = getFiatPerBtc("USD");
-                                double usdToFiat = 1d;
-                                if (fiatPerBtc!= 0d && basePerBtc!= 0d)
+                                String symbol = getCurrencySymbol(currentFiatCode);
+                                textCurrentPrice.setText(String.format(Locale.US, "%s%,.2f", symbol, priceInFiat));
+                                int color;
+                                if (lastDisplayPrice == 0f)
                                 {
-                                    usdToFiat = fiatPerBtc / basePerBtc;
+                                    color = getThemeColor(android.R.attr.textColorPrimary);
                                 }
-
-                                final double openFiat = candle.open * usdToFiat;
-                                final double highFiat = candle.high * usdToFiat;
-                                final double lowFiat = candle.low * usdToFiat;
-                                final double closeFiat = candle.close * usdToFiat;
-
-                                mainHandler.post(new Runnable()
+                                else if (priceInFiat > lastDisplayPrice)
                                 {
-                                    @Override
-                                    public void run()
-                                    {
-                                        popupCandleDetail.setVisibility(View.VISIBLE);
-                                        GradientDrawable bg = new GradientDrawable();
-                                        bg.setColor(getResources().getColor(R.color.chart_bg, getTheme()));
-                                        bg.setCornerRadius(0f);
-                                        bg.setStroke((int) (1 * res.getDisplayMetrics().density), res.getColor(R.color.chart_grid, null));
-                                        popupCandleDetail.setBackground(bg);
-                                        popupCandleDetail.setElevation(8f * res.getDisplayMetrics().density);
-
-                                        if (popupTime!= null)
-                                        {
-                                            popupTime.setText(fullTimeFormat.format(new Date(candle.openTime)));
-                                        }
-                                        if (popupOpen!= null)
-                                        {
-                                            popupOpen.setText(getString(R.string.chart_open_label, String.format(Locale.US, "%,.2f", openFiat)));
-                                        }
-                                        if (popupHigh!= null)
-                                        {
-                                            popupHigh.setText(getString(R.string.chart_high_detail, String.format(Locale.US, "%,.2f", highFiat)));
-                                        }
-                                        if (popupLow!= null)
-                                        {
-                                            popupLow.setText(getString(R.string.chart_low_detail, String.format(Locale.US, "%,.2f", lowFiat)));
-                                        }
-                                        if (popupClose!= null)
-                                        {
-                                            popupClose.setText(getString(R.string.chart_close_label, String.format(Locale.US, "%,.2f", closeFiat)));
-                                        }
-                                        if (popupVolume!= null)
-                                        {
-                                            popupVolume.setText(getString(R.string.chart_volume_label, String.format(Locale.US, "%.2f", candle.volume)));
-                                        }
-                                    }
-                                });
+                                    color = res.getColor(R.color.palette_green, null);
+                                }
+                                else if (priceInFiat < lastDisplayPrice)
+                                {
+                                    color = res.getColor(R.color.palette_red, null);
+                                }
+                                else
+                                {
+                                    color = res.getColor(R.color.chart_last_price_line, null);
+                                }
+                                textCurrentPrice.setTextColor(color);
+                                lastDisplayPrice = (float) priceInFiat;
                             }
-                        }).start();
+                        });
+                    }).start();
+                });
+            }
+
+            @Override
+            public void onTickerUpdate(float high24h, float low24h, float volBtc, float volUsdt, float changePercent)
+            {
+                runOnUiThread(() ->
+                {
+                    if (textChange24h!= null)
+                    {
+                        textChange24h.setText(String.format(Locale.US, "%.2f%%", changePercent));
+                        int c;
+                        if (changePercent >= 0)
+                        {
+                            c = res.getColor(R.color.palette_green, null);
+                        }
+                        else
+                        {
+                            c = res.getColor(R.color.palette_red, null);
+                        }
+                        textChange24h.setTextColor(c);
                     }
+
+                    new Thread(() ->
+                    {
+                        double fiatPerBtc = getFiatPerBtc(currentFiatCode);
+                        double basePerBtc = getFiatPerBtc("USD");
+                        if (fiatPerBtc == 0d || basePerBtc == 0d)
+                        {
+                            return;
+                        }
+                        double usdToFiat = fiatPerBtc / basePerBtc;
+                        double highFiat = high24h * usdToFiat;
+                        double lowFiat = low24h * usdToFiat;
+                        double volFiat = volUsdt * usdToFiat;
+
+                        String baseAsset = currentSymbol;
+                        if (baseAsset.endsWith("USDT"))
+                        {
+                            baseAsset = baseAsset.substring(0, baseAsset.length() - 4);
+                        }
+                        else if (baseAsset.endsWith("BUSD"))
+                        {
+                            baseAsset = baseAsset.substring(0, baseAsset.length() - 4);
+                        }
+                        else if (baseAsset.length() > 3)
+                        {
+                            baseAsset = baseAsset.substring(0, 3);
+                        }
+
+                        String highStr = getString(R.string.chart_high_label, String.format(Locale.US, "%,.2f", highFiat));
+                        String lowStr = getString(R.string.chart_low_label, String.format(Locale.US, "%,.2f", lowFiat));
+                        String volBtcStr = getString(R.string.chart_vol_base_format, baseAsset, String.format(Locale.US, "%.2f", volBtc));
+                        String volFiatStr;
+                        if (volFiat >= 1_000_000_000)
+                        {
+                            volFiatStr = getString(R.string.chart_vol_quote_format, currentFiatCode, String.format(Locale.US, "%.2fB", volFiat / 1_000_000_000));
+                        }
+                        else if (volFiat >= 1_000_000)
+                        {
+                            volFiatStr = getString(R.string.chart_vol_quote_format, currentFiatCode, String.format(Locale.US, "%.2fM", volFiat / 1_000_000));
+                        }
+                        else
+                        {
+                            volFiatStr = getString(R.string.chart_vol_quote_format, currentFiatCode, String.format(Locale.US, "%.2f", volFiat));
+                        }
+
+                        mainHandler.post(() ->
+                        {
+                            if (textHigh24h!= null)
+                            {
+                                textHigh24h.setText(highStr);
+                            }
+                            if (textLow24h!= null)
+                            {
+                                textLow24h.setText(lowStr);
+                            }
+                            if (textVolBtc!= null)
+                            {
+                                textVolBtc.setText(volBtcStr);
+                            }
+                            if (textVolFiat!= null)
+                            {
+                                textVolFiat.setText(volFiatStr);
+                            }
+                        });
+                    }).start();
+                });
+            }
+
+            @Override
+            public void onMaUpdate(List<Float> maValues)
+            {
+                runOnUiThread(() ->
+                {
+                    new Thread(() ->
+                    {
+                        double fiatPerBtc = getFiatPerBtc(currentFiatCode);
+                        double basePerBtc = getFiatPerBtc("USD");
+                        double usdToFiat = 1d;
+                        if (fiatPerBtc!= 0d && basePerBtc!= 0d)
+                        {
+                            usdToFiat = fiatPerBtc / basePerBtc;
+                        }
+
+                        double finalUsdToFiat = usdToFiat;
+                        mainHandler.post(() ->
+                        {
+                            if (textMaLabel!= null)
+                            {
+                                if (maValues == null || maValues.isEmpty())
+                                {
+                                    textMaLabel.setText(getString(R.string.chart_ma_default));
+                                }
+                                else
+                                {
+                                    List<MarketChartView.MaLine> lines = marketChartView.getMaLines();
+                                    SpannableStringBuilder sb = new SpannableStringBuilder();
+                                    for (int i = 0; i < lines.size(); i++)
+                                    {
+                                        if (i >= maValues.size())
+                                        {
+                                            break;
+                                        }
+                                        float value = maValues.get(i);
+                                        if (value == 0f)
+                                        {
+                                            continue;
+                                        }
+                                        double fiatVal = value * finalUsdToFiat;
+                                        String label = String.format(Locale.US, "MA%d: %,.2f", lines.get(i).period, fiatVal);
+                                        if (sb.length() > 0)
+                                        {
+                                            sb.append(" • ");
+                                        }
+                                        int start = sb.length();
+                                        sb.append(label);
+                                        sb.setSpan(new ForegroundColorSpan(lines.get(i).color), start, start + label.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                                    }
+                                    textMaLabel.setText(sb);
+                                }
+                            }
+                        });
+                    }).start();
+                });
+            }
+
+            @Override
+            public void onCountdownUpdate(String countdown)
+            {
+                runOnUiThread(() ->
+                {
+                    if (textCountdown!= null)
+                    {
+                        textCountdown.setText(getString(R.string.chart_close_in, countdown));
+                    }
+                    if (marketChartView!= null)
+                    {
+                        marketChartView.setCountdown(countdown);
+                    }
+                });
+            }
+
+            @Override
+            public void onCandleSelected(MarketChartView.Candle candle)
+            {
+                runOnUiThread(() ->
+                {
+                    if (popupCandleDetail == null || candle == null)
+                    {
+                        return;
+                    }
+
+                    new Thread(() ->
+                    {
+                        double fiatPerBtc = getFiatPerBtc(currentFiatCode);
+                        double basePerBtc = getFiatPerBtc("USD");
+                        double usdToFiat = 1d;
+                        if (fiatPerBtc!= 0d && basePerBtc!= 0d)
+                        {
+                            usdToFiat = fiatPerBtc / basePerBtc;
+                        }
+
+                        double openFiat = candle.open * usdToFiat;
+                        double highFiat = candle.high * usdToFiat;
+                        double lowFiat = candle.low * usdToFiat;
+                        double closeFiat = candle.close * usdToFiat;
+
+                        mainHandler.post(() ->
+                        {
+                            popupCandleDetail.setVisibility(View.VISIBLE);
+                            GradientDrawable bg = new GradientDrawable();
+                            bg.setColor(getResources().getColor(R.color.chart_bg, getTheme()));
+                            bg.setCornerRadius(0f);
+                            bg.setStroke((int) (1 * res.getDisplayMetrics().density), res.getColor(R.color.chart_grid, null));
+                            popupCandleDetail.setBackground(bg);
+                            popupCandleDetail.setElevation(8f * res.getDisplayMetrics().density);
+
+                            if (popupTime!= null)
+                            {
+                                popupTime.setText(fullTimeFormat.format(new Date(candle.openTime)));
+                            }
+                            if (popupOpen!= null)
+                            {
+                                popupOpen.setText(getString(R.string.chart_open_label, String.format(Locale.US, "%,.2f", openFiat)));
+                            }
+                            if (popupHigh!= null)
+                            {
+                                popupHigh.setText(getString(R.string.chart_high_detail, String.format(Locale.US, "%,.2f", highFiat)));
+                            }
+                            if (popupLow!= null)
+                            {
+                                popupLow.setText(getString(R.string.chart_low_detail, String.format(Locale.US, "%,.2f", lowFiat)));
+                            }
+                            if (popupClose!= null)
+                            {
+                                popupClose.setText(getString(R.string.chart_close_label, String.format(Locale.US, "%,.2f", closeFiat)));
+                            }
+                            if (popupVolume!= null)
+                            {
+                                popupVolume.setText(getString(R.string.chart_volume_label, String.format(Locale.US, "%.2f", candle.volume)));
+                            }
+                        });
+                    }).start();
                 });
             }
 
             @Override
             public void onNothingSelected()
             {
-                runOnUiThread(new Runnable()
+                runOnUiThread(() ->
                 {
-                    @Override
-                    public void run()
+                    if (popupCandleDetail!= null)
                     {
-                        if (popupCandleDetail!= null)
-                        {
-                            popupCandleDetail.setVisibility(View.GONE);
-                        }
+                        popupCandleDetail.setVisibility(View.GONE);
                     }
                 });
             }
