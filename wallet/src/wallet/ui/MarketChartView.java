@@ -549,8 +549,7 @@ public class MarketChartView extends View
     {
         Resources res = context.getResources();
         int defaultBg = getThemeColor(android.R.attr.colorBackground);
-        int finalBg = bgColor!= -1? bgColor : defaultBg;
-        setBackgroundColor(finalBg);
+        setBackgroundColor(defaultBg);
 
         bullishPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         bullishPaint.setColor(bullishColor);
@@ -673,30 +672,17 @@ public class MarketChartView extends View
     protected void onConfigurationChanged(android.content.res.Configuration newConfig)
     {
         super.onConfigurationChanged(newConfig);
-        // CHỈ FIX NỀN CHART - không đụng lưới và text
-        try
-        {
-            SharedPreferences sp = getContext().getSharedPreferences(PREFS_CHART, Context.MODE_PRIVATE);
-            sp.edit().remove(KEY_BG_COLOR).apply();
-        }
-        catch (Exception e) {}
         loadChartOptions(getContext());
-        bgColor = -1;
+        initCandleColors(getContext());
         initPaints(getContext());
         invalidate();
     }
 
-    // Gọi khi đổi theme sáng/tối bằng AppCompatDelegate - CHỈ FIX NỀN
+    // FIX: Gọi khi đổi theme sáng/tối bằng AppCompatDelegate
     public void refreshTheme()
     {
-        try
-        {
-            SharedPreferences sp = getContext().getSharedPreferences(PREFS_CHART, Context.MODE_PRIVATE);
-            sp.edit().remove(KEY_BG_COLOR).apply();
-        }
-        catch (Exception e) {}
         loadChartOptions(getContext());
-        bgColor = -1;
+        initCandleColors(getContext());
         initPaints(getContext());
         invalidate();
     }
