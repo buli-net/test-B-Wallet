@@ -1,3 +1,5 @@
+Copy All MarketChartView FINAL NO DUP
+MarketChartView FINAL NO DUP
 package wallet.ui;
 
 import android.content.Context;
@@ -323,14 +325,6 @@ public boolean isShowLastPriceLine() { return showLastPriceLine; }
     public boolean isLastLineDashed() { return lastLineDashed; }
 
 
-    public void updateThemeColors()
-    {
-        this.bgColor = getResources().getColor(R.color.chart_bg, getContext().getTheme());
-        this.gridColor = getResources().getColor(R.color.chart_grid, getContext().getTheme());
-        this.priceTextColor = getThemeColor(android.R.attr.textColorSecondary);
-        invalidate();
-    }
-
     public void setChartAppearance(boolean sLastPrice, int lastLineColor, int lastBgColor, float txtSize, int txtColor, int gColor, int bColor, float lastW, boolean lastDash)
     {
         this.showLastPriceLine = sLastPrice;
@@ -361,14 +355,6 @@ public boolean isShowLastPriceLine() { return showLastPriceLine; }
         invalidate();
     }
     // keep old signature for compatibility
-    public void updateThemeColors()
-    {
-        this.bgColor = getResources().getColor(R.color.chart_bg, getContext().getTheme());
-        this.gridColor = getResources().getColor(R.color.chart_grid, getContext().getTheme());
-        this.priceTextColor = getThemeColor(android.R.attr.textColorSecondary);
-        invalidate();
-    }
-
     public void setChartAppearance(boolean sLastPrice, int lastLineColor, int lastBgColor, float txtSize, int txtColor, int gColor)
     {
         setChartAppearance(sLastPrice, lastLineColor, lastBgColor, txtSize, txtColor, gColor, bgColor, lastLineWidthPx, lastLineDashed);
