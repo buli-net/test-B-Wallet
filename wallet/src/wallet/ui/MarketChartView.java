@@ -1,5 +1,3 @@
-Copy All MarketChartView FINAL NO YELLOW - keep original + price bar prefs like candle
-MarketChartView FINAL NO YELLOW - keep original + price bar prefs like candle
 package wallet.ui;
 
 import android.content.Context;
