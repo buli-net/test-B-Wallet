@@ -1,5 +1,3 @@
-Copy All MarketChartView FULL COLORS
-MarketChartView FULL COLORS
 package wallet.ui;
 
 import android.content.Context;
