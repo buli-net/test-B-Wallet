@@ -136,7 +136,6 @@
         android:singleLine="true"
         android:ellipsize="end" />
 
-    <!-- FIX: Only 1 setting icon vector -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -150,6 +149,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
+            android:clipToPadding="false"
             android:scrollbars="none">
 
             <LinearLayout
@@ -159,7 +159,7 @@
                 android:orientation="horizontal"
                 android:gravity="center_vertical"
                 android:paddingStart="4dp"
-                android:paddingEnd="4dp" />
+                android:paddingEnd="8dp" />
 
         </HorizontalScrollView>
 
@@ -167,6 +167,7 @@
             android:id="@+id/btnChartSettings"
             android:layout_width="40dp"
             android:layout_height="40dp"
+            android:layout_marginEnd="4dp"
             android:padding="8dp"
             android:src="@drawable/ic_chart_settings"
             android:contentDescription="@string/chart_settings_title"
@@ -177,7 +178,9 @@
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1">
+        android:layout_weight="1"
+        android:clipChildren="false"
+        android:clipToPadding="false">
 
         <wallet.ui.MarketChartView
             android:id="@+id/marketChartView"
@@ -190,9 +193,10 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:visibility="gone"
+            android:elevation="8dp"
             android:padding="@dimen/chart_popup_padding"
-            android:layout_margin="@dimen/chart_small_margin"
-            android:background="?android:attr/colorBackground">
+            android:layout_margin="8dp"
+            android:background="@color/chart_bg">
 
             <TextView
                 android:id="@+id/popupTime"
@@ -200,12 +204,14 @@
                 android:layout_height="wrap_content"
                 android:text="@string/chart_popup_time_default"
                 android:textSize="@dimen/chart_popup_time_size"
+                android:textStyle="bold"
                 android:textColor="?android:attr/textColorPrimary" />
 
             <TextView
                 android:id="@+id/popupOpen"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
                 android:text="@string/chart_popup_open_default"
                 android:textSize="@dimen/chart_popup_size" />
 
@@ -234,8 +240,10 @@
                 android:id="@+id/popupVolume"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
                 android:text="@string/chart_popup_volume_default"
-                android:textSize="@dimen/chart_popup_time_size" />
+                android:textSize="@dimen/chart_popup_time_size"
+                android:textColor="?android:attr/textColorSecondary" />
 
         </LinearLayout>
 
