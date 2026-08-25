@@ -310,335 +310,554 @@ public class MarketChartActivity extends Activity
         loadFiatRate();
     }
 
+
     private void showMaSettingsPopup()
     {
         showChartSettingsPopup();
     }
-/////////////setting///////
- 
-        private void showChartSettingsPopup()
-{
-    if (marketChartView == null)
+
+    private void showChartSettingsPopup()
     {
-        return;
-    }
-
-    final Dialog dialog = new Dialog(this);
-    ScrollView scrollView = new ScrollView(this);
-    scrollView.setFillViewport(false);
-
-    LinearLayout root = new LinearLayout(this);
-    root.setOrientation(LinearLayout.VERTICAL);
-    root.setPadding(32, 32, 32, 32);
-    GradientDrawable rootBg = new GradientDrawable();
-    rootBg.setCornerRadius(24f);
-    rootBg.setColor(getResources().getColor(R.color.chart_bg, getTheme()));
-    root.setBackground(rootBg);
-
-    TextView title = new TextView(this);
-    title.setText(getString(R.string.chart_settings_title));
-    title.setTextSize(18f);
-    title.setTypeface(null, Typeface.BOLD);
-    title.setPadding(0, 0, 0, 24);
-    root.addView(title);
-
-    final int[] candlePalette = getResources().getIntArray(R.array.candle_color_palette);
-    final int[] curBull = {marketChartView.getBullishColor()};
-    final int[] curBear = {marketChartView.getBearishColor()};
-
-    // ===================== CANDLE SECTION =====================
-    LinearLayout candleHeader = new LinearLayout(this);
-    candleHeader.setOrientation(LinearLayout.HORIZONTAL);
-    candleHeader.setGravity(Gravity.CENTER_VERTICAL);
-    candleHeader.setPadding(0, 16, 0, 16);
-    candleHeader.setClickable(true);
-    candleHeader.setFocusable(true);
-
-    final TextView titleCandle = new TextView(this);
-    titleCandle.setText("▶ " + getString(R.string.chart_settings_candle));
-    titleCandle.setTextSize(14f);
-    titleCandle.setTypeface(null, Typeface.BOLD);
-    LinearLayout.LayoutParams lpTitleCandle = new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f);
-    titleCandle.setLayoutParams(lpTitleCandle);
-
-    TextView arrowCandle = new TextView(this);
-    arrowCandle.setText("▼");
-    arrowCandle.setTextSize(12f);
-
-    candleHeader.addView(titleCandle);
-    candleHeader.addView(arrowCandle);
-    root.addView(candleHeader);
-
-    final LinearLayout containerCandle = new LinearLayout(this);
-    containerCandle.setOrientation(LinearLayout.VERTICAL);
-    containerCandle.setVisibility(View.GONE);
-
-    LinearLayout rowBull = new LinearLayout(this);
-    rowBull.setOrientation(LinearLayout.HORIZONTAL);
-    rowBull.setGravity(Gravity.CENTER_VERTICAL);
-    rowBull.setPadding(0, 8, 0, 8);
-    TextView lbBull = new TextView(this);
-    lbBull.setText(getString(R.string.chart_settings_bullish));
-    lbBull.setTextSize(13f);
-    lbBull.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
-    final View viewBull = new View(this);
-    viewBull.setLayoutParams(new LinearLayout.LayoutParams(48, 48));
-    GradientDrawable gdBull = new GradientDrawable();
-    gdBull.setCornerRadius(0f);
-    gdBull.setColor(curBull[0]);
-    viewBull.setBackground(gdBull);
-    rowBull.addView(lbBull);
-    rowBull.addView(viewBull);
-    containerCandle.addView(rowBull);
-
-    LinearLayout rowBear = new LinearLayout(this);
-    rowBear.setOrientation(LinearLayout.HORIZONTAL);
-    rowBear.setGravity(Gravity.CENTER_VERTICAL);
-    rowBear.setPadding(0, 8, 0, 8);
-    TextView lbBear = new TextView(this);
-    lbBear.setText(getString(R.string.chart_settings_bearish));
-    lbBear.setTextSize(13f);
-    lbBear.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
-    final View viewBear = new View(this);
-    viewBear.setLayoutParams(new LinearLayout.LayoutParams(48, 48));
-    GradientDrawable gdBear = new GradientDrawable();
-    gdBear.setCornerRadius(0f);
-    gdBear.setColor(curBear[0]);
-    viewBear.setBackground(gdBear);
-    rowBear.addView(lbBear);
-    rowBear.addView(viewBear);
-    containerCandle.addView(rowBear);
-
-    viewBull.setOnClickListener(new View.OnClickListener()
-    {
-        @Override
-        public void onClick(View v)
+        if (marketChartView == null)
         {
-            int idx = 0;
-            for (int i = 0; i < candlePalette.length; i++)
+            return;
+        }
+
+        final Dialog dialog = new Dialog(this);
+        ScrollView scrollView = new ScrollView(this);
+        scrollView.setFillViewport(false);
+        LinearLayout.LayoutParams scrollLp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        scrollView.setLayoutParams(scrollLp);
+
+        LinearLayout root = new LinearLayout(this);
+        root.setOrientation(LinearLayout.VERTICAL);
+        root.setPadding(32, 32, 32, 32);
+        GradientDrawable rootBg = new GradientDrawable();
+        rootBg.setCornerRadius(24f);
+        rootBg.setColor(getResources().getColor(R.color.chart_bg, getTheme()));
+        root.setBackground(rootBg);
+
+        TextView title = new TextView(this);
+        title.setText(getString(R.string.chart_settings_title));
+        title.setTextSize(18f);
+        title.setTypeface(null, Typeface.BOLD);
+        title.setPadding(0, 0, 0, 24);
+        root.addView(title);
+
+        final int[] candlePalette = getResources().getIntArray(R.array.candle_color_palette);
+        final int[] curBull = {marketChartView.getBullishColor()};
+        final int[] curBear = {marketChartView.getBearishColor()};
+
+        // ===================== CANDLE SECTION =====================
+        LinearLayout candleHeader = new LinearLayout(this);
+        candleHeader.setOrientation(LinearLayout.HORIZONTAL);
+        candleHeader.setGravity(Gravity.CENTER_VERTICAL);
+        candleHeader.setPadding(0, 16, 0, 16);
+        candleHeader.setClickable(true);
+        candleHeader.setFocusable(true);
+        TypedValue outValue = new TypedValue();
+        getTheme().resolveAttribute(android.R.attr.selectableItemBackground, outValue, true);
+        candleHeader.setBackgroundResource(outValue.resourceId);
+
+        final TextView titleCandle = new TextView(this);
+        titleCandle.setText("▶ " + getString(R.string.chart_settings_candle));
+        titleCandle.setTextSize(14f);
+        titleCandle.setTypeface(null, Typeface.BOLD);
+        LinearLayout.LayoutParams lpTitleCandle = new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f);
+        titleCandle.setLayoutParams(lpTitleCandle);
+
+        TextView arrowCandle = new TextView(this);
+        arrowCandle.setText("▼");
+        arrowCandle.setTextSize(12f);
+
+        candleHeader.addView(titleCandle);
+        candleHeader.addView(arrowCandle);
+        root.addView(candleHeader);
+
+        final LinearLayout containerCandle = new LinearLayout(this);
+        containerCandle.setOrientation(LinearLayout.VERTICAL);
+        containerCandle.setVisibility(View.GONE);
+
+        LinearLayout rowBull = new LinearLayout(this);
+        rowBull.setOrientation(LinearLayout.HORIZONTAL);
+        rowBull.setGravity(Gravity.CENTER_VERTICAL);
+        rowBull.setPadding(0, 8, 0, 8);
+        TextView lbBull = new TextView(this);
+        lbBull.setText(getString(R.string.chart_settings_bullish));
+        lbBull.setTextSize(13f);
+        lbBull.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
+        final View viewBull = new View(this);
+        viewBull.setLayoutParams(new LinearLayout.LayoutParams(48, 48));
+        GradientDrawable gdBull = new GradientDrawable();
+        gdBull.setCornerRadius(8f);
+        gdBull.setColor(curBull[0]);
+        viewBull.setBackground(gdBull);
+        rowBull.addView(lbBull);
+        rowBull.addView(viewBull);
+        containerCandle.addView(rowBull);
+
+        LinearLayout rowBear = new LinearLayout(this);
+        rowBear.setOrientation(LinearLayout.HORIZONTAL);
+        rowBear.setGravity(Gravity.CENTER_VERTICAL);
+        rowBear.setPadding(0, 8, 0, 8);
+        TextView lbBear = new TextView(this);
+        lbBear.setText(getString(R.string.chart_settings_bearish));
+        lbBear.setTextSize(13f);
+        lbBear.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
+        final View viewBear = new View(this);
+        viewBear.setLayoutParams(new LinearLayout.LayoutParams(48, 48));
+        GradientDrawable gdBear = new GradientDrawable();
+        gdBear.setCornerRadius(8f);
+        gdBear.setColor(curBear[0]);
+        viewBear.setBackground(gdBear);
+        rowBear.addView(lbBear);
+        rowBear.addView(viewBear);
+        containerCandle.addView(rowBear);
+
+        viewBull.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
             {
-                if (candlePalette[i] == curBull[0])
+                int idx = 0;
+                for (int i = 0; i < candlePalette.length; i++)
                 {
-                    idx = i;
-                }
-            }
-            int next = candlePalette[(idx + 1) % candlePalette.length];
-            curBull[0] = next;
-            GradientDrawable gd = new GradientDrawable();
-            gd.setCornerRadius(0f);
-            gd.setColor(next);
-            v.setBackground(gd);
-        }
-    });
-
-    viewBear.setOnClickListener(new View.OnClickListener()
-    {
-        @Override
-        public void onClick(View v)
-        {
-            int idx = 0;
-            for (int i = 0; i < candlePalette.length; i++)
-            {
-                if (candlePalette[i] == curBear[0])
-                {
-                    idx = i;
-                }
-            }
-            int next = candlePalette[(idx + 1) % candlePalette.length];
-            curBear[0] = next;
-            GradientDrawable gd = new GradientDrawable();
-            gd.setCornerRadius(0f);
-            gd.setColor(next);
-            v.setBackground(gd);
-        }
-    });
-
-    root.addView(containerCandle);
-
-    View divider = new View(this);
-    LinearLayout.LayoutParams lpDiv = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, (int) (1 * getResources().getDisplayMetrics().density));
-    lpDiv.topMargin = 16;
-    lpDiv.bottomMargin = 16;
-    divider.setLayoutParams(lpDiv);
-    divider.setBackgroundColor(getResources().getColor(R.color.chart_grid, getTheme()));
-    root.addView(divider);
-
-    // ===================== MA SECTION =====================
-    LinearLayout maHeader = new LinearLayout(this);
-    maHeader.setOrientation(LinearLayout.HORIZONTAL);
-    maHeader.setGravity(Gravity.CENTER_VERTICAL);
-    maHeader.setPadding(0, 16, 0, 16);
-    maHeader.setClickable(true);
-    maHeader.setFocusable(true);
-
-    final TextView titleMa = new TextView(this);
-    titleMa.setText("▶ " + getString(R.string.chart_settings_ma));
-    titleMa.setTextSize(14f);
-    titleMa.setTypeface(null, Typeface.BOLD);
-    titleMa.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
-
-    TextView arrowMa = new TextView(this);
-    arrowMa.setText("▼");
-    arrowMa.setTextSize(12f);
-
-    maHeader.addView(titleMa);
-    maHeader.addView(arrowMa);
-    root.addView(maHeader);
-
-    final LinearLayout containerMa = new LinearLayout(this);
-    containerMa.setOrientation(LinearLayout.VERTICAL);
-    containerMa.setVisibility(View.GONE);
-
-    View maView = getLayoutInflater().inflate(R.layout.bottom_sheet_ma_settings, null);
-    final RecyclerView recycler = maView.findViewById(R.id.recycler_ma_popup);
-    recycler.setLayoutManager(new LinearLayoutManager(this));
-    recycler.setNestedScrollingEnabled(false);
-
-    final List<MarketChartView.MaLine> tempList = new ArrayList<>(marketChartView.getMaLines());
-    final MaPopupAdapter adapter = new MaPopupAdapter(tempList);
-    recycler.setAdapter(adapter);
-
-    View btnAdd = maView.findViewById(R.id.btn_add_ma);
-    GradientDrawable addBg = new GradientDrawable();
-    addBg.setCornerRadius(0f);
-    addBg.setColor(getResources().getColor(R.color.bg_level2, getTheme()));
-    btnAdd.setBackground(addBg);
-    btnAdd.setOnClickListener(new View.OnClickListener()
-    {
-        @Override
-        public void onClick(View v)
-        {
-            if (tempList.size() >= 6)
-            {
-                Toast.makeText(v.getContext(), getString(R.string.max_ma_reached), Toast.LENGTH_SHORT).show();
-                return;
-            }
-            int[] colors = getResources().getIntArray(R.array.ma_default_colors);
-            int color = colors[tempList.size() % colors.length];
-            tempList.add(new MarketChartView.MaLine(20, color));
-            adapter.notifyDataSetChanged();
-        }
-    });
-
-    View btnApplyOld = maView.findViewById(R.id.btn_apply);
-    if (btnApplyOld!= null)
-    {
-        btnApplyOld.setVisibility(View.GONE);
-    }
-
-    containerMa.addView(maView);
-    root.addView(containerMa);
-
-    // ===================== TOGGLE LOGIC =====================
-    final boolean[] isCandleExpanded = {false};
-    final boolean[] isMaExpanded = {false};
-
-    candleHeader.setOnClickListener(new View.OnClickListener()
-    {
-        @Override
-        public void onClick(View v)
-        {
-            isCandleExpanded[0] =!isCandleExpanded[0];
-            if (isCandleExpanded[0])
-            {
-                containerCandle.setVisibility(View.VISIBLE);
-                titleCandle.setText("▼ " + getString(R.string.chart_settings_candle));
-            }
-            else
-            {
-                containerCandle.setVisibility(View.GONE);
-                titleCandle.setText("▶ " + getString(R.string.chart_settings_candle));
-            }
-        }
-    });
-
-    maHeader.setOnClickListener(new View.OnClickListener()
-    {
-        @Override
-        public void onClick(View v)
-        {
-            isMaExpanded[0] =!isMaExpanded[0];
-            if (isMaExpanded[0])
-            {
-                containerMa.setVisibility(View.VISIBLE);
-                titleMa.setText("▼ " + getString(R.string.chart_settings_ma));
-            }
-            else
-            {
-                containerMa.setVisibility(View.GONE);
-                titleMa.setText("▶ " + getString(R.string.chart_settings_ma));
-            }
-        }
-    });
-
-    // ===================== APPLY BUTTON =====================
-    TextView btnApply = new TextView(this);
-    btnApply.setText(getString(R.string.chart_settings_apply));
-    btnApply.setTextSize(14f);
-    btnApply.setGravity(Gravity.CENTER);
-    btnApply.setPadding(0, 28, 0, 28);
-    btnApply.setTextColor(getResources().getColor(android.R.color.white, getTheme()));
-    GradientDrawable bgApply = new GradientDrawable();
-    bgApply.setCornerRadius(0f);
-    bgApply.setColor(getThemeColor(android.R.attr.colorPrimary));
-    btnApply.setBackground(bgApply);
-    LinearLayout.LayoutParams lpApply = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-    lpApply.topMargin = 24;
-    btnApply.setLayoutParams(lpApply);
-    btnApply.setOnClickListener(new View.OnClickListener()
-    {
-        @Override
-        public void onClick(View v)
-        {
-            try
-            {
-                if (dialog.getCurrentFocus()!= null)
-                {
-                    dialog.getCurrentFocus().clearFocus();
-                }
-                recycler.clearFocus();
-                for (int i = 0; i < recycler.getChildCount(); i++)
-                {
-                    RecyclerView.ViewHolder vh = recycler.getChildViewHolder(recycler.getChildAt(i));
-                    if (vh instanceof MaPopupAdapter.Holder)
+                    if (candlePalette[i] == curBull[0])
                     {
-                        MaPopupAdapter.Holder h = (MaPopupAdapter.Holder) vh;
-                        int pos = h.getAdapterPosition();
-                        if (pos >= 0 && pos < tempList.size())
+                        idx = i;
+                        break;
+                    }
+                }
+                int next = candlePalette[(idx + 1) % candlePalette.length];
+                curBull[0] = next;
+                GradientDrawable gd = new GradientDrawable();
+                gd.setCornerRadius(8f);
+                gd.setColor(next);
+                v.setBackground(gd);
+            }
+        });
+
+        viewBear.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+                int idx = 0;
+                for (int i = 0; i < candlePalette.length; i++)
+                {
+                    if (candlePalette[i] == curBear[0])
+                    {
+                        idx = i;
+                        break;
+                    }
+                }
+                int next = candlePalette[(idx + 1) % candlePalette.length];
+                curBear[0] = next;
+                GradientDrawable gd = new GradientDrawable();
+                gd.setCornerRadius(8f);
+                gd.setColor(next);
+                v.setBackground(gd);
+            }
+        });
+
+        root.addView(containerCandle);
+
+        View divider1 = new View(this);
+        LinearLayout.LayoutParams lpDiv1 = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, (int) (1 * getResources().getDisplayMetrics().density));
+        lpDiv1.topMargin = 16;
+        lpDiv1.bottomMargin = 16;
+        divider1.setLayoutParams(lpDiv1);
+        divider1.setBackgroundColor(getResources().getColor(R.color.chart_grid, getTheme()));
+        root.addView(divider1);
+
+        // ===================== MA SECTION =====================
+        LinearLayout maHeader = new LinearLayout(this);
+        maHeader.setOrientation(LinearLayout.HORIZONTAL);
+        maHeader.setGravity(Gravity.CENTER_VERTICAL);
+        maHeader.setPadding(0, 16, 0, 16);
+        maHeader.setClickable(true);
+        maHeader.setFocusable(true);
+        maHeader.setBackgroundResource(outValue.resourceId);
+
+        final TextView titleMa = new TextView(this);
+        titleMa.setText("▶ " + getString(R.string.chart_settings_ma));
+        titleMa.setTextSize(14f);
+        titleMa.setTypeface(null, Typeface.BOLD);
+        titleMa.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
+
+        TextView arrowMa = new TextView(this);
+        arrowMa.setText("▼");
+        arrowMa.setTextSize(12f);
+
+        maHeader.addView(titleMa);
+        maHeader.addView(arrowMa);
+        root.addView(maHeader);
+
+        final LinearLayout containerMa = new LinearLayout(this);
+        containerMa.setOrientation(LinearLayout.VERTICAL);
+        containerMa.setVisibility(View.GONE);
+
+        View maView = getLayoutInflater().inflate(R.layout.bottom_sheet_ma_settings, null);
+        final RecyclerView recycler = maView.findViewById(R.id.recycler_ma_popup);
+        recycler.setLayoutManager(new LinearLayoutManager(this));
+        recycler.setNestedScrollingEnabled(false);
+
+        final List<MarketChartView.MaLine> tempList = new ArrayList<MarketChartView.MaLine>();
+        List<MarketChartView.MaLine> origLines = marketChartView.getMaLines();
+        for (int i = 0; i < origLines.size(); i++)
+        {
+            MarketChartView.MaLine o = origLines.get(i);
+            tempList.add(new MarketChartView.MaLine(o.period, o.color));
+        }
+        final MaPopupAdapter adapter = new MaPopupAdapter(tempList);
+        recycler.setAdapter(adapter);
+
+        View btnAdd = maView.findViewById(R.id.btn_add_ma);
+        GradientDrawable addBg = new GradientDrawable();
+        addBg.setCornerRadius(12f);
+        addBg.setColor(getResources().getColor(R.color.bg_level2, getTheme()));
+        btnAdd.setBackground(addBg);
+        btnAdd.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+                if (tempList.size() >= 6)
+                {
+                    Toast.makeText(v.getContext(), getString(R.string.max_ma_reached), Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                int[] colors = getResources().getIntArray(R.array.ma_default_colors);
+                int color = colors[tempList.size() % colors.length];
+                tempList.add(new MarketChartView.MaLine(20, color));
+                adapter.notifyDataSetChanged();
+            }
+        });
+
+        View btnApplyOld = maView.findViewById(R.id.btn_apply);
+        if (btnApplyOld != null)
+        {
+            btnApplyOld.setVisibility(View.GONE);
+        }
+
+        containerMa.addView(maView);
+        root.addView(containerMa);
+
+        View divider2 = new View(this);
+        LinearLayout.LayoutParams lpDiv2 = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, (int) (1 * getResources().getDisplayMetrics().density));
+        lpDiv2.topMargin = 16;
+        lpDiv2.bottomMargin = 16;
+        divider2.setLayoutParams(lpDiv2);
+        divider2.setBackgroundColor(getResources().getColor(R.color.chart_grid, getTheme()));
+        root.addView(divider2);
+
+        // ===================== CHART OPTIONS SECTION =====================
+        LinearLayout chartHeader = new LinearLayout(this);
+        chartHeader.setOrientation(LinearLayout.HORIZONTAL);
+        chartHeader.setGravity(Gravity.CENTER_VERTICAL);
+        chartHeader.setPadding(0, 16, 0, 16);
+        chartHeader.setClickable(true);
+        chartHeader.setFocusable(true);
+        chartHeader.setBackgroundResource(outValue.resourceId);
+
+        final TextView titleChart = new TextView(this);
+        titleChart.setText("▶ Chart Options");
+        titleChart.setTextSize(14f);
+        titleChart.setTypeface(null, Typeface.BOLD);
+        titleChart.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
+
+        TextView arrowChart = new TextView(this);
+        arrowChart.setText("▼");
+        arrowChart.setTextSize(12f);
+
+        chartHeader.addView(titleChart);
+        chartHeader.addView(arrowChart);
+        root.addView(chartHeader);
+
+        final LinearLayout containerChart = new LinearLayout(this);
+        containerChart.setOrientation(LinearLayout.VERTICAL);
+        containerChart.setVisibility(View.GONE);
+        containerChart.setPadding(0, 8, 0, 8);
+
+        // Body fraction
+        TextView lbBody = new TextView(this);
+        lbBody.setText("Body width: " + marketChartView.getBodyWidthFraction());
+        lbBody.setTextSize(12f);
+        containerChart.addView(lbBody);
+
+        android.widget.SeekBar sbBody = new android.widget.SeekBar(this);
+        sbBody.setMax(70);
+        sbBody.setProgress((int) ((marketChartView.getBodyWidthFraction() - 0.3f) * 100));
+        containerChart.addView(sbBody);
+
+        // Wick width
+        final float[] curWick = {marketChartView.getWickWidthPx() > 0 ? marketChartView.getWickWidthPx() : getResources().getDimension(R.dimen.chart_wick_width)};
+        TextView lbWick = new TextView(this);
+        lbWick.setText("Wick width: " + (int) curWick[0] + "px");
+        lbWick.setTextSize(12f);
+        containerChart.addView(lbWick);
+
+        android.widget.SeekBar sbWick = new android.widget.SeekBar(this);
+        sbWick.setMax(20);
+        sbWick.setProgress((int) curWick[0]);
+        containerChart.addView(sbWick);
+
+        // MA width
+        final float[] curMaW = {marketChartView.getMaLineWidthPx() > 0 ? marketChartView.getMaLineWidthPx() : getResources().getDimension(R.dimen.chart_ma_line_width)};
+        TextView lbMaW = new TextView(this);
+        lbMaW.setText("MA line width: " + (int) curMaW[0] + "px");
+        lbMaW.setTextSize(12f);
+        containerChart.addView(lbMaW);
+
+        android.widget.SeekBar sbMaW = new android.widget.SeekBar(this);
+        sbMaW.setMax(20);
+        sbMaW.setProgress((int) curMaW[0]);
+        containerChart.addView(sbMaW);
+
+        // Show Grid Switch
+        LinearLayout rowGrid = new LinearLayout(this);
+        rowGrid.setOrientation(LinearLayout.HORIZONTAL);
+        rowGrid.setGravity(Gravity.CENTER_VERTICAL);
+        TextView lbGrid = new TextView(this);
+        lbGrid.setText("Show Grid");
+        lbGrid.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
+        final android.widget.Switch swGrid = new android.widget.Switch(this);
+        swGrid.setChecked(marketChartView.isShowGrid());
+        rowGrid.addView(lbGrid);
+        rowGrid.addView(swGrid);
+        containerChart.addView(rowGrid);
+
+        // Show Volume Switch
+        LinearLayout rowVol = new LinearLayout(this);
+        rowVol.setOrientation(LinearLayout.HORIZONTAL);
+        rowVol.setGravity(Gravity.CENTER_VERTICAL);
+        TextView lbVol = new TextView(this);
+        lbVol.setText("Show Volume");
+        lbVol.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
+        final android.widget.Switch swVol = new android.widget.Switch(this);
+        swVol.setChecked(marketChartView.isShowVolume());
+        rowVol.addView(lbVol);
+        rowVol.addView(swVol);
+        containerChart.addView(rowVol);
+
+        // Visible count
+        TextView lbVis = new TextView(this);
+        lbVis.setText("Visible candles: " + marketChartView.getVisibleCandleCountValue());
+        lbVis.setTextSize(12f);
+        containerChart.addView(lbVis);
+
+        android.widget.SeekBar sbVis = new android.widget.SeekBar(this);
+        sbVis.setMax(130);
+        sbVis.setProgress(marketChartView.getVisibleCandleCountValue() - 20);
+        containerChart.addView(sbVis);
+
+        sbBody.setOnSeekBarChangeListener(new android.widget.SeekBar.OnSeekBarChangeListener()
+        {
+            @Override
+            public void onProgressChanged(android.widget.SeekBar seekBar, int progress, boolean fromUser)
+            {
+                float fraction = 0.3f + progress / 100f;
+                lbBody.setText("Body width: " + String.format(Locale.US, "%.2f", fraction));
+            }
+            @Override public void onStartTrackingTouch(android.widget.SeekBar seekBar) {}
+            @Override public void onStopTrackingTouch(android.widget.SeekBar seekBar) {}
+        });
+
+        sbWick.setOnSeekBarChangeListener(new android.widget.SeekBar.OnSeekBarChangeListener()
+        {
+            @Override
+            public void onProgressChanged(android.widget.SeekBar seekBar, int progress, boolean fromUser)
+            {
+                if (progress < 1) progress = 1;
+                curWick[0] = progress;
+                lbWick.setText("Wick width: " + progress + "px");
+            }
+            @Override public void onStartTrackingTouch(android.widget.SeekBar seekBar) {}
+            @Override public void onStopTrackingTouch(android.widget.SeekBar seekBar) {}
+        });
+
+        sbMaW.setOnSeekBarChangeListener(new android.widget.SeekBar.OnSeekBarChangeListener()
+        {
+            @Override
+            public void onProgressChanged(android.widget.SeekBar seekBar, int progress, boolean fromUser)
+            {
+                if (progress < 1) progress = 1;
+                curMaW[0] = progress;
+                lbMaW.setText("MA line width: " + progress + "px");
+            }
+            @Override public void onStartTrackingTouch(android.widget.SeekBar seekBar) {}
+            @Override public void onStopTrackingTouch(android.widget.SeekBar seekBar) {}
+        });
+
+        sbVis.setOnSeekBarChangeListener(new android.widget.SeekBar.OnSeekBarChangeListener()
+        {
+            @Override
+            public void onProgressChanged(android.widget.SeekBar seekBar, int progress, boolean fromUser)
+            {
+                int count = 20 + progress;
+                lbVis.setText("Visible candles: " + count);
+            }
+            @Override public void onStartTrackingTouch(android.widget.SeekBar seekBar) {}
+            @Override public void onStopTrackingTouch(android.widget.SeekBar seekBar) {}
+        });
+
+        root.addView(containerChart);
+
+        // ===================== TOGGLE LOGIC =====================
+        final boolean[] isCandleExpanded = {false};
+        final boolean[] isMaExpanded = {false};
+        final boolean[] isChartExpanded = {false};
+
+        candleHeader.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+                isCandleExpanded[0] = !isCandleExpanded[0];
+                if (isCandleExpanded[0])
+                {
+                    containerCandle.setVisibility(View.VISIBLE);
+                    titleCandle.setText("▼ " + getString(R.string.chart_settings_candle));
+                }
+                else
+                {
+                    containerCandle.setVisibility(View.GONE);
+                    titleCandle.setText("▶ " + getString(R.string.chart_settings_candle));
+                }
+            }
+        });
+
+        maHeader.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+                isMaExpanded[0] = !isMaExpanded[0];
+                if (isMaExpanded[0])
+                {
+                    containerMa.setVisibility(View.VISIBLE);
+                    titleMa.setText("▼ " + getString(R.string.chart_settings_ma));
+                }
+                else
+                {
+                    containerMa.setVisibility(View.GONE);
+                    titleMa.setText("▶ " + getString(R.string.chart_settings_ma));
+                }
+            }
+        });
+
+        chartHeader.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+                isChartExpanded[0] = !isChartExpanded[0];
+                if (isChartExpanded[0])
+                {
+                    containerChart.setVisibility(View.VISIBLE);
+                    titleChart.setText("▼ Chart Options");
+                }
+                else
+                {
+                    containerChart.setVisibility(View.GONE);
+                    titleChart.setText("▶ Chart Options");
+                }
+            }
+        });
+
+        // ===================== APPLY BUTTON =====================
+        TextView btnApply = new TextView(this);
+        btnApply.setText(getString(R.string.chart_settings_apply));
+        btnApply.setTextSize(14f);
+        btnApply.setTypeface(null, Typeface.BOLD);
+        btnApply.setGravity(Gravity.CENTER);
+        btnApply.setPadding(0, 28, 0, 28);
+        btnApply.setTextColor(getResources().getColor(android.R.color.white, getTheme()));
+        GradientDrawable bgApply = new GradientDrawable();
+        bgApply.setCornerRadius(12f);
+        bgApply.setColor(getThemeColor(android.R.attr.colorPrimary));
+        btnApply.setBackground(bgApply);
+        LinearLayout.LayoutParams lpApply = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        lpApply.topMargin = 24;
+        btnApply.setLayoutParams(lpApply);
+        btnApply.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+                try
+                {
+                    if (dialog.getCurrentFocus() != null)
+                    {
+                        dialog.getCurrentFocus().clearFocus();
+                    }
+                    recycler.clearFocus();
+                    for (int i = 0; i < recycler.getChildCount(); i++)
+                    {
+                        RecyclerView.ViewHolder vh = recycler.getChildViewHolder(recycler.getChildAt(i));
+                        if (vh instanceof MaPopupAdapter.Holder)
                         {
-                            String txt = h.et.getText().toString().trim();
-                            if (!txt.isEmpty())
+                            MaPopupAdapter.Holder h = (MaPopupAdapter.Holder) vh;
+                            int pos = h.getAdapterPosition();
+                            if (pos >= 0 && pos < tempList.size())
                             {
-                                tempList.get(pos).period = Integer.parseInt(txt);
+                                String txt = h.et.getText().toString().trim();
+                                if (!txt.isEmpty())
+                                {
+                                    int period = Integer.parseInt(txt);
+                                    if (period > 0)
+                                    {
+                                        tempList.get(pos).period = period;
+                                    }
+                                }
                             }
                         }
                     }
+                    // Also check focused EditText that may not be in child list
+                    for (int i = 0; i < tempList.size(); i++)
+                    {
+                        // ensure no zero period left
+                        if (tempList.get(i).period <= 0)
+                        {
+                            tempList.get(i).period = 20;
+                        }
+                    }
                 }
-            }
-            catch (Exception e)
-            {
-            }
+                catch (Exception e)
+                {
+                }
 
-            marketChartView.setCandleColors(curBull[0], curBear[0]);
-            marketChartView.setMaLines(tempList);
-            dialog.dismiss();
+                float bodyFraction = 0.3f + sbBody.getProgress() / 100f;
+                float wickW = sbWick.getProgress();
+                if (wickW < 1) wickW = 1;
+                float maW = sbMaW.getProgress();
+                if (maW < 1) maW = 1;
+                int visCount = 20 + sbVis.getProgress();
+                boolean showG = swGrid.isChecked();
+                boolean showV = swVol.isChecked();
+
+                marketChartView.setCandleColors(curBull[0], curBear[0]);
+                marketChartView.setChartOptions(bodyFraction, wickW, maW, showG, showV, visCount);
+                marketChartView.setMaLines(tempList);
+                dialog.dismiss();
+            }
+        });
+        root.addView(btnApply);
+
+        scrollView.addView(root);
+        dialog.setContentView(scrollView);
+
+        if (dialog.getWindow() != null)
+        {
+            dialog.getWindow().setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT));
+            dialog.getWindow().setLayout(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+            dialog.getWindow().setGravity(Gravity.CENTER);
         }
-    });
-    root.addView(btnApply);
 
-    scrollView.addView(root);
-    dialog.setContentView(scrollView);
-
-    if (dialog.getWindow()!= null)
-    {
-        dialog.getWindow().setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT));
-        dialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        dialog.getWindow().setGravity(Gravity.CENTER);
+        dialog.show();
     }
 
-    dialog.show();
-}
-///////////////end////////
+
     static class MaPopupAdapter extends RecyclerView.Adapter<MaPopupAdapter.Holder>
     {
         List<MarketChartView.MaLine> list;
