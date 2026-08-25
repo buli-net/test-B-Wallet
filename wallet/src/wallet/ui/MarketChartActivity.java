@@ -993,7 +993,8 @@ public class MarketChartActivity extends Activity
 
                 marketChartView.setCandleColors(curBull[0], curBear[0]);
                 marketChartView.setChartOptions(bodyFraction, wickW, maW, showG, showV, visCount);
-                marketChartView.setChartAppearance(showLast, curLastColor[0], curLastColor[0], finalTxtSize[0], curPriceTxtColor[0], curGridColor[0], curBg, curLastW[0], swDash.isChecked());
+                int bgColorForApply = getThemeColor(android.R.attr.colorBackground);
+                marketChartView.setChartAppearance(showLast, curLastColor[0], curLastColor[0], finalTxtSize[0], curPriceTxtColor[0], curGridColor[0], bgColorForApply, curLastW[0], swDash.isChecked());
                 marketChartView.setMaLines(tempList);
                 dialog.dismiss();
             }
