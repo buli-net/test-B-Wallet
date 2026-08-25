@@ -56,4 +56,8 @@
 <dimen name="chart_popup_time_size">10sp</dimen>
 <dimen name="chart_popup_size">12sp</dimen>
 
+<!-- current price bar -  -->
+<dimen name="chart_current_price_bar_height">24dp</dimen>
+<dimen name="chart_current_price_text_size">11sp</dimen>
+
 </resources>
