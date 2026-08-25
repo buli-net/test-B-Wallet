@@ -500,15 +500,33 @@ public class MarketChartActivity extends Activity
         lpApply.topMargin = 24;
         btnApply.setLayoutParams(lpApply);
         btnApply.setOnClickListener(new View.OnClickListener()
-        {
-            @Override
-            public void onClick(View v)
-            {
-                marketChartView.setCandleColors(curBull[0], curBear[0]);
-                marketChartView.setMaLines(tempList);
-                dialog.dismiss();
+{
+    @Override
+    public void onClick(View v)
+    {
+        try {
+            if (dialog.getCurrentFocus()!= null) dialog.getCurrentFocus().clearFocus();
+            recycler.clearFocus();
+            for (int i = 0; i < recycler.getChildCount(); i++) {
+                RecyclerView.ViewHolder vh = recycler.getChildViewHolder(recycler.getChildAt(i));
+                if (vh instanceof MaPopupAdapter.Holder) {
+                    MaPopupAdapter.Holder h = (MaPopupAdapter.Holder) vh;
+                    int pos = h.getAdapterPosition();
+                    if (pos >= 0 && pos < tempList.size()) {
+                        String txt = h.et.getText().toString().trim();
+                        if (!txt.isEmpty()) {
+                            tempList.get(pos).period = Integer.parseInt(txt);
+                        }
+                    }
+                }
             }
-        });
+        } catch (Exception e) {}
+
+        marketChartView.setCandleColors(curBull[0], curBear[0]);
+        marketChartView.setMaLines(tempList);
+        dialog.dismiss();
+    }
+});
         root.addView(btnApply);
 
         scrollView.addView(root);
