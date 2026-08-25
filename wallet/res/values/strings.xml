@@ -551,4 +551,12 @@
 <string name="chart_settings_bearish">Bearish Color</string>
 <string name="chart_settings_ma">MA Settings</string>
 <string name="chart_settings_apply">Apply</string>
+
+<string name="chart_settings_chart_options">Chart Options</string>
+<string name="chart_body_width">Body width: %1$s</string>
+<string name="chart_wick_width">Wick width: %1$dpx</string>
+<string name="chart_ma_line_width">MA line width: %1$dpx</string>
+<string name="chart_show_grid">Show Grid</string>
+<string name="chart_show_volume">Show Volume</string>
+<string name="chart_visible_candles">Visible candles: %1$d</string>
 </resources>
