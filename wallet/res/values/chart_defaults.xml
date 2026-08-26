@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Candle count -->
+    <!-- integers -->
     <integer name="default_visible_candle_count">80</integer>
     <integer name="default_min_visible_candle_count">20</integer>
     <integer name="default_max_visible_candle_count">150</integer>
@@ -9,25 +9,13 @@
     <integer name="chart_live_interval_ms">1000</integer>
     <integer name="chart_countdown_interval_ms">1000</integer>
 
-    <!-- Dimens -->
-    <dimen name="chart_top_padding">12dp</dimen>
-    <dimen name="chart_bottom_padding">48dp</dimen>
-    <dimen name="chart_volume_height">90dp</dimen>
-    <dimen name="chart_volume_top_margin">12dp</dimen>
-    <dimen name="chart_price_axis_width">72dp</dimen>
-    <dimen name="default_wick_width">1.5dp</dimen>
-    <dimen name="default_ma_line_width">1.2dp</dimen>
-    <dimen name="default_price_text_size">11sp</dimen>
-    <dimen name="default_last_line_width">1dp</dimen>
-    <dimen name="default_last_label_text_size">11sp</dimen>
-
-    <!-- Bools -->
+    <!-- bools -->
     <bool name="default_show_grid">true</bool>
     <bool name="default_show_volume">true</bool>
     <bool name="default_show_last_price">true</bool>
     <bool name="default_last_line_dashed">true</bool>
 
-    <!-- Colors - dùng string reference, nền transparent auto theo theme -->
+    <!-- colors -->
     <color name="default_bullish">@color/palette_green</color>
     <color name="default_bearish">@color/palette_red</color>
     <color name="default_last_price_line">@color/palette_yellow</color>
@@ -36,4 +24,11 @@
     <color name="default_price_text">@color/palette_grey</color>
     <color name="default_last_label_text">@color/palette_white</color>
     <color name="default_chart_bg">@android:color/transparent</color>
+
+    <!-- dimen chỉ default_ , không dùng chart_ để tránh trùng với dimens.xml -->
+    <dimen name="default_wick_width">1dp</dimen>
+    <dimen name="default_ma_line_width">1.2dp</dimen>
+    <dimen name="default_price_text_size">10sp</dimen>
+    <dimen name="default_last_line_width">1dp</dimen>
+    <dimen name="default_last_label_text_size">11sp</dimen>
 </resources>
