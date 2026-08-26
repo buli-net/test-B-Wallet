@@ -44,6 +44,7 @@
     <dimen name="default_text_size">10sp</dimen>
     <dimen name="default_price_text_size">10sp</dimen>
     <dimen name="default_last_price_line_width">1dp</dimen>
+    <dimen name="default_last_line_width">1dp</dimen>
     <dimen name="default_dash_length">10dp</dimen>
     <dimen name="default_dash_gap">6dp</dimen>
     <dimen name="default_ma_line_width">1.2dp</dimen>
