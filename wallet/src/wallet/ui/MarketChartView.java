@@ -132,7 +132,6 @@ public class MarketChartView extends View
     private static final String KEY_BULL = "bull_color";
     private static final String KEY_BEAR = "bear_color";
 
-    // ===== NEW: CHART OPTIONS PREFS =====
     private static final String PREFS_CHART = "chart_options_prefs";
     private static final String KEY_BODY_FRACTION = "body_fraction";
     private static final String KEY_WICK_WIDTH = "wick_width";
@@ -149,6 +148,9 @@ public class MarketChartView extends View
     private static final String KEY_BG_COLOR = "bg_color";
     private static final String KEY_LAST_LINE_WIDTH = "last_line_width";
     private static final String KEY_LAST_LINE_DASH = "last_line_dash";
+    // NEW: label giá hiện tại
+    private static final String KEY_LAST_LABEL_TEXT_SIZE = "last_label_text_size";
+    private static final String KEY_LAST_LABEL_TEXT_COLOR = "last_label_text_color";
 
     private int visibleCandleCount = DEFAULT_VISIBLE_CANDLE_COUNT;
     private float translationX = 0f;
@@ -178,7 +180,6 @@ public class MarketChartView extends View
     private int bullishColor;
     private int bearishColor;
 
-    // ===== NEW: OPTIONS STATE =====
     private float bodyWidthFraction = 0.7f;
     private float wickWidthPx = -1f;
     private float maLineWidthPx = -1f;
@@ -193,6 +194,9 @@ public class MarketChartView extends View
     private int bgColor = -1;
     private float lastLineWidthPx = -1f;
     private boolean lastLineDashed = true;
+    // NEW: size + màu label giá hiện tại
+    private float lastPriceLabelTextSizePx = -1f;
+    private int lastPriceLabelTextColor = -1;
 
     public MarketChartView(Context context, AttributeSet attrs)
     {
@@ -252,6 +256,8 @@ public class MarketChartView extends View
             bgColor = sp.getInt(KEY_BG_COLOR, -1);
             lastLineWidthPx = sp.getFloat(KEY_LAST_LINE_WIDTH, -1f);
             lastLineDashed = sp.getBoolean(KEY_LAST_LINE_DASH, true);
+            lastPriceLabelTextSizePx = sp.getFloat(KEY_LAST_LABEL_TEXT_SIZE, -1f);
+            lastPriceLabelTextColor = sp.getInt(KEY_LAST_LABEL_TEXT_COLOR, -1);
         }
         catch (Exception e)
         {
@@ -270,6 +276,8 @@ public class MarketChartView extends View
             bgColor = -1;
             lastLineWidthPx = -1f;
             lastLineDashed = true;
+            lastPriceLabelTextSizePx = -1f;
+            lastPriceLabelTextColor = -1;
         }
     }
 
@@ -321,6 +329,8 @@ public class MarketChartView extends View
     public int getBgColor() { return bgColor; }
     public float getLastLineWidthPx() { return lastLineWidthPx; }
     public boolean isLastLineDashed() { return lastLineDashed; }
+    public float getLastPriceLabelTextSizePx() { return lastPriceLabelTextSizePx; }
+    public int getLastPriceLabelTextColor() { return lastPriceLabelTextColor; }
 
     public void setChartAppearance(boolean sLastPrice, int lastLineColor, int lastBgColor, float txtSize, int txtColor, int gColor, int bColor, float lastW, boolean lastDash)
     {
@@ -351,10 +361,29 @@ public class MarketChartView extends View
         initPaints(getContext());
         invalidate();
     }
-    // keep old signature for compatibility
+
     public void setChartAppearance(boolean sLastPrice, int lastLineColor, int lastBgColor, float txtSize, int txtColor, int gColor)
     {
         setChartAppearance(sLastPrice, lastLineColor, lastBgColor, txtSize, txtColor, gColor, bgColor, lastLineWidthPx, lastLineDashed);
+    }
+
+    // NEW: chỉnh riêng label giá hiện tại
+    public void setLastPriceLabelAppearance(int bgColor, int textColor, float textSizePx)
+    {
+        this.lastPriceBgColor = bgColor;
+        this.lastPriceLabelTextColor = textColor;
+        this.lastPriceLabelTextSizePx = textSizePx;
+        try
+        {
+            SharedPreferences sp = getContext().getSharedPreferences(PREFS_CHART, Context.MODE_PRIVATE);
+            SharedPreferences.Editor ed = sp.edit();
+            ed.putInt(KEY_LAST_PRICE_BG_COLOR, bgColor);
+            ed.putInt(KEY_LAST_LABEL_TEXT_COLOR, textColor);
+            ed.putFloat(KEY_LAST_LABEL_TEXT_SIZE, textSizePx);
+            ed.apply();
+        } catch (Exception e) {}
+        initPaints(getContext());
+        invalidate();
     }
 
     public void setCandleColors(int bull, int bear)
@@ -608,8 +637,8 @@ public class MarketChartView extends View
         lastPriceBgPaint.setStyle(Paint.Style.FILL);
 
         lastPriceTextPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        lastPriceTextPaint.setColor(getThemeColor(android.R.attr.textColorPrimaryInverse));
-        lastPriceTextPaint.setTextSize(res.getDimension(R.dimen.chart_text_size));
+        lastPriceTextPaint.setColor(lastPriceLabelTextColor!= -1? lastPriceLabelTextColor : getThemeColor(android.R.attr.textColorPrimaryInverse));
+        lastPriceTextPaint.setTextSize(lastPriceLabelTextSizePx > 0? lastPriceLabelTextSizePx : res.getDimension(R.dimen.chart_text_size));
         lastPriceTextPaint.setFakeBoldText(true);
 
         float defaultMaWidth = res.getDimension(R.dimen.chart_ma_line_width);
@@ -678,7 +707,6 @@ public class MarketChartView extends View
         invalidate();
     }
 
-    // FIX: Gọi khi đổi theme sáng/tối bằng AppCompatDelegate
     public void refreshTheme()
     {
         loadChartOptions(getContext());
