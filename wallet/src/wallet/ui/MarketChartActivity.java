@@ -391,11 +391,11 @@ public class MarketChartActivity extends Activity
             }
         }
 
-        state.curWick[0] = marketChartView.getWickWidthPx() > 0? marketChartView.getWickWidthPx() : getResources().getDimension(R.dimen.chart_wick_width);
-        state.curMaW[0] = marketChartView.getMaLineWidthPx() > 0? marketChartView.getMaLineWidthPx() : getResources().getDimension(R.dimen.chart_ma_line_width);
-        state.curTxtSize[0] = marketChartView.getPriceTextSizePx() > 0? marketChartView.getPriceTextSizePx() : getResources().getDimension(R.dimen.chart_text_size);
-        state.curLastW[0] = marketChartView.getLastLineWidthPx() > 0? marketChartView.getLastLineWidthPx() : getResources().getDimension(R.dimen.chart_last_price_line_width);
-        state.curLabelSize[0] = marketChartView.getLastPriceLabelTextSizePx() > 0? marketChartView.getLastPriceLabelTextSizePx() : getResources().getDimension(R.dimen.chart_text_size);
+        state.curWick[0] = marketChartView.getWickWidthPx() > 0? marketChartView.getWickWidthPx() : getResources().getDimension(R.dimen.default_wick_width);
+        state.curMaW[0] = marketChartView.getMaLineWidthPx() > 0? marketChartView.getMaLineWidthPx() : getResources().getDimension(R.dimen.default_ma_line_width);
+        state.curTxtSize[0] = marketChartView.getPriceTextSizePx() > 0? marketChartView.getPriceTextSizePx() : getResources().getDimension(R.dimen.default_price_text_size);
+        state.curLastW[0] = marketChartView.getLastLineWidthPx() > 0? marketChartView.getLastLineWidthPx() : getResources().getDimension(R.dimen.default_last_price_line_width);
+        state.curLabelSize[0] = marketChartView.getLastPriceLabelTextSizePx() > 0? marketChartView.getLastPriceLabelTextSizePx() : getResources().getDimension(R.dimen.default_price_text_size);
         state.curLastColor[0] = marketChartView.getLastPriceLineColor();
         state.curGridColor[0] = marketChartView.getGridColor()!= -1? marketChartView.getGridColor() : getResources().getColor(R.color.chart_grid, getTheme());
         state.curPriceTxtColor[0] = marketChartView.getPriceTextColor()!= -1? marketChartView.getPriceTextColor() : getThemeColor(android.R.attr.textColorSecondary);
@@ -1338,9 +1338,9 @@ public class MarketChartActivity extends Activity
     private void showResetConfirm(final Dialog settingsDialog)
     {
         new AlertDialog.Builder(this)
-             .setTitle(getString(R.string.chart_reset_confirm_title))
-             .setMessage(getString(R.string.chart_reset_confirm_message))
-             .setPositiveButton(getString(R.string.chart_reset), new DialogInterface.OnClickListener()
+            .setTitle(getString(R.string.chart_reset_confirm_title))
+            .setMessage(getString(R.string.chart_reset_confirm_message))
+            .setPositiveButton(getString(R.string.chart_reset), new DialogInterface.OnClickListener()
                 {
                     @Override
                     public void onClick(DialogInterface d, int which)
@@ -1353,8 +1353,8 @@ public class MarketChartActivity extends Activity
                         Toast.makeText(MarketChartActivity.this, getString(R.string.chart_settings_reset), Toast.LENGTH_SHORT).show();
                     }
                 })
-             .setNegativeButton(getString(R.string.close), null)
-             .show();
+            .setNegativeButton(getString(R.string.close), null)
+            .show();
     }
 
     static class MaPopupAdapter extends RecyclerView.Adapter<MaPopupAdapter.Holder>
@@ -1664,8 +1664,8 @@ public class MarketChartActivity extends Activity
         int[] intervalLabels = {R.string.time, R.string.interval_1m, R.string.interval_3m, R.string.interval_5m, R.string.interval_15m, R.string.interval_30m, R.string.interval_1h, R.string.interval_2h, R.string.interval_4h, R.string.interval_6h, R.string.interval_12h, R.string.interval_1d, R.string.interval_1w, R.string.interval_1M};
 
         final AlertDialog dialog = new AlertDialog.Builder(this)
-             .setView(root)
-             .setNegativeButton(R.string.close, new DialogInterface.OnClickListener()
+            .setView(root)
+            .setNegativeButton(R.string.close, new DialogInterface.OnClickListener()
                 {
                     @Override
                     public void onClick(DialogInterface d, int w)
@@ -1673,7 +1673,7 @@ public class MarketChartActivity extends Activity
                         d.dismiss();
                     }
                 })
-             .create();
+            .create();
 
         for (int i = 0; i < realLoad.length; i++)
         {
