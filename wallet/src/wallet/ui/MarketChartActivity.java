@@ -1,12 +1,11 @@
 /*
  * Copyright (c) 2024
  *
- * Modified version for MarketChartActivity
+ * Modified version for MarketChartActivity - fixed ViewModel/Lifecycle issues
  */
 
 package wallet.ui;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
@@ -33,6 +32,7 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -50,16 +50,15 @@ import java.util.Locale;
 import java.util.Map;
 
 import wallet.Configuration;
-import wallet.Constants;
 import wallet.R;
 import wallet.WalletApplication;
-import wallet.data.WalletBalanceLiveData;
 import wallet.exchangerate.ExchangeRateDao;
 import wallet.exchangerate.ExchangeRateEntry;
 import wallet.exchangerate.ExchangeRatesRepository;
 import wallet.service.BlockchainState;
+import wallet.ui.WalletBalanceViewModel;
 
-public class MarketChartActivity extends Activity
+public class MarketChartActivity extends AppCompatActivity
 {
     private MarketChartView marketChartView;
     private TextView textCurrentPrice;
@@ -355,7 +354,7 @@ public class MarketChartActivity extends Activity
 
         loadFiatRate();
 
-        // ========== SỬA LẠI PHẦN LẤY SỐ DƯ ==========
+        // ========== LẤY SỐ DƯ QUA VIEWMODEL (offline, không API) ==========
         balanceViewModel = new ViewModelProvider(this).get(WalletBalanceViewModel.class);
 
         // Observe balance
@@ -384,27 +383,23 @@ public class MarketChartActivity extends Activity
         }
     }
 
-    // ========== PHƯƠNG THỨC CẬP NHẬT SỐ DƯ MỚI ==========
+    // ========== CẬP NHẬT HIỂN THỊ SỐ DƯ ==========
     private void updateBalanceDisplay() {
         if (textWalletBalance == null) return;
 
-        // Nếu chưa sync xong, hiển thị syncing
         if (!isBlockchainSynced) {
             textWalletBalance.setText("Syncing...");
             return;
         }
 
-        // Nếu chưa có balance
         if (currentBalance == null) {
             textWalletBalance.setText("Loading balance...");
             return;
         }
 
-        // Tính số BTC
         double btcBalance = currentBalance.toBtc().doubleValue();
         String btcStr = String.format(Locale.US, "%.8f", btcBalance);
 
-        // Nếu có exchange rate và show local balance
         boolean showLocal = getResources().getBoolean(R.bool.show_local_balance) && config.isEnableExchangeRates();
         if (showLocal && currentExchangeRate != null) {
             Fiat fiatValue = currentExchangeRate.exchangeRate().coinToFiat(currentBalance);
@@ -417,7 +412,7 @@ public class MarketChartActivity extends Activity
         textWalletBalance.invalidate();
     }
 
-    // ========== CÁC PHƯƠNG THỨC KHÁC GIỮ NGUYÊN ==========
+    // ========== CÁC PHƯƠNG THỨC KHÁC (GIỮ NGUYÊN) ==========
     private void showMaSettingsPopup()
     {
         showChartSettingsPopup();
@@ -1477,7 +1472,7 @@ public class MarketChartActivity extends Activity
                     marketChartView.setFiatCode(currentFiatCode);
                     marketChartView.setFiatMultiplier((float) usdToFiat);
                 }
-                updateBalanceDisplay(); // cập nhật lại balance với rate mới
+                updateBalanceDisplay();
             });
         }).start();
     }
