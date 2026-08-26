@@ -1538,7 +1538,7 @@ public class MarketChartActivity extends Activity
                         return;
                     }
                     Coin bal = wallet.getBalance();
-                    cachedBtcBalance = bal.toBtc();
+                    cachedBtcBalance = bal.toBtc().doubleValue();
                     mainHandler.post(new Runnable()
                     {
                         @Override
