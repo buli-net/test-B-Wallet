@@ -48,6 +48,7 @@ import wallet.WalletApplication;
 import wallet.exchangerate.ExchangeRateDao;
 import wallet.exchangerate.ExchangeRateEntry;
 import wallet.exchangerate.ExchangeRatesRepository;
+import wallet.data.WalletBalanceLiveData;
 
 public class MarketChartActivity extends Activity
 {
@@ -85,6 +86,8 @@ public class MarketChartActivity extends Activity
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
     private float lastDisplayPrice = 0f;
     private double cachedBtcBalance = -1;
+    private WalletBalanceLiveData balanceLiveData;
+    private androidx.lifecycle.Observer<Coin> balanceObserver;
 
     private static class ChartSettingsState
     {
@@ -1343,9 +1346,9 @@ public class MarketChartActivity extends Activity
     private void showResetConfirm(final Dialog settingsDialog)
     {
         new AlertDialog.Builder(this)
-        .setTitle(getString(R.string.chart_reset_confirm_title))
-        .setMessage(getString(R.string.chart_reset_confirm_message))
-        .setPositiveButton(getString(R.string.chart_reset), new DialogInterface.OnClickListener()
+       .setTitle(getString(R.string.chart_reset_confirm_title))
+       .setMessage(getString(R.string.chart_reset_confirm_message))
+       .setPositiveButton(getString(R.string.chart_reset), new DialogInterface.OnClickListener()
                 {
                     @Override
                     public void onClick(DialogInterface d, int which)
@@ -1358,8 +1361,8 @@ public class MarketChartActivity extends Activity
                         Toast.makeText(MarketChartActivity.this, getString(R.string.chart_settings_reset), Toast.LENGTH_SHORT).show();
                     }
                 })
-        .setNegativeButton(getString(R.string.close), null)
-        .show();
+       .setNegativeButton(getString(R.string.close), null)
+       .show();
     }
 
     static class MaPopupAdapter extends RecyclerView.Adapter<MaPopupAdapter.Holder>
@@ -1481,6 +1484,10 @@ public class MarketChartActivity extends Activity
     protected void onDestroy()
     {
         super.onDestroy();
+        if (balanceLiveData!= null && balanceObserver!= null)
+        {
+            balanceLiveData.removeObserver(balanceObserver);
+        }
         if (prefs!= null && prefsListener!= null)
         {
             prefs.unregisterOnSharedPreferenceChangeListener(prefsListener);
@@ -1521,85 +1528,68 @@ public class MarketChartActivity extends Activity
             }
         }).start();
     }
-/////////////////
-        private void fetchAndCacheWalletBalance()
+
+    private void fetchAndCacheWalletBalance()
     {
-        new Thread(new Runnable()
+        try
         {
-            @Override
-            public void run()
+            final WalletApplication app = (WalletApplication) getApplication();
+            balanceLiveData = new WalletBalanceLiveData(app);
+            balanceObserver = new androidx.lifecycle.Observer<Coin>()
             {
-                try
+                @Override
+                public void onChanged(Coin coin)
                 {
-                    WalletApplication app = (WalletApplication) getApplication();
-                    if (app == null) return;
-                    org.bitcoinj.wallet.Wallet wallet = null;
-                    for (int i = 0; i < 5; i++) {
-                        wallet = app.getWallet();
-                        if (wallet != null) break;
-                        try { Thread.sleep(500); } catch (Exception e) {}
+                    if (coin!= null)
+                    {
+                        cachedBtcBalance = coin.toBtc().doubleValue();
+                        updateWalletBalanceDisplay();
                     }
-                    if (wallet == null) return;
-
-                    // CHUẨN ví gốc 0.17.1: ESTIMATED (giống WalletBalanceLiveData default)
-                    org.bitcoinj.base.Coin bal = wallet.getBalance(org.bitcoinj.wallet.Wallet.BalanceType.ESTIMATED);
-                    if (bal == null) return;
-                    cachedBtcBalance = bal.toBtc().doubleValue();
-
-                    // Listener giống hệt WalletBalanceLiveData.java bản 0.17.1
-                    try {
-                        wallet.addCoinsReceivedEventListener(org.bitcoinj.utils.Threading.SAME_THREAD,
-                            new org.bitcoinj.wallet.listeners.WalletCoinsReceivedEventListener() {
-                                @Override
-                                public void onCoinsReceived(org.bitcoinj.wallet.Wallet w,
-                                                            org.bitcoinj.core.Transaction tx,
-                                                            org.bitcoinj.base.Coin prev,
-                                                            org.bitcoinj.base.Coin newBal) {
-                                    try {
-                                        cachedBtcBalance = w.getBalance(org.bitcoinj.wallet.Wallet.BalanceType.ESTIMATED).toBtc().doubleValue();
-                                        mainHandler.post(new Runnable() {
-                                            @Override public void run() { updateWalletBalanceDisplay(); }
-                                        });
-                                    } catch (Exception e) {}
-                                }
-                            });
-
-                        wallet.addCoinsSentEventListener(org.bitcoinj.utils.Threading.SAME_THREAD,
-                            new org.bitcoinj.wallet.listeners.WalletCoinsSentEventListener() {
-                                @Override
-                                public void onCoinsSent(org.bitcoinj.wallet.Wallet w,
-                                                        org.bitcoinj.core.Transaction tx,
-                                                        org.bitcoinj.base.Coin prev,
-                                                        org.bitcoinj.base.Coin newBal) {
-                                    try {
-                                        cachedBtcBalance = w.getBalance(org.bitcoinj.wallet.Wallet.BalanceType.ESTIMATED).toBtc().doubleValue();
-                                        mainHandler.post(new Runnable() {
-                                            @Override public void run() { updateWalletBalanceDisplay(); }
-                                        });
-                                    } catch (Exception e) {}
-                                }
-                            });
-
-                        wallet.addChangeEventListener(org.bitcoinj.utils.Threading.SAME_THREAD,
-                            new org.bitcoinj.wallet.listeners.WalletChangeEventListener() {
-                                @Override
-                                public void onWalletChanged(org.bitcoinj.wallet.Wallet w) {
-                                    try {
-                                        cachedBtcBalance = w.getBalance(org.bitcoinj.wallet.Wallet.BalanceType.ESTIMATED).toBtc().doubleValue();
-                                        mainHandler.post(new Runnable() {
-                                            @Override public void run() { updateWalletBalanceDisplay(); }
-                                        });
-                                    } catch (Exception e) {}
-                                }
-                            });
-                    } catch (Exception e) {}
-
-                    mainHandler.post(new Runnable() {
-                        @Override public void run() { updateWalletBalanceDisplay(); }
-                    });
-                } catch (Exception e) {}
+                }
+            };
+            balanceLiveData.observeForever(balanceObserver);
+            if (textWalletBalance!= null)
+            {
+                textWalletBalance.setText(getString(R.string.chart_balance_loading));
             }
-        }).start();
+            mainHandler.postDelayed(new Runnable()
+            {
+                @Override
+                public void run()
+                {
+                    try
+                    {
+                        Wallet w = app.getWallet();
+                        if (w!= null)
+                        {
+                            Coin bal = w.getBalance(Wallet.BalanceType.ESTIMATED);
+                            if (bal!= null)
+                            {
+                                cachedBtcBalance = bal.toBtc().doubleValue();
+                                updateWalletBalanceDisplay();
+                            }
+                        }
+                        else
+                        {
+                            if (cachedBtcBalance < 0)
+                            {
+                                mainHandler.postDelayed(this, 1000);
+                            }
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        if (cachedBtcBalance < 0)
+                        {
+                            mainHandler.postDelayed(this, 1000);
+                        }
+                    }
+                }
+            }, 500);
+        }
+        catch (Exception e)
+        {
+        }
     }
 
     private void updateWalletBalanceDisplay()
@@ -1607,24 +1597,27 @@ public class MarketChartActivity extends Activity
         try
         {
             if (textWalletBalance == null) return;
-            if (cachedBtcBalance < 0) {
+            if (cachedBtcBalance < 0)
+            {
                 textWalletBalance.setText(getString(R.string.chart_balance_loading));
                 return;
             }
             double fiatPerBtc = getFiatPerBtc(currentFiatCode);
             String sym = getCurrencySymbol(currentFiatCode);
-            if (fiatPerBtc > 0) {
+            if (fiatPerBtc > 0)
+            {
                 double fiatVal = cachedBtcBalance * fiatPerBtc;
-                textWalletBalance.setText(String.format(java.util.Locale.US,
-                        getString(R.string.chart_balance_format), cachedBtcBalance, sym, fiatVal));
-            } else {
-                textWalletBalance.setText(String.format(java.util.Locale.US,
-                        getString(R.string.chart_balance_btc_only), cachedBtcBalance));
+                textWalletBalance.setText(String.format(java.util.Locale.US, getString(R.string.chart_balance_format), cachedBtcBalance, sym, fiatVal));
             }
-        } catch (Exception e) {}
+            else
+            {
+                textWalletBalance.setText(String.format(java.util.Locale.US, getString(R.string.chart_balance_btc_only), cachedBtcBalance));
+            }
+        }
+        catch (Exception e)
+        {
+        }
     }
-
-////////////////
 
     private double getFiatPerBtc(String fiatCode)
     {
@@ -1774,8 +1767,8 @@ public class MarketChartActivity extends Activity
         int[] intervalLabels = {R.string.time, R.string.interval_1m, R.string.interval_3m, R.string.interval_5m, R.string.interval_15m, R.string.interval_30m, R.string.interval_1h, R.string.interval_2h, R.string.interval_4h, R.string.interval_6h, R.string.interval_12h, R.string.interval_1d, R.string.interval_1w, R.string.interval_1M};
 
         final AlertDialog dialog = new AlertDialog.Builder(this)
-        .setView(root)
-        .setNegativeButton(R.string.close, new DialogInterface.OnClickListener()
+       .setView(root)
+       .setNegativeButton(R.string.close, new DialogInterface.OnClickListener()
                 {
                     @Override
                     public void onClick(DialogInterface d, int w)
@@ -1783,7 +1776,7 @@ public class MarketChartActivity extends Activity
                         d.dismiss();
                     }
                 })
-        .create();
+       .create();
 
         for (int i = 0; i < realLoad.length; i++)
         {
