@@ -233,16 +233,6 @@ public class MarketChartView extends View
             Resources res = context.getResources();
             int defBull = res.getColor(R.color.default_bullish, null);
             int defBear = res.getColor(R.color.default_bearish, null);
-            TypedArray palette = res.obtainTypedArray(R.array.candle_color_palette);
-            if (palette.length() > 3)
-            {
-                defBull = palette.getColor(3, defBull);
-            }
-            if (palette.length() > 4)
-            {
-                defBear = palette.getColor(4, defBear);
-            }
-            palette.recycle();
             bullishColor = sp.getInt(KEY_BULL, defBull);
             bearishColor = sp.getInt(KEY_BEAR, defBear);
         }
@@ -251,10 +241,8 @@ public class MarketChartView extends View
             try
             {
                 Resources res = context.getResources();
-                TypedArray palette = res.obtainTypedArray(R.array.candle_color_palette);
-                bullishColor = palette.getColor(3, res.getColor(R.color.default_bullish, null));
-                bearishColor = palette.getColor(4, res.getColor(R.color.default_bearish, null));
-                palette.recycle();
+                bullishColor = res.getColor(R.color.default_bullish, null);
+                bearishColor = res.getColor(R.color.default_bearish, null);
             }
             catch (Exception ex)
             {
@@ -552,10 +540,8 @@ public class MarketChartView extends View
         try
         {
             Resources res = getResources();
-            TypedArray palette = res.obtainTypedArray(R.array.candle_color_palette);
-            int defaultBull = palette.getColor(3, res.getColor(R.color.default_bullish, null));
-            int defaultBear = palette.getColor(4, res.getColor(R.color.default_bearish, null));
-            palette.recycle();
+            int defaultBull = res.getColor(R.color.default_bullish, null);
+            int defaultBear = res.getColor(R.color.default_bearish, null);
 
             bullishColor = defaultBull;
             bearishColor = defaultBear;
@@ -603,8 +589,8 @@ public class MarketChartView extends View
             bgColor = r.getColor(R.color.default_chart_bg, null);
             lastLineWidthPx = r.getDimension(R.dimen.default_last_line_width);
 
-            TypedArray colors = res.obtainTypedArray(R.array.ma_default_colors);
-            int[] periods = res.getIntArray(R.array.ma_default_periods);
+            TypedArray colors = res.obtainTypedArray(R.array.default_ma_colors);
+            int[] periods = res.getIntArray(R.array.default_ma_periods);
             maLines.clear();
             for (int i = 0; i < periods.length; i++)
             {
@@ -694,8 +680,8 @@ public class MarketChartView extends View
         try
         {
             Resources res = context.getResources();
-            int[] periods = res.getIntArray(R.array.ma_default_periods);
-            TypedArray colors = res.obtainTypedArray(R.array.ma_default_colors);
+            int[] periods = res.getIntArray(R.array.default_ma_periods);
+            TypedArray colors = res.obtainTypedArray(R.array.default_ma_colors);
             maLines.clear();
             for (int i = 0; i < periods.length; i++)
             {
@@ -709,9 +695,9 @@ public class MarketChartView extends View
             try
             {
                 Resources res = context.getResources();
-                TypedArray colors = res.obtainTypedArray(R.array.ma_default_colors);
+                TypedArray colors = res.obtainTypedArray(R.array.default_ma_colors);
                 maLines.clear();
-                int[] periods = res.getIntArray(R.array.ma_default_periods);
+                int[] periods = res.getIntArray(R.array.default_ma_periods);
                 for (int i = 0; i < periods.length; i++)
                 {
                     maLines.add(new MaLine(periods[i], colors.getColor(i % colors.length(), res.getColor(R.color.default_last_price_line, null))));
@@ -721,9 +707,9 @@ public class MarketChartView extends View
             catch (Exception ex)
             {
                 Resources res = context.getResources();
-                TypedArray colors = res.obtainTypedArray(R.array.ma_default_colors);
+                TypedArray colors = res.obtainTypedArray(R.array.default_ma_colors);
                 maLines.clear();
-                int[] periods = res.getIntArray(R.array.ma_default_periods);
+                int[] periods = res.getIntArray(R.array.default_ma_periods);
                 for (int i = 0; i < periods.length; i++)
                 {
                     maLines.add(new MaLine(periods[i], colors.getColor(i % colors.length(), res.getColor(R.color.default_last_price_line, null))));
