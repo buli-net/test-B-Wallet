@@ -22,7 +22,7 @@
     <color name="default_last_price_bg">@color/palette_yellow</color>
     <color name="default_grid">@color/palette_grey</color>
     <color name="default_price_text">@color/palette_grey</color>
-    <color name="default_last_label_text">@color/palette_white</color>
+    <color name="default_last_label_text">?android:attr/textColorPrimary</color>
     <color name="default_chart_bg">@android:color/transparent</color>
 
     <!-- dimen chỉ default_ , không dùng chart_ để tránh trùng với dimens.xml -->
