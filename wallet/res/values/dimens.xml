@@ -39,9 +39,9 @@
 <dimen name="chart_body_min_width">2dp</dimen>
 <dimen name="chart_body_max_width">12dp</dimen>
 <dimen name="chart_candle_min_height">2dp</dimen>
-<dimen name="chart_price_axis_width">52dp</dimen>
+<dimen name="chart_price_axis_width">22dp</dimen>
 <dimen name="chart_time_axis_height">20dp</dimen>
-<dimen name="chart_volume_height">90dp</dimen>
+<dimen name="chart_volume_height">50dp</dimen>
 <dimen name="chart_top_padding">12dp</dimen>
 <dimen name="chart_bottom_padding">30dp</dimen>
 <dimen name="chart_volume_top_margin">12dp</dimen>
