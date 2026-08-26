@@ -240,10 +240,8 @@
                 android:id="@+id/popupVolume"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
                 android:text="@string/chart_popup_volume_default"
-                android:textSize="@dimen/chart_popup_time_size"
-                android:textColor="?android:attr/textColorSecondary" />
+                android:textSize="@dimen/chart_popup_size" />
 
         </LinearLayout>
 
