@@ -11,8 +11,8 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:gravity="top"
-        android:paddingStart="@dimen/chart_screen_padding"
-        android:paddingEnd="@dimen/chart_screen_padding"
+        android:paddingStart="@dimen/default_screen_padding"
+        android:paddingEnd="@dimen/default_screen_padding"
         android:paddingTop="8dp"
         android:paddingBottom="8dp">
 
@@ -33,7 +33,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/chart_price_default"
-                    android:textSize="@dimen/chart_price_large_size"
+                    android:textSize="@dimen/default_price_large_size"
                     android:textStyle="bold"
                     android:singleLine="true"
                     android:ellipsize="end"
@@ -43,9 +43,9 @@
                     android:id="@+id/textChange24h"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="@dimen/chart_small_margin"
+                    android:layout_marginStart="@dimen/default_small_margin"
                     android:text="@string/chart_change_default"
-                    android:textSize="@dimen/chart_text_size"
+                    android:textSize="@dimen/default_text_size"
                     android:singleLine="true" />
 
             </LinearLayout>
@@ -126,8 +126,8 @@
         android:id="@+id/textMaLabel"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingStart="@dimen/chart_screen_padding"
-        android:paddingEnd="@dimen/chart_screen_padding"
+        android:paddingStart="@dimen/default_screen_padding"
+        android:paddingEnd="@dimen/default_screen_padding"
         android:layout_marginTop="6dp"
         android:layout_marginBottom="14dp"
         android:paddingBottom="6dp"
@@ -194,7 +194,7 @@
             android:orientation="vertical"
             android:visibility="gone"
             android:elevation="8dp"
-            android:padding="@dimen/chart_popup_padding"
+            android:padding="@dimen/default_popup_padding"
             android:layout_margin="8dp"
             android:background="@color/chart_bg">
 
@@ -203,7 +203,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/chart_popup_time_default"
-                android:textSize="@dimen/chart_popup_time_size"
+                android:textSize="@dimen/default_popup_time_size"
                 android:textStyle="bold"
                 android:textColor="?android:attr/textColorPrimary" />
 
@@ -213,35 +213,35 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
                 android:text="@string/chart_popup_open_default"
-                android:textSize="@dimen/chart_popup_size" />
+                android:textSize="@dimen/default_popup_size" />
 
             <TextView
                 android:id="@+id/popupHigh"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/chart_popup_high_default"
-                android:textSize="@dimen/chart_popup_size" />
+                android:textSize="@dimen/default_popup_size" />
 
             <TextView
                 android:id="@+id/popupLow"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/chart_popup_low_default"
-                android:textSize="@dimen/chart_popup_size" />
+                android:textSize="@dimen/default_popup_size" />
 
             <TextView
                 android:id="@+id/popupClose"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/chart_popup_close_default"
-                android:textSize="@dimen/chart_popup_size" />
+                android:textSize="@dimen/default_popup_size" />
 
             <TextView
                 android:id="@+id/popupVolume"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/chart_popup_volume_default"
-                android:textSize="@dimen/chart_popup_size" />
+                android:textSize="@dimen/default_popup_size" />
 
         </LinearLayout>
 
