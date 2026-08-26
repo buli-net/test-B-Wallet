@@ -1522,7 +1522,7 @@ public class MarketChartActivity extends Activity
         }).start();
     }
 /////////////////
-    private void fetchAndCacheWalletBalance()
+        private void fetchAndCacheWalletBalance()
     {
         new Thread(new Runnable()
         {
@@ -1533,7 +1533,7 @@ public class MarketChartActivity extends Activity
                 {
                     WalletApplication app = (WalletApplication) getApplication();
                     if (app == null) return;
-                    Wallet wallet = null;
+                    org.bitcoinj.wallet.Wallet wallet = null;
                     for (int i = 0; i < 5; i++) {
                         wallet = app.getWallet();
                         if (wallet != null) break;
@@ -1541,44 +1541,63 @@ public class MarketChartActivity extends Activity
                     }
                     if (wallet == null) return;
 
-                    // Chuẩn ví gốc: ESTIMATED
-                    Coin bal = wallet.getBalance(Wallet.BalanceType.ESTIMATED);
+                    // CHUẨN ví gốc 0.17.1: ESTIMATED (giống WalletBalanceLiveData default)
+                    org.bitcoinj.base.Coin bal = wallet.getBalance(org.bitcoinj.wallet.Wallet.BalanceType.ESTIMATED);
                     if (bal == null) return;
                     cachedBtcBalance = bal.toBtc().doubleValue();
 
-                    // Chuẩn ví gốc: đăng ký listener giống WalletBalanceLiveData
+                    // Listener giống hệt WalletBalanceLiveData.java bản 0.17.1
                     try {
-                        wallet.addCoinsReceivedEventListener(org.bitcoinj.utils.Threading.SAME_THREAD, new org.bitcoinj.wallet.WalletCoinsReceivedEventListener() {
-                            @Override public void onCoinsReceived(Wallet w, org.bitcoinj.core.Transaction tx, Coin prev, Coin newBal) {
-                                try {
-                                    cachedBtcBalance = w.getBalance(Wallet.BalanceType.ESTIMATED).toBtc().doubleValue();
-                                    mainHandler.post(() -> updateWalletBalanceDisplay());
-                                } catch (Exception e) {}
-                            }
-                        });
-                        wallet.addCoinsSentEventListener(org.bitcoinj.utils.Threading.SAME_THREAD, new org.bitcoinj.wallet.WalletCoinsSentEventListener() {
-                            @Override public void onCoinsSent(Wallet w, org.bitcoinj.core.Transaction tx, Coin prev, Coin newBal) {
-                                try {
-                                    cachedBtcBalance = w.getBalance(Wallet.BalanceType.ESTIMATED).toBtc().doubleValue();
-                                    mainHandler.post(() -> updateWalletBalanceDisplay());
-                                } catch (Exception e) {}
-                            }
-                        });
-                        wallet.addChangeEventListener(org.bitcoinj.utils.Threading.SAME_THREAD, new org.bitcoinj.wallet.WalletChangeEventListener() {
-                            @Override public void onWalletChanged(Wallet w) {
-                                try {
-                                    cachedBtcBalance = w.getBalance(Wallet.BalanceType.ESTIMATED).toBtc().doubleValue();
-                                    mainHandler.post(() -> updateWalletBalanceDisplay());
-                                } catch (Exception e) {}
-                            }
-                        });
+                        wallet.addCoinsReceivedEventListener(org.bitcoinj.utils.Threading.SAME_THREAD,
+                            new org.bitcoinj.wallet.listeners.WalletCoinsReceivedEventListener() {
+                                @Override
+                                public void onCoinsReceived(org.bitcoinj.wallet.Wallet w,
+                                                            org.bitcoinj.core.Transaction tx,
+                                                            org.bitcoinj.base.Coin prev,
+                                                            org.bitcoinj.base.Coin newBal) {
+                                    try {
+                                        cachedBtcBalance = w.getBalance(org.bitcoinj.wallet.Wallet.BalanceType.ESTIMATED).toBtc().doubleValue();
+                                        mainHandler.post(new Runnable() {
+                                            @Override public void run() { updateWalletBalanceDisplay(); }
+                                        });
+                                    } catch (Exception e) {}
+                                }
+                            });
+
+                        wallet.addCoinsSentEventListener(org.bitcoinj.utils.Threading.SAME_THREAD,
+                            new org.bitcoinj.wallet.listeners.WalletCoinsSentEventListener() {
+                                @Override
+                                public void onCoinsSent(org.bitcoinj.wallet.Wallet w,
+                                                        org.bitcoinj.core.Transaction tx,
+                                                        org.bitcoinj.base.Coin prev,
+                                                        org.bitcoinj.base.Coin newBal) {
+                                    try {
+                                        cachedBtcBalance = w.getBalance(org.bitcoinj.wallet.Wallet.BalanceType.ESTIMATED).toBtc().doubleValue();
+                                        mainHandler.post(new Runnable() {
+                                            @Override public void run() { updateWalletBalanceDisplay(); }
+                                        });
+                                    } catch (Exception e) {}
+                                }
+                            });
+
+                        wallet.addChangeEventListener(org.bitcoinj.utils.Threading.SAME_THREAD,
+                            new org.bitcoinj.wallet.listeners.WalletChangeEventListener() {
+                                @Override
+                                public void onWalletChanged(org.bitcoinj.wallet.Wallet w) {
+                                    try {
+                                        cachedBtcBalance = w.getBalance(org.bitcoinj.wallet.Wallet.BalanceType.ESTIMATED).toBtc().doubleValue();
+                                        mainHandler.post(new Runnable() {
+                                            @Override public void run() { updateWalletBalanceDisplay(); }
+                                        });
+                                    } catch (Exception e) {}
+                                }
+                            });
                     } catch (Exception e) {}
 
                     mainHandler.post(new Runnable() {
                         @Override public void run() { updateWalletBalanceDisplay(); }
                     });
-                }
-                catch (Exception e) {}
+                } catch (Exception e) {}
             }
         }).start();
     }
@@ -1596,12 +1615,13 @@ public class MarketChartActivity extends Activity
             String sym = getCurrencySymbol(currentFiatCode);
             if (fiatPerBtc > 0) {
                 double fiatVal = cachedBtcBalance * fiatPerBtc;
-                textWalletBalance.setText(String.format(Locale.US, getString(R.string.chart_balance_format), cachedBtcBalance, sym, fiatVal));
+                textWalletBalance.setText(String.format(java.util.Locale.US,
+                        getString(R.string.chart_balance_format), cachedBtcBalance, sym, fiatVal));
             } else {
-                textWalletBalance.setText(String.format(Locale.US, getString(R.string.chart_balance_btc_only), cachedBtcBalance));
+                textWalletBalance.setText(String.format(java.util.Locale.US,
+                        getString(R.string.chart_balance_btc_only), cachedBtcBalance));
             }
-        }
-        catch (Exception e) {}
+        } catch (Exception e) {}
     }
 
 ////////////////
