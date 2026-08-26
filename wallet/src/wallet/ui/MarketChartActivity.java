@@ -1561,19 +1561,14 @@ public class MarketChartActivity extends Activity
         }).start();
     }
 
-    private void updateWalletBalanceDisplay()
+        private void updateWalletBalanceDisplay()
     {
         try
         {
             if (textWalletBalance == null) return;
             if (cachedBtcBalance < 0)
             {
-                // Nếu vẫn chưa lấy được thì hiện 0.00 chứ không để --
-                textWalletBalance.setText(String.format(Locale.US, getString(R.string.chart_balance_btc_only), 0.0));
-                // thử lại sau 1s
-                mainHandler.postDelayed(new Runnable() {
-                    @Override public void run() { fetchAndCacheWalletBalance(); }
-                }, 1000);
+                textWalletBalance.setText(getString(R.string.chart_balance_loading));
                 return;
             }
             double fiatPerBtc = 0;
