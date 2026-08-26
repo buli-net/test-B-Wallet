@@ -48,7 +48,6 @@ import wallet.WalletApplication;
 import wallet.exchangerate.ExchangeRateDao;
 import wallet.exchangerate.ExchangeRateEntry;
 import wallet.exchangerate.ExchangeRatesRepository;
-import wallet.data.WalletBalanceLiveData;
 
 public class MarketChartActivity extends Activity
 {
@@ -86,10 +85,7 @@ public class MarketChartActivity extends Activity
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
     private float lastDisplayPrice = 0f;
     private double cachedBtcBalance = -1;
-    private WalletBalanceLiveData balanceLiveData;
-    private androidx.lifecycle.Observer<Coin> balanceObserver;
-    private int balanceRetryCount = 0;
-    private static final int MAX_BALANCE_RETRY = 10;
+    private boolean isBalanceLoading = false;
 
     private static class ChartSettingsState
     {
@@ -1493,10 +1489,6 @@ public class MarketChartActivity extends Activity
     protected void onDestroy()
     {
         super.onDestroy();
-        if (balanceLiveData!= null && balanceObserver!= null)
-        {
-            balanceLiveData.removeObserver(balanceObserver);
-        }
         if (prefs!= null && prefsListener!= null)
         {
             prefs.unregisterOnSharedPreferenceChangeListener(prefsListener);
@@ -1540,17 +1532,17 @@ public class MarketChartActivity extends Activity
 
     private void fetchAndCacheWalletBalance()
     {
+        if (isBalanceLoading) return;
+        isBalanceLoading = true;
+        
         try
         {
             final WalletApplication app = (WalletApplication) getApplication();
             
-            // Reset retry count
-            balanceRetryCount = 0;
-            
-            // Try to get balance directly from wallet first (offline)
+            // Try to get balance directly from wallet first (offline - NO API)
             getBalanceFromWallet(app);
             
-            // If balance not available yet, retry
+            // If balance not available yet, retry every second until success
             if (cachedBtcBalance < 0)
             {
                 mainHandler.postDelayed(new Runnable()
@@ -1559,29 +1551,30 @@ public class MarketChartActivity extends Activity
                     public void run()
                     {
                         getBalanceFromWallet(app);
-                        if (cachedBtcBalance < 0 && balanceRetryCount < MAX_BALANCE_RETRY)
+                        if (cachedBtcBalance < 0)
                         {
-                            balanceRetryCount++;
+                            // Retry forever until balance is loaded
                             mainHandler.postDelayed(this, 1000);
                         }
-                        else if (cachedBtcBalance < 0)
+                        else
                         {
-                            // After max retries, show error
-                            if (textWalletBalance != null)
-                            {
-                                textWalletBalance.setText("Balance: 0 BTC");
-                            }
+                            isBalanceLoading = false;
                         }
                     }
                 }, 500);
+            }
+            else
+            {
+                isBalanceLoading = false;
             }
         }
         catch (Exception e)
         {
             e.printStackTrace();
+            isBalanceLoading = false;
             if (textWalletBalance != null)
             {
-                textWalletBalance.setText("Balance error");
+                textWalletBalance.setText("0 BTC");
             }
         }
     }
@@ -1593,7 +1586,7 @@ public class MarketChartActivity extends Activity
             Wallet wallet = app.getWallet();
             if (wallet != null)
             {
-                // Try ESTIMATED balance first (includes pending transactions)
+                // Get balance from wallet - OFFLINE, NO API CALL
                 Coin balance = wallet.getBalance(Wallet.BalanceType.ESTIMATED);
                 
                 if (balance != null)
@@ -1612,14 +1605,6 @@ public class MarketChartActivity extends Activity
                     return;
                 }
             }
-            else
-            {
-                // Wallet not initialized yet
-                if (textWalletBalance != null && balanceRetryCount == 0)
-                {
-                    textWalletBalance.setText("Initializing wallet...");
-                }
-            }
         }
         catch (Exception e)
         {
@@ -1635,14 +1620,14 @@ public class MarketChartActivity extends Activity
             
             if (cachedBtcBalance < 0)
             {
-                textWalletBalance.setText("Loading balance...");
+                textWalletBalance.setText("Loading...");
                 return;
             }
             
             // Format BTC balance with 8 decimal places
             String btcStr = String.format(Locale.US, "%.8f", cachedBtcBalance);
             
-            // Try to get fiat rate
+            // Try to get fiat rate from local database (NO API)
             double fiatPerBtc = getFiatPerBtc(currentFiatCode);
             String sym = getCurrencySymbol(currentFiatCode);
             
@@ -1652,10 +1637,13 @@ public class MarketChartActivity extends Activity
                 String fiatStr = String.format(Locale.US, "%,.2f %s", fiatVal, sym);
                 textWalletBalance.setText(String.format("%s BTC ≈ %s", btcStr, fiatStr));
             }
+            else if (cachedBtcBalance >= 0)
+            {
+                textWalletBalance.setText(String.format("%s BTC", btcStr));
+            }
             else
             {
-                // Only show BTC if no fiat rate available
-                textWalletBalance.setText(String.format("%s BTC", btcStr));
+                textWalletBalance.setText("0 BTC");
             }
             
             textWalletBalance.invalidate();
@@ -1665,7 +1653,7 @@ public class MarketChartActivity extends Activity
             e.printStackTrace();
             if (textWalletBalance != null)
             {
-                textWalletBalance.setText("Balance error");
+                textWalletBalance.setText("0 BTC");
             }
         }
     }
