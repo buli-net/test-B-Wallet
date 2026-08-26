@@ -213,7 +213,7 @@ public class MarketChartView extends View
         }
         catch (Exception e)
         {
-            visibleCandleCount = 80;
+            visibleCandleCount = res.getInteger(R.integer.default_visible_candle_count);
         }
         try
         {
@@ -221,7 +221,7 @@ public class MarketChartView extends View
         }
         catch (Exception e)
         {
-            bodyWidthFraction = 0.7f;
+            bodyWidthFraction = res.getInteger(R.integer.default_body_fraction_percent) / 100f;
         }
         try
         {
@@ -229,7 +229,7 @@ public class MarketChartView extends View
         }
         catch (Exception e)
         {
-            showGrid = true;
+            showGrid = res.getBoolean(R.bool.default_show_grid);
         }
         try
         {
@@ -237,7 +237,7 @@ public class MarketChartView extends View
         }
         catch (Exception e)
         {
-            showVolume = true;
+            showVolume = res.getBoolean(R.bool.default_show_volume);
         }
         try
         {
@@ -245,7 +245,7 @@ public class MarketChartView extends View
         }
         catch (Exception e)
         {
-            showLastPriceLine = true;
+            showLastPriceLine = res.getBoolean(R.bool.default_show_last_price);
         }
         try
         {
@@ -253,7 +253,7 @@ public class MarketChartView extends View
         }
         catch (Exception e)
         {
-            lastLineDashed = true;
+            lastLineDashed = res.getBoolean(R.bool.default_last_line_dashed);
         }
         try
         {
@@ -261,7 +261,7 @@ public class MarketChartView extends View
         }
         catch (Exception e)
         {
-            wickWidthPx = -1f;
+            wickWidthPx = res.getDimension(R.dimen.default_wick_width);
         }
         try
         {
@@ -269,7 +269,7 @@ public class MarketChartView extends View
         }
         catch (Exception e)
         {
-            maLineWidthPx = -1f;
+            maLineWidthPx = res.getDimension(R.dimen.default_ma_line_width);
         }
         try
         {
@@ -277,7 +277,7 @@ public class MarketChartView extends View
         }
         catch (Exception e)
         {
-            priceTextSizePx = -1f;
+            priceTextSizePx = res.getDimension(R.dimen.default_price_text_size);
         }
         try
         {
@@ -285,7 +285,7 @@ public class MarketChartView extends View
         }
         catch (Exception e)
         {
-            lastLineWidthPx = -1f;
+            lastLineWidthPx = res.getDimension(R.dimen.default_last_line_width);
         }
         try
         {
@@ -293,7 +293,7 @@ public class MarketChartView extends View
         }
         catch (Exception e)
         {
-            lastPriceLabelTextSizePx = -1f;
+            lastPriceLabelTextSizePx = res.getDimension(R.dimen.default_last_label_text_size);
         }
         try
         {
@@ -301,7 +301,7 @@ public class MarketChartView extends View
         }
         catch (Exception e)
         {
-            bullishColor = 0xFF00C853;
+            bullishColor = res.getColor(R.color.default_bullish, null);
         }
         try
         {
@@ -309,7 +309,7 @@ public class MarketChartView extends View
         }
         catch (Exception e)
         {
-            bearishColor = 0xFFFF1744;
+            bearishColor = res.getColor(R.color.default_bearish, null);
         }
         try
         {
@@ -317,7 +317,7 @@ public class MarketChartView extends View
         }
         catch (Exception e)
         {
-            lastPriceLineColor = 0xFFFFC107;
+            lastPriceLineColor = res.getColor(R.color.default_last_price_line, null);
         }
         try
         {
@@ -325,7 +325,7 @@ public class MarketChartView extends View
         }
         catch (Exception e)
         {
-            lastPriceBgColor = 0xFFFFC107;
+            lastPriceBgColor = res.getColor(R.color.default_last_price_bg, null);
         }
         try
         {
@@ -333,7 +333,7 @@ public class MarketChartView extends View
         }
         catch (Exception e)
         {
-            gridColor = -1;
+            gridColor = res.getColor(R.color.default_grid, null);
         }
         try
         {
@@ -341,7 +341,7 @@ public class MarketChartView extends View
         }
         catch (Exception e)
         {
-            priceTextColor = -1;
+            priceTextColor = res.getColor(R.color.default_price_text, null);
         }
         try
         {
@@ -349,7 +349,7 @@ public class MarketChartView extends View
         }
         catch (Exception e)
         {
-            lastPriceLabelTextColor = -1;
+            lastPriceLabelTextColor = res.getColor(R.color.default_last_label_text, null);
         }
         try
         {
@@ -357,7 +357,7 @@ public class MarketChartView extends View
         }
         catch (Exception e)
         {
-            bgColor = -1;
+            bgColor = res.getColor(R.color.default_chart_bg, null);
         }
     }
 
@@ -375,7 +375,7 @@ public class MarketChartView extends View
             }
             catch (Exception ex)
             {
-                defBull = 0xFF00C853;
+                defBull = res.getColor(R.color.default_bullish, null);
             }
             try
             {
@@ -383,7 +383,7 @@ public class MarketChartView extends View
             }
             catch (Exception ex)
             {
-                defBear = 0xFFFF1744;
+                defBear = res.getColor(R.color.default_bearish, null);
             }
             try
             {
@@ -413,8 +413,8 @@ public class MarketChartView extends View
             }
             catch (Exception ex)
             {
-                bullishColor = 0xFF00C853;
-                bearishColor = 0xFFFF1744;
+                bullishColor = context.getResources().getColor(R.color.default_bullish, null);
+                bearishColor = context.getResources().getColor(R.color.default_bearish, null);
             }
         }
     }
@@ -647,22 +647,8 @@ public class MarketChartView extends View
         this.showVolume = sVolume;
         this.visibleCandleCount = visCount;
 
-        int minCount = 20;
-        int maxCount = 150;
-        try
-        {
-            minCount = getResources().getInteger(R.integer.default_min_visible_candle_count);
-        }
-        catch (Exception e)
-        {
-        }
-        try
-        {
-            maxCount = getResources().getInteger(R.integer.default_max_visible_candle_count);
-        }
-        catch (Exception e)
-        {
-        }
+        int minCount = getResources().getInteger(R.integer.default_min_visible_candle_count);
+        int maxCount = getResources().getInteger(R.integer.default_max_visible_candle_count);
         if (this.visibleCandleCount < minCount)
         {
             this.visibleCandleCount = minCount;
@@ -723,9 +709,11 @@ public class MarketChartView extends View
         catch (Exception ex)
         {
             maLines.clear();
-            maLines.add(new MaLine(7, 0xFFFFC107));
-            maLines.add(new MaLine(25, 0xFF7C4DFF));
-            maLines.add(new MaLine(99, 0xFF2962FF));
+            Resources res = getResources();
+            int[] colors = res.getIntArray(R.array.ma_default_colors);
+            maLines.add(new MaLine(7, colors[0 % colors.length]));
+            maLines.add(new MaLine(25, colors[1 % colors.length]));
+            maLines.add(new MaLine(99, colors[2 % colors.length]));
             saveMaLines(getContext());
         }
 
@@ -824,9 +812,11 @@ public class MarketChartView extends View
             catch (Exception ex)
             {
                 maLines.clear();
-                maLines.add(new MaLine(7, 0xFFFFC107));
-                maLines.add(new MaLine(25, 0xFF7C4DFF));
-                maLines.add(new MaLine(99, 0xFF2962FF));
+                Resources res = context.getResources();
+                int[] colors = res.getIntArray(R.array.ma_default_colors);
+                maLines.add(new MaLine(7, colors[0 % colors.length]));
+                maLines.add(new MaLine(25, colors[1 % colors.length]));
+                maLines.add(new MaLine(99, colors[2 % colors.length]));
             }
         }
     }
@@ -909,7 +899,7 @@ public class MarketChartView extends View
         }
         catch (Exception e)
         {
-            defaultWickWidth = res.getDimension(R.dimen.chart_wick_width);
+            defaultWickWidth = res.getDimension(R.dimen.default_wick_width);
         }
         float finalWickWidth = (wickWidthPx > 0f)? wickWidthPx : defaultWickWidth;
 
@@ -926,11 +916,11 @@ public class MarketChartView extends View
         wickBearishPaint.setStrokeWidth(finalWickWidth);
 
         gridPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        gridPaint.setColor(gridColor!= -1? gridColor : res.getColor(R.color.chart_grid, null));
+        gridPaint.setColor(gridColor!= -1? gridColor : res.getColor(R.color.default_grid, null));
         gridPaint.setStrokeWidth(res.getDimension(R.dimen.chart_grid_width));
 
         textPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        textPaint.setColor(priceTextColor!= -1? priceTextColor : getThemeColor(android.R.attr.textColorSecondary));
+        textPaint.setColor(priceTextColor!= -1? priceTextColor : res.getColor(R.color.default_price_text, null));
         float defTxtSize;
         try
         {
@@ -938,12 +928,12 @@ public class MarketChartView extends View
         }
         catch (Exception e)
         {
-            defTxtSize = res.getDimension(R.dimen.chart_text_size);
+            defTxtSize = res.getDimension(R.dimen.default_price_text_size);
         }
         textPaint.setTextSize(priceTextSizePx > 0? priceTextSizePx : defTxtSize);
 
         lastPriceLinePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        lastPriceLinePaint.setColor(lastPriceLineColor!= -1? lastPriceLineColor : res.getColor(R.color.chart_last_price_line, null));
+        lastPriceLinePaint.setColor(lastPriceLineColor!= -1? lastPriceLineColor : res.getColor(R.color.default_last_price_line, null));
         float defaultLastW;
         try
         {
@@ -951,7 +941,7 @@ public class MarketChartView extends View
         }
         catch (Exception e)
         {
-            defaultLastW = res.getDimension(R.dimen.chart_last_price_line_width);
+            defaultLastW = res.getDimension(R.dimen.default_last_line_width);
         }
         lastPriceLinePaint.setStrokeWidth(lastLineWidthPx > 0? lastLineWidthPx : defaultLastW);
         lastPriceLinePaint.setStyle(Paint.Style.STROKE);
@@ -965,11 +955,11 @@ public class MarketChartView extends View
         }
 
         lastPriceBgPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        lastPriceBgPaint.setColor(lastPriceBgColor!= -1? lastPriceBgColor : res.getColor(R.color.chart_last_price_line, null));
+        lastPriceBgPaint.setColor(lastPriceBgColor!= -1? lastPriceBgColor : res.getColor(R.color.default_last_price_bg, null));
         lastPriceBgPaint.setStyle(Paint.Style.FILL);
 
         lastPriceTextPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        lastPriceTextPaint.setColor(lastPriceLabelTextColor!= -1? lastPriceLabelTextColor : getThemeColor(android.R.attr.textColorPrimaryInverse));
+        lastPriceTextPaint.setColor(lastPriceLabelTextColor!= -1? lastPriceLabelTextColor : res.getColor(R.color.default_last_label_text, null));
         float defLabelSize;
         try
         {
@@ -977,7 +967,7 @@ public class MarketChartView extends View
         }
         catch (Exception e)
         {
-            defLabelSize = res.getDimension(R.dimen.chart_text_size);
+            defLabelSize = res.getDimension(R.dimen.default_last_label_text_size);
         }
         lastPriceTextPaint.setTextSize(lastPriceLabelTextSizePx > 0? lastPriceLabelTextSizePx : defLabelSize);
         lastPriceTextPaint.setFakeBoldText(true);
@@ -989,7 +979,7 @@ public class MarketChartView extends View
         }
         catch (Exception e)
         {
-            defaultMaWidth = res.getDimension(R.dimen.chart_ma_line_width);
+            defaultMaWidth = res.getDimension(R.dimen.default_ma_line_width);
         }
         float thin = (maLineWidthPx > 0f)? maLineWidthPx : defaultMaWidth;
 
@@ -1072,22 +1062,8 @@ public class MarketChartView extends View
             public boolean onScale(ScaleGestureDetector detector)
             {
                 visibleCandleCount = (int) (visibleCandleCount / detector.getScaleFactor());
-                int minCount = 20;
-                int maxCount = 150;
-                try
-                {
-                    minCount = getResources().getInteger(R.integer.default_min_visible_candle_count);
-                }
-                catch (Exception e)
-                {
-                }
-                try
-                {
-                    maxCount = getResources().getInteger(R.integer.default_max_visible_candle_count);
-                }
-                catch (Exception e)
-                {
-                }
+                int minCount = getResources().getInteger(R.integer.default_min_visible_candle_count);
+                int maxCount = getResources().getInteger(R.integer.default_max_visible_candle_count);
                 if (visibleCandleCount < minCount)
                 {
                     visibleCandleCount = minCount;
