@@ -82,6 +82,40 @@ public class MarketChartActivity extends Activity
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
     private float lastDisplayPrice = 0f;
 
+    private static class ChartSettingsState
+    {
+        int[] candlePalette;
+        int[] curBull = new int[1];
+        int[] curBear = new int[1];
+        int[] bullIdx = new int[1];
+        int[] bearIdx = new int[1];
+        float[] curWick = new float[1];
+        float[] curMaW = new float[1];
+        float[] curTxtSize = new float[1];
+        float[] curLastW = new float[1];
+        float[] curLabelSize = new float[1];
+        int[] curLastColor = new int[1];
+        int[] curGridColor = new int[1];
+        int[] curPriceTxtColor = new int[1];
+        int[] curLabelBg = new int[1];
+        int[] curLabelTextColorFinal = new int[1];
+        float[] finalTxtSize = new float[1];
+        float[] finalLabelSize = new float[1];
+        List<MarketChartView.MaLine> tempList;
+        android.widget.SeekBar sbBody;
+        android.widget.SeekBar sbWick;
+        android.widget.SeekBar sbMaW;
+        android.widget.SeekBar sbVis;
+        android.widget.SeekBar sbTxtSize;
+        android.widget.SeekBar sbLastW;
+        android.widget.SeekBar sbLabelSize;
+        android.widget.Switch swGrid;
+        android.widget.Switch swVol;
+        android.widget.Switch swLast;
+        android.widget.Switch swDash;
+        RecyclerView recycler;
+    }
+
     private static final Map<String, String> FIAT_SYMBOLS = new HashMap<String, String>()
     {{
         put("USD", "$");
@@ -328,6 +362,49 @@ public class MarketChartActivity extends Activity
             return;
         }
 
+        final ChartSettingsState state = new ChartSettingsState();
+        state.candlePalette = getResources().getIntArray(R.array.candle_color_palette);
+        state.curBull[0] = marketChartView.getBullishColor();
+        state.curBear[0] = marketChartView.getBearishColor();
+
+        for (int i = 0; i < state.candlePalette.length; i++)
+        {
+            if (state.candlePalette[i] == state.curBull[0])
+            {
+                state.bullIdx[0] = i;
+                break;
+            }
+        }
+        for (int i = 0; i < state.candlePalette.length; i++)
+        {
+            if (state.candlePalette[i] == state.curBear[0])
+            {
+                state.bearIdx[0] = i;
+                break;
+            }
+        }
+
+        state.curWick[0] = marketChartView.getWickWidthPx() > 0? marketChartView.getWickWidthPx() : getResources().getDimension(R.dimen.chart_wick_width);
+        state.curMaW[0] = marketChartView.getMaLineWidthPx() > 0? marketChartView.getMaLineWidthPx() : getResources().getDimension(R.dimen.chart_ma_line_width);
+        state.curTxtSize[0] = marketChartView.getPriceTextSizePx() > 0? marketChartView.getPriceTextSizePx() : getResources().getDimension(R.dimen.chart_text_size);
+        state.curLastW[0] = marketChartView.getLastLineWidthPx() > 0? marketChartView.getLastLineWidthPx() : getResources().getDimension(R.dimen.chart_last_price_line_width);
+        state.curLabelSize[0] = marketChartView.getLastPriceLabelTextSizePx() > 0? marketChartView.getLastPriceLabelTextSizePx() : getResources().getDimension(R.dimen.chart_text_size);
+        state.curLastColor[0] = marketChartView.getLastPriceLineColor();
+        state.curGridColor[0] = marketChartView.getGridColor()!= -1? marketChartView.getGridColor() : getResources().getColor(R.color.chart_grid, getTheme());
+        state.curPriceTxtColor[0] = marketChartView.getPriceTextColor()!= -1? marketChartView.getPriceTextColor() : getThemeColor(android.R.attr.textColorSecondary);
+        state.curLabelBg[0] = marketChartView.getLastPriceBgColor()!= -1? marketChartView.getLastPriceBgColor() : getResources().getColor(R.color.chart_last_price_line, getTheme());
+        state.curLabelTextColorFinal[0] = marketChartView.getLastPriceLabelTextColor()!= -1? marketChartView.getLastPriceLabelTextColor() : getThemeColor(android.R.attr.textColorPrimaryInverse);
+        state.finalTxtSize[0] = state.curTxtSize[0];
+        state.finalLabelSize[0] = state.curLabelSize[0];
+
+        state.tempList = new ArrayList<MarketChartView.MaLine>();
+        List<MarketChartView.MaLine> origLines = marketChartView.getMaLines();
+        for (int i = 0; i < origLines.size(); i++)
+        {
+            MarketChartView.MaLine o = origLines.get(i);
+            state.tempList.add(new MarketChartView.MaLine(o.period, o.color));
+        }
+
         final Dialog dialog = new Dialog(this);
         ScrollView scrollView = new ScrollView(this);
         scrollView.setFillViewport(false);
@@ -349,19 +426,48 @@ public class MarketChartActivity extends Activity
         title.setPadding(0, 0, 0, 24);
         root.addView(title);
 
-        final int[] candlePalette = getResources().getIntArray(R.array.candle_color_palette);
-        final int[] curBull = {marketChartView.getBullishColor()};
-        final int[] curBear = {marketChartView.getBearishColor()};
+        TypedValue outValue = new TypedValue();
+        getTheme().resolveAttribute(android.R.attr.selectableItemBackground, outValue, true);
 
-        // ===================== CANDLE SECTION =====================
+        addCandleSection(root, state, outValue);
+        addDivider(root);
+        addMaSection(root, state, outValue);
+        addDivider(root);
+        addChartOptionsSection(root, state, outValue);
+        addApplyButton(root, state, dialog);
+
+        scrollView.addView(root);
+        dialog.setContentView(scrollView);
+
+        if (dialog.getWindow()!= null)
+        {
+            dialog.getWindow().setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT));
+            dialog.getWindow().setLayout(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+            dialog.getWindow().setGravity(Gravity.CENTER);
+        }
+
+        dialog.show();
+    }
+
+    private void addDivider(LinearLayout root)
+    {
+        View divider = new View(this);
+        LinearLayout.LayoutParams lpDiv = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, (int) (1 * getResources().getDisplayMetrics().density));
+        lpDiv.topMargin = 16;
+        lpDiv.bottomMargin = 16;
+        divider.setLayoutParams(lpDiv);
+        divider.setBackgroundColor(getResources().getColor(R.color.chart_grid, getTheme()));
+        root.addView(divider);
+    }
+
+    private void addCandleSection(LinearLayout root, final ChartSettingsState state, TypedValue outValue)
+    {
         LinearLayout candleHeader = new LinearLayout(this);
         candleHeader.setOrientation(LinearLayout.HORIZONTAL);
         candleHeader.setGravity(Gravity.CENTER_VERTICAL);
         candleHeader.setPadding(0, 16, 0, 16);
         candleHeader.setClickable(true);
         candleHeader.setFocusable(true);
-        TypedValue outValue = new TypedValue();
-        getTheme().resolveAttribute(android.R.attr.selectableItemBackground, outValue, true);
         candleHeader.setBackgroundResource(outValue.resourceId);
 
         final TextView titleCandle = new TextView(this);
@@ -395,7 +501,7 @@ public class MarketChartActivity extends Activity
         viewBull.setLayoutParams(new LinearLayout.LayoutParams(48, 48));
         GradientDrawable gdBull = new GradientDrawable();
         gdBull.setCornerRadius(8f);
-        gdBull.setColor(curBull[0]);
+        gdBull.setColor(state.curBull[0]);
         viewBull.setBackground(gdBull);
         rowBull.addView(lbBull);
         rowBull.addView(viewBull);
@@ -413,26 +519,20 @@ public class MarketChartActivity extends Activity
         viewBear.setLayoutParams(new LinearLayout.LayoutParams(48, 48));
         GradientDrawable gdBear = new GradientDrawable();
         gdBear.setCornerRadius(8f);
-        gdBear.setColor(curBear[0]);
+        gdBear.setColor(state.curBear[0]);
         viewBear.setBackground(gdBear);
         rowBear.addView(lbBear);
         rowBear.addView(viewBear);
         containerCandle.addView(rowBear);
-
-        final int[] bullIdx = {0};
-        final int[] bearIdx = {0};
-        // init idx
-        for (int i = 0; i < candlePalette.length; i++) { if (candlePalette[i] == curBull[0]) { bullIdx[0]=i; break; } }
-        for (int i = 0; i < candlePalette.length; i++) { if (candlePalette[i] == curBear[0]) { bearIdx[0]=i; break; } }
 
         viewBull.setOnClickListener(new View.OnClickListener()
         {
             @Override
             public void onClick(View v)
             {
-                bullIdx[0] = (bullIdx[0] + 1) % candlePalette.length;
-                int next = candlePalette[bullIdx[0]];
-                curBull[0] = next;
+                state.bullIdx[0] = (state.bullIdx[0] + 1) % state.candlePalette.length;
+                int next = state.candlePalette[state.bullIdx[0]];
+                state.curBull[0] = next;
                 GradientDrawable gd = new GradientDrawable();
                 gd.setCornerRadius(8f);
                 gd.setColor(next);
@@ -445,9 +545,9 @@ public class MarketChartActivity extends Activity
             @Override
             public void onClick(View v)
             {
-                bearIdx[0] = (bearIdx[0] + 1) % candlePalette.length;
-                int next = candlePalette[bearIdx[0]];
-                curBear[0] = next;
+                state.bearIdx[0] = (state.bearIdx[0] + 1) % state.candlePalette.length;
+                int next = state.candlePalette[state.bearIdx[0]];
+                state.curBear[0] = next;
                 GradientDrawable gd = new GradientDrawable();
                 gd.setCornerRadius(8f);
                 gd.setColor(next);
@@ -457,15 +557,29 @@ public class MarketChartActivity extends Activity
 
         root.addView(containerCandle);
 
-        View divider1 = new View(this);
-        LinearLayout.LayoutParams lpDiv1 = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, (int) (1 * getResources().getDisplayMetrics().density));
-        lpDiv1.topMargin = 16;
-        lpDiv1.bottomMargin = 16;
-        divider1.setLayoutParams(lpDiv1);
-        divider1.setBackgroundColor(getResources().getColor(R.color.chart_grid, getTheme()));
-        root.addView(divider1);
+        final boolean[] isCandleExpanded = {false};
+        candleHeader.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+                isCandleExpanded[0] =!isCandleExpanded[0];
+                if (isCandleExpanded[0])
+                {
+                    containerCandle.setVisibility(View.VISIBLE);
+                    titleCandle.setText("\u25BC " + getString(R.string.chart_settings_candle));
+                }
+                else
+                {
+                    containerCandle.setVisibility(View.GONE);
+                    titleCandle.setText("\u25B6 " + getString(R.string.chart_settings_candle));
+                }
+            }
+        });
+    }
 
-        // ===================== MA SECTION =====================
+    private void addMaSection(LinearLayout root, final ChartSettingsState state, TypedValue outValue)
+    {
         LinearLayout maHeader = new LinearLayout(this);
         maHeader.setOrientation(LinearLayout.HORIZONTAL);
         maHeader.setGravity(Gravity.CENTER_VERTICAL);
@@ -493,19 +607,12 @@ public class MarketChartActivity extends Activity
         containerMa.setVisibility(View.GONE);
 
         View maView = getLayoutInflater().inflate(R.layout.bottom_sheet_ma_settings, null);
-        final RecyclerView recycler = maView.findViewById(R.id.recycler_ma_popup);
-        recycler.setLayoutManager(new LinearLayoutManager(this));
-        recycler.setNestedScrollingEnabled(false);
+        state.recycler = maView.findViewById(R.id.recycler_ma_popup);
+        state.recycler.setLayoutManager(new LinearLayoutManager(this));
+        state.recycler.setNestedScrollingEnabled(false);
 
-        final List<MarketChartView.MaLine> tempList = new ArrayList<MarketChartView.MaLine>();
-        List<MarketChartView.MaLine> origLines = marketChartView.getMaLines();
-        for (int i = 0; i < origLines.size(); i++)
-        {
-            MarketChartView.MaLine o = origLines.get(i);
-            tempList.add(new MarketChartView.MaLine(o.period, o.color));
-        }
-        final MaPopupAdapter adapter = new MaPopupAdapter(tempList);
-        recycler.setAdapter(adapter);
+        final MaPopupAdapter adapter = new MaPopupAdapter(state.tempList);
+        state.recycler.setAdapter(adapter);
 
         View btnAdd = maView.findViewById(R.id.btn_add_ma);
         GradientDrawable addBg = new GradientDrawable();
@@ -517,14 +624,14 @@ public class MarketChartActivity extends Activity
             @Override
             public void onClick(View v)
             {
-                if (tempList.size() >= 6)
+                if (state.tempList.size() >= 6)
                 {
                     Toast.makeText(v.getContext(), getString(R.string.max_ma_reached), Toast.LENGTH_SHORT).show();
                     return;
                 }
                 int[] colors = getResources().getIntArray(R.array.ma_default_colors);
-                int color = colors[tempList.size() % colors.length];
-                tempList.add(new MarketChartView.MaLine(20, color));
+                int color = colors[state.tempList.size() % colors.length];
+                state.tempList.add(new MarketChartView.MaLine(20, color));
                 adapter.notifyDataSetChanged();
             }
         });
@@ -538,15 +645,29 @@ public class MarketChartActivity extends Activity
         containerMa.addView(maView);
         root.addView(containerMa);
 
-        View divider2 = new View(this);
-        LinearLayout.LayoutParams lpDiv2 = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, (int) (1 * getResources().getDisplayMetrics().density));
-        lpDiv2.topMargin = 16;
-        lpDiv2.bottomMargin = 16;
-        divider2.setLayoutParams(lpDiv2);
-        divider2.setBackgroundColor(getResources().getColor(R.color.chart_grid, getTheme()));
-        root.addView(divider2);
+        final boolean[] isMaExpanded = {false};
+        maHeader.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+                isMaExpanded[0] =!isMaExpanded[0];
+                if (isMaExpanded[0])
+                {
+                    containerMa.setVisibility(View.VISIBLE);
+                    titleMa.setText("\u25BC " + getString(R.string.chart_settings_ma));
+                }
+                else
+                {
+                    containerMa.setVisibility(View.GONE);
+                    titleMa.setText("\u25B6 " + getString(R.string.chart_settings_ma));
+                }
+            }
+        });
+    }
 
-        // ===================== CHART OPTIONS SECTION =====================
+    private void addChartOptionsSection(LinearLayout root, final ChartSettingsState state, TypedValue outValue)
+    {
         LinearLayout chartHeader = new LinearLayout(this);
         chartHeader.setOrientation(LinearLayout.HORIZONTAL);
         chartHeader.setGravity(Gravity.CENTER_VERTICAL);
@@ -574,468 +695,22 @@ public class MarketChartActivity extends Activity
         containerChart.setVisibility(View.GONE);
         containerChart.setPadding(0, 8, 0, 8);
 
-        // Body fraction
-        TextView lbBody = new TextView(this);
-        lbBody.setText(getString(R.string.chart_body_width, String.valueOf(marketChartView.getBodyWidthFraction())));
-        lbBody.setTextSize(12f);
-        containerChart.addView(lbBody);
-
-        android.widget.SeekBar sbBody = new android.widget.SeekBar(this);
-        sbBody.setMax(70);
-        sbBody.setProgress((int) ((marketChartView.getBodyWidthFraction() - 0.3f) * 100));
-        containerChart.addView(sbBody);
-
-        // Wick width
-        final float[] curWick = {marketChartView.getWickWidthPx() > 0? marketChartView.getWickWidthPx() : getResources().getDimension(R.dimen.chart_wick_width)};
-        TextView lbWick = new TextView(this);
-        lbWick.setText(getString(R.string.chart_wick_width, (int)curWick[0]));
-        lbWick.setTextSize(12f);
-        containerChart.addView(lbWick);
-
-        android.widget.SeekBar sbWick = new android.widget.SeekBar(this);
-        sbWick.setMax(20);
-        sbWick.setProgress((int) curWick[0]);
-        containerChart.addView(sbWick);
-
-        // MA width
-        final float[] curMaW = {marketChartView.getMaLineWidthPx() > 0? marketChartView.getMaLineWidthPx() : getResources().getDimension(R.dimen.chart_ma_line_width)};
-        TextView lbMaW = new TextView(this);
-        lbMaW.setText(getString(R.string.chart_ma_line_width, (int)curMaW[0]));
-        lbMaW.setTextSize(12f);
-        containerChart.addView(lbMaW);
-
-        android.widget.SeekBar sbMaW = new android.widget.SeekBar(this);
-        sbMaW.setMax(20);
-        sbMaW.setProgress((int) curMaW[0]);
-        containerChart.addView(sbMaW);
-
-        // Show Grid Switch
-        LinearLayout rowGrid = new LinearLayout(this);
-        rowGrid.setOrientation(LinearLayout.HORIZONTAL);
-        rowGrid.setGravity(Gravity.CENTER_VERTICAL);
-        TextView lbGrid = new TextView(this);
-        lbGrid.setText(getString(R.string.chart_show_grid));
-        lbGrid.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
-        final android.widget.Switch swGrid = new android.widget.Switch(this);
-        swGrid.setChecked(marketChartView.isShowGrid());
-        rowGrid.addView(lbGrid);
-        rowGrid.addView(swGrid);
-        containerChart.addView(rowGrid);
-
-        // Show Volume Switch
-        LinearLayout rowVol = new LinearLayout(this);
-        rowVol.setOrientation(LinearLayout.HORIZONTAL);
-        rowVol.setGravity(Gravity.CENTER_VERTICAL);
-        TextView lbVol = new TextView(this);
-        lbVol.setText(getString(R.string.chart_show_volume));
-        lbVol.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
-        final android.widget.Switch swVol = new android.widget.Switch(this);
-        swVol.setChecked(marketChartView.isShowVolume());
-        rowVol.addView(lbVol);
-        rowVol.addView(swVol);
-        containerChart.addView(rowVol);
-
-        // Visible count
-        TextView lbVis = new TextView(this);
-        lbVis.setText(getString(R.string.chart_visible_candles, marketChartView.getVisibleCandleCountValue()));
-        lbVis.setTextSize(12f);
-        containerChart.addView(lbVis);
-
-        android.widget.SeekBar sbVis = new android.widget.SeekBar(this);
-        sbVis.setMax(130);
-        sbVis.setProgress(marketChartView.getVisibleCandleCountValue() - 20);
-        containerChart.addView(sbVis);
-
-        sbBody.setOnSeekBarChangeListener(new android.widget.SeekBar.OnSeekBarChangeListener()
-        {
-            @Override
-            public void onProgressChanged(android.widget.SeekBar seekBar, int progress, boolean fromUser)
-            {
-                float fraction = 0.3f + progress / 100f;
-                lbBody.setText(getString(R.string.chart_body_width, String.format(Locale.US, "%.2f", fraction)));
-            }
-            @Override public void onStartTrackingTouch(android.widget.SeekBar seekBar) {}
-            @Override public void onStopTrackingTouch(android.widget.SeekBar seekBar) {}
-        });
-
-        sbWick.setOnSeekBarChangeListener(new android.widget.SeekBar.OnSeekBarChangeListener()
-        {
-            @Override
-            public void onProgressChanged(android.widget.SeekBar seekBar, int progress, boolean fromUser)
-            {
-                if (progress < 1) progress = 1;
-                curWick[0] = progress;
-                lbWick.setText(getString(R.string.chart_wick_width, progress));
-            }
-            @Override public void onStartTrackingTouch(android.widget.SeekBar seekBar) {}
-            @Override public void onStopTrackingTouch(android.widget.SeekBar seekBar) {}
-        });
-
-        sbMaW.setOnSeekBarChangeListener(new android.widget.SeekBar.OnSeekBarChangeListener()
-        {
-            @Override
-            public void onProgressChanged(android.widget.SeekBar seekBar, int progress, boolean fromUser)
-            {
-                if (progress < 1) progress = 1;
-                curMaW[0] = progress;
-                lbMaW.setText(getString(R.string.chart_ma_line_width, progress));
-            }
-            @Override public void onStartTrackingTouch(android.widget.SeekBar seekBar) {}
-            @Override public void onStopTrackingTouch(android.widget.SeekBar seekBar) {}
-        });
-
-        sbVis.setOnSeekBarChangeListener(new android.widget.SeekBar.OnSeekBarChangeListener()
-        {
-            @Override
-            public void onProgressChanged(android.widget.SeekBar seekBar, int progress, boolean fromUser)
-            {
-                int count = 20 + progress;
-                lbVis.setText(getString(R.string.chart_visible_candles, count));
-            }
-            @Override public void onStartTrackingTouch(android.widget.SeekBar seekBar) {}
-            @Override public void onStopTrackingTouch(android.widget.SeekBar seekBar) {}
-        });
-
-        // === LAST PRICE LINE SETTINGS ===
-        TextView lbLastPrice = new TextView(this);
-        lbLastPrice.setText(getString(R.string.chart_last_price_section));
-        lbLastPrice.setTextSize(12f);
-        lbLastPrice.setTypeface(null, Typeface.BOLD);
-        lbLastPrice.setPadding(0,16,0,8);
-        containerChart.addView(lbLastPrice);
-
-        LinearLayout rowLast = new LinearLayout(this);
-        rowLast.setOrientation(LinearLayout.HORIZONTAL);
-        rowLast.setGravity(Gravity.CENTER_VERTICAL);
-        TextView lbShowLast = new TextView(this);
-        lbShowLast.setText(getString(R.string.chart_show_volume).replace("Volume","Last Price"));
-        lbShowLast.setText(getString(R.string.chart_show_last_price));
-        lbShowLast.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
-        final android.widget.Switch swLast = new android.widget.Switch(this);
-        swLast.setChecked(marketChartView.isShowLastPriceLine());
-        rowLast.addView(lbShowLast);
-        rowLast.addView(swLast);
-        containerChart.addView(rowLast);
-
-        LinearLayout rowLastColor = new LinearLayout(this);
-        rowLastColor.setOrientation(LinearLayout.HORIZONTAL);
-        rowLastColor.setGravity(Gravity.CENTER_VERTICAL);
-        rowLastColor.setPadding(0,8,0,8);
-        TextView lbLastColor = new TextView(this);
-        lbLastColor.setText(getString(R.string.chart_last_price_color));
-        lbLastColor.setTextSize(13f);
-        lbLastColor.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
-        final View viewLastColor = new View(this);
-        viewLastColor.setLayoutParams(new LinearLayout.LayoutParams(48,48));
-        GradientDrawable gdLast = new GradientDrawable(); gdLast.setCornerRadius(8f); gdLast.setColor(marketChartView.getLastPriceLineColor());
-        viewLastColor.setBackground(gdLast);
-        rowLastColor.addView(lbLastColor);
-        rowLastColor.addView(viewLastColor);
-        containerChart.addView(rowLastColor);
-
-        // Price text size
-        TextView lbTxtSize = new TextView(this);
-        final float[] curTxtSize = {marketChartView.getPriceTextSizePx() > 0? marketChartView.getPriceTextSizePx() : getResources().getDimension(R.dimen.chart_text_size)};
-        lbTxtSize.setText(getString(R.string.chart_price_text_size, (int)curTxtSize[0]));
-        lbTxtSize.setTextSize(12f);
-        containerChart.addView(lbTxtSize);
-        android.widget.SeekBar sbTxtSize = new android.widget.SeekBar(this);
-        sbTxtSize.setMax(30);
-        sbTxtSize.setProgress((int)curTxtSize[0]);
-        containerChart.addView(sbTxtSize);
-
-        // Grid color
-        LinearLayout rowGridColor = new LinearLayout(this);
-        rowGridColor.setOrientation(LinearLayout.HORIZONTAL);
-        rowGridColor.setGravity(Gravity.CENTER_VERTICAL);
-        rowGridColor.setPadding(0,8,0,8);
-        TextView lbGridColor = new TextView(this);
-        lbGridColor.setText(getString(R.string.chart_grid_color));
-        lbGridColor.setTextSize(13f);
-        lbGridColor.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
-        final View viewGridColor = new View(this);
-        viewGridColor.setLayoutParams(new LinearLayout.LayoutParams(48,48));
-        GradientDrawable gdGrid = new GradientDrawable(); gdGrid.setCornerRadius(8f);
-        int curGrid = marketChartView.getGridColor()!= -1? marketChartView.getGridColor() : getResources().getColor(R.color.chart_grid, getTheme());
-        gdGrid.setColor(curGrid);
-        viewGridColor.setBackground(gdGrid);
-        rowGridColor.addView(lbGridColor);
-        rowGridColor.addView(viewGridColor);
-        containerChart.addView(rowGridColor);
-
-        final int[] curLastColor = {marketChartView.getLastPriceLineColor()};
-        final int[] curGridColor = {curGrid};
-        final float[] finalTxtSize = {curTxtSize[0]};
-
-                // Price text color
-        LinearLayout rowTxtColor = new LinearLayout(this);
-        rowTxtColor.setOrientation(LinearLayout.HORIZONTAL);
-        rowTxtColor.setGravity(Gravity.CENTER_VERTICAL);
-        rowTxtColor.setPadding(0,8,0,8);
-        TextView lbTxtColor = new TextView(this);
-        lbTxtColor.setText(getString(R.string.chart_price_text_color));
-        lbTxtColor.setTextSize(13f);
-        lbTxtColor.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
-        final View viewTxtColor = new View(this);
-        viewTxtColor.setLayoutParams(new LinearLayout.LayoutParams(48,48));
-        GradientDrawable gdTxtC = new GradientDrawable(); gdTxtC.setCornerRadius(8f);
-        int curTxtC = marketChartView.getPriceTextColor()!= -1? marketChartView.getPriceTextColor() : getThemeColor(android.R.attr.textColorSecondary);
-        gdTxtC.setColor(curTxtC);
-        viewTxtColor.setBackground(gdTxtC);
-        rowTxtColor.addView(lbTxtColor);
-        rowTxtColor.addView(viewTxtColor);
-        containerChart.addView(rowTxtColor);
-
-        // Last line width
-        TextView lbLastW = new TextView(this);
-        final float[] curLastW = {marketChartView.getLastLineWidthPx() > 0? marketChartView.getLastLineWidthPx() : getResources().getDimension(R.dimen.chart_last_price_line_width)};
-        lbLastW.setText(getString(R.string.chart_last_line_width, (int)curLastW[0]));
-        lbLastW.setTextSize(12f);
-        containerChart.addView(lbLastW);
-        android.widget.SeekBar sbLastW = new android.widget.SeekBar(this);
-        sbLastW.setMax(10);
-        sbLastW.setProgress((int)curLastW[0]);
-        containerChart.addView(sbLastW);
-
-        // Dashed switch
-        LinearLayout rowDash = new LinearLayout(this);
-        rowDash.setOrientation(LinearLayout.HORIZONTAL);
-        rowDash.setGravity(Gravity.CENTER_VERTICAL);
-        TextView lbDash = new TextView(this);
-        lbDash.setText(getString(R.string.chart_last_line_dashed));
-        lbDash.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
-        final android.widget.Switch swDash = new android.widget.Switch(this);
-        swDash.setChecked(marketChartView.isLastLineDashed());
-        rowDash.addView(lbDash);
-        rowDash.addView(swDash);
-        containerChart.addView(rowDash);
-
-        // bg removed
-        final int[] curPriceTxtColor = {curTxtC};
-
-        // ===================== CURRENT PRICE LABEL - NEW FEATURE =====================
-        View dividerLabel = new View(this);
-        LinearLayout.LayoutParams lpDivLabel = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, (int) (1 * getResources().getDisplayMetrics().density));
-        lpDivLabel.topMargin = 16;
-        lpDivLabel.bottomMargin = 8;
-        dividerLabel.setLayoutParams(lpDivLabel);
-        dividerLabel.setBackgroundColor(getResources().getColor(R.color.chart_grid, getTheme()));
-        containerChart.addView(dividerLabel);
-
-        TextView lbLabelSection = new TextView(this);
-        lbLabelSection.setText(getString(R.string.chart_last_price_label_section));
-        lbLabelSection.setTextSize(12f);
-        lbLabelSection.setTypeface(null, Typeface.BOLD);
-        lbLabelSection.setPadding(0, 8, 0, 8);
-        containerChart.addView(lbLabelSection);
-
-        // Label Background color
-        LinearLayout rowLabelBg = new LinearLayout(this);
-        rowLabelBg.setOrientation(LinearLayout.HORIZONTAL);
-        rowLabelBg.setGravity(Gravity.CENTER_VERTICAL);
-        rowLabelBg.setPadding(0, 8, 0, 8);
-        TextView lbLabelBg = new TextView(this);
-        lbLabelBg.setText(getString(R.string.chart_last_price_label_bg));
-        lbLabelBg.setTextSize(13f);
-        lbLabelBg.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
-        final View viewLabelBg = new View(this);
-        viewLabelBg.setLayoutParams(new LinearLayout.LayoutParams(48, 48));
-        GradientDrawable gdLabelBg = new GradientDrawable();
-        gdLabelBg.setCornerRadius(8f);
-        int curLabelBgInit = marketChartView.getLastPriceBgColor()!= -1? marketChartView.getLastPriceBgColor() : getResources().getColor(R.color.chart_last_price_line, getTheme());
-        gdLabelBg.setColor(curLabelBgInit);
-        viewLabelBg.setBackground(gdLabelBg);
-        rowLabelBg.addView(lbLabelBg);
-        rowLabelBg.addView(viewLabelBg);
-        containerChart.addView(rowLabelBg);
-
-        // Label Text color
-        LinearLayout rowLabelTextColor = new LinearLayout(this);
-        rowLabelTextColor.setOrientation(LinearLayout.HORIZONTAL);
-        rowLabelTextColor.setGravity(Gravity.CENTER_VERTICAL);
-        rowLabelTextColor.setPadding(0, 8, 0, 8);
-        TextView lbLabelTextColor = new TextView(this);
-        lbLabelTextColor.setText(getString(R.string.chart_last_price_label_text_color));
-        lbLabelTextColor.setTextSize(13f);
-        lbLabelTextColor.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
-        final View viewLabelTextColor = new View(this);
-        viewLabelTextColor.setLayoutParams(new LinearLayout.LayoutParams(48, 48));
-        GradientDrawable gdLabelText = new GradientDrawable();
-        gdLabelText.setCornerRadius(8f);
-        int curLabelTextInit = marketChartView.getLastPriceLabelTextColor()!= -1? marketChartView.getLastPriceLabelTextColor() : getThemeColor(android.R.attr.textColorPrimaryInverse);
-        gdLabelText.setColor(curLabelTextInit);
-        viewLabelTextColor.setBackground(gdLabelText);
-        rowLabelTextColor.addView(lbLabelTextColor);
-        rowLabelTextColor.addView(viewLabelTextColor);
-        containerChart.addView(rowLabelTextColor);
-
-        // Label Text size
-        TextView lbLabelSize = new TextView(this);
-        final float[] curLabelSize = {marketChartView.getLastPriceLabelTextSizePx() > 0? marketChartView.getLastPriceLabelTextSizePx() : getResources().getDimension(R.dimen.chart_text_size)};
-        lbLabelSize.setText(getString(R.string.chart_last_price_label_text_size, (int) curLabelSize[0]));
-        lbLabelSize.setTextSize(12f);
-        containerChart.addView(lbLabelSize);
-
-        android.widget.SeekBar sbLabelSize = new android.widget.SeekBar(this);
-        sbLabelSize.setMax(30);
-        sbLabelSize.setProgress((int) curLabelSize[0]);
-        containerChart.addView(sbLabelSize);
-
-        final int[] curLabelBg = {curLabelBgInit};
-        final int[] curLabelTextColorFinal = {curLabelTextInit};
-        final float[] finalLabelSize = {curLabelSize[0]};
-
-        viewLabelBg.setOnClickListener(new View.OnClickListener()
-        {
-            @Override
-            public void onClick(View v)
-            {
-                int idx = 0;
-                for (int i = 0; i < candlePalette.length; i++)
-                {
-                    if (candlePalette[i] == curLabelBg[0])
-                    {
-                        idx = i;
-                        break;
-                    }
-                }
-                int next = candlePalette[(idx + 1) % candlePalette.length];
-                curLabelBg[0] = next;
-                GradientDrawable gd = new GradientDrawable();
-                gd.setCornerRadius(8f);
-                gd.setColor(next);
-                v.setBackground(gd);
-            }
-        });
-
-        viewLabelTextColor.setOnClickListener(new View.OnClickListener()
-        {
-            @Override
-            public void onClick(View v)
-            {
-                int idx = 0;
-                for (int i = 0; i < candlePalette.length; i++)
-                {
-                    if (candlePalette[i] == curLabelTextColorFinal[0])
-                    {
-                        idx = i;
-                        break;
-                    }
-                }
-                int next = candlePalette[(idx + 1) % candlePalette.length];
-                curLabelTextColorFinal[0] = next;
-                GradientDrawable gd = new GradientDrawable();
-                gd.setCornerRadius(8f);
-                gd.setColor(next);
-                v.setBackground(gd);
-            }
-        });
-
-        sbLabelSize.setOnSeekBarChangeListener(new android.widget.SeekBar.OnSeekBarChangeListener()
-        {
-            @Override
-            public void onProgressChanged(android.widget.SeekBar seekBar, int progress, boolean fromUser)
-            {
-                if (progress < 8)
-                {
-                    progress = 8;
-                }
-                finalLabelSize[0] = progress;
-                lbLabelSize.setText(getString(R.string.chart_last_price_label_text_size, progress));
-            }
-            @Override
-            public void onStartTrackingTouch(android.widget.SeekBar seekBar)
-            {
-            }
-            @Override
-            public void onStopTrackingTouch(android.widget.SeekBar seekBar)
-            {
-            }
-        });
-
-        viewLastColor.setOnClickListener(new View.OnClickListener(){
-            @Override public void onClick(View v){
-                int idx=0; for(int i=0;i<candlePalette.length;i++){ if(candlePalette[i]==curLastColor[0]){idx=i;break;}}
-                int next=candlePalette[(idx+1)%candlePalette.length]; curLastColor[0]=next;
-                GradientDrawable gd=new GradientDrawable(); gd.setCornerRadius(8f); gd.setColor(next); v.setBackground(gd);
-            }
-        });
-        viewGridColor.setOnClickListener(new View.OnClickListener(){
-            @Override public void onClick(View v){
-                int idx=0; for(int i=0;i<candlePalette.length;i++){ if(candlePalette[i]==curGridColor[0]){idx=i;break;}}
-                int next=candlePalette[(idx+1)%candlePalette.length]; curGridColor[0]=next;
-                GradientDrawable gd=new GradientDrawable(); gd.setCornerRadius(8f); gd.setColor(next); v.setBackground(gd);
-            }
-        });
-
-                viewTxtColor.setOnClickListener(new View.OnClickListener(){
-            @Override public void onClick(View v){
-                int idx=0; for(int i=0;i<candlePalette.length;i++){ if(candlePalette[i]==curPriceTxtColor[0]){idx=i;break;}}
-                int next=candlePalette[(idx+1)%candlePalette.length]; curPriceTxtColor[0]=next;
-                GradientDrawable gd=new GradientDrawable(); gd.setCornerRadius(8f); gd.setColor(next); v.setBackground(gd);
-            }
-        });
-        sbLastW.setOnSeekBarChangeListener(new android.widget.SeekBar.OnSeekBarChangeListener(){
-            @Override public void onProgressChanged(android.widget.SeekBar seekBar, int progress, boolean fromUser){
-                if(progress<1) progress=1; curLastW[0]=progress; lbLastW.setText(getString(R.string.chart_last_line_width, progress));
-            }
-            @Override public void onStartTrackingTouch(android.widget.SeekBar seekBar){}
-            @Override public void onStopTrackingTouch(android.widget.SeekBar seekBar){}
-        });
-
-        sbTxtSize.setOnSeekBarChangeListener(new android.widget.SeekBar.OnSeekBarChangeListener(){
-            @Override public void onProgressChanged(android.widget.SeekBar seekBar, int progress, boolean fromUser){
-                if(progress<8) progress=8; finalTxtSize[0]=progress; lbTxtSize.setText(getString(R.string.chart_price_text_size, progress));
-            }
-            @Override public void onStartTrackingTouch(android.widget.SeekBar seekBar){}
-            @Override public void onStopTrackingTouch(android.widget.SeekBar seekBar){}
-        });
+        buildBodyWidthControl(containerChart, state);
+        buildWickWidthControl(containerChart, state);
+        buildMaWidthControl(containerChart, state);
+        buildGridVolumeSwitches(containerChart, state);
+        buildVisibleCountControl(containerChart, state);
+        buildLastPriceLineSection(containerChart, state);
+        buildPriceTextSection(containerChart, state);
+        buildGridColorSection(containerChart, state);
+        buildPriceTextColorSection(containerChart, state);
+        buildLastLineWidthSection(containerChart, state);
+        buildDashedSwitchSection(containerChart, state);
+        buildCurrentPriceLabelSection(containerChart, state);
 
         root.addView(containerChart);
 
-        // ===================== TOGGLE LOGIC =====================
-        final boolean[] isCandleExpanded = {false};
-        final boolean[] isMaExpanded = {false};
         final boolean[] isChartExpanded = {false};
-
-        candleHeader.setOnClickListener(new View.OnClickListener()
-        {
-            @Override
-            public void onClick(View v)
-            {
-                isCandleExpanded[0] =!isCandleExpanded[0];
-                if (isCandleExpanded[0])
-                {
-                    containerCandle.setVisibility(View.VISIBLE);
-                    titleCandle.setText("\u25BC " + getString(R.string.chart_settings_candle));
-                }
-                else
-                {
-                    containerCandle.setVisibility(View.GONE);
-                    titleCandle.setText("\u25B6 " + getString(R.string.chart_settings_candle));
-                }
-            }
-        });
-
-        maHeader.setOnClickListener(new View.OnClickListener()
-        {
-            @Override
-            public void onClick(View v)
-            {
-                isMaExpanded[0] =!isMaExpanded[0];
-                if (isMaExpanded[0])
-                {
-                    containerMa.setVisibility(View.VISIBLE);
-                    titleMa.setText("\u25BC " + getString(R.string.chart_settings_ma));
-                }
-                else
-                {
-                    containerMa.setVisibility(View.GONE);
-                    titleMa.setText("\u25B6 " + getString(R.string.chart_settings_ma));
-                }
-            }
-        });
-
         chartHeader.setOnClickListener(new View.OnClickListener()
         {
             @Override
@@ -1054,8 +729,494 @@ public class MarketChartActivity extends Activity
                 }
             }
         });
+    }
 
-        // ===================== APPLY BUTTON =====================
+    private void buildBodyWidthControl(LinearLayout container, final ChartSettingsState state)
+    {
+        TextView lbBody = new TextView(this);
+        lbBody.setText(getString(R.string.chart_body_width, String.valueOf(marketChartView.getBodyWidthFraction())));
+        lbBody.setTextSize(12f);
+        container.addView(lbBody);
+
+        android.widget.SeekBar sbBody = new android.widget.SeekBar(this);
+        sbBody.setMax(70);
+        sbBody.setProgress((int) ((marketChartView.getBodyWidthFraction() - 0.3f) * 100));
+        container.addView(sbBody);
+        state.sbBody = sbBody;
+
+        sbBody.setOnSeekBarChangeListener(new android.widget.SeekBar.OnSeekBarChangeListener()
+        {
+            @Override
+            public void onProgressChanged(android.widget.SeekBar seekBar, int progress, boolean fromUser)
+            {
+                float fraction = 0.3f + progress / 100f;
+                lbBody.setText(getString(R.string.chart_body_width, String.format(Locale.US, "%.2f", fraction)));
+            }
+            @Override public void onStartTrackingTouch(android.widget.SeekBar seekBar) {}
+            @Override public void onStopTrackingTouch(android.widget.SeekBar seekBar) {}
+        });
+    }
+
+    private void buildWickWidthControl(LinearLayout container, final ChartSettingsState state)
+    {
+        TextView lbWick = new TextView(this);
+        lbWick.setText(getString(R.string.chart_wick_width, (int) state.curWick[0]));
+        lbWick.setTextSize(12f);
+        container.addView(lbWick);
+
+        android.widget.SeekBar sbWick = new android.widget.SeekBar(this);
+        sbWick.setMax(20);
+        sbWick.setProgress((int) state.curWick[0]);
+        container.addView(sbWick);
+        state.sbWick = sbWick;
+
+        sbWick.setOnSeekBarChangeListener(new android.widget.SeekBar.OnSeekBarChangeListener()
+        {
+            @Override
+            public void onProgressChanged(android.widget.SeekBar seekBar, int progress, boolean fromUser)
+            {
+                if (progress < 1) progress = 1;
+                state.curWick[0] = progress;
+                lbWick.setText(getString(R.string.chart_wick_width, progress));
+            }
+            @Override public void onStartTrackingTouch(android.widget.SeekBar seekBar) {}
+            @Override public void onStopTrackingTouch(android.widget.SeekBar seekBar) {}
+        });
+    }
+
+    private void buildMaWidthControl(LinearLayout container, final ChartSettingsState state)
+    {
+        TextView lbMaW = new TextView(this);
+        lbMaW.setText(getString(R.string.chart_ma_line_width, (int) state.curMaW[0]));
+        lbMaW.setTextSize(12f);
+        container.addView(lbMaW);
+
+        android.widget.SeekBar sbMaW = new android.widget.SeekBar(this);
+        sbMaW.setMax(20);
+        sbMaW.setProgress((int) state.curMaW[0]);
+        container.addView(sbMaW);
+        state.sbMaW = sbMaW;
+
+        sbMaW.setOnSeekBarChangeListener(new android.widget.SeekBar.OnSeekBarChangeListener()
+        {
+            @Override
+            public void onProgressChanged(android.widget.SeekBar seekBar, int progress, boolean fromUser)
+            {
+                if (progress < 1) progress = 1;
+                state.curMaW[0] = progress;
+                lbMaW.setText(getString(R.string.chart_ma_line_width, progress));
+            }
+            @Override public void onStartTrackingTouch(android.widget.SeekBar seekBar) {}
+            @Override public void onStopTrackingTouch(android.widget.SeekBar seekBar) {}
+        });
+    }
+
+    private void buildGridVolumeSwitches(LinearLayout container, final ChartSettingsState state)
+    {
+        LinearLayout rowGrid = new LinearLayout(this);
+        rowGrid.setOrientation(LinearLayout.HORIZONTAL);
+        rowGrid.setGravity(Gravity.CENTER_VERTICAL);
+        TextView lbGrid = new TextView(this);
+        lbGrid.setText(getString(R.string.chart_show_grid));
+        lbGrid.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
+        final android.widget.Switch swGrid = new android.widget.Switch(this);
+        swGrid.setChecked(marketChartView.isShowGrid());
+        rowGrid.addView(lbGrid);
+        rowGrid.addView(swGrid);
+        container.addView(rowGrid);
+        state.swGrid = swGrid;
+
+        LinearLayout rowVol = new LinearLayout(this);
+        rowVol.setOrientation(LinearLayout.HORIZONTAL);
+        rowVol.setGravity(Gravity.CENTER_VERTICAL);
+        TextView lbVol = new TextView(this);
+        lbVol.setText(getString(R.string.chart_show_volume));
+        lbVol.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
+        final android.widget.Switch swVol = new android.widget.Switch(this);
+        swVol.setChecked(marketChartView.isShowVolume());
+        rowVol.addView(lbVol);
+        rowVol.addView(swVol);
+        container.addView(rowVol);
+        state.swVol = swVol;
+    }
+
+    private void buildVisibleCountControl(LinearLayout container, final ChartSettingsState state)
+    {
+        TextView lbVis = new TextView(this);
+        lbVis.setText(getString(R.string.chart_visible_candles, marketChartView.getVisibleCandleCountValue()));
+        lbVis.setTextSize(12f);
+        container.addView(lbVis);
+
+        android.widget.SeekBar sbVis = new android.widget.SeekBar(this);
+        sbVis.setMax(130);
+        sbVis.setProgress(marketChartView.getVisibleCandleCountValue() - 20);
+        container.addView(sbVis);
+        state.sbVis = sbVis;
+
+        sbVis.setOnSeekBarChangeListener(new android.widget.SeekBar.OnSeekBarChangeListener()
+        {
+            @Override
+            public void onProgressChanged(android.widget.SeekBar seekBar, int progress, boolean fromUser)
+            {
+                int count = 20 + progress;
+                lbVis.setText(getString(R.string.chart_visible_candles, count));
+            }
+            @Override public void onStartTrackingTouch(android.widget.SeekBar seekBar) {}
+            @Override public void onStopTrackingTouch(android.widget.SeekBar seekBar) {}
+        });
+    }
+
+    private void buildLastPriceLineSection(LinearLayout container, final ChartSettingsState state)
+    {
+        TextView lbLastPrice = new TextView(this);
+        lbLastPrice.setText(getString(R.string.chart_last_price_section));
+        lbLastPrice.setTextSize(12f);
+        lbLastPrice.setTypeface(null, Typeface.BOLD);
+        lbLastPrice.setPadding(0, 16, 0, 8);
+        container.addView(lbLastPrice);
+
+        LinearLayout rowLast = new LinearLayout(this);
+        rowLast.setOrientation(LinearLayout.HORIZONTAL);
+        rowLast.setGravity(Gravity.CENTER_VERTICAL);
+        TextView lbShowLast = new TextView(this);
+        lbShowLast.setText(getString(R.string.chart_show_last_price));
+        lbShowLast.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
+        final android.widget.Switch swLast = new android.widget.Switch(this);
+        swLast.setChecked(marketChartView.isShowLastPriceLine());
+        rowLast.addView(lbShowLast);
+        rowLast.addView(swLast);
+        container.addView(rowLast);
+        state.swLast = swLast;
+
+        LinearLayout rowLastColor = new LinearLayout(this);
+        rowLastColor.setOrientation(LinearLayout.HORIZONTAL);
+        rowLastColor.setGravity(Gravity.CENTER_VERTICAL);
+        rowLastColor.setPadding(0, 8, 0, 8);
+        TextView lbLastColor = new TextView(this);
+        lbLastColor.setText(getString(R.string.chart_last_price_color));
+        lbLastColor.setTextSize(13f);
+        lbLastColor.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
+        final View viewLastColor = new View(this);
+        viewLastColor.setLayoutParams(new LinearLayout.LayoutParams(48, 48));
+        GradientDrawable gdLast = new GradientDrawable();
+        gdLast.setCornerRadius(8f);
+        gdLast.setColor(state.curLastColor[0]);
+        viewLastColor.setBackground(gdLast);
+        rowLastColor.addView(lbLastColor);
+        rowLastColor.addView(viewLastColor);
+        container.addView(rowLastColor);
+
+        viewLastColor.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+                int idx = 0;
+                for (int i = 0; i < state.candlePalette.length; i++)
+                {
+                    if (state.candlePalette[i] == state.curLastColor[0])
+                    {
+                        idx = i;
+                        break;
+                    }
+                }
+                int next = state.candlePalette[(idx + 1) % state.candlePalette.length];
+                state.curLastColor[0] = next;
+                GradientDrawable gd = new GradientDrawable();
+                gd.setCornerRadius(8f);
+                gd.setColor(next);
+                v.setBackground(gd);
+            }
+        });
+    }
+
+    private void buildPriceTextSection(LinearLayout container, final ChartSettingsState state)
+    {
+        TextView lbTxtSize = new TextView(this);
+        lbTxtSize.setText(getString(R.string.chart_price_text_size, (int) state.curTxtSize[0]));
+        lbTxtSize.setTextSize(12f);
+        container.addView(lbTxtSize);
+
+        android.widget.SeekBar sbTxtSize = new android.widget.SeekBar(this);
+        sbTxtSize.setMax(30);
+        sbTxtSize.setProgress((int) state.curTxtSize[0]);
+        container.addView(sbTxtSize);
+        state.sbTxtSize = sbTxtSize;
+
+        sbTxtSize.setOnSeekBarChangeListener(new android.widget.SeekBar.OnSeekBarChangeListener()
+        {
+            @Override
+            public void onProgressChanged(android.widget.SeekBar seekBar, int progress, boolean fromUser)
+            {
+                if (progress < 8) progress = 8;
+                state.finalTxtSize[0] = progress;
+                lbTxtSize.setText(getString(R.string.chart_price_text_size, progress));
+            }
+            @Override public void onStartTrackingTouch(android.widget.SeekBar seekBar) {}
+            @Override public void onStopTrackingTouch(android.widget.SeekBar seekBar) {}
+        });
+    }
+
+    private void buildGridColorSection(LinearLayout container, final ChartSettingsState state)
+    {
+        LinearLayout rowGridColor = new LinearLayout(this);
+        rowGridColor.setOrientation(LinearLayout.HORIZONTAL);
+        rowGridColor.setGravity(Gravity.CENTER_VERTICAL);
+        rowGridColor.setPadding(0, 8, 0, 8);
+        TextView lbGridColor = new TextView(this);
+        lbGridColor.setText(getString(R.string.chart_grid_color));
+        lbGridColor.setTextSize(13f);
+        lbGridColor.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
+        final View viewGridColor = new View(this);
+        viewGridColor.setLayoutParams(new LinearLayout.LayoutParams(48, 48));
+        GradientDrawable gdGrid = new GradientDrawable();
+        gdGrid.setCornerRadius(8f);
+        gdGrid.setColor(state.curGridColor[0]);
+        viewGridColor.setBackground(gdGrid);
+        rowGridColor.addView(lbGridColor);
+        rowGridColor.addView(viewGridColor);
+        container.addView(rowGridColor);
+
+        viewGridColor.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+                int idx = 0;
+                for (int i = 0; i < state.candlePalette.length; i++)
+                {
+                    if (state.candlePalette[i] == state.curGridColor[0])
+                    {
+                        idx = i;
+                        break;
+                    }
+                }
+                int next = state.candlePalette[(idx + 1) % state.candlePalette.length];
+                state.curGridColor[0] = next;
+                GradientDrawable gd = new GradientDrawable();
+                gd.setCornerRadius(8f);
+                gd.setColor(next);
+                v.setBackground(gd);
+            }
+        });
+    }
+
+    private void buildPriceTextColorSection(LinearLayout container, final ChartSettingsState state)
+    {
+        LinearLayout rowTxtColor = new LinearLayout(this);
+        rowTxtColor.setOrientation(LinearLayout.HORIZONTAL);
+        rowTxtColor.setGravity(Gravity.CENTER_VERTICAL);
+        rowTxtColor.setPadding(0, 8, 0, 8);
+        TextView lbTxtColor = new TextView(this);
+        lbTxtColor.setText(getString(R.string.chart_price_text_color));
+        lbTxtColor.setTextSize(13f);
+        lbTxtColor.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
+        final View viewTxtColor = new View(this);
+        viewTxtColor.setLayoutParams(new LinearLayout.LayoutParams(48, 48));
+        GradientDrawable gdTxtC = new GradientDrawable();
+        gdTxtC.setCornerRadius(8f);
+        gdTxtC.setColor(state.curPriceTxtColor[0]);
+        viewTxtColor.setBackground(gdTxtC);
+        rowTxtColor.addView(lbTxtColor);
+        rowTxtColor.addView(viewTxtColor);
+        container.addView(rowTxtColor);
+
+        viewTxtColor.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+                int idx = 0;
+                for (int i = 0; i < state.candlePalette.length; i++)
+                {
+                    if (state.candlePalette[i] == state.curPriceTxtColor[0])
+                    {
+                        idx = i;
+                        break;
+                    }
+                }
+                int next = state.candlePalette[(idx + 1) % state.candlePalette.length];
+                state.curPriceTxtColor[0] = next;
+                GradientDrawable gd = new GradientDrawable();
+                gd.setCornerRadius(8f);
+                gd.setColor(next);
+                v.setBackground(gd);
+            }
+        });
+    }
+
+    private void buildLastLineWidthSection(LinearLayout container, final ChartSettingsState state)
+    {
+        TextView lbLastW = new TextView(this);
+        lbLastW.setText(getString(R.string.chart_last_line_width, (int) state.curLastW[0]));
+        lbLastW.setTextSize(12f);
+        container.addView(lbLastW);
+
+        android.widget.SeekBar sbLastW = new android.widget.SeekBar(this);
+        sbLastW.setMax(10);
+        sbLastW.setProgress((int) state.curLastW[0]);
+        container.addView(sbLastW);
+        state.sbLastW = sbLastW;
+
+        sbLastW.setOnSeekBarChangeListener(new android.widget.SeekBar.OnSeekBarChangeListener()
+        {
+            @Override
+            public void onProgressChanged(android.widget.SeekBar seekBar, int progress, boolean fromUser)
+            {
+                if (progress < 1) progress = 1;
+                state.curLastW[0] = progress;
+                lbLastW.setText(getString(R.string.chart_last_line_width, progress));
+            }
+            @Override public void onStartTrackingTouch(android.widget.SeekBar seekBar) {}
+            @Override public void onStopTrackingTouch(android.widget.SeekBar seekBar) {}
+        });
+    }
+
+    private void buildDashedSwitchSection(LinearLayout container, final ChartSettingsState state)
+    {
+        LinearLayout rowDash = new LinearLayout(this);
+        rowDash.setOrientation(LinearLayout.HORIZONTAL);
+        rowDash.setGravity(Gravity.CENTER_VERTICAL);
+        TextView lbDash = new TextView(this);
+        lbDash.setText(getString(R.string.chart_last_line_dashed));
+        lbDash.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
+        final android.widget.Switch swDash = new android.widget.Switch(this);
+        swDash.setChecked(marketChartView.isLastLineDashed());
+        rowDash.addView(lbDash);
+        rowDash.addView(swDash);
+        container.addView(rowDash);
+        state.swDash = swDash;
+    }
+
+    private void buildCurrentPriceLabelSection(LinearLayout container, final ChartSettingsState state)
+    {
+        View dividerLabel = new View(this);
+        LinearLayout.LayoutParams lpDivLabel = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, (int) (1 * getResources().getDisplayMetrics().density));
+        lpDivLabel.topMargin = 16;
+        lpDivLabel.bottomMargin = 8;
+        dividerLabel.setLayoutParams(lpDivLabel);
+        dividerLabel.setBackgroundColor(getResources().getColor(R.color.chart_grid, getTheme()));
+        container.addView(dividerLabel);
+
+        TextView lbLabelSection = new TextView(this);
+        lbLabelSection.setText(getString(R.string.chart_last_price_label_section));
+        lbLabelSection.setTextSize(12f);
+        lbLabelSection.setTypeface(null, Typeface.BOLD);
+        lbLabelSection.setPadding(0, 8, 0, 8);
+        container.addView(lbLabelSection);
+
+        LinearLayout rowLabelBg = new LinearLayout(this);
+        rowLabelBg.setOrientation(LinearLayout.HORIZONTAL);
+        rowLabelBg.setGravity(Gravity.CENTER_VERTICAL);
+        rowLabelBg.setPadding(0, 8, 0, 8);
+        TextView lbLabelBg = new TextView(this);
+        lbLabelBg.setText(getString(R.string.chart_last_price_label_bg));
+        lbLabelBg.setTextSize(13f);
+        lbLabelBg.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
+        final View viewLabelBg = new View(this);
+        viewLabelBg.setLayoutParams(new LinearLayout.LayoutParams(48, 48));
+        GradientDrawable gdLabelBg = new GradientDrawable();
+        gdLabelBg.setCornerRadius(8f);
+        gdLabelBg.setColor(state.curLabelBg[0]);
+        viewLabelBg.setBackground(gdLabelBg);
+        rowLabelBg.addView(lbLabelBg);
+        rowLabelBg.addView(viewLabelBg);
+        container.addView(rowLabelBg);
+
+        LinearLayout rowLabelTextColor = new LinearLayout(this);
+        rowLabelTextColor.setOrientation(LinearLayout.HORIZONTAL);
+        rowLabelTextColor.setGravity(Gravity.CENTER_VERTICAL);
+        rowLabelTextColor.setPadding(0, 8, 0, 8);
+        TextView lbLabelTextColor = new TextView(this);
+        lbLabelTextColor.setText(getString(R.string.chart_last_price_label_text_color));
+        lbLabelTextColor.setTextSize(13f);
+        lbLabelTextColor.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
+        final View viewLabelTextColor = new View(this);
+        viewLabelTextColor.setLayoutParams(new LinearLayout.LayoutParams(48, 48));
+        GradientDrawable gdLabelText = new GradientDrawable();
+        gdLabelText.setCornerRadius(8f);
+        gdLabelText.setColor(state.curLabelTextColorFinal[0]);
+        viewLabelTextColor.setBackground(gdLabelText);
+        rowLabelTextColor.addView(lbLabelTextColor);
+        rowLabelTextColor.addView(viewLabelTextColor);
+        container.addView(rowLabelTextColor);
+
+        TextView lbLabelSize = new TextView(this);
+        lbLabelSize.setText(getString(R.string.chart_last_price_label_text_size, (int) state.curLabelSize[0]));
+        lbLabelSize.setTextSize(12f);
+        container.addView(lbLabelSize);
+
+        android.widget.SeekBar sbLabelSize = new android.widget.SeekBar(this);
+        sbLabelSize.setMax(30);
+        sbLabelSize.setProgress((int) state.curLabelSize[0]);
+        container.addView(sbLabelSize);
+        state.sbLabelSize = sbLabelSize;
+
+        viewLabelBg.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+                int idx = 0;
+                for (int i = 0; i < state.candlePalette.length; i++)
+                {
+                    if (state.candlePalette[i] == state.curLabelBg[0])
+                    {
+                        idx = i;
+                        break;
+                    }
+                }
+                int next = state.candlePalette[(idx + 1) % state.candlePalette.length];
+                state.curLabelBg[0] = next;
+                GradientDrawable gd = new GradientDrawable();
+                gd.setCornerRadius(8f);
+                gd.setColor(next);
+                v.setBackground(gd);
+            }
+        });
+
+        viewLabelTextColor.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+                int idx = 0;
+                for (int i = 0; i < state.candlePalette.length; i++)
+                {
+                    if (state.candlePalette[i] == state.curLabelTextColorFinal[0])
+                    {
+                        idx = i;
+                        break;
+                    }
+                }
+                int next = state.candlePalette[(idx + 1) % state.candlePalette.length];
+                state.curLabelTextColorFinal[0] = next;
+                GradientDrawable gd = new GradientDrawable();
+                gd.setCornerRadius(8f);
+                gd.setColor(next);
+                v.setBackground(gd);
+            }
+        });
+
+        sbLabelSize.setOnSeekBarChangeListener(new android.widget.SeekBar.OnSeekBarChangeListener()
+        {
+            @Override
+            public void onProgressChanged(android.widget.SeekBar seekBar, int progress, boolean fromUser)
+            {
+                if (progress < 8)
+                {
+                    progress = 8;
+                }
+                state.finalLabelSize[0] = progress;
+                lbLabelSize.setText(getString(R.string.chart_last_price_label_text_size, progress));
+            }
+            @Override public void onStartTrackingTouch(android.widget.SeekBar seekBar) {}
+            @Override public void onStopTrackingTouch(android.widget.SeekBar seekBar) {}
+        });
+    }
+
+    private void addApplyButton(LinearLayout root, final ChartSettingsState state, final Dialog dialog)
+    {
         TextView btnApply = new TextView(this);
         btnApply.setText(getString(R.string.chart_settings_apply));
         btnApply.setTextSize(14f);
@@ -1081,35 +1242,36 @@ public class MarketChartActivity extends Activity
                     {
                         dialog.getCurrentFocus().clearFocus();
                     }
-                    recycler.clearFocus();
-                    for (int i = 0; i < recycler.getChildCount(); i++)
+                    if (state.recycler!= null)
                     {
-                        RecyclerView.ViewHolder vh = recycler.getChildViewHolder(recycler.getChildAt(i));
-                        if (vh instanceof MaPopupAdapter.Holder)
+                        state.recycler.clearFocus();
+                        for (int i = 0; i < state.recycler.getChildCount(); i++)
                         {
-                            MaPopupAdapter.Holder h = (MaPopupAdapter.Holder) vh;
-                            int pos = h.getAdapterPosition();
-                            if (pos >= 0 && pos < tempList.size())
+                            RecyclerView.ViewHolder vh = state.recycler.getChildViewHolder(state.recycler.getChildAt(i));
+                            if (vh instanceof MaPopupAdapter.Holder)
                             {
-                                String txt = h.et.getText().toString().trim();
-                                if (!txt.isEmpty())
+                                MaPopupAdapter.Holder h = (MaPopupAdapter.Holder) vh;
+                                int pos = h.getAdapterPosition();
+                                if (pos >= 0 && pos < state.tempList.size())
                                 {
-                                    int period = Integer.parseInt(txt);
-                                    if (period > 0)
+                                    String txt = h.et.getText().toString().trim();
+                                    if (!txt.isEmpty())
                                     {
-                                        tempList.get(pos).period = period;
+                                        int period = Integer.parseInt(txt);
+                                        if (period > 0)
+                                        {
+                                            state.tempList.get(pos).period = period;
+                                        }
                                     }
                                 }
                             }
                         }
                     }
-                    // Also check focused EditText that may not be in child list
-                    for (int i = 0; i < tempList.size(); i++)
+                    for (int i = 0; i < state.tempList.size(); i++)
                     {
-                        // ensure no zero period left
-                        if (tempList.get(i).period <= 0)
+                        if (state.tempList.get(i).period <= 0)
                         {
-                            tempList.get(i).period = 20;
+                            state.tempList.get(i).period = 20;
                         }
                     }
                 }
@@ -1117,38 +1279,26 @@ public class MarketChartActivity extends Activity
                 {
                 }
 
-                float bodyFraction = 0.3f + sbBody.getProgress() / 100f;
-                float wickW = sbWick.getProgress();
+                float bodyFraction = 0.3f + state.sbBody.getProgress() / 100f;
+                float wickW = state.sbWick.getProgress();
                 if (wickW < 1) wickW = 1;
-                float maW = sbMaW.getProgress();
+                float maW = state.sbMaW.getProgress();
                 if (maW < 1) maW = 1;
-                int visCount = 20 + sbVis.getProgress();
-                boolean showG = swGrid.isChecked();
-                boolean showV = swVol.isChecked();
-                boolean showLast = swLast.isChecked();
+                int visCount = 20 + state.sbVis.getProgress();
+                boolean showG = state.swGrid.isChecked();
+                boolean showV = state.swVol.isChecked();
+                boolean showLast = state.swLast.isChecked();
 
-                marketChartView.setCandleColors(curBull[0], curBear[0]);
+                marketChartView.setCandleColors(state.curBull[0], state.curBear[0]);
                 marketChartView.setChartOptions(bodyFraction, wickW, maW, showG, showV, visCount);
                 int bgColorForApply = getThemeColor(android.R.attr.colorBackground);
-                marketChartView.setChartAppearance(showLast, curLastColor[0], curLabelBg[0], finalTxtSize[0], curPriceTxtColor[0], curGridColor[0], bgColorForApply, curLastW[0], swDash.isChecked());
-                marketChartView.setLastPriceLabelAppearance(curLabelBg[0], curLabelTextColorFinal[0], finalLabelSize[0]);
-                marketChartView.setMaLines(tempList);
+                marketChartView.setChartAppearance(showLast, state.curLastColor[0], state.curLabelBg[0], state.finalTxtSize[0], state.curPriceTxtColor[0], state.curGridColor[0], bgColorForApply, state.curLastW[0], state.swDash.isChecked());
+                marketChartView.setLastPriceLabelAppearance(state.curLabelBg[0], state.curLabelTextColorFinal[0], state.finalLabelSize[0]);
+                marketChartView.setMaLines(state.tempList);
                 dialog.dismiss();
             }
         });
         root.addView(btnApply);
-
-        scrollView.addView(root);
-        dialog.setContentView(scrollView);
-
-        if (dialog.getWindow()!= null)
-        {
-            dialog.getWindow().setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT));
-            dialog.getWindow().setLayout(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-            dialog.getWindow().setGravity(Gravity.CENTER);
-        }
-
-        dialog.show();
     }
 
     static class MaPopupAdapter extends RecyclerView.Adapter<MaPopupAdapter.Holder>
