@@ -26,38 +26,4 @@
     <dimen name="shortcut_size">48dp</dimen>
     <dimen name="shortcut_icon_size">32dp</dimen>
 
-
-<!-- market chart -->
-<dimen name="chart_wick_width">1dp</dimen>
-<dimen name="chart_grid_width">0.5dp</dimen>
-<dimen name="chart_text_size">10sp</dimen>
-<dimen name="chart_last_price_line_width">1dp</dimen>
-<dimen name="chart_dash_length">10dp</dimen>
-<dimen name="chart_dash_gap">6dp</dimen>
-<dimen name="chart_ma_line_width">1.2dp</dimen>
-<dimen name="chart_selected_width">1dp</dimen>
-<dimen name="chart_body_min_width">2dp</dimen>
-<dimen name="chart_body_max_width">12dp</dimen>
-<dimen name="chart_candle_min_height">2dp</dimen>
-<dimen name="chart_price_axis_width">32dp</dimen>
-<dimen name="chart_time_axis_height">20dp</dimen>
-<dimen name="chart_volume_height">30dp</dimen>
-<dimen name="chart_top_padding">12dp</dimen>
-<dimen name="chart_bottom_padding">30dp</dimen>
-<dimen name="chart_volume_top_margin">12dp</dimen>
-<dimen name="chart_price_text_margin">4dp</dimen>
-<dimen name="chart_time_text_margin">4dp</dimen>
-<dimen name="chart_price_text_offset">3dp</dimen>
-<dimen name="chart_loading_offset">100dp</dimen>
-<dimen name="chart_screen_padding">16dp</dimen>
-<dimen name="chart_price_large_size">20sp</dimen>
-<dimen name="chart_small_margin">4dp</dimen>
-<dimen name="chart_popup_padding">8dp</dimen>
-<dimen name="chart_popup_time_size">10sp</dimen>
-<dimen name="chart_popup_size">12sp</dimen>
-
-<!-- current price bar -  -->
-<dimen name="chart_current_price_bar_height">24dp</dimen>
-<dimen name="chart_current_price_text_size">11sp</dimen>
-
 </resources>
