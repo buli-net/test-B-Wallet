@@ -6,6 +6,7 @@ import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
+import android.content.res.TypedArray;
 import android.graphics.Typeface;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
@@ -362,7 +363,14 @@ public class MarketChartActivity extends Activity
         }
 
         final ChartSettingsState state = new ChartSettingsState();
-        state.candlePalette = getResources().getIntArray(R.array.candle_color_palette);
+        Resources resPal = getResources();
+        TypedArray palTa = resPal.obtainTypedArray(R.array.chart_color_palette);
+        state.candlePalette = new int[palTa.length()];
+        for (int i = 0; i < palTa.length(); i++)
+        {
+            state.candlePalette[i] = palTa.getColor(i, 0);
+        }
+        palTa.recycle();
         state.curBull[0] = marketChartView.getBullishColor();
         state.curBear[0] = marketChartView.getBearishColor();
 
@@ -629,7 +637,14 @@ public class MarketChartActivity extends Activity
                     Toast.makeText(v.getContext(), getString(R.string.max_ma_reached), Toast.LENGTH_SHORT).show();
                     return;
                 }
-                int[] colors = getResources().getIntArray(R.array.ma_default_colors);
+                Resources res = getResources();
+                TypedArray ta = res.obtainTypedArray(R.array.default_ma_colors);
+                int[] colors = new int[ta.length()];
+                for (int i = 0; i < ta.length(); i++)
+                {
+                    colors[i] = ta.getColor(i, 0);
+                }
+                ta.recycle();
                 int color = colors[state.tempList.size() % colors.length];
                 state.tempList.add(new MarketChartView.MaLine(20, color));
                 adapter.notifyDataSetChanged();
@@ -1323,9 +1338,9 @@ public class MarketChartActivity extends Activity
     private void showResetConfirm(final Dialog settingsDialog)
     {
         new AlertDialog.Builder(this)
-              .setTitle(getString(R.string.chart_reset_confirm_title))
-              .setMessage(getString(R.string.chart_reset_confirm_message))
-              .setPositiveButton(getString(R.string.chart_reset), new DialogInterface.OnClickListener()
+             .setTitle(getString(R.string.chart_reset_confirm_title))
+             .setMessage(getString(R.string.chart_reset_confirm_message))
+             .setPositiveButton(getString(R.string.chart_reset), new DialogInterface.OnClickListener()
                 {
                     @Override
                     public void onClick(DialogInterface d, int which)
@@ -1338,8 +1353,8 @@ public class MarketChartActivity extends Activity
                         Toast.makeText(MarketChartActivity.this, getString(R.string.chart_settings_reset), Toast.LENGTH_SHORT).show();
                     }
                 })
-              .setNegativeButton(getString(R.string.close), null)
-              .show();
+             .setNegativeButton(getString(R.string.close), null)
+             .show();
     }
 
     static class MaPopupAdapter extends RecyclerView.Adapter<MaPopupAdapter.Holder>
@@ -1411,7 +1426,13 @@ public class MarketChartActivity extends Activity
                 public void onClick(View v)
                 {
                     Resources res = v.getContext().getResources();
-                    int[] colors = res.getIntArray(R.array.ma_default_colors);
+                    TypedArray ta = res.obtainTypedArray(R.array.default_ma_colors);
+                    int[] colors = new int[ta.length()];
+                    for (int i = 0; i < ta.length(); i++)
+                    {
+                        colors[i] = ta.getColor(i, 0);
+                    }
+                    ta.recycle();
                     int idx = 0;
                     for (int i = 0; i < colors.length; i++)
                     {
@@ -1643,8 +1664,8 @@ public class MarketChartActivity extends Activity
         int[] intervalLabels = {R.string.time, R.string.interval_1m, R.string.interval_3m, R.string.interval_5m, R.string.interval_15m, R.string.interval_30m, R.string.interval_1h, R.string.interval_2h, R.string.interval_4h, R.string.interval_6h, R.string.interval_12h, R.string.interval_1d, R.string.interval_1w, R.string.interval_1M};
 
         final AlertDialog dialog = new AlertDialog.Builder(this)
-              .setView(root)
-              .setNegativeButton(R.string.close, new DialogInterface.OnClickListener()
+             .setView(root)
+             .setNegativeButton(R.string.close, new DialogInterface.OnClickListener()
                 {
                     @Override
                     public void onClick(DialogInterface d, int w)
@@ -1652,7 +1673,7 @@ public class MarketChartActivity extends Activity
                         d.dismiss();
                     }
                 })
-              .create();
+             .create();
 
         for (int i = 0; i < realLoad.length; i++)
         {
