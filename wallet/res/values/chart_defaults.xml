@@ -1,21 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Visible candles -->
     <integer name="default_visible_candle_count">80</integer>
     <integer name="default_min_visible_candle_count">20</integer>
     <integer name="default_max_visible_candle_count">150</integer>
     <integer name="default_body_fraction_percent">70</integer>
 
+    <!-- Booleans -->
     <bool name="default_show_grid">true</bool>
     <bool name="default_show_volume">true</bool>
     <bool name="default_show_last_price">true</bool>
     <bool name="default_last_line_dashed">true</bool>
 
+    <!-- Dimens -->
     <dimen name="default_wick_width">1.5dp</dimen>
     <dimen name="default_ma_line_width">1.2dp</dimen>
     <dimen name="default_price_text_size">11sp</dimen>
     <dimen name="default_last_line_width">1dp</dimen>
     <dimen name="default_last_label_text_size">11sp</dimen>
 
+    <!-- Colors -->
     <color name="default_bullish">#FF00C853</color>
     <color name="default_bearish">#FFFF1744</color>
     <color name="default_last_price_line">#FFFFC107</color>
