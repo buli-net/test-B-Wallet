@@ -711,9 +711,11 @@ public class MarketChartView extends View
             maLines.clear();
             Resources res = getResources();
             int[] colors = res.getIntArray(R.array.ma_default_colors);
-            maLines.add(new MaLine(7, colors[0 % colors.length]));
-            maLines.add(new MaLine(25, colors[1 % colors.length]));
-            maLines.add(new MaLine(99, colors[2 % colors.length]));
+            int[] periods = res.getIntArray(R.array.ma_default_periods);
+            for (int i = 0; i < periods.length; i++)
+            {
+                maLines.add(new MaLine(periods[i], colors[i % colors.length]));
+            }
             saveMaLines(getContext());
         }
 
@@ -801,22 +803,13 @@ public class MarketChartView extends View
         }
         catch (Resources.NotFoundException e)
         {
-            try
+            Resources res = context.getResources();
+            int[] colors = res.getIntArray(R.array.ma_default_colors);
+            int[] periods = res.getIntArray(R.array.ma_default_periods);
+            maLines.clear();
+            for (int i = 0; i < periods.length; i++)
             {
-                int[] colors = context.getResources().getIntArray(R.array.ma_default_colors);
-                maLines.clear();
-                maLines.add(new MaLine(7, colors[0]));
-                maLines.add(new MaLine(25, colors[1 % colors.length]));
-                maLines.add(new MaLine(99, colors[2 % colors.length]));
-            }
-            catch (Exception ex)
-            {
-                maLines.clear();
-                Resources res = context.getResources();
-                int[] colors = res.getIntArray(R.array.ma_default_colors);
-                maLines.add(new MaLine(7, colors[0 % colors.length]));
-                maLines.add(new MaLine(25, colors[1 % colors.length]));
-                maLines.add(new MaLine(99, colors[2 % colors.length]));
+                maLines.add(new MaLine(periods[i], colors[i % colors.length]));
             }
         }
     }
