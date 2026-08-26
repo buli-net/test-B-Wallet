@@ -1521,8 +1521,9 @@ public class MarketChartActivity extends Activity
             }
         }).start();
     }
+/////////////////
 
-    private void fetchAndCacheWalletBalance()
+        private void fetchAndCacheWalletBalance()
     {
         new Thread(new Runnable()
         {
@@ -1532,15 +1533,24 @@ public class MarketChartActivity extends Activity
                 try
                 {
                     WalletApplication app = (WalletApplication) getApplication();
-                    Wallet wallet = app.getWallet();
+                    if (app == null) return;
+                    // Retry 3 lần vì Wallet load chậm hơn Activity
+                    Wallet wallet = null;
+                    for (int i = 0; i < 3; i++) {
+                        wallet = app.getWallet();
+                        if (wallet != null) break;
+                        try { Thread.sleep(500); } catch (Exception e) {}
+                    }
+                    if (wallet == null) return;
                     Coin bal = wallet.getBalance();
+                    if (bal == null) return;
                     cachedBtcBalance = bal.toBtc().doubleValue();
                     mainHandler.post(new Runnable()
                     {
                         @Override
                         public void run()
                         {
-                            updateWalletBalanceDisplay();
+                            try { updateWalletBalanceDisplay(); } catch (Exception e) {}
                         }
                     });
                 }
@@ -1555,17 +1565,21 @@ public class MarketChartActivity extends Activity
     {
         try
         {
-            if (textWalletBalance == null)
-            {
-                return;
-            }
+            if (textWalletBalance == null) return;
             if (cachedBtcBalance < 0)
             {
-                textWalletBalance.setText(getString(R.string.chart_balance_loading));
+                // Nếu vẫn chưa lấy được thì hiện 0.00 chứ không để --
+                textWalletBalance.setText(String.format(Locale.US, getString(R.string.chart_balance_btc_only), 0.0));
+                // thử lại sau 1s
+                mainHandler.postDelayed(new Runnable() {
+                    @Override public void run() { fetchAndCacheWalletBalance(); }
+                }, 1000);
                 return;
             }
-            double fiatPerBtc = getFiatPerBtc(currentFiatCode);
-            String sym = getCurrencySymbol(currentFiatCode);
+            double fiatPerBtc = 0;
+            try { fiatPerBtc = getFiatPerBtc(currentFiatCode); } catch (Exception ex) {}
+            String sym = currentFiatCode + " ";
+            try { sym = getCurrencySymbol(currentFiatCode); } catch (Exception ex) {}
             if (fiatPerBtc > 0)
             {
                 double fiatVal = cachedBtcBalance * fiatPerBtc;
@@ -1580,6 +1594,7 @@ public class MarketChartActivity extends Activity
         {
         }
     }
+////////////////
 
     private double getFiatPerBtc(String fiatCode)
     {
