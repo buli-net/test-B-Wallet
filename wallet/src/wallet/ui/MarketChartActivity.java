@@ -1523,7 +1523,7 @@ public class MarketChartActivity extends Activity
     }
 /////////////////
 
-        private void fetchAndCacheWalletBalance()
+            private void fetchAndCacheWalletBalance()
     {
         new Thread(new Runnable()
         {
@@ -1534,17 +1534,34 @@ public class MarketChartActivity extends Activity
                 {
                     WalletApplication app = (WalletApplication) getApplication();
                     if (app == null) return;
-                    // Retry 3 lần vì Wallet load chậm hơn Activity
                     Wallet wallet = null;
-                    for (int i = 0; i < 3; i++) {
+                    for (int i = 0; i < 5; i++) {
                         wallet = app.getWallet();
                         if (wallet != null) break;
                         try { Thread.sleep(500); } catch (Exception e) {}
                     }
                     if (wallet == null) return;
-                    Coin bal = wallet.getBalance();
+                    // Dùng ESTIMATED để tính cả giao dịch chưa confirm (RBF)
+                    Coin bal = wallet.getBalance(Wallet.BalanceType.ESTIMATED);
+                    if (bal == null) bal = wallet.getBalance();
                     if (bal == null) return;
                     cachedBtcBalance = bal.toBtc().doubleValue();
+
+                    // Lắng nghe khi có coin mới về để tự cập nhật chart
+                    try {
+                        wallet.addCoinsReceivedEventListener(new org.bitcoinj.wallet.WalletCoinsReceivedEventListener() {
+                            @Override
+                            public void onCoinsReceived(Wallet w, org.bitcoinj.core.Transaction tx, Coin prevBalance, Coin newBalance) {
+                                try {
+                                    cachedBtcBalance = newBalance.toBtc().doubleValue();
+                                    mainHandler.post(new Runnable() {
+                                        @Override public void run() { updateWalletBalanceDisplay(); }
+                                    });
+                                } catch (Exception e) {}
+                            }
+                        });
+                    } catch (Exception e) {}
+
                     mainHandler.post(new Runnable()
                     {
                         @Override
@@ -1561,7 +1578,7 @@ public class MarketChartActivity extends Activity
         }).start();
     }
 
-        private void updateWalletBalanceDisplay()
+    private void updateWalletBalanceDisplay()
     {
         try
         {
@@ -1589,6 +1606,7 @@ public class MarketChartActivity extends Activity
         {
         }
     }
+
 ////////////////
 
     private double getFiatPerBtc(String fiatCode)
