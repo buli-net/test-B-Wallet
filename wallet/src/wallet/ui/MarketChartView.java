@@ -214,11 +214,11 @@ public class MarketChartView extends View
         DEFAULT_VISIBLE_CANDLE_COUNT = res.getInteger(R.integer.default_visible_candle_count);
         MIN_VISIBLE_CANDLE_COUNT = res.getInteger(R.integer.default_min_visible_candle_count);
         MAX_VISIBLE_CANDLE_COUNT = res.getInteger(R.integer.default_max_visible_candle_count);
-        TOP_PADDING_PX = res.getDimensionPixelSize(R.dimen.chart_top_padding);
-        BOTTOM_PADDING_PX = res.getDimensionPixelSize(R.dimen.chart_bottom_padding);
-        VOLUME_CHART_HEIGHT_DP = res.getDimensionPixelSize(R.dimen.chart_volume_height);
-        VOLUME_TOP_MARGIN_PX = res.getDimensionPixelSize(R.dimen.chart_volume_top_margin);
-        PRICE_AXIS_WIDTH_DP = res.getDimensionPixelSize(R.dimen.chart_price_axis_width);
+        TOP_PADDING_PX = res.getDimensionPixelSize(R.dimen.default_top_padding);
+        BOTTOM_PADDING_PX = res.getDimensionPixelSize(R.dimen.default_bottom_padding);
+        VOLUME_CHART_HEIGHT_DP = res.getDimensionPixelSize(R.dimen.default_volume_height);
+        VOLUME_TOP_MARGIN_PX = res.getDimensionPixelSize(R.dimen.default_volume_top_margin);
+        PRICE_AXIS_WIDTH_DP = res.getDimensionPixelSize(R.dimen.default_price_axis_width);
         FETCH_LIMIT = res.getInteger(R.integer.chart_fetch_limit);
         LIVE_REFRESH_INTERVAL_MS = res.getInteger(R.integer.chart_live_interval_ms);
         COUNTDOWN_INTERVAL_MS = res.getInteger(R.integer.chart_countdown_interval_ms);
@@ -783,7 +783,7 @@ public class MarketChartView extends View
         volumeBearishPaint.setAlpha(255);
         volumeBearishPaint.setStyle(Paint.Style.FILL);
 
-        float defaultWickWidth = res.getDimension(R.dimen.chart_wick_width);
+        float defaultWickWidth = res.getDimension(R.dimen.default_wick_width);
         float finalWickWidth = (wickWidthPx > 0f)? wickWidthPx : defaultWickWidth;
 
         wickPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
@@ -800,7 +800,7 @@ public class MarketChartView extends View
 
         gridPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         gridPaint.setColor(gridColor);
-        gridPaint.setStrokeWidth(res.getDimension(R.dimen.chart_grid_width));
+        gridPaint.setStrokeWidth(res.getDimension(R.dimen.default_grid_width));
 
         textPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         textPaint.setColor(priceTextColor);
@@ -828,7 +828,7 @@ public class MarketChartView extends View
         lastPriceTextPaint.setTextSize(lastPriceLabelTextSizePx);
         lastPriceTextPaint.setFakeBoldText(true);
 
-        float defaultMaWidth = res.getDimension(R.dimen.chart_ma_line_width);
+        float defaultMaWidth = res.getDimension(R.dimen.default_ma_line_width);
         float thin = (maLineWidthPx > 0f)? maLineWidthPx : defaultMaWidth;
 
         movingAverage5Paint = new Paint(Paint.ANTI_ALIAS_FLAG);
@@ -880,7 +880,7 @@ public class MarketChartView extends View
 
         selectedLinePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         selectedLinePaint.setColor(res.getColor(R.color.chart_text, null));
-        selectedLinePaint.setStrokeWidth(res.getDimension(R.dimen.chart_selected_width));
+        selectedLinePaint.setStrokeWidth(res.getDimension(R.dimen.default_selected_width));
         selectedLinePaint.setAlpha(100);
     }
 
@@ -1532,8 +1532,8 @@ public class MarketChartView extends View
         float bodyFraction = 0.48f;
         float finalBodyFraction = bodyWidthFraction > 0? bodyWidthFraction : bodyFraction;
         float bodyWidth = info.candleWidth * finalBodyFraction;
-        float minBody = getResources().getDimension(R.dimen.chart_body_min_width);
-        float maxBody = getResources().getDimension(R.dimen.chart_body_max_width);
+        float minBody = getResources().getDimension(R.dimen.default_body_min_width);
+        float maxBody = getResources().getDimension(R.dimen.default_body_max_width);
         if (bodyWidth < minBody)
         {
             bodyWidth = minBody;
@@ -1570,7 +1570,7 @@ public class MarketChartView extends View
 
             float top = Math.min(openY, closeY);
             float bottom = Math.max(openY, closeY);
-            float minH = getResources().getDimension(R.dimen.chart_candle_min_height);
+            float minH = getResources().getDimension(R.dimen.default_candle_min_height);
             if (Math.abs(bottom - top) < minH)
             {
                 bottom = top + minH;
@@ -1670,14 +1670,14 @@ public class MarketChartView extends View
         boolean isBigFiat = fiatMultiplier > 100f;
         String fmt = isBigFiat? "%,.0f" : "%,.2f";
 
-        float labelH = getResources().getDimension(R.dimen.chart_price_text_offset) + getResources().getDimension(R.dimen.chart_text_size);
+        float labelH = getResources().getDimension(R.dimen.default_price_text_offset) + getResources().getDimension(R.dimen.default_text_size);
         float top = lastPriceY - labelH;
         float bottom = lastPriceY + labelH;
         canvas.drawRect(info.chartWidth, top, info.fullWidth, bottom, lastPriceBgPaint);
 
         String label = String.format(Locale.US, fmt, lastPrice * fiatMultiplier);
-        float tx = info.chartWidth + getResources().getDimension(R.dimen.chart_price_text_margin) / 2f;
-        float ty = lastPriceY + getResources().getDimension(R.dimen.chart_text_size) / 3f;
+        float tx = info.chartWidth + getResources().getDimension(R.dimen.default_price_text_margin) / 2f;
+        float ty = lastPriceY + getResources().getDimension(R.dimen.default_text_size) / 3f;
         canvas.drawText(label, tx, ty, lastPriceTextPaint);
     }
 
@@ -1688,9 +1688,9 @@ public class MarketChartView extends View
         for (int i = 0; i <= 4; i++)
         {
             float price = info.displayMax - (info.displayMax - info.displayMin) * i / 4f;
-            float y = TOP_PADDING_PX + info.priceChartHeight * i / 4f + getResources().getDimension(R.dimen.chart_price_text_offset);
+            float y = TOP_PADDING_PX + info.priceChartHeight * i / 4f + getResources().getDimension(R.dimen.default_price_text_offset);
             String priceText = String.format(Locale.US, axisFmt, price);
-            canvas.drawText(priceText, info.chartWidth + getResources().getDimension(R.dimen.chart_price_text_margin), y, textPaint);
+            canvas.drawText(priceText, info.chartWidth + getResources().getDimension(R.dimen.default_price_text_margin), y, textPaint);
         }
     }
 
@@ -1705,8 +1705,8 @@ public class MarketChartView extends View
         float bodyFraction = 0.48f;
         float finalBodyFraction = bodyWidthFraction > 0? bodyWidthFraction : bodyFraction;
         float bodyWidth = info.candleWidth * finalBodyFraction;
-        float minBody = getResources().getDimension(R.dimen.chart_body_min_width);
-        float maxBody = getResources().getDimension(R.dimen.chart_body_max_width);
+        float minBody = getResources().getDimension(R.dimen.default_body_min_width);
+        float maxBody = getResources().getDimension(R.dimen.default_body_max_width);
         if (bodyWidth < minBody)
         {
             bodyWidth = minBody;
