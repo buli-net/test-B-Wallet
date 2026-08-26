@@ -86,6 +86,7 @@ public class MarketChartActivity extends Activity
     private float lastDisplayPrice = 0f;
     private double cachedBtcBalance = -1;
     private boolean isBalanceLoading = false;
+    private int balanceRetryAttempts = 0;
 
     private static class ChartSettingsState
     {
@@ -1530,85 +1531,88 @@ public class MarketChartActivity extends Activity
         }).start();
     }
 
+    // =============== FIX BALANCE ===============
     private void fetchAndCacheWalletBalance()
     {
         if (isBalanceLoading) return;
         isBalanceLoading = true;
-        
-        try
-        {
-            final WalletApplication app = (WalletApplication) getApplication();
-            
-            // Try to get balance directly from wallet first (offline - NO API)
-            getBalanceFromWallet(app);
-            
-            // If balance not available yet, retry every second until success
-            if (cachedBtcBalance < 0)
-            {
-                mainHandler.postDelayed(new Runnable()
-                {
-                    @Override
-                    public void run()
-                    {
-                        getBalanceFromWallet(app);
-                        if (cachedBtcBalance < 0)
-                        {
-                            // Retry forever until balance is loaded
-                            mainHandler.postDelayed(this, 1000);
-                        }
-                        else
-                        {
-                            isBalanceLoading = false;
-                        }
-                    }
-                }, 500);
-            }
-            else
-            {
-                isBalanceLoading = false;
-            }
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
+        balanceRetryAttempts = 0;
+
+        final WalletApplication app = (WalletApplication) getApplication();
+
+        // Try immediately
+        if (getBalanceFromWallet(app)) {
             isBalanceLoading = false;
-            if (textWalletBalance != null)
-            {
-                textWalletBalance.setText("0 BTC");
-            }
+            return;
         }
+
+        // If not ready, retry every second forever until success
+        mainHandler.postDelayed(new Runnable()
+        {
+            @Override
+            public void run()
+            {
+                balanceRetryAttempts++;
+                if (getBalanceFromWallet(app)) {
+                    isBalanceLoading = false;
+                    return;
+                }
+                // Keep retrying
+                mainHandler.postDelayed(this, 1000);
+            }
+        }, 500);
     }
-    
-    private void getBalanceFromWallet(WalletApplication app)
+
+    /**
+     * Lấy số dư từ wallet OFFLINE (không gọi API)
+     * @return true nếu lấy thành công (balance >= 0)
+     */
+    private boolean getBalanceFromWallet(WalletApplication app)
     {
         try
         {
             Wallet wallet = app.getWallet();
-            if (wallet != null)
+            if (wallet == null)
             {
-                // Get balance from wallet - OFFLINE, NO API CALL
-                Coin balance = wallet.getBalance(Wallet.BalanceType.ESTIMATED);
-                
-                if (balance != null)
-                {
-                    cachedBtcBalance = balance.toBtc().doubleValue();
-                    updateWalletBalanceDisplay();
-                    return;
+                // Wallet chưa init
+                if (textWalletBalance != null && balanceRetryAttempts == 0) {
+                    textWalletBalance.setText("Initializing wallet...");
                 }
-                
-                // If ESTIMATED fails, try AVAILABLE
-                balance = wallet.getBalance(Wallet.BalanceType.AVAILABLE);
-                if (balance != null)
-                {
-                    cachedBtcBalance = balance.toBtc().doubleValue();
-                    updateWalletBalanceDisplay();
-                    return;
-                }
+                return false;
             }
+
+            // Thử ESTIMATED (bao gồm pending)
+            Coin balance = wallet.getBalance(Wallet.BalanceType.ESTIMATED);
+            if (balance != null) {
+                double btc = balance.toBtc().doubleValue();
+                // Chỉ cập nhật nếu balance hợp lệ (có thể là 0)
+                cachedBtcBalance = btc;
+                updateWalletBalanceDisplay();
+                return true;
+            }
+
+            // Thử AVAILABLE
+            balance = wallet.getBalance(Wallet.BalanceType.AVAILABLE);
+            if (balance != null) {
+                double btc = balance.toBtc().doubleValue();
+                cachedBtcBalance = btc;
+                updateWalletBalanceDisplay();
+                return true;
+            }
+
+            // Nếu cả 2 đều null, chưa có dữ liệu
+            if (textWalletBalance != null && balanceRetryAttempts % 5 == 0) {
+                textWalletBalance.setText("Syncing wallet...");
+            }
+            return false;
         }
         catch (Exception e)
         {
             e.printStackTrace();
+            if (textWalletBalance != null && balanceRetryAttempts % 5 == 0) {
+                textWalletBalance.setText("Loading balance...");
+            }
+            return false;
         }
     }
 
@@ -1617,46 +1621,40 @@ public class MarketChartActivity extends Activity
         try
         {
             if (textWalletBalance == null) return;
-            
-            if (cachedBtcBalance < 0)
-            {
+
+            // Nếu chưa có balance
+            if (cachedBtcBalance < 0) {
                 textWalletBalance.setText("Loading...");
                 return;
             }
-            
-            // Format BTC balance with 8 decimal places
+
+            // Format BTC
             String btcStr = String.format(Locale.US, "%.8f", cachedBtcBalance);
-            
-            // Try to get fiat rate from local database (NO API)
+
+            // Lấy tỷ giá từ database local (offline)
             double fiatPerBtc = getFiatPerBtc(currentFiatCode);
             String sym = getCurrencySymbol(currentFiatCode);
-            
-            if (fiatPerBtc > 0 && cachedBtcBalance > 0)
-            {
+
+            if (fiatPerBtc > 0 && cachedBtcBalance >= 0) {
                 double fiatVal = cachedBtcBalance * fiatPerBtc;
                 String fiatStr = String.format(Locale.US, "%,.2f %s", fiatVal, sym);
                 textWalletBalance.setText(String.format("%s BTC ≈ %s", btcStr, fiatStr));
-            }
-            else if (cachedBtcBalance >= 0)
-            {
+            } else {
+                // Chỉ hiển thị BTC nếu chưa có rate
                 textWalletBalance.setText(String.format("%s BTC", btcStr));
             }
-            else
-            {
-                textWalletBalance.setText("0 BTC");
-            }
-            
+
             textWalletBalance.invalidate();
         }
         catch (Exception e)
         {
             e.printStackTrace();
-            if (textWalletBalance != null)
-            {
+            if (textWalletBalance != null) {
                 textWalletBalance.setText("0 BTC");
             }
         }
     }
+    // =============== END FIX BALANCE ===============
 
     private double getFiatPerBtc(String fiatCode)
     {
