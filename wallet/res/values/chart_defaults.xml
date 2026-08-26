@@ -15,7 +15,7 @@
     <bool name="default_show_last_price">true</bool>
     <bool name="default_last_line_dashed">true</bool>
 
-    <!-- colors -->
+    <!-- colors mặc định thật -->
     <color name="default_bullish">@color/palette_green</color>
     <color name="default_bearish">@color/palette_red</color>
     <color name="default_last_price_line">@color/palette_yellow</color>
@@ -25,7 +25,19 @@
     <color name="default_last_label_text">@color/last_label_text</color>
     <color name="default_chart_bg">@android:color/transparent</color>
 
-    <!-- dimen chỉ default_ , không dùng chart_ để tránh trùng với dimens.xml -->
+    <!-- MA mặc định -->
+    <integer-array name="default_ma_periods">
+        <item>7</item>
+        <item>25</item>
+        <item>99</item>
+    </integer-array>
+    <array name="default_ma_colors">
+        <item>@color/palette_yellow</item>
+        <item>@color/palette_purple</item>
+        <item>@color/palette_blue</item>
+    </array>
+
+    <!-- dimens -->
     <dimen name="default_wick_width">1dp</dimen>
     <dimen name="default_ma_line_width">1.2dp</dimen>
     <dimen name="default_price_text_size">10sp</dimen>
