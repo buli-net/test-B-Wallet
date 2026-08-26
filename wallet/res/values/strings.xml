@@ -588,4 +588,13 @@
 <string name="chart_reset_confirm_message">All chart customizations will be restored to default. This action cannot be undone.</string>
 <string name="chart_reset">Reset</string>
 
+
+    <!-- Chart Balance - English only -->
+<string name="chart_balance_default">Balance: --</string>
+<string name="chart_balance_format">Balance: %1$.8f BTC ≈ %2$s%3$,.2f</string>
+<string name="chart_balance_btc_only">Balance: %1$.8f BTC</string>
+<string name="chart_balance_loading">Balance:...</string>
+
+
+
 </resources>
