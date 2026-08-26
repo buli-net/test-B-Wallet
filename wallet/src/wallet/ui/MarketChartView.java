@@ -775,7 +775,8 @@ public class MarketChartView extends View
     private void initPaints(Context context)
     {
         Resources res = context.getResources();
-        setBackgroundColor(android.graphics.Color.TRANSPARENT);
+        int defaultBg = getThemeColor(android.R.attr.colorBackground);
+        setBackgroundColor(bgColor!= 0? bgColor : defaultBg);
 
         bullishPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         bullishPaint.setColor(bullishColor);
