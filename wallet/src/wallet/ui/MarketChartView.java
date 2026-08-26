@@ -444,7 +444,7 @@ public class MarketChartView extends View
             ed.putFloat(KEY_PRICE_TEXT_SIZE, txtSize);
             ed.putInt(KEY_PRICE_TEXT_COLOR, txtColor);
             ed.putInt(KEY_GRID_COLOR, gColor);
-            ed.putInt(KEY_BG_COLOR, bColor);
+            ed.remove(KEY_BG_COLOR);
             ed.putFloat(KEY_LAST_LINE_WIDTH, lastW);
             ed.putBoolean(KEY_LAST_LINE_DASH, lastDash);
             ed.apply();
@@ -775,8 +775,9 @@ public class MarketChartView extends View
     private void initPaints(Context context)
     {
         Resources res = context.getResources();
-        int defaultBg = getThemeColor(android.R.attr.colorBackground);
-        setBackgroundColor(bgColor!= 0? bgColor : defaultBg);
+        int themeBg = getThemeColor(android.R.attr.colorBackground);
+        setBackgroundColor(themeBg);
+        bgColor = themeBg;
 
         bullishPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         bullishPaint.setColor(bullishColor);
@@ -903,6 +904,7 @@ public class MarketChartView extends View
         super.onConfigurationChanged(newConfig);
         loadDefaultsFromXml(getContext());
         loadChartOptions(getContext());
+        bgColor = 0;
         initCandleColors(getContext());
         initPaints(getContext());
         invalidate();
@@ -912,6 +914,7 @@ public class MarketChartView extends View
     {
         loadDefaultsFromXml(getContext());
         loadChartOptions(getContext());
+        bgColor = 0;
         initCandleColors(getContext());
         initPaints(getContext());
         invalidate();
