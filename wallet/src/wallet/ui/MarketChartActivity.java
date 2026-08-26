@@ -1522,8 +1522,7 @@ public class MarketChartActivity extends Activity
         }).start();
     }
 /////////////////
-
-            private void fetchAndCacheWalletBalance()
+    private void fetchAndCacheWalletBalance()
     {
         new Thread(new Runnable()
         {
@@ -1541,39 +1540,45 @@ public class MarketChartActivity extends Activity
                         try { Thread.sleep(500); } catch (Exception e) {}
                     }
                     if (wallet == null) return;
-                    // Dùng ESTIMATED để tính cả giao dịch chưa confirm (RBF)
+
+                    // Chuẩn ví gốc: ESTIMATED
                     Coin bal = wallet.getBalance(Wallet.BalanceType.ESTIMATED);
-                    if (bal == null) bal = wallet.getBalance();
                     if (bal == null) return;
                     cachedBtcBalance = bal.toBtc().doubleValue();
 
-                    // Lắng nghe khi có coin mới về để tự cập nhật chart
+                    // Chuẩn ví gốc: đăng ký listener giống WalletBalanceLiveData
                     try {
-                        wallet.addCoinsReceivedEventListener(new org.bitcoinj.wallet.WalletCoinsReceivedEventListener() {
-                            @Override
-                            public void onCoinsReceived(Wallet w, org.bitcoinj.core.Transaction tx, Coin prevBalance, Coin newBalance) {
+                        wallet.addCoinsReceivedEventListener(org.bitcoinj.utils.Threading.SAME_THREAD, new org.bitcoinj.wallet.WalletCoinsReceivedEventListener() {
+                            @Override public void onCoinsReceived(Wallet w, org.bitcoinj.core.Transaction tx, Coin prev, Coin newBal) {
                                 try {
-                                    cachedBtcBalance = newBalance.toBtc().doubleValue();
-                                    mainHandler.post(new Runnable() {
-                                        @Override public void run() { updateWalletBalanceDisplay(); }
-                                    });
+                                    cachedBtcBalance = w.getBalance(Wallet.BalanceType.ESTIMATED).toBtc().doubleValue();
+                                    mainHandler.post(() -> updateWalletBalanceDisplay());
+                                } catch (Exception e) {}
+                            }
+                        });
+                        wallet.addCoinsSentEventListener(org.bitcoinj.utils.Threading.SAME_THREAD, new org.bitcoinj.wallet.WalletCoinsSentEventListener() {
+                            @Override public void onCoinsSent(Wallet w, org.bitcoinj.core.Transaction tx, Coin prev, Coin newBal) {
+                                try {
+                                    cachedBtcBalance = w.getBalance(Wallet.BalanceType.ESTIMATED).toBtc().doubleValue();
+                                    mainHandler.post(() -> updateWalletBalanceDisplay());
+                                } catch (Exception e) {}
+                            }
+                        });
+                        wallet.addChangeEventListener(org.bitcoinj.utils.Threading.SAME_THREAD, new org.bitcoinj.wallet.WalletChangeEventListener() {
+                            @Override public void onWalletChanged(Wallet w) {
+                                try {
+                                    cachedBtcBalance = w.getBalance(Wallet.BalanceType.ESTIMATED).toBtc().doubleValue();
+                                    mainHandler.post(() -> updateWalletBalanceDisplay());
                                 } catch (Exception e) {}
                             }
                         });
                     } catch (Exception e) {}
 
-                    mainHandler.post(new Runnable()
-                    {
-                        @Override
-                        public void run()
-                        {
-                            try { updateWalletBalanceDisplay(); } catch (Exception e) {}
-                        }
+                    mainHandler.post(new Runnable() {
+                        @Override public void run() { updateWalletBalanceDisplay(); }
                     });
                 }
-                catch (Exception e)
-                {
-                }
+                catch (Exception e) {}
             }
         }).start();
     }
@@ -1583,28 +1588,20 @@ public class MarketChartActivity extends Activity
         try
         {
             if (textWalletBalance == null) return;
-            if (cachedBtcBalance < 0)
-            {
+            if (cachedBtcBalance < 0) {
                 textWalletBalance.setText(getString(R.string.chart_balance_loading));
                 return;
             }
-            double fiatPerBtc = 0;
-            try { fiatPerBtc = getFiatPerBtc(currentFiatCode); } catch (Exception ex) {}
-            String sym = currentFiatCode + " ";
-            try { sym = getCurrencySymbol(currentFiatCode); } catch (Exception ex) {}
-            if (fiatPerBtc > 0)
-            {
+            double fiatPerBtc = getFiatPerBtc(currentFiatCode);
+            String sym = getCurrencySymbol(currentFiatCode);
+            if (fiatPerBtc > 0) {
                 double fiatVal = cachedBtcBalance * fiatPerBtc;
                 textWalletBalance.setText(String.format(Locale.US, getString(R.string.chart_balance_format), cachedBtcBalance, sym, fiatVal));
-            }
-            else
-            {
+            } else {
                 textWalletBalance.setText(String.format(Locale.US, getString(R.string.chart_balance_btc_only), cachedBtcBalance));
             }
         }
-        catch (Exception e)
-        {
-        }
+        catch (Exception e) {}
     }
 
 ////////////////
