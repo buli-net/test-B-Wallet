@@ -324,11 +324,7 @@ public class MarketChartView extends View
             lastLineWidthPx = res.getDimension(R.dimen.default_last_line_width);
             lastLineDashed = res.getBoolean(R.bool.default_last_line_dashed);
             lastPriceLabelTextSizePx = res.getDimension(R.dimen.default_last_label_text_size);
-            try {
-                lastPriceLabelTextColor = res.getColor(R.color.default_last_label_text, getContext().getTheme());
-            } catch (Exception ex) {
-                lastPriceLabelTextColor = getThemeColor(android.R.attr.textColorPrimary);
-            }
+            lastPriceLabelTextColor = res.getColor(R.color.default_last_label_text, getContext().getTheme());
         }
     }
 
@@ -581,11 +577,7 @@ public class MarketChartView extends View
             lastLineWidthPx = r.getDimension(R.dimen.default_last_line_width);
             lastLineDashed = r.getBoolean(R.bool.default_last_line_dashed);
             lastPriceLabelTextSizePx = r.getDimension(R.dimen.default_last_label_text_size);
-            try {
-                lastPriceLabelTextColor = r.getColor(R.color.default_last_label_text, getContext().getTheme());
-            } catch (Exception ex) {
-                lastPriceLabelTextColor = getThemeColor(android.R.attr.textColorPrimary);
-            }
+            lastPriceLabelTextColor = r.getColor(R.color.default_last_label_text, getContext().getTheme());
 
             initMaLines(getContext());
             initCandleColors(getContext());
@@ -606,11 +598,7 @@ public class MarketChartView extends View
             priceTextSizePx = r.getDimension(R.dimen.default_price_text_size);
             lastPriceLabelTextSizePx = r.getDimension(R.dimen.default_last_label_text_size);
             priceTextColor = r.getColor(R.color.default_price_text, null);
-            try {
-                lastPriceLabelTextColor = r.getColor(R.color.default_last_label_text, getContext().getTheme());
-            } catch (Exception ex) {
-                lastPriceLabelTextColor = getThemeColor(android.R.attr.textColorPrimary);
-            }
+            lastPriceLabelTextColor = r.getColor(R.color.default_last_label_text, getContext().getTheme());
             gridColor = r.getColor(R.color.default_grid, null);
             bgColor = r.getColor(R.color.default_chart_bg, null);
             lastLineWidthPx = r.getDimension(R.dimen.default_last_line_width);
