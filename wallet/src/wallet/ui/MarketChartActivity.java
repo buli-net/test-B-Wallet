@@ -1521,6 +1521,7 @@ public class MarketChartActivity extends Activity
             }
         }).start();
     }
+////////////////////////////////////////////
 
     private void fetchAndCacheWalletBalance()
     {
@@ -1532,52 +1533,64 @@ public class MarketChartActivity extends Activity
                 try
                 {
                     WalletApplication app = (WalletApplication) getApplication();
+                    if (app == null) return;
                     Wallet wallet = app.getWallet();
-                    if (wallet == null)
-                    {
-                        return;
-                    }
+                    if (wallet == null) return;
                     Coin bal = wallet.getBalance();
-                    cachedBtcBalance = bal.toBtc().doubleValue();
+                    if (bal == null) return;
+                    // bitcoinj 0.16+ returns BigDecimal
+                    try
+                    {
+                        cachedBtcBalance = bal.toBtc().doubleValue();
+                    }
+                    catch (Exception ex)
+                    {
+                        // fallback for old lib where toBtc returns double
+                        try { cachedBtcBalance = Double.parseDouble(bal.toBtc().toString()); }
+                        catch (Exception e2) { return; }
+                    }
                     mainHandler.post(new Runnable()
                     {
                         @Override
                         public void run()
                         {
-                            updateWalletBalanceDisplay();
+                            try { updateWalletBalanceDisplay(); } catch (Exception e) {}
                         }
                     });
                 }
-                catch (Exception e)
-                {
-                }
+                catch (Exception e) {}
             }
         }).start();
     }
 
     private void updateWalletBalanceDisplay()
     {
-        if (textWalletBalance == null)
+        try
         {
-            return;
+            if (textWalletBalance == null) return;
+            if (cachedBtcBalance < 0)
+            {
+                textWalletBalance.setText(getString(R.string.chart_balance_loading));
+                return;
+            }
+            double fiatPerBtc = 0;
+            try { fiatPerBtc = getFiatPerBtc(currentFiatCode); } catch (Exception e) {}
+            String sym = currentFiatCode + " ";
+            try { sym = getCurrencySymbol(currentFiatCode); } catch (Exception e) {}
+            if (fiatPerBtc > 0)
+            {
+                double fiatVal = cachedBtcBalance * fiatPerBtc;
+                textWalletBalance.setText(String.format(Locale.US, getString(R.string.chart_balance_format), cachedBtcBalance, sym, fiatVal));
+            }
+            else
+            {
+                textWalletBalance.setText(String.format(Locale.US, getString(R.string.chart_balance_btc_only), cachedBtcBalance));
+            }
         }
-        if (cachedBtcBalance < 0)
-        {
-            textWalletBalance.setText("Balance:...");
-            return;
-        }
-        double fiatPerBtc = getFiatPerBtc(currentFiatCode);
-        String sym = getCurrencySymbol(currentFiatCode);
-        if (fiatPerBtc > 0)
-        {
-            double fiatVal = cachedBtcBalance * fiatPerBtc;
-            textWalletBalance.setText(String.format(Locale.US, "Balance: %.8f BTC ≈ %s%,.2f", cachedBtcBalance, sym, fiatVal));
-        }
-        else
-        {
-            textWalletBalance.setText(String.format(Locale.US, "Balance: %.8f BTC", cachedBtcBalance));
-        }
+        catch (Exception e) {}
     }
+    
+////?/////////////////////////////////////
 
     private double getFiatPerBtc(String fiatCode)
     {
