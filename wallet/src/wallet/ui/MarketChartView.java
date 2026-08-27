@@ -1,5 +1,3 @@
-Copy
-MarketChartView.java — FIX cannot find symbol startLiveUpdates -> startLive + lưu time nến
 package wallet.ui;
 
 import android.content.Context;
