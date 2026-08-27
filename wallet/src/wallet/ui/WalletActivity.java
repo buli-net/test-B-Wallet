@@ -312,7 +312,9 @@ public final class WalletActivity extends AbstractWalletActivity {
                      startActivity(intent);
                      return true;
                 // end maket 2/2
-                
+                } else if (itemId == R.id.wallet_options_sweep_wallet) {
+                    SweepWalletActivity.start(WalletActivity.this);
+                    return true;
             //add create paper wallet
                 } else if (itemId == R.id.wallet_options_create_paper_wallet) {
                     startActivity(new Intent(WalletActivity.this, wallet.ui.PaperWalletActivity.class));
