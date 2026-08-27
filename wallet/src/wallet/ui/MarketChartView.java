@@ -1,5 +1,3 @@
-Copy
-MarketChartView.java — fix lưu time + nến không reset khi đổi theme / thoát app
 package wallet.ui;
 
 import android.content.Context;
