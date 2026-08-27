@@ -4,6 +4,7 @@
  * Modified version for MarketChartActivity - fixed ViewModel/Lifecycle issues
  * Uses plain Activity with manual ViewModelStoreOwner and LifecycleOwner implementation.
  * Fixed ViewModel instantiation with AndroidViewModelFactory.
+ * Now uses live chart price to calculate fiat balance when available.
  */
 
 package wallet.ui;
@@ -108,6 +109,9 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
     private Coin currentBalance = null;
     private ExchangeRateEntry currentExchangeRate = null;
     private boolean isBlockchainSynced = false;
+
+    // Biến lưu giá BTC/fiat hiện tại từ chart (để tính fiat balance realtime)
+    private float currentMarketPriceFiat = 0f;
 
     private static class ChartSettingsState
     {
@@ -442,7 +446,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         }
     }
 
-    // ========== CẬP NHẬT HIỂN THỊ SỐ DƯ ==========
+    // ========== CẬP NHẬT HIỂN THỊ SỐ DƯ (ƯU TIÊN GIÁ CHART) ==========
     private void updateBalanceDisplay() {
         if (textWalletBalance == null) return;
 
@@ -460,13 +464,21 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
             double btcBalance = currentBalance.toBtc().doubleValue();
             String btcStr = String.format(Locale.US, "%.8f", btcBalance);
 
-            boolean showLocal = getResources().getBoolean(R.bool.show_local_balance) && config.isEnableExchangeRates();
-            if (showLocal && currentExchangeRate != null) {
-                Fiat fiatValue = currentExchangeRate.exchangeRate().coinToFiat(currentBalance);
-                String fiatStr = fiatValue.toFriendlyString();
-                textWalletBalance.setText(String.format("%s BTC ≈ %s", btcStr, fiatStr));
+            // Ưu tiên dùng giá chart nếu có (real-time)
+            if (currentMarketPriceFiat > 0) {
+                double fiatVal = btcBalance * currentMarketPriceFiat;
+                String symbol = getCurrencySymbol(currentFiatCode);
+                textWalletBalance.setText(String.format(Locale.US, "%s BTC ≈ %s%,.2f", btcStr, symbol, fiatVal));
             } else {
-                textWalletBalance.setText(String.format("%s BTC", btcStr));
+                // Fallback: dùng tỷ giá từ database
+                boolean showLocal = getResources().getBoolean(R.bool.show_local_balance) && config.isEnableExchangeRates();
+                if (showLocal && currentExchangeRate != null) {
+                    Fiat fiatValue = currentExchangeRate.exchangeRate().coinToFiat(currentBalance);
+                    String fiatStr = fiatValue.toFriendlyString();
+                    textWalletBalance.setText(String.format("%s BTC ≈ %s", btcStr, fiatStr));
+                } else {
+                    textWalletBalance.setText(String.format("%s BTC", btcStr));
+                }
             }
             textWalletBalance.invalidate();
         } catch (Exception e) {
@@ -1873,36 +1885,51 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
                 runOnUiThread(() -> new Thread(() -> {
                     double fiatPerBtc = getFiatPerBtc(currentFiatCode);
                     double basePerBtc = getFiatPerBtc("USD");
-                    if (fiatPerBtc == 0d || basePerBtc == 0d) return;
+                    if (fiatPerBtc == 0d || basePerBtc == 0d) {
+                        // Nếu chưa có tỷ giá, fallback dùng USD
+                        final double priceInFiat = price;
+                        mainHandler.post(() -> {
+                            updatePriceDisplay(priceInFiat);
+                        });
+                        return;
+                    }
                     double usdToFiat = fiatPerBtc / basePerBtc;
                     final double priceInFiat = price * usdToFiat;
                     mainHandler.post(() -> {
-                        if (textCurrentPrice != null)
-                        {
-                            String symbol = getCurrencySymbol(currentFiatCode);
-                            textCurrentPrice.setText(String.format(Locale.US, "%s%,.2f", symbol, priceInFiat));
-                            int color;
-                            if (lastDisplayPrice == 0f)
-                            {
-                                color = getThemeColor(android.R.attr.textColorPrimary);
-                            }
-                            else if (priceInFiat > lastDisplayPrice)
-                            {
-                                color = res.getColor(R.color.palette_green, null);
-                            }
-                            else if (priceInFiat < lastDisplayPrice)
-                            {
-                                color = res.getColor(R.color.palette_red, null);
-                            }
-                            else
-                            {
-                                color = res.getColor(R.color.chart_last_price_line, null);
-                            }
-                            textCurrentPrice.setTextColor(color);
-                            lastDisplayPrice = (float) priceInFiat;
-                        }
+                        updatePriceDisplay(priceInFiat);
+                        // Cập nhật giá chart hiện tại để tính fiat balance realtime
+                        currentMarketPriceFiat = (float) priceInFiat;
+                        // Gọi updateBalanceDisplay để cập nhật số dư theo giá mới
+                        updateBalanceDisplay();
                     });
                 }).start());
+            }
+
+            private void updatePriceDisplay(double priceInFiat) {
+                if (textCurrentPrice != null)
+                {
+                    String symbol = getCurrencySymbol(currentFiatCode);
+                    textCurrentPrice.setText(String.format(Locale.US, "%s%,.2f", symbol, priceInFiat));
+                    int color;
+                    if (lastDisplayPrice == 0f)
+                    {
+                        color = getThemeColor(android.R.attr.textColorPrimary);
+                    }
+                    else if (priceInFiat > lastDisplayPrice)
+                    {
+                        color = res.getColor(R.color.palette_green, null);
+                    }
+                    else if (priceInFiat < lastDisplayPrice)
+                    {
+                        color = res.getColor(R.color.palette_red, null);
+                    }
+                    else
+                    {
+                        color = res.getColor(R.color.chart_last_price_line, null);
+                    }
+                    textCurrentPrice.setTextColor(color);
+                    lastDisplayPrice = (float) priceInFiat;
+                }
             }
 
             @Override
