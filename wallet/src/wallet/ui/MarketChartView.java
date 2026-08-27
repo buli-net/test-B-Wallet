@@ -233,8 +233,9 @@ public class MarketChartView extends View
             Resources res = context.getResources();
             int defBull = res.getColor(R.color.default_bullish, null);
             int defBear = res.getColor(R.color.default_bearish, null);
-            bullishColor = sp.getInt(KEY_BULL, defBull);
-            bearishColor = sp.getInt(KEY_BEAR, defBear);
+            // FIX: WHITE_BUG - Color.WHITE = 0xFFFFFFFF == -1, using -1 as sentinel breaks white. Use contains() to allow white to be saved and restored.
+            bullishColor = sp.contains(KEY_BULL) ? sp.getInt(KEY_BULL, defBull) : defBull;
+            bearishColor = sp.contains(KEY_BEAR) ? sp.getInt(KEY_BEAR, defBear) : defBear;
         }
         catch (Exception e)
         {
@@ -282,16 +283,17 @@ public class MarketChartView extends View
             showVolume = sp.getBoolean(KEY_SHOW_VOLUME, defVol);
             visibleCandleCount = sp.getInt(KEY_VISIBLE_COUNT, defVis);
             showLastPriceLine = sp.getBoolean(KEY_SHOW_LAST_PRICE, defLast);
-            lastPriceLineColor = sp.getInt(KEY_LAST_PRICE_LINE_COLOR, defLastColor);
-            lastPriceBgColor = sp.getInt(KEY_LAST_PRICE_BG_COLOR, defLastBg);
+            // FIX: WHITE_BUG COMPATIBILITY - white is -1, so check contains() instead of relying on -1 sentinel. Compatible with MarketChartActivity which now uses 0 as unset sentinel.
+            lastPriceLineColor = sp.contains(KEY_LAST_PRICE_LINE_COLOR) ? sp.getInt(KEY_LAST_PRICE_LINE_COLOR, defLastColor) : defLastColor;
+            lastPriceBgColor = sp.contains(KEY_LAST_PRICE_BG_COLOR) ? sp.getInt(KEY_LAST_PRICE_BG_COLOR, defLastBg) : defLastBg;
             priceTextSizePx = sp.getFloat(KEY_PRICE_TEXT_SIZE, defTxt);
-            priceTextColor = sp.getInt(KEY_PRICE_TEXT_COLOR, defPriceTxt);
-            gridColor = sp.getInt(KEY_GRID_COLOR, defGridColor);
-            bgColor = sp.getInt(KEY_BG_COLOR, defBg);
+            priceTextColor = sp.contains(KEY_PRICE_TEXT_COLOR) ? sp.getInt(KEY_PRICE_TEXT_COLOR, defPriceTxt) : defPriceTxt;
+            gridColor = sp.contains(KEY_GRID_COLOR) ? sp.getInt(KEY_GRID_COLOR, defGridColor) : defGridColor;
+            bgColor = sp.contains(KEY_BG_COLOR) ? sp.getInt(KEY_BG_COLOR, defBg) : defBg;
             lastLineWidthPx = sp.getFloat(KEY_LAST_LINE_WIDTH, defLastW);
             lastLineDashed = sp.getBoolean(KEY_LAST_LINE_DASH, defDash);
             lastPriceLabelTextSizePx = sp.getFloat(KEY_LAST_LABEL_TEXT_SIZE, defLabel);
-            lastPriceLabelTextColor = sp.getInt(KEY_LAST_LABEL_TEXT_COLOR, defLabelTxt);
+            lastPriceLabelTextColor = sp.contains(KEY_LAST_LABEL_TEXT_COLOR) ? sp.getInt(KEY_LAST_LABEL_TEXT_COLOR, defLabelTxt) : defLabelTxt;
         }
         catch (Exception e)
         {
@@ -1622,7 +1624,7 @@ public class MarketChartView extends View
             for (int i = 0; i < info.count; i++)
             {
                 int dataIndex = info.startIndex + i;
-                if (dataIndex >= data.size())
+                if (dataIndex >= info.size())
                 {
                     break;
                 }
