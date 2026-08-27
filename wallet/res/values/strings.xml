@@ -591,8 +591,8 @@
 
     <!-- Chart Balance - English only -->
 
-<!-- Trong res/values/strings.xml (tiếng Anh mặc định) -->
-<string name="balance_loading_wallet">Loading wallet...</string>
+
+    <string name="balance_loading_wallet">Loading wallet...</string>
 <string name="balance_syncing">Syncing...</string>
 <string name="balance_loading">Loading balance...</string>
 <string name="balance_error">Balance error</string>
