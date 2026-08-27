@@ -1,5 +1,3 @@
-Copy
-MarketChartView.java — View - fix reset time 15p + scroll
 package wallet.ui;
 
 import android.content.Context;
