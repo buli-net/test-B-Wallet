@@ -1171,6 +1171,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         rowDash.setGravity(Gravity.CENTER_VERTICAL);
         TextView lbDash = new TextView(this);
         lbDash.setText(getString(R.string.chart_last_line_dashed));
+        lbDash.setTextSize(12f);
         lbDash.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
         final android.widget.Switch swDash = new android.widget.Switch(this);
         swDash.setChecked(marketChartView.isLastLineDashed());
