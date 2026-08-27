@@ -1,3 +1,5 @@
+Copy
+MarketChartActivity - FIX đọc prefs trước chips
 /*
  * Copyright (c) 2024
  *
@@ -369,6 +371,25 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
             }
         };
         prefs.registerOnSharedPreferenceChangeListener(prefsListener);
+
+        // FIX: Restore saved interval BEFORE creating chips and loading chart - so scroll is preserved when coming from wallet screen
+        try
+        {
+            android.content.SharedPreferences spChart = getSharedPreferences("chart_options_prefs", MODE_PRIVATE);
+            String savedInterval = spChart.getString("interval", null);
+            if (savedInterval != null && !savedInterval.isEmpty())
+            {
+                currentInterval = savedInterval;
+            }
+            String savedSymbol = spChart.getString("current_symbol", null);
+            if (savedSymbol != null && !savedSymbol.isEmpty())
+            {
+                currentSymbol = savedSymbol;
+            }
+        }
+        catch (Exception e)
+        {
+        }
 
         setupTimeframeChips();
         setupChartListener();
