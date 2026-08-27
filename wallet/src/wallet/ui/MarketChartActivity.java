@@ -960,7 +960,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         rowVol.setGravity(Gravity.CENTER_VERTICAL);
         TextView lbVol = new TextView(this);
         lbVol.setText(getString(R.string.chart_show_volume));
-        lbGrid.setTextSize(12f);
+        lbVol.setTextSize(12f);
         lbVol.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
         final android.widget.Switch swVol = new android.widget.Switch(this);
         swVol.setChecked(marketChartView.isShowVolume());
@@ -1008,7 +1008,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         rowLast.setGravity(Gravity.CENTER_VERTICAL);
         TextView lbShowLast = new TextView(this);
         lbShowLast.setText(getString(R.string.chart_show_last_price));
-        lbGrid.setTextSize(12f);
+        lbShowLast.setTextSize(12f);
         lbShowLast.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
         final android.widget.Switch swLast = new android.widget.Switch(this);
         swLast.setChecked(marketChartView.isShowLastPriceLine());
