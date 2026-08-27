@@ -946,6 +946,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         rowGrid.setGravity(Gravity.CENTER_VERTICAL);
         TextView lbGrid = new TextView(this);
         lbGrid.setText(getString(R.string.chart_show_grid));
+        lbGrid.setTextSize(12f);
         lbGrid.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
         final android.widget.Switch swGrid = new android.widget.Switch(this);
         swGrid.setChecked(marketChartView.isShowGrid());
@@ -959,6 +960,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         rowVol.setGravity(Gravity.CENTER_VERTICAL);
         TextView lbVol = new TextView(this);
         lbVol.setText(getString(R.string.chart_show_volume));
+        lbGrid.setTextSize(12f);
         lbVol.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
         final android.widget.Switch swVol = new android.widget.Switch(this);
         swVol.setChecked(marketChartView.isShowVolume());
@@ -1006,6 +1008,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         rowLast.setGravity(Gravity.CENTER_VERTICAL);
         TextView lbShowLast = new TextView(this);
         lbShowLast.setText(getString(R.string.chart_show_last_price));
+        lbGrid.setTextSize(12f);
         lbShowLast.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
         final android.widget.Switch swLast = new android.widget.Switch(this);
         swLast.setChecked(marketChartView.isShowLastPriceLine());
@@ -1020,7 +1023,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         rowLastColor.setPadding(0, 8, 0, 8);
         TextView lbLastColor = new TextView(this);
         lbLastColor.setText(getString(R.string.chart_last_price_color));
-        lbLastColor.setTextSize(13f);
+        lbLastColor.setTextSize(12f);
         lbLastColor.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
         final View viewLastColor = new View(this);
         viewLastColor.setLayoutParams(new LinearLayout.LayoutParams(48, 48));
