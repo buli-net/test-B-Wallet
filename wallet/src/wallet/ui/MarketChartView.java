@@ -1,3 +1,5 @@
+Copy
+MarketChartView.java — View - fix reset time 15p + scroll
 package wallet.ui;
 
 import android.content.Context;
@@ -151,6 +153,9 @@ public class MarketChartView extends View
     private static final String KEY_LAST_LINE_DASH = "last_line_dash";
     private static final String KEY_LAST_LABEL_TEXT_SIZE = "last_label_text_size";
     private static final String KEY_LAST_LABEL_TEXT_COLOR = "last_label_text_color";
+    private static final String KEY_INTERVAL = "interval";
+    private static final String KEY_TRANSLATION_X = "translation_x";
+    private static final String KEY_CURRENT_SYMBOL = "current_symbol";
 
     private int visibleCandleCount;
     private float translationX = 0f;
@@ -283,6 +288,19 @@ public class MarketChartView extends View
             showVolume = sp.getBoolean(KEY_SHOW_VOLUME, defVol);
             visibleCandleCount = sp.getInt(KEY_VISIBLE_COUNT, defVis);
             showLastPriceLine = sp.getBoolean(KEY_SHOW_LAST_PRICE, defLast);
+            // FIX: Persist interval and scroll position to avoid reset on theme change / app resume
+            String savedInterval = sp.getString(KEY_INTERVAL, null);
+            if (savedInterval != null && !savedInterval.isEmpty())
+            {
+                currentInterval = savedInterval;
+            }
+            translationX = sp.getFloat(KEY_TRANSLATION_X, 0f);
+            extraOffsetX = translationX < 0f ? translationX : 0f;
+            String savedSymbol = sp.getString(KEY_CURRENT_SYMBOL, null);
+            if (savedSymbol != null && !savedSymbol.isEmpty())
+            {
+                currentSymbol = savedSymbol;
+            }
             // FIX: WHITE_BUG COMPATIBILITY - white is -1, so check contains() instead of relying on -1 sentinel. Compatible with MarketChartActivity which now uses 0 as unset sentinel.
             lastPriceLineColor = sp.contains(KEY_LAST_PRICE_LINE_COLOR) ? sp.getInt(KEY_LAST_PRICE_LINE_COLOR, defLastColor) : defLastColor;
             lastPriceBgColor = sp.contains(KEY_LAST_PRICE_BG_COLOR) ? sp.getInt(KEY_LAST_PRICE_BG_COLOR, defLastBg) : defLastBg;
@@ -925,6 +943,13 @@ public class MarketChartView extends View
                     visibleCandleCount = MAX_VISIBLE_CANDLE_COUNT;
                 }
                 clampTranslationX();
+                try
+                {
+                    getContext().getSharedPreferences(PREFS_CHART, Context.MODE_PRIVATE).edit().putInt(KEY_VISIBLE_COUNT, visibleCandleCount).putFloat(KEY_TRANSLATION_X, translationX).apply();
+                }
+                catch (Exception e)
+                {
+                }
                 invalidate();
                 return true;
             }
@@ -948,6 +973,13 @@ public class MarketChartView extends View
                 }
                 translationX -= distanceX;
                 clampTranslationX();
+                try
+                {
+                    getContext().getSharedPreferences(PREFS_CHART, Context.MODE_PRIVATE).edit().putFloat(KEY_TRANSLATION_X, translationX).apply();
+                }
+                catch (Exception e)
+                {
+                }
                 if (selectedIndex!= -1)
                 {
                     selectedIndex = -1;
@@ -1055,15 +1087,37 @@ public class MarketChartView extends View
         {
             extraOffsetX = 0f;
         }
+        // FIX: Persist scroll position so it survives theme change / activity recreate
+        try
+        {
+            getContext().getSharedPreferences(PREFS_CHART, Context.MODE_PRIVATE).edit().putFloat(KEY_TRANSLATION_X, translationX).apply();
+        }
+        catch (Exception e)
+        {
+        }
     }
 
     public void loadChart(String symbol, String interval)
     {
+        // FIX: Don't reset translationX if same interval/symbol is being reloaded (theme change / resume)
+        boolean isSameChart = symbol != null && symbol.equals(this.currentSymbol) && interval != null && interval.equals(this.currentInterval);
         this.currentSymbol = symbol;
         this.currentInterval = interval;
         this.selectedIndex = -1;
-        this.translationX = 0f;
-        this.extraOffsetX = 0f;
+        if (!isSameChart)
+        {
+            // Only reset scroll when actually changing timeframe/symbol
+            this.translationX = 0f;
+            this.extraOffsetX = 0f;
+        }
+        try
+        {
+            SharedPreferences sp = getContext().getSharedPreferences(PREFS_CHART, Context.MODE_PRIVATE);
+            sp.edit().putString(KEY_INTERVAL, interval).putString(KEY_CURRENT_SYMBOL, symbol).putFloat(KEY_TRANSLATION_X, this.translationX).apply();
+        }
+        catch (Exception e)
+        {
+        }
         stopLive();
         fetchCandles();
         startLive();
