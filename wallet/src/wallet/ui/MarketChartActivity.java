@@ -404,7 +404,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
 
         // Set initial text
         if (textWalletBalance != null) {
-            textWalletBalance.setText("Loading wallet...");
+            textWalletBalance.setText(getString(R.string.balance_loading_wallet));
         }
     }
 
@@ -447,12 +447,12 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         if (textWalletBalance == null) return;
 
         if (!isBlockchainSynced) {
-            textWalletBalance.setText("Syncing...");
+            textWalletBalance.setText(getString(R.string.balance_syncing));
             return;
         }
 
         if (currentBalance == null) {
-            textWalletBalance.setText("Loading balance...");
+            textWalletBalance.setText(getString(R.string.balance_loading));
             return;
         }
 
@@ -471,7 +471,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
             textWalletBalance.invalidate();
         } catch (Exception e) {
             e.printStackTrace();
-            textWalletBalance.setText("Balance error");
+            textWalletBalance.setText(getString(R.string.balance_error));
         }
     }
 
