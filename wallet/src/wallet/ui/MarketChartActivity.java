@@ -6,6 +6,7 @@
  * Fixed ViewModel instantiation with AndroidViewModelFactory.
  * Now uses live chart price to calculate fiat balance when available.
  * Fixed interval persistence: saves and restores selected time interval.
+ * Fixed color view borders: added 1dp stroke to all color picker views.
  */
 
 package wallet.ui;
@@ -117,6 +118,17 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
 
     // Biến lưu giá chart
     private float currentMarketPriceFiat = 0f;
+
+    // ========== Helper: create color view with 1dp border ==========
+    private GradientDrawable createColorViewDrawable(int color) {
+        GradientDrawable drawable = new GradientDrawable();
+        drawable.setCornerRadius(8f);
+        drawable.setColor(color);
+        float density = getResources().getDisplayMetrics().density;
+        int borderColor = getResources().getColor(R.color.chart_grid, getTheme());
+        drawable.setStroke((int) (1 * density), borderColor);
+        return drawable;
+    }
 
     private static class ChartSettingsState
     {
@@ -656,10 +668,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         lbBull.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
         final View viewBull = new View(this);
         viewBull.setLayoutParams(new LinearLayout.LayoutParams(48, 48));
-        GradientDrawable gdBull = new GradientDrawable();
-        gdBull.setCornerRadius(8f);
-        gdBull.setColor(state.curBull[0]);
-        viewBull.setBackground(gdBull);
+        viewBull.setBackground(createColorViewDrawable(state.curBull[0]));
         rowBull.addView(lbBull);
         rowBull.addView(viewBull);
         containerCandle.addView(rowBull);
@@ -674,10 +683,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         lbBear.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
         final View viewBear = new View(this);
         viewBear.setLayoutParams(new LinearLayout.LayoutParams(48, 48));
-        GradientDrawable gdBear = new GradientDrawable();
-        gdBear.setCornerRadius(8f);
-        gdBear.setColor(state.curBear[0]);
-        viewBear.setBackground(gdBear);
+        viewBear.setBackground(createColorViewDrawable(state.curBear[0]));
         rowBear.addView(lbBear);
         rowBear.addView(viewBear);
         containerCandle.addView(rowBear);
@@ -686,20 +692,14 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
             state.bullIdx[0] = (state.bullIdx[0] + 1) % state.candlePalette.length;
             int next = state.candlePalette[state.bullIdx[0]];
             state.curBull[0] = next;
-            GradientDrawable gd = new GradientDrawable();
-            gd.setCornerRadius(8f);
-            gd.setColor(next);
-            v.setBackground(gd);
+            v.setBackground(createColorViewDrawable(next));
         });
 
         viewBear.setOnClickListener(v -> {
             state.bearIdx[0] = (state.bearIdx[0] + 1) % state.candlePalette.length;
             int next = state.candlePalette[state.bearIdx[0]];
             state.curBear[0] = next;
-            GradientDrawable gd = new GradientDrawable();
-            gd.setCornerRadius(8f);
-            gd.setColor(next);
-            v.setBackground(gd);
+            v.setBackground(createColorViewDrawable(next));
         });
 
         root.addView(containerCandle);
@@ -1024,10 +1024,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         lbLastColor.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
         final View viewLastColor = new View(this);
         viewLastColor.setLayoutParams(new LinearLayout.LayoutParams(48, 48));
-        GradientDrawable gdLast = new GradientDrawable();
-        gdLast.setCornerRadius(8f);
-        gdLast.setColor(state.curLastColor[0]);
-        viewLastColor.setBackground(gdLast);
+        viewLastColor.setBackground(createColorViewDrawable(state.curLastColor[0]));
         rowLastColor.addView(lbLastColor);
         rowLastColor.addView(viewLastColor);
         container.addView(rowLastColor);
@@ -1044,10 +1041,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
             }
             int next = state.candlePalette[(idx + 1) % state.candlePalette.length];
             state.curLastColor[0] = next;
-            GradientDrawable gd = new GradientDrawable();
-            gd.setCornerRadius(8f);
-            gd.setColor(next);
-            v.setBackground(gd);
+            v.setBackground(createColorViewDrawable(next));
         });
     }
 
@@ -1088,13 +1082,11 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         lbGridColor.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
         final View viewGridColor = new View(this);
         viewGridColor.setLayoutParams(new LinearLayout.LayoutParams(48, 48));
-        GradientDrawable gdGrid = new GradientDrawable();
-        gdGrid.setCornerRadius(8f);
-        gdGrid.setColor(state.curGridColor[0]);
-        viewGridColor.setBackground(gdGrid);
+        viewGridColor.setBackground(createColorViewDrawable(state.curGridColor[0]));
         rowGridColor.addView(lbGridColor);
         rowGridColor.addView(viewGridColor);
         container.addView(rowGridColor);
+
         viewGridColor.setOnClickListener(v -> {
             int idx = 0;
             for (int i = 0; i < state.candlePalette.length; i++)
@@ -1107,10 +1099,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
             }
             int next = state.candlePalette[(idx + 1) % state.candlePalette.length];
             state.curGridColor[0] = next;
-            GradientDrawable gd = new GradientDrawable();
-            gd.setCornerRadius(8f);
-            gd.setColor(next);
-            v.setBackground(gd);
+            v.setBackground(createColorViewDrawable(next));
         });
     }
 
@@ -1126,13 +1115,11 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         lbTxtColor.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
         final View viewTxtColor = new View(this);
         viewTxtColor.setLayoutParams(new LinearLayout.LayoutParams(48, 48));
-        GradientDrawable gdTxtC = new GradientDrawable();
-        gdTxtC.setCornerRadius(8f);
-        gdTxtC.setColor(state.curPriceTxtColor[0]);
-        viewTxtColor.setBackground(gdTxtC);
+        viewTxtColor.setBackground(createColorViewDrawable(state.curPriceTxtColor[0]));
         rowTxtColor.addView(lbTxtColor);
         rowTxtColor.addView(viewTxtColor);
         container.addView(rowTxtColor);
+
         viewTxtColor.setOnClickListener(v -> {
             int idx = 0;
             for (int i = 0; i < state.candlePalette.length; i++)
@@ -1145,10 +1132,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
             }
             int next = state.candlePalette[(idx + 1) % state.candlePalette.length];
             state.curPriceTxtColor[0] = next;
-            GradientDrawable gd = new GradientDrawable();
-            gd.setCornerRadius(8f);
-            gd.setColor(next);
-            v.setBackground(gd);
+            v.setBackground(createColorViewDrawable(next));
         });
     }
 
@@ -1220,10 +1204,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         lbLabelBg.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
         final View viewLabelBg = new View(this);
         viewLabelBg.setLayoutParams(new LinearLayout.LayoutParams(48, 48));
-        GradientDrawable gdLabelBg = new GradientDrawable();
-        gdLabelBg.setCornerRadius(8f);
-        gdLabelBg.setColor(state.curLabelBg[0]);
-        viewLabelBg.setBackground(gdLabelBg);
+        viewLabelBg.setBackground(createColorViewDrawable(state.curLabelBg[0]));
         rowLabelBg.addView(lbLabelBg);
         rowLabelBg.addView(viewLabelBg);
         container.addView(rowLabelBg);
@@ -1238,10 +1219,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         lbLabelTextColor.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
         final View viewLabelTextColor = new View(this);
         viewLabelTextColor.setLayoutParams(new LinearLayout.LayoutParams(48, 48));
-        GradientDrawable gdLabelText = new GradientDrawable();
-        gdLabelText.setCornerRadius(8f);
-        gdLabelText.setColor(state.curLabelTextColorFinal[0]);
-        viewLabelTextColor.setBackground(gdLabelText);
+        viewLabelTextColor.setBackground(createColorViewDrawable(state.curLabelTextColorFinal[0]));
         rowLabelTextColor.addView(lbLabelTextColor);
         rowLabelTextColor.addView(viewLabelTextColor);
         container.addView(rowLabelTextColor);
@@ -1269,10 +1247,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
             }
             int next = state.candlePalette[(idx + 1) % state.candlePalette.length];
             state.curLabelBg[0] = next;
-            GradientDrawable gd = new GradientDrawable();
-            gd.setCornerRadius(8f);
-            gd.setColor(next);
-            v.setBackground(gd);
+            v.setBackground(createColorViewDrawable(next));
         });
 
         viewLabelTextColor.setOnClickListener(v -> {
@@ -1287,10 +1262,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
             }
             int next = state.candlePalette[(idx + 1) % state.candlePalette.length];
             state.curLabelTextColorFinal[0] = next;
-            GradientDrawable gd = new GradientDrawable();
-            gd.setCornerRadius(8f);
-            gd.setColor(next);
-            v.setBackground(gd);
+            v.setBackground(createColorViewDrawable(next));
         });
 
         sbLabelSize.setOnSeekBarChangeListener(new android.widget.SeekBar.OnSeekBarChangeListener()
@@ -1746,7 +1718,6 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
             tv.setOnClickListener(v -> {
                 if (load.isEmpty()) return;
                 currentInterval = load;
-                // Lưu interval vào SharedPreferences
                 getSharedPreferences(PREFS_CHART_STATE, MODE_PRIVATE)
                         .edit().putString(KEY_INTERVAL, currentInterval).apply();
                 if (marketChartView != null)
@@ -1838,7 +1809,6 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
             final String load = realInterval;
             tv.setOnClickListener(v -> {
                 currentInterval = load;
-                // Lưu interval vào SharedPreferences
                 getSharedPreferences(PREFS_CHART_STATE, MODE_PRIVATE)
                         .edit().putString(KEY_INTERVAL, currentInterval).apply();
                 if (marketChartView != null) {
