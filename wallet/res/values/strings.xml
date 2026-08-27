@@ -590,11 +590,11 @@
 
 
     <!-- Chart Balance - English only -->
-<string name="chart_balance_default">Balance: --</string>
-<string name="chart_balance_format">Balance: %1$.8f BTC ≈ %2$s%3$,.2f</string>
-<string name="chart_balance_btc_only">Balance: %1$.8f BTC</string>
-<string name="chart_balance_loading">Balance:...</string>
 
-
+<!-- Trong res/values/strings.xml (tiếng Anh mặc định) -->
+<string name="balance_loading_wallet">Loading wallet...</string>
+<string name="balance_syncing">Syncing...</string>
+<string name="balance_loading">Loading balance...</string>
+<string name="balance_error">Balance error</string>
 
 </resources>
