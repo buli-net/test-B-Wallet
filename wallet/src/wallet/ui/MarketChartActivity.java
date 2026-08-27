@@ -5,6 +5,7 @@
  * Uses plain Activity with manual ViewModelStoreOwner and LifecycleOwner implementation.
  * Fixed ViewModel instantiation with AndroidViewModelFactory.
  * Now uses live chart price to calculate fiat balance when available.
+ * Fixed interval persistence: saves and restores selected time interval.
  */
 
 package wallet.ui;
@@ -88,6 +89,10 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
     private TextView popupVolume;
     private View btnChartSettings;
 
+    // ======== FIX: Lưu interval ========
+    private static final String PREFS_CHART_STATE = "chart_state_prefs";
+    private static final String KEY_INTERVAL = "interval";
+
     private String currentSymbol = "BTCUSDT";
     private String currentInterval = "15m";
 
@@ -110,7 +115,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
     private ExchangeRateEntry currentExchangeRate = null;
     private boolean isBlockchainSynced = false;
 
-    // Biến lưu giá BTC/fiat hiện tại từ chart (để tính fiat balance realtime)
+    // Biến lưu giá chart
     private float currentMarketPriceFiat = 0f;
 
     private static class ChartSettingsState
@@ -370,23 +375,11 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         };
         prefs.registerOnSharedPreferenceChangeListener(prefsListener);
 
-        // FIX: Restore saved interval BEFORE creating chips and loading chart - so scroll is preserved when coming from wallet screen
-        try
-        {
-            android.content.SharedPreferences spChart = getSharedPreferences("chart_options_prefs", MODE_PRIVATE);
-            String savedInterval = spChart.getString("interval", null);
-            if (savedInterval != null && !savedInterval.isEmpty())
-            {
-                currentInterval = savedInterval;
-            }
-            String savedSymbol = spChart.getString("current_symbol", null);
-            if (savedSymbol != null && !savedSymbol.isEmpty())
-            {
-                currentSymbol = savedSymbol;
-            }
-        }
-        catch (Exception e)
-        {
+        // ======== FIX: Khôi phục interval đã lưu ========
+        SharedPreferences statePrefs = getSharedPreferences(PREFS_CHART_STATE, MODE_PRIVATE);
+        String savedInterval = statePrefs.getString(KEY_INTERVAL, "15m");
+        if (savedInterval != null && !savedInterval.isEmpty()) {
+            currentInterval = savedInterval;
         }
 
         setupTimeframeChips();
@@ -417,7 +410,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
             updateBalanceDisplay();
         });
 
-        // Observe blockchain state để biết khi nào wallet sync xong
+        // Observe blockchain state
         application.blockchainState.observe(this, blockchainState -> {
             if (blockchainState != null) {
                 isBlockchainSynced = !blockchainState.replaying;
@@ -465,7 +458,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         }
     }
 
-    // ========== CẬP NHẬT HIỂN THỊ SỐ DƯ (ƯU TIÊN GIÁ CHART) ==========
+    // ========== CẬP NHẬT HIỂN THỊ SỐ DƯ ==========
     private void updateBalanceDisplay() {
         if (textWalletBalance == null) return;
 
@@ -483,13 +476,12 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
             double btcBalance = currentBalance.toBtc().doubleValue();
             String btcStr = String.format(Locale.US, "%.8f", btcBalance);
 
-            // Ưu tiên dùng giá chart nếu có (real-time)
+            // Ưu tiên giá chart nếu có
             if (currentMarketPriceFiat > 0) {
                 double fiatVal = btcBalance * currentMarketPriceFiat;
                 String symbol = getCurrencySymbol(currentFiatCode);
                 textWalletBalance.setText(String.format(Locale.US, "%s BTC ≈ %s%,.2f", btcStr, symbol, fiatVal));
             } else {
-                // Fallback: dùng tỷ giá từ database
                 boolean showLocal = getResources().getBoolean(R.bool.show_local_balance) && config.isEnableExchangeRates();
                 if (showLocal && currentExchangeRate != null) {
                     Fiat fiatValue = currentExchangeRate.exchangeRate().coinToFiat(currentBalance);
@@ -506,7 +498,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         }
     }
 
-    // ========== CÁC PHƯƠNG THỨC KHÁC (giữ nguyên từ file gốc) ==========
+    // ========== CÁC PHƯƠNG THỨC KHÁC ==========
     private void showMaSettingsPopup()
     {
         showChartSettingsPopup();
@@ -553,16 +545,11 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         state.curTxtSize[0] = marketChartView.getPriceTextSizePx() > 0 ? marketChartView.getPriceTextSizePx() : getResources().getDimension(R.dimen.default_price_text_size);
         state.curLastW[0] = marketChartView.getLastLineWidthPx() > 0 ? marketChartView.getLastLineWidthPx() : getResources().getDimension(R.dimen.default_last_price_line_width);
         state.curLabelSize[0] = marketChartView.getLastPriceLabelTextSizePx() > 0 ? marketChartView.getLastPriceLabelTextSizePx() : getResources().getDimension(R.dimen.default_price_text_size);
-        // FIX: WHITE_BUG - last line color white == -1, need 0 sentinel check
-        state.curLastColor[0] = marketChartView.getLastPriceLineColor() != 0 ? marketChartView.getLastPriceLineColor() : getResources().getColor(R.color.chart_last_price_line, getTheme());
-        // FIX: WHITE_BUG - Color.WHITE is 0xFFFFFFFF == -1, so -1 cannot be used as unset sentinel. Use 0 instead to allow white to persist.
-        state.curGridColor[0] = marketChartView.getGridColor() != 0 ? marketChartView.getGridColor() : getResources().getColor(R.color.chart_grid, getTheme());
-        // FIX: WHITE_BUG - white == -1, check !=0
-        state.curPriceTxtColor[0] = marketChartView.getPriceTextColor() != 0 ? marketChartView.getPriceTextColor() : getThemeColor(android.R.attr.textColorSecondary);
-        // FIX: WHITE_BUG - white == -1 causes fallback to yellow when reopening dialog. Use 0 as unset.
-        state.curLabelBg[0] = marketChartView.getLastPriceBgColor() != 0 ? marketChartView.getLastPriceBgColor() : getResources().getColor(R.color.chart_last_price_line, getTheme());
-        // FIX: WHITE_BUG - label text white handling
-        state.curLabelTextColorFinal[0] = marketChartView.getLastPriceLabelTextColor() != 0 ? marketChartView.getLastPriceLabelTextColor() : getThemeColor(android.R.attr.textColorPrimaryInverse);
+        state.curLastColor[0] = marketChartView.getLastPriceLineColor();
+        state.curGridColor[0] = marketChartView.getGridColor() != -1 ? marketChartView.getGridColor() : getResources().getColor(R.color.chart_grid, getTheme());
+        state.curPriceTxtColor[0] = marketChartView.getPriceTextColor() != -1 ? marketChartView.getPriceTextColor() : getThemeColor(android.R.attr.textColorSecondary);
+        state.curLabelBg[0] = marketChartView.getLastPriceBgColor() != -1 ? marketChartView.getLastPriceBgColor() : getResources().getColor(R.color.chart_last_price_line, getTheme());
+        state.curLabelTextColorFinal[0] = marketChartView.getLastPriceLabelTextColor() != -1 ? marketChartView.getLastPriceLabelTextColor() : getThemeColor(android.R.attr.textColorPrimaryInverse);
         state.finalTxtSize[0] = state.curTxtSize[0];
         state.finalLabelSize[0] = state.curLabelSize[0];
 
@@ -630,19 +617,6 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         root.addView(divider);
     }
 
-    // FIX: BORDER FIX - White color preview invisible on light theme (dialog bg is white).
-    // Added helper that creates a color box drawable with 1dp border using chart_grid color.
-    // This makes white and light colors always visible.
-    private GradientDrawable createColorBoxDrawable(int color, float radius)
-    {
-        GradientDrawable gd = new GradientDrawable();
-        gd.setCornerRadius(radius);
-        gd.setColor(color);
-        // 1dp border to make white visible
-        gd.setStroke((int)(1 * getResources().getDisplayMetrics().density), getResources().getColor(R.color.chart_grid, getTheme()));
-        return gd;
-    }
-
     private void addCandleSection(LinearLayout root, final ChartSettingsState state, TypedValue outValue)
     {
         LinearLayout candleHeader = new LinearLayout(this);
@@ -682,8 +656,10 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         lbBull.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
         final View viewBull = new View(this);
         viewBull.setLayoutParams(new LinearLayout.LayoutParams(48, 48));
-        // FIX: BORDER - use helper with stroke
-        viewBull.setBackground(createColorBoxDrawable(state.curBull[0], 8f));
+        GradientDrawable gdBull = new GradientDrawable();
+        gdBull.setCornerRadius(8f);
+        gdBull.setColor(state.curBull[0]);
+        viewBull.setBackground(gdBull);
         rowBull.addView(lbBull);
         rowBull.addView(viewBull);
         containerCandle.addView(rowBull);
@@ -698,8 +674,10 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         lbBear.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
         final View viewBear = new View(this);
         viewBear.setLayoutParams(new LinearLayout.LayoutParams(48, 48));
-        // FIX: BORDER - use helper with stroke
-        viewBear.setBackground(createColorBoxDrawable(state.curBear[0], 8f));
+        GradientDrawable gdBear = new GradientDrawable();
+        gdBear.setCornerRadius(8f);
+        gdBear.setColor(state.curBear[0]);
+        viewBear.setBackground(gdBear);
         rowBear.addView(lbBear);
         rowBear.addView(viewBear);
         containerCandle.addView(rowBear);
@@ -708,16 +686,20 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
             state.bullIdx[0] = (state.bullIdx[0] + 1) % state.candlePalette.length;
             int next = state.candlePalette[state.bullIdx[0]];
             state.curBull[0] = next;
-            // FIX: BORDER - keep border when cycling colors
-            v.setBackground(createColorBoxDrawable(next, 8f));
+            GradientDrawable gd = new GradientDrawable();
+            gd.setCornerRadius(8f);
+            gd.setColor(next);
+            v.setBackground(gd);
         });
 
         viewBear.setOnClickListener(v -> {
             state.bearIdx[0] = (state.bearIdx[0] + 1) % state.candlePalette.length;
             int next = state.candlePalette[state.bearIdx[0]];
             state.curBear[0] = next;
-            // FIX: BORDER - keep border when cycling colors
-            v.setBackground(createColorBoxDrawable(next, 8f));
+            GradientDrawable gd = new GradientDrawable();
+            gd.setCornerRadius(8f);
+            gd.setColor(next);
+            v.setBackground(gd);
         });
 
         root.addView(containerCandle);
@@ -1042,8 +1024,10 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         lbLastColor.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
         final View viewLastColor = new View(this);
         viewLastColor.setLayoutParams(new LinearLayout.LayoutParams(48, 48));
-        // FIX: BORDER - white invisible fix
-        viewLastColor.setBackground(createColorBoxDrawable(state.curLastColor[0], 8f));
+        GradientDrawable gdLast = new GradientDrawable();
+        gdLast.setCornerRadius(8f);
+        gdLast.setColor(state.curLastColor[0]);
+        viewLastColor.setBackground(gdLast);
         rowLastColor.addView(lbLastColor);
         rowLastColor.addView(viewLastColor);
         container.addView(rowLastColor);
@@ -1060,8 +1044,10 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
             }
             int next = state.candlePalette[(idx + 1) % state.candlePalette.length];
             state.curLastColor[0] = next;
-                        // FIX: BORDER - keep border
-            v.setBackground(createColorBoxDrawable(next, 8f));
+            GradientDrawable gd = new GradientDrawable();
+            gd.setCornerRadius(8f);
+            gd.setColor(next);
+            v.setBackground(gd);
         });
     }
 
@@ -1102,8 +1088,10 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         lbGridColor.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
         final View viewGridColor = new View(this);
         viewGridColor.setLayoutParams(new LinearLayout.LayoutParams(48, 48));
-        // FIX: BORDER - white invisible fix
-        viewGridColor.setBackground(createColorBoxDrawable(state.curGridColor[0], 8f));
+        GradientDrawable gdGrid = new GradientDrawable();
+        gdGrid.setCornerRadius(8f);
+        gdGrid.setColor(state.curGridColor[0]);
+        viewGridColor.setBackground(gdGrid);
         rowGridColor.addView(lbGridColor);
         rowGridColor.addView(viewGridColor);
         container.addView(rowGridColor);
@@ -1119,8 +1107,10 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
             }
             int next = state.candlePalette[(idx + 1) % state.candlePalette.length];
             state.curGridColor[0] = next;
-                        // FIX: BORDER - keep border
-            v.setBackground(createColorBoxDrawable(next, 8f));
+            GradientDrawable gd = new GradientDrawable();
+            gd.setCornerRadius(8f);
+            gd.setColor(next);
+            v.setBackground(gd);
         });
     }
 
@@ -1136,8 +1126,10 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         lbTxtColor.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
         final View viewTxtColor = new View(this);
         viewTxtColor.setLayoutParams(new LinearLayout.LayoutParams(48, 48));
-        // FIX: BORDER - white invisible fix
-        viewTxtColor.setBackground(createColorBoxDrawable(state.curPriceTxtColor[0], 8f));
+        GradientDrawable gdTxtC = new GradientDrawable();
+        gdTxtC.setCornerRadius(8f);
+        gdTxtC.setColor(state.curPriceTxtColor[0]);
+        viewTxtColor.setBackground(gdTxtC);
         rowTxtColor.addView(lbTxtColor);
         rowTxtColor.addView(viewTxtColor);
         container.addView(rowTxtColor);
@@ -1153,8 +1145,10 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
             }
             int next = state.candlePalette[(idx + 1) % state.candlePalette.length];
             state.curPriceTxtColor[0] = next;
-                        // FIX: BORDER - keep border
-            v.setBackground(createColorBoxDrawable(next, 8f));
+            GradientDrawable gd = new GradientDrawable();
+            gd.setCornerRadius(8f);
+            gd.setColor(next);
+            v.setBackground(gd);
         });
     }
 
@@ -1226,8 +1220,10 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         lbLabelBg.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
         final View viewLabelBg = new View(this);
         viewLabelBg.setLayoutParams(new LinearLayout.LayoutParams(48, 48));
-        // FIX: BORDER - white invisible fix
-        viewLabelBg.setBackground(createColorBoxDrawable(state.curLabelBg[0], 8f));
+        GradientDrawable gdLabelBg = new GradientDrawable();
+        gdLabelBg.setCornerRadius(8f);
+        gdLabelBg.setColor(state.curLabelBg[0]);
+        viewLabelBg.setBackground(gdLabelBg);
         rowLabelBg.addView(lbLabelBg);
         rowLabelBg.addView(viewLabelBg);
         container.addView(rowLabelBg);
@@ -1242,8 +1238,10 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         lbLabelTextColor.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
         final View viewLabelTextColor = new View(this);
         viewLabelTextColor.setLayoutParams(new LinearLayout.LayoutParams(48, 48));
-        // FIX: BORDER - white invisible fix
-        viewLabelTextColor.setBackground(createColorBoxDrawable(state.curLabelTextColorFinal[0], 8f));
+        GradientDrawable gdLabelText = new GradientDrawable();
+        gdLabelText.setCornerRadius(8f);
+        gdLabelText.setColor(state.curLabelTextColorFinal[0]);
+        viewLabelTextColor.setBackground(gdLabelText);
         rowLabelTextColor.addView(lbLabelTextColor);
         rowLabelTextColor.addView(viewLabelTextColor);
         container.addView(rowLabelTextColor);
@@ -1271,8 +1269,10 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
             }
             int next = state.candlePalette[(idx + 1) % state.candlePalette.length];
             state.curLabelBg[0] = next;
-                        // FIX: BORDER - keep border
-            v.setBackground(createColorBoxDrawable(next, 8f));
+            GradientDrawable gd = new GradientDrawable();
+            gd.setCornerRadius(8f);
+            gd.setColor(next);
+            v.setBackground(gd);
         });
 
         viewLabelTextColor.setOnClickListener(v -> {
@@ -1287,8 +1287,10 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
             }
             int next = state.candlePalette[(idx + 1) % state.candlePalette.length];
             state.curLabelTextColorFinal[0] = next;
-                        // FIX: BORDER - keep border
-            v.setBackground(createColorBoxDrawable(next, 8f));
+            GradientDrawable gd = new GradientDrawable();
+            gd.setCornerRadius(8f);
+            gd.setColor(next);
+            v.setBackground(gd);
         });
 
         sbLabelSize.setOnSeekBarChangeListener(new android.widget.SeekBar.OnSeekBarChangeListener()
@@ -1462,11 +1464,9 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         {
             MarketChartView.MaLine line = list.get(pos);
             h.et.setText(String.valueOf(line.period));
-            // FIX: BORDER - MA color box also needs border for white visibility
             GradientDrawable gd = new GradientDrawable();
             gd.setCornerRadius(0f);
             gd.setColor(line.color);
-            gd.setStroke((int)(1 * h.itemView.getResources().getDisplayMetrics().density), h.itemView.getResources().getColor(R.color.chart_grid, h.itemView.getContext().getTheme()));
             h.color.setBackground(gd);
 
             h.et.setOnFocusChangeListener((v, hasFocus) -> {
@@ -1505,11 +1505,9 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
                 }
                 int next = colors[(idx + 1) % colors.length];
                 line.color = next;
-                // FIX: BORDER - keep border
                 GradientDrawable ngd = new GradientDrawable();
                 ngd.setCornerRadius(0f);
                 ngd.setColor(next);
-                ngd.setStroke((int)(1 * v.getResources().getDisplayMetrics().density), v.getResources().getColor(R.color.chart_grid, v.getContext().getTheme()));
                 h.color.setBackground(ngd);
             });
 
@@ -1676,6 +1674,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         }
     }
 
+    // ======== FIX: Lưu interval khi chọn ========
     private void showMoreIntervalsDialog()
     {
         LinearLayout root = new LinearLayout(this);
@@ -1747,6 +1746,9 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
             tv.setOnClickListener(v -> {
                 if (load.isEmpty()) return;
                 currentInterval = load;
+                // Lưu interval vào SharedPreferences
+                getSharedPreferences(PREFS_CHART_STATE, MODE_PRIVATE)
+                        .edit().putString(KEY_INTERVAL, currentInterval).apply();
                 if (marketChartView != null)
                 {
                     marketChartView.loadChart(currentSymbol, currentInterval);
@@ -1836,8 +1838,10 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
             final String load = realInterval;
             tv.setOnClickListener(v -> {
                 currentInterval = load;
-                if (marketChartView != null)
-                {
+                // Lưu interval vào SharedPreferences
+                getSharedPreferences(PREFS_CHART_STATE, MODE_PRIVATE)
+                        .edit().putString(KEY_INTERVAL, currentInterval).apply();
+                if (marketChartView != null) {
                     marketChartView.loadChart(currentSymbol, currentInterval);
                 }
                 setupTimeframeChips();
@@ -1899,20 +1903,15 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
                     double fiatPerBtc = getFiatPerBtc(currentFiatCode);
                     double basePerBtc = getFiatPerBtc("USD");
                     if (fiatPerBtc == 0d || basePerBtc == 0d) {
-                        // Nếu chưa có tỷ giá, fallback dùng USD
                         final double priceInFiat = price;
-                        mainHandler.post(() -> {
-                            updatePriceDisplay(priceInFiat);
-                        });
+                        mainHandler.post(() -> updatePriceDisplay(priceInFiat));
                         return;
                     }
                     double usdToFiat = fiatPerBtc / basePerBtc;
                     final double priceInFiat = price * usdToFiat;
                     mainHandler.post(() -> {
                         updatePriceDisplay(priceInFiat);
-                        // Cập nhật giá chart hiện tại để tính fiat balance realtime
                         currentMarketPriceFiat = (float) priceInFiat;
-                        // Gọi updateBalanceDisplay để cập nhật số dư theo giá mới
                         updateBalanceDisplay();
                     });
                 }).start());
