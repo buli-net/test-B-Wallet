@@ -1,5 +1,3 @@
-Copy
-MarketChartActivity - FIX đọc prefs trước chips
 /*
  * Copyright (c) 2024
  *
