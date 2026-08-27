@@ -534,11 +534,16 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         state.curTxtSize[0] = marketChartView.getPriceTextSizePx() > 0 ? marketChartView.getPriceTextSizePx() : getResources().getDimension(R.dimen.default_price_text_size);
         state.curLastW[0] = marketChartView.getLastLineWidthPx() > 0 ? marketChartView.getLastLineWidthPx() : getResources().getDimension(R.dimen.default_last_price_line_width);
         state.curLabelSize[0] = marketChartView.getLastPriceLabelTextSizePx() > 0 ? marketChartView.getLastPriceLabelTextSizePx() : getResources().getDimension(R.dimen.default_price_text_size);
-        state.curLastColor[0] = marketChartView.getLastPriceLineColor();
-        state.curGridColor[0] = marketChartView.getGridColor() != -1 ? marketChartView.getGridColor() : getResources().getColor(R.color.chart_grid, getTheme());
-        state.curPriceTxtColor[0] = marketChartView.getPriceTextColor() != -1 ? marketChartView.getPriceTextColor() : getThemeColor(android.R.attr.textColorSecondary);
-        state.curLabelBg[0] = marketChartView.getLastPriceBgColor() != -1 ? marketChartView.getLastPriceBgColor() : getResources().getColor(R.color.chart_last_price_line, getTheme());
-        state.curLabelTextColorFinal[0] = marketChartView.getLastPriceLabelTextColor() != -1 ? marketChartView.getLastPriceLabelTextColor() : getThemeColor(android.R.attr.textColorPrimaryInverse);
+        // FIX: WHITE_BUG - last line color white == -1, need 0 sentinel check
+        state.curLastColor[0] = marketChartView.getLastPriceLineColor() != 0 ? marketChartView.getLastPriceLineColor() : getResources().getColor(R.color.chart_last_price_line, getTheme());
+        // FIX: WHITE_BUG - Color.WHITE is 0xFFFFFFFF == -1, so -1 cannot be used as unset sentinel. Use 0 instead to allow white to persist.
+        state.curGridColor[0] = marketChartView.getGridColor() != 0 ? marketChartView.getGridColor() : getResources().getColor(R.color.chart_grid, getTheme());
+        // FIX: WHITE_BUG - white == -1, check !=0
+        state.curPriceTxtColor[0] = marketChartView.getPriceTextColor() != 0 ? marketChartView.getPriceTextColor() : getThemeColor(android.R.attr.textColorSecondary);
+        // FIX: WHITE_BUG - white == -1 causes fallback to yellow when reopening dialog. Use 0 as unset.
+        state.curLabelBg[0] = marketChartView.getLastPriceBgColor() != 0 ? marketChartView.getLastPriceBgColor() : getResources().getColor(R.color.chart_last_price_line, getTheme());
+        // FIX: WHITE_BUG - label text white handling
+        state.curLabelTextColorFinal[0] = marketChartView.getLastPriceLabelTextColor() != 0 ? marketChartView.getLastPriceLabelTextColor() : getThemeColor(android.R.attr.textColorPrimaryInverse);
         state.finalTxtSize[0] = state.curTxtSize[0];
         state.finalLabelSize[0] = state.curLabelSize[0];
 
@@ -606,6 +611,19 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         root.addView(divider);
     }
 
+    // FIX: BORDER FIX - White color preview invisible on light theme (dialog bg is white).
+    // Added helper that creates a color box drawable with 1dp border using chart_grid color.
+    // This makes white and light colors always visible.
+    private GradientDrawable createColorBoxDrawable(int color, float radius)
+    {
+        GradientDrawable gd = new GradientDrawable();
+        gd.setCornerRadius(radius);
+        gd.setColor(color);
+        // 1dp border to make white visible
+        gd.setStroke((int)(1 * getResources().getDisplayMetrics().density), getResources().getColor(R.color.chart_grid, getTheme()));
+        return gd;
+    }
+
     private void addCandleSection(LinearLayout root, final ChartSettingsState state, TypedValue outValue)
     {
         LinearLayout candleHeader = new LinearLayout(this);
@@ -645,10 +663,8 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         lbBull.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
         final View viewBull = new View(this);
         viewBull.setLayoutParams(new LinearLayout.LayoutParams(48, 48));
-        GradientDrawable gdBull = new GradientDrawable();
-        gdBull.setCornerRadius(8f);
-        gdBull.setColor(state.curBull[0]);
-        viewBull.setBackground(gdBull);
+        // FIX: BORDER - use helper with stroke
+        viewBull.setBackground(createColorBoxDrawable(state.curBull[0], 8f));
         rowBull.addView(lbBull);
         rowBull.addView(viewBull);
         containerCandle.addView(rowBull);
@@ -663,10 +679,8 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         lbBear.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
         final View viewBear = new View(this);
         viewBear.setLayoutParams(new LinearLayout.LayoutParams(48, 48));
-        GradientDrawable gdBear = new GradientDrawable();
-        gdBear.setCornerRadius(8f);
-        gdBear.setColor(state.curBear[0]);
-        viewBear.setBackground(gdBear);
+        // FIX: BORDER - use helper with stroke
+        viewBear.setBackground(createColorBoxDrawable(state.curBear[0], 8f));
         rowBear.addView(lbBear);
         rowBear.addView(viewBear);
         containerCandle.addView(rowBear);
@@ -675,20 +689,16 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
             state.bullIdx[0] = (state.bullIdx[0] + 1) % state.candlePalette.length;
             int next = state.candlePalette[state.bullIdx[0]];
             state.curBull[0] = next;
-            GradientDrawable gd = new GradientDrawable();
-            gd.setCornerRadius(8f);
-            gd.setColor(next);
-            v.setBackground(gd);
+            // FIX: BORDER - keep border when cycling colors
+            v.setBackground(createColorBoxDrawable(next, 8f));
         });
 
         viewBear.setOnClickListener(v -> {
             state.bearIdx[0] = (state.bearIdx[0] + 1) % state.candlePalette.length;
             int next = state.candlePalette[state.bearIdx[0]];
             state.curBear[0] = next;
-            GradientDrawable gd = new GradientDrawable();
-            gd.setCornerRadius(8f);
-            gd.setColor(next);
-            v.setBackground(gd);
+            // FIX: BORDER - keep border when cycling colors
+            v.setBackground(createColorBoxDrawable(next, 8f));
         });
 
         root.addView(containerCandle);
@@ -1013,10 +1023,8 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         lbLastColor.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
         final View viewLastColor = new View(this);
         viewLastColor.setLayoutParams(new LinearLayout.LayoutParams(48, 48));
-        GradientDrawable gdLast = new GradientDrawable();
-        gdLast.setCornerRadius(8f);
-        gdLast.setColor(state.curLastColor[0]);
-        viewLastColor.setBackground(gdLast);
+        // FIX: BORDER - white invisible fix
+        viewLastColor.setBackground(createColorBoxDrawable(state.curLastColor[0], 8f));
         rowLastColor.addView(lbLastColor);
         rowLastColor.addView(viewLastColor);
         container.addView(rowLastColor);
@@ -1033,10 +1041,8 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
             }
             int next = state.candlePalette[(idx + 1) % state.candlePalette.length];
             state.curLastColor[0] = next;
-            GradientDrawable gd = new GradientDrawable();
-            gd.setCornerRadius(8f);
-            gd.setColor(next);
-            v.setBackground(gd);
+                        // FIX: BORDER - keep border
+            v.setBackground(createColorBoxDrawable(next, 8f));
         });
     }
 
@@ -1077,10 +1083,8 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         lbGridColor.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
         final View viewGridColor = new View(this);
         viewGridColor.setLayoutParams(new LinearLayout.LayoutParams(48, 48));
-        GradientDrawable gdGrid = new GradientDrawable();
-        gdGrid.setCornerRadius(8f);
-        gdGrid.setColor(state.curGridColor[0]);
-        viewGridColor.setBackground(gdGrid);
+        // FIX: BORDER - white invisible fix
+        viewGridColor.setBackground(createColorBoxDrawable(state.curGridColor[0], 8f));
         rowGridColor.addView(lbGridColor);
         rowGridColor.addView(viewGridColor);
         container.addView(rowGridColor);
@@ -1096,10 +1100,8 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
             }
             int next = state.candlePalette[(idx + 1) % state.candlePalette.length];
             state.curGridColor[0] = next;
-            GradientDrawable gd = new GradientDrawable();
-            gd.setCornerRadius(8f);
-            gd.setColor(next);
-            v.setBackground(gd);
+                        // FIX: BORDER - keep border
+            v.setBackground(createColorBoxDrawable(next, 8f));
         });
     }
 
@@ -1115,10 +1117,8 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         lbTxtColor.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
         final View viewTxtColor = new View(this);
         viewTxtColor.setLayoutParams(new LinearLayout.LayoutParams(48, 48));
-        GradientDrawable gdTxtC = new GradientDrawable();
-        gdTxtC.setCornerRadius(8f);
-        gdTxtC.setColor(state.curPriceTxtColor[0]);
-        viewTxtColor.setBackground(gdTxtC);
+        // FIX: BORDER - white invisible fix
+        viewTxtColor.setBackground(createColorBoxDrawable(state.curPriceTxtColor[0], 8f));
         rowTxtColor.addView(lbTxtColor);
         rowTxtColor.addView(viewTxtColor);
         container.addView(rowTxtColor);
@@ -1134,10 +1134,8 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
             }
             int next = state.candlePalette[(idx + 1) % state.candlePalette.length];
             state.curPriceTxtColor[0] = next;
-            GradientDrawable gd = new GradientDrawable();
-            gd.setCornerRadius(8f);
-            gd.setColor(next);
-            v.setBackground(gd);
+                        // FIX: BORDER - keep border
+            v.setBackground(createColorBoxDrawable(next, 8f));
         });
     }
 
@@ -1209,10 +1207,8 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         lbLabelBg.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
         final View viewLabelBg = new View(this);
         viewLabelBg.setLayoutParams(new LinearLayout.LayoutParams(48, 48));
-        GradientDrawable gdLabelBg = new GradientDrawable();
-        gdLabelBg.setCornerRadius(8f);
-        gdLabelBg.setColor(state.curLabelBg[0]);
-        viewLabelBg.setBackground(gdLabelBg);
+        // FIX: BORDER - white invisible fix
+        viewLabelBg.setBackground(createColorBoxDrawable(state.curLabelBg[0], 8f));
         rowLabelBg.addView(lbLabelBg);
         rowLabelBg.addView(viewLabelBg);
         container.addView(rowLabelBg);
@@ -1227,10 +1223,8 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         lbLabelTextColor.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
         final View viewLabelTextColor = new View(this);
         viewLabelTextColor.setLayoutParams(new LinearLayout.LayoutParams(48, 48));
-        GradientDrawable gdLabelText = new GradientDrawable();
-        gdLabelText.setCornerRadius(8f);
-        gdLabelText.setColor(state.curLabelTextColorFinal[0]);
-        viewLabelTextColor.setBackground(gdLabelText);
+        // FIX: BORDER - white invisible fix
+        viewLabelTextColor.setBackground(createColorBoxDrawable(state.curLabelTextColorFinal[0], 8f));
         rowLabelTextColor.addView(lbLabelTextColor);
         rowLabelTextColor.addView(viewLabelTextColor);
         container.addView(rowLabelTextColor);
@@ -1258,10 +1252,8 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
             }
             int next = state.candlePalette[(idx + 1) % state.candlePalette.length];
             state.curLabelBg[0] = next;
-            GradientDrawable gd = new GradientDrawable();
-            gd.setCornerRadius(8f);
-            gd.setColor(next);
-            v.setBackground(gd);
+                        // FIX: BORDER - keep border
+            v.setBackground(createColorBoxDrawable(next, 8f));
         });
 
         viewLabelTextColor.setOnClickListener(v -> {
@@ -1276,10 +1268,8 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
             }
             int next = state.candlePalette[(idx + 1) % state.candlePalette.length];
             state.curLabelTextColorFinal[0] = next;
-            GradientDrawable gd = new GradientDrawable();
-            gd.setCornerRadius(8f);
-            gd.setColor(next);
-            v.setBackground(gd);
+                        // FIX: BORDER - keep border
+            v.setBackground(createColorBoxDrawable(next, 8f));
         });
 
         sbLabelSize.setOnSeekBarChangeListener(new android.widget.SeekBar.OnSeekBarChangeListener()
@@ -1453,9 +1443,11 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         {
             MarketChartView.MaLine line = list.get(pos);
             h.et.setText(String.valueOf(line.period));
+            // FIX: BORDER - MA color box also needs border for white visibility
             GradientDrawable gd = new GradientDrawable();
             gd.setCornerRadius(0f);
             gd.setColor(line.color);
+            gd.setStroke((int)(1 * h.itemView.getResources().getDisplayMetrics().density), h.itemView.getResources().getColor(R.color.chart_grid, h.itemView.getContext().getTheme()));
             h.color.setBackground(gd);
 
             h.et.setOnFocusChangeListener((v, hasFocus) -> {
@@ -1494,9 +1486,11 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
                 }
                 int next = colors[(idx + 1) % colors.length];
                 line.color = next;
+                // FIX: BORDER - keep border
                 GradientDrawable ngd = new GradientDrawable();
                 ngd.setCornerRadius(0f);
                 ngd.setColor(next);
+                ngd.setStroke((int)(1 * v.getResources().getDisplayMetrics().density), v.getResources().getColor(R.color.chart_grid, v.getContext().getTheme()));
                 h.color.setBackground(ngd);
             });
 
