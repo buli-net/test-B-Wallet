@@ -1624,7 +1624,7 @@ public class MarketChartView extends View
             for (int i = 0; i < info.count; i++)
             {
                 int dataIndex = info.startIndex + i;
-                if (dataIndex >= info.size())
+                if (dataIndex >= data.size())
                 {
                     break;
                 }
