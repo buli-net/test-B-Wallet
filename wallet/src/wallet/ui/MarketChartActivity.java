@@ -496,7 +496,8 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
 
     // ======== FIX: Xoay màn hình không bị xẹp ========
     @Override
-    public void onConfigurationChanged(Configuration newConfig) {
+    public void onConfigurationChanged(android.content.res.Configuration newConfig) {
+   // public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
         // Refresh chart để vẽ lại với kích thước mới
         if (marketChartView != null) {
