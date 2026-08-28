@@ -1,3 +1,5 @@
+
+}
 /*
  * Copyright (c) 2024
  *
@@ -9,6 +11,7 @@
  * Fixed color view borders: added 1dp stroke to all color picker views.
  * Added reset interval to default on chart reset (interval default from XML).
  * Added onConfigurationChanged to fix screen rotation squash issue.
+ * Fixed ambiguous Configuration references.
  */
 
 package wallet.ui;
@@ -62,7 +65,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import wallet.Configuration;
+import wallet.Configuration; // class wallet.Configuration
 import wallet.R;
 import wallet.WalletApplication;
 import wallet.exchangerate.ExchangeRateDao;
@@ -103,7 +106,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
     private SimpleDateFormat fullTimeFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US);
 
     private ExchangeRateDao exchangeRateDao;
-    private Configuration config;
+    private wallet.Configuration config; // FULL qualified to avoid ambiguity
     private SharedPreferences prefs;
     private SharedPreferences.OnSharedPreferenceChangeListener prefsListener;
     private String currentFiatCode = "USD";
@@ -386,7 +389,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         }
 
         WalletApplication application = (WalletApplication) getApplication();
-        config = application.getConfiguration();
+        config = application.getConfiguration(); // now wallet.Configuration
         prefs = application.getSharedPreferences("wallet_preferences", MODE_PRIVATE);
         exchangeRateDao = ExchangeRatesRepository.get(application).exchangeRateDao();
 
@@ -397,7 +400,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         }
 
         prefsListener = (sharedPreferences, key) -> {
-            if (Configuration.PREFS_KEY_EXCHANGE_CURRENCY.equals(key))
+            if (wallet.Configuration.PREFS_KEY_EXCHANGE_CURRENCY.equals(key)) // fully qualified
             {
                 String newCode = config.getExchangeCurrencyCode();
                 if (newCode != null)
@@ -497,7 +500,6 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
     // ======== FIX: Xoay màn hình không bị xẹp ========
     @Override
     public void onConfigurationChanged(android.content.res.Configuration newConfig) {
-   // public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
         // Refresh chart để vẽ lại với kích thước mới
         if (marketChartView != null) {
