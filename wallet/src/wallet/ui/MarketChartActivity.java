@@ -8,6 +8,7 @@
  * Fixed interval persistence: saves and restores selected time interval.
  * Fixed color view borders: added 1dp stroke to all color picker views.
  * Added reset interval to default on chart reset (interval default from XML).
+ * Added onConfigurationChanged to fix screen rotation squash issue.
  */
 
 package wallet.ui;
@@ -17,6 +18,7 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Typeface;
@@ -490,6 +492,19 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         if (prefs != null && prefsListener != null) {
             prefs.unregisterOnSharedPreferenceChangeListener(prefsListener);
         }
+    }
+
+    // ======== FIX: Xoay màn hình không bị xẹp ========
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        // Refresh chart để vẽ lại với kích thước mới
+        if (marketChartView != null) {
+            marketChartView.invalidate();
+            marketChartView.requestLayout();
+        }
+        // Cập nhật lại các chip time frame nếu cần
+        setupTimeframeChips();
     }
 
     // ========== CẬP NHẬT HIỂN THỊ SỐ DƯ ==========
