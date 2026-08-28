@@ -968,6 +968,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         rowGrid.setGravity(Gravity.CENTER_VERTICAL);
         TextView lbGrid = new TextView(this);
         lbGrid.setText(getString(R.string.chart_show_grid));
+        lbGrid.setTextSize(12f);
         lbGrid.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
         final android.widget.Switch swGrid = new android.widget.Switch(this);
         swGrid.setChecked(marketChartView.isShowGrid());
@@ -981,6 +982,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         rowVol.setGravity(Gravity.CENTER_VERTICAL);
         TextView lbVol = new TextView(this);
         lbVol.setText(getString(R.string.chart_show_volume));
+        lbVol.setTextSize(12f);
         lbVol.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
         final android.widget.Switch swVol = new android.widget.Switch(this);
         swVol.setChecked(marketChartView.isShowVolume());
@@ -1028,6 +1030,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         rowLast.setGravity(Gravity.CENTER_VERTICAL);
         TextView lbShowLast = new TextView(this);
         lbShowLast.setText(getString(R.string.chart_show_last_price));
+        lbShowLast.setTextSize(12f);
         lbShowLast.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
         final android.widget.Switch swLast = new android.widget.Switch(this);
         swLast.setChecked(marketChartView.isShowLastPriceLine());
@@ -1042,6 +1045,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         rowLastColor.setPadding(0, 8, 0, 8);
         TextView lbLastColor = new TextView(this);
         lbLastColor.setText(getString(R.string.chart_last_price_color));
+        lbLastColor.setTextSize(12f);
         lbLastColor.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
         final View viewLastColor = new View(this);
         viewLastColor.setLayoutParams(new LinearLayout.LayoutParams(48, 48));
@@ -1099,6 +1103,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         rowGridColor.setPadding(0, 8, 0, 8);
         TextView lbGridColor = new TextView(this);
         lbGridColor.setText(getString(R.string.chart_grid_color));
+        lbGridColor.setTextSize(13f);
         lbGridColor.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
         final View viewGridColor = new View(this);
         viewGridColor.setLayoutParams(new LinearLayout.LayoutParams(48, 48));
@@ -1131,6 +1136,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         rowTxtColor.setPadding(0, 8, 0, 8);
         TextView lbTxtColor = new TextView(this);
         lbTxtColor.setText(getString(R.string.chart_price_text_color));
+        lbTxtColor.setTextSize(13f);
         lbTxtColor.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
         final View viewTxtColor = new View(this);
         viewTxtColor.setLayoutParams(new LinearLayout.LayoutParams(48, 48));
@@ -1187,6 +1193,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         rowDash.setGravity(Gravity.CENTER_VERTICAL);
         TextView lbDash = new TextView(this);
         lbDash.setText(getString(R.string.chart_last_line_dashed));
+        lbDash.setTextSize(12f);
         lbDash.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
         final android.widget.Switch swDash = new android.widget.Switch(this);
         swDash.setChecked(marketChartView.isLastLineDashed());
@@ -1219,6 +1226,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         rowLabelBg.setPadding(0, 8, 0, 8);
         TextView lbLabelBg = new TextView(this);
         lbLabelBg.setText(getString(R.string.chart_last_price_label_bg));
+        lbLabelBg.setTextSize(13f);
         lbLabelBg.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
         final View viewLabelBg = new View(this);
         viewLabelBg.setLayoutParams(new LinearLayout.LayoutParams(48, 48));
@@ -1233,6 +1241,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         rowLabelTextColor.setPadding(0, 8, 0, 8);
         TextView lbLabelTextColor = new TextView(this);
         lbLabelTextColor.setText(getString(R.string.chart_last_price_label_text_color));
+        lbLabelTextColor.setTextSize(13f);
         lbLabelTextColor.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
         final View viewLabelTextColor = new View(this);
         viewLabelTextColor.setLayoutParams(new LinearLayout.LayoutParams(48, 48));
