@@ -172,6 +172,10 @@
             android:parentActivityName="wallet.ui.WalletActivity"
             android:label="@string/market_chart_title"
             android:theme="@style/My.Preference" />
+
+        <activity android:name=".MarketChartActivity"
+            android:configChanges="orientation|screenSize|keyboardHidden"
+            android:screenOrientation="fullSensor" />
 <!-- end chart -->
         <activity
             android:name="wallet.ui.monitor.NetworkMonitorActivity"
