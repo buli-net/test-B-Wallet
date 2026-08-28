@@ -63,7 +63,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import wallet.Configuration; // class wallet.Configuration
 import wallet.R;
 import wallet.WalletApplication;
 import wallet.exchangerate.ExchangeRateDao;
