@@ -7,6 +7,7 @@
  * Now uses live chart price to calculate fiat balance when available.
  * Fixed interval persistence: saves and restores selected time interval.
  * Fixed color view borders: added 1dp stroke to all color picker views.
+ * Added reset interval to default on chart reset (interval default from XML).
  */
 
 package wallet.ui;
@@ -325,6 +326,25 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         return lifecycleRegistry;
     }
 
+    // ===== Get default interval from resources =====
+    private String getDefaultInterval() {
+        return getString(R.string.default_interval);
+    }
+
+    // ===== Reset interval to default =====
+    private void resetToDefaultInterval() {
+        String defaultInterval = getDefaultInterval();
+        currentInterval = defaultInterval;
+        // Xóa key interval khỏi SharedPreferences để lần sau dùng mặc định
+        getSharedPreferences(PREFS_CHART_STATE, MODE_PRIVATE).edit().remove(KEY_INTERVAL).apply();
+        // Load lại chart với interval mặc định
+        if (marketChartView != null) {
+            marketChartView.loadChart(currentSymbol, currentInterval);
+        }
+        // Cập nhật chip group
+        setupTimeframeChips();
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
@@ -387,11 +407,13 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         };
         prefs.registerOnSharedPreferenceChangeListener(prefsListener);
 
-        // ======== FIX: Khôi phục interval đã lưu ========
+        // ======== FIX: Khôi phục interval đã lưu, nếu không có thì dùng default từ XML ========
         SharedPreferences statePrefs = getSharedPreferences(PREFS_CHART_STATE, MODE_PRIVATE);
-        String savedInterval = statePrefs.getString(KEY_INTERVAL, "15m");
+        String savedInterval = statePrefs.getString(KEY_INTERVAL, null);
         if (savedInterval != null && !savedInterval.isEmpty()) {
             currentInterval = savedInterval;
+        } else {
+            currentInterval = getDefaultInterval();
         }
 
         setupTimeframeChips();
@@ -946,7 +968,6 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         rowGrid.setGravity(Gravity.CENTER_VERTICAL);
         TextView lbGrid = new TextView(this);
         lbGrid.setText(getString(R.string.chart_show_grid));
-        lbGrid.setTextSize(12f);
         lbGrid.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
         final android.widget.Switch swGrid = new android.widget.Switch(this);
         swGrid.setChecked(marketChartView.isShowGrid());
@@ -960,7 +981,6 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         rowVol.setGravity(Gravity.CENTER_VERTICAL);
         TextView lbVol = new TextView(this);
         lbVol.setText(getString(R.string.chart_show_volume));
-        lbVol.setTextSize(12f);
         lbVol.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
         final android.widget.Switch swVol = new android.widget.Switch(this);
         swVol.setChecked(marketChartView.isShowVolume());
@@ -1008,7 +1028,6 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         rowLast.setGravity(Gravity.CENTER_VERTICAL);
         TextView lbShowLast = new TextView(this);
         lbShowLast.setText(getString(R.string.chart_show_last_price));
-        lbShowLast.setTextSize(12f);
         lbShowLast.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
         final android.widget.Switch swLast = new android.widget.Switch(this);
         swLast.setChecked(marketChartView.isShowLastPriceLine());
@@ -1023,7 +1042,6 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         rowLastColor.setPadding(0, 8, 0, 8);
         TextView lbLastColor = new TextView(this);
         lbLastColor.setText(getString(R.string.chart_last_price_color));
-        lbLastColor.setTextSize(12f);
         lbLastColor.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
         final View viewLastColor = new View(this);
         viewLastColor.setLayoutParams(new LinearLayout.LayoutParams(48, 48));
@@ -1081,7 +1099,6 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         rowGridColor.setPadding(0, 8, 0, 8);
         TextView lbGridColor = new TextView(this);
         lbGridColor.setText(getString(R.string.chart_grid_color));
-        lbGridColor.setTextSize(13f);
         lbGridColor.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
         final View viewGridColor = new View(this);
         viewGridColor.setLayoutParams(new LinearLayout.LayoutParams(48, 48));
@@ -1114,7 +1131,6 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         rowTxtColor.setPadding(0, 8, 0, 8);
         TextView lbTxtColor = new TextView(this);
         lbTxtColor.setText(getString(R.string.chart_price_text_color));
-        lbTxtColor.setTextSize(13f);
         lbTxtColor.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
         final View viewTxtColor = new View(this);
         viewTxtColor.setLayoutParams(new LinearLayout.LayoutParams(48, 48));
@@ -1171,7 +1187,6 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         rowDash.setGravity(Gravity.CENTER_VERTICAL);
         TextView lbDash = new TextView(this);
         lbDash.setText(getString(R.string.chart_last_line_dashed));
-        lbDash.setTextSize(12f);
         lbDash.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
         final android.widget.Switch swDash = new android.widget.Switch(this);
         swDash.setChecked(marketChartView.isLastLineDashed());
@@ -1204,7 +1219,6 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         rowLabelBg.setPadding(0, 8, 0, 8);
         TextView lbLabelBg = new TextView(this);
         lbLabelBg.setText(getString(R.string.chart_last_price_label_bg));
-        lbLabelBg.setTextSize(13f);
         lbLabelBg.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
         final View viewLabelBg = new View(this);
         viewLabelBg.setLayoutParams(new LinearLayout.LayoutParams(48, 48));
@@ -1219,7 +1233,6 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         rowLabelTextColor.setPadding(0, 8, 0, 8);
         TextView lbLabelTextColor = new TextView(this);
         lbLabelTextColor.setText(getString(R.string.chart_last_price_label_text_color));
-        lbLabelTextColor.setTextSize(13f);
         lbLabelTextColor.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
         final View viewLabelTextColor = new View(this);
         viewLabelTextColor.setLayoutParams(new LinearLayout.LayoutParams(48, 48));
@@ -1388,6 +1401,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         dialog.dismiss();
     }
 
+    // ======== FIX: Reset bao gồm cả interval ========
     private void showResetConfirm(final Dialog settingsDialog)
     {
         new AlertDialog.Builder(this)
@@ -1397,6 +1411,8 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
                     if (marketChartView != null) {
                         marketChartView.resetToDefaults();
                     }
+                    // Reset interval về mặc định
+                    resetToDefaultInterval();
                     settingsDialog.dismiss();
                     Toast.makeText(MarketChartActivity.this, getString(R.string.chart_settings_reset), Toast.LENGTH_SHORT).show();
                 })
