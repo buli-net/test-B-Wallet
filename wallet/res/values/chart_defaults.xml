@@ -72,4 +72,5 @@
     <dimen name="default_current_price_text_size">11sp</dimen>
     <dimen name="default_last_label_text_size">11sp</dimen>
 
+    <string name="default_interval">15m</string>
 </resources>
