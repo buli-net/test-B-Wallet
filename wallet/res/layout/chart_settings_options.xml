@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:paddingTop="4dp"
+    android:paddingBottom="4dp">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/chart_settings_chart_options"
+        android:textSize="14sp"
+        android:textStyle="bold"
+        android:paddingBottom="8dp" />
+
+    <!-- Body Width -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingVertical="4dp">
+
+        <TextView
+            android:id="@+id/lbBody"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Body width: 0.70"
+            android:textSize="12sp" />
+
+        <SeekBar
+            android:id="@+id/sbBody"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:max="70"
+            android:progress="40" />
+    </LinearLayout>
+
+    <!-- Wick Width -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingVertical="4dp">
+
+        <TextView
+            android:id="@+id/lbWick"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Wick width: 2px"
+            android:textSize="12sp" />
+
+        <SeekBar
+            android:id="@+id/sbWick"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:max="20"
+            android:progress="2" />
+    </LinearLayout>
+
+    <!-- MA Line Width -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingVertical="4dp">
+
+        <TextView
+            android:id="@+id/lbMaW"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="MA line width: 2px"
+            android:textSize="12sp" />
+
+        <SeekBar
+            android:id="@+id/sbMaW"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:max="20"
+            android:progress="2" />
+    </LinearLayout>
+
+    <!-- Show Grid -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingVertical="4dp">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/chart_show_grid"
+            android:textSize="13sp" />
+
+        <Switch
+            android:id="@+id/swGrid"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
+
+    <!-- Show Volume -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingVertical="4dp">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/chart_show_volume"
+            android:textSize="13sp" />
+
+        <Switch
+            android:id="@+id/swVol"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
+
+    <!-- Visible Candles -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingVertical="4dp">
+
+        <TextView
+            android:id="@+id/lbVis"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Visible candles: 80"
+            android:textSize="12sp" />
+
+        <SeekBar
+            android:id="@+id/sbVis"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:max="130"
+            android:progress="60" />
+    </LinearLayout>
+
+</LinearLayout>
