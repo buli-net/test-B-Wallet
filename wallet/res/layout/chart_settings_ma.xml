@@ -3,8 +3,8 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:paddingTop="8dp"
-    android:paddingBottom="8dp">
+    android:paddingTop="4dp"
+    android:paddingBottom="4dp">
 
     <TextView
         android:layout_width="wrap_content"
@@ -23,9 +23,9 @@
     <Button
         android:id="@+id/btn_add_ma"
         android:layout_width="match_parent"
-        android:layout_height="48dp"
+        android:layout_height="44dp"
+        android:layout_marginTop="8dp"
         android:text="@string/add_ma"
-        android:textAllCaps="false"
-        android:layout_marginTop="8dp" />
+        android:textAllCaps="false" />
 
 </LinearLayout>
