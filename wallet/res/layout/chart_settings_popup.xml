@@ -9,7 +9,7 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:padding="16dp"
-        android:background="?android:attr/colorBackground">
+        android:background="@android:color/transparent">
 
         <TextView
             android:layout_width="wrap_content"
@@ -49,8 +49,9 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="▸"
-                    android:textSize="18sp"
-                    android:textStyle="bold" />
+                    android:textSize="28sp"
+                    android:textStyle="bold"
+                    android:padding="8dp" />
             </LinearLayout>
 
             <LinearLayout
@@ -102,8 +103,9 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="▸"
-                    android:textSize="18sp"
-                    android:textStyle="bold" />
+                    android:textSize="28sp"
+                    android:textStyle="bold"
+                    android:padding="8dp" />
             </LinearLayout>
 
             <LinearLayout
@@ -155,8 +157,9 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="▸"
-                    android:textSize="18sp"
-                    android:textStyle="bold" />
+                    android:textSize="28sp"
+                    android:textStyle="bold"
+                    android:padding="8dp" />
             </LinearLayout>
 
             <LinearLayout
@@ -208,8 +211,9 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="▸"
-                    android:textSize="18sp"
-                    android:textStyle="bold" />
+                    android:textSize="28sp"
+                    android:textStyle="bold"
+                    android:padding="8dp" />
             </LinearLayout>
 
             <LinearLayout
@@ -261,8 +265,9 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="▸"
-                    android:textSize="18sp"
-                    android:textStyle="bold" />
+                    android:textSize="28sp"
+                    android:textStyle="bold"
+                    android:padding="8dp" />
             </LinearLayout>
 
             <LinearLayout
