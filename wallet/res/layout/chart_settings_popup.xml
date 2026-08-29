@@ -16,8 +16,10 @@
     <!-- Candle Settings -->
     <include layout="@layout/chart_settings_candle" />
 
-    <!-- Các phần khác sẽ thêm sau (tạm comment để build chạy) -->
-    <!-- <include layout="@layout/chart_settings_ma" /> -->
+    <!-- MA Settings -->
+    <include layout="@layout/chart_settings_ma" />
+
+    <!-- Các phần khác sẽ thêm sau -->
     <!-- <include layout="@layout/chart_settings_options" /> -->
     <!-- <include layout="@layout/chart_settings_last_price" /> -->
     <!-- <include layout="@layout/chart_settings_label" /> -->
