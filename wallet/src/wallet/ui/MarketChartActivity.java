@@ -8,6 +8,7 @@
  * Fixed interval persistence: saves and restores selected time interval.
  * Fixed color view borders: added 1dp stroke to all color picker views.
  * Added reset interval to default on chart reset (interval default from XML).
+ * Migrated chart settings popup to XML layout with include structure.
  */
 
 package wallet.ui;
@@ -131,6 +132,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         return drawable;
     }
 
+    // ========== Chart Settings State ==========
     private static class ChartSettingsState
     {
         int[] candlePalette;
@@ -335,13 +337,10 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
     private void resetToDefaultInterval() {
         String defaultInterval = getDefaultInterval();
         currentInterval = defaultInterval;
-        // Xóa key interval khỏi SharedPreferences để lần sau dùng mặc định
         getSharedPreferences(PREFS_CHART_STATE, MODE_PRIVATE).edit().remove(KEY_INTERVAL).apply();
-        // Load lại chart với interval mặc định
         if (marketChartView != null) {
             marketChartView.loadChart(currentSymbol, currentInterval);
         }
-        // Cập nhật chip group
         setupTimeframeChips();
     }
 
@@ -407,7 +406,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         };
         prefs.registerOnSharedPreferenceChangeListener(prefsListener);
 
-        // ======== FIX: Khôi phục interval đã lưu, nếu không có thì dùng default từ XML ========
+        // ======== FIX: Khôi phục interval đã lưu ========
         SharedPreferences statePrefs = getSharedPreferences(PREFS_CHART_STATE, MODE_PRIVATE);
         String savedInterval = statePrefs.getString(KEY_INTERVAL, null);
         if (savedInterval != null && !savedInterval.isEmpty()) {
@@ -426,25 +425,22 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
 
         loadFiatRate();
 
-        // ========== KHỞI TẠO VIEWMODEL ĐÚNG CÁCH ==========
+        // ========== KHỞI TẠO VIEWMODEL ==========
         balanceViewModel = new ViewModelProvider(
                 this,
                 new ViewModelProvider.AndroidViewModelFactory(application)
         ).get(WalletBalanceViewModel.class);
 
-        // Observe balance
         balanceViewModel.getBalance().observe(this, balance -> {
             currentBalance = balance;
             updateBalanceDisplay();
         });
 
-        // Observe exchange rate
         balanceViewModel.getExchangeRate().observe(this, exchangeRate -> {
             currentExchangeRate = exchangeRate;
             updateBalanceDisplay();
         });
 
-        // Observe blockchain state
         application.blockchainState.observe(this, blockchainState -> {
             if (blockchainState != null) {
                 isBlockchainSynced = !blockchainState.replaying;
@@ -452,7 +448,6 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
             }
         });
 
-        // Set initial text
         if (textWalletBalance != null) {
             textWalletBalance.setText(getString(R.string.balance_loading_wallet));
         }
@@ -510,7 +505,6 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
             double btcBalance = currentBalance.toBtc().doubleValue();
             String btcStr = String.format(Locale.US, "%.8f", btcBalance);
 
-            // Ưu tiên giá chart nếu có
             if (currentMarketPriceFiat > 0) {
                 double fiatVal = btcBalance * currentMarketPriceFiat;
                 String symbol = getCurrencySymbol(currentFiatCode);
@@ -538,6 +532,10 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         showChartSettingsPopup();
     }
 
+    // ==================================================================
+    // CHART SETTINGS POPUP - XML VERSION
+    // Now using chart_settings_popup.xml with includes
+    // ==================================================================
     private void showChartSettingsPopup()
     {
         if (marketChartView == null)
@@ -596,39 +594,10 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         }
 
         final Dialog dialog = new Dialog(this);
-        ScrollView scrollView = new ScrollView(this);
-        scrollView.setFillViewport(false);
-        LinearLayout.LayoutParams scrollLp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        scrollView.setLayoutParams(scrollLp);
 
-        LinearLayout root = new LinearLayout(this);
-        root.setOrientation(LinearLayout.VERTICAL);
-        root.setPadding(32, 32, 32, 32);
-        GradientDrawable rootBg = new GradientDrawable();
-        rootBg.setCornerRadius(24f);
-        rootBg.setColor(getResources().getColor(R.color.chart_bg, getTheme()));
-        root.setBackground(rootBg);
-
-        TextView title = new TextView(this);
-        title.setText(getString(R.string.chart_settings_title));
-        title.setTextSize(18f);
-        title.setTypeface(null, Typeface.BOLD);
-        title.setPadding(0, 0, 0, 24);
-        root.addView(title);
-
-        TypedValue outValue = new TypedValue();
-        getTheme().resolveAttribute(android.R.attr.selectableItemBackground, outValue, true);
-
-        addCandleSection(root, state, outValue);
-        addDivider(root);
-        addMaSection(root, state, outValue);
-        addDivider(root);
-        addChartOptionsSection(root, state, outValue);
-        addApplyButton(root, state, dialog);
-        addResetButton(root, state, dialog);
-
-        scrollView.addView(root);
-        dialog.setContentView(scrollView);
+        // ===== INFLATE XML LAYOUT =====
+        View content = getLayoutInflater().inflate(R.layout.chart_settings_popup, null);
+        dialog.setContentView(content);
 
         if (dialog.getWindow() != null)
         {
@@ -637,8 +606,187 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
             dialog.getWindow().setGravity(Gravity.CENTER);
         }
 
+        // ===== CANDLE SETTINGS =====
+        View viewBull = content.findViewById(R.id.viewBull);
+        View viewBear = content.findViewById(R.id.viewBear);
+
+        if (viewBull != null) {
+            viewBull.setBackground(createColorViewDrawable(state.curBull[0]));
+            viewBull.setOnClickListener(v -> {
+                state.bullIdx[0] = (state.bullIdx[0] + 1) % state.candlePalette.length;
+                int next = state.candlePalette[state.bullIdx[0]];
+                state.curBull[0] = next;
+                v.setBackground(createColorViewDrawable(next));
+            });
+        }
+
+        if (viewBear != null) {
+            viewBear.setBackground(createColorViewDrawable(state.curBear[0]));
+            viewBear.setOnClickListener(v -> {
+                state.bearIdx[0] = (state.bearIdx[0] + 1) % state.candlePalette.length;
+                int next = state.candlePalette[state.bearIdx[0]];
+                state.curBear[0] = next;
+                v.setBackground(createColorViewDrawable(next));
+            });
+        }
+
+        // ===== MA SETTINGS =====
+        RecyclerView recycler = content.findViewById(R.id.recycler_ma_popup);
+        View btnAddMa = content.findViewById(R.id.btn_add_ma);
+
+        if (recycler != null) {
+            state.recycler = recycler;
+            recycler.setLayoutManager(new LinearLayoutManager(this));
+            recycler.setNestedScrollingEnabled(false);
+            final MaPopupAdapter adapter = new MaPopupAdapter(state.tempList);
+            recycler.setAdapter(adapter);
+        }
+
+        if (btnAddMa != null) {
+            btnAddMa.setOnClickListener(v -> {
+                if (state.tempList.size() >= 6) {
+                    Toast.makeText(v.getContext(), getString(R.string.max_ma_reached), Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                Resources res = getResources();
+                TypedArray ta = res.obtainTypedArray(R.array.chart_color_palette);
+                int[] colors = new int[ta.length()];
+                for (int i = 0; i < ta.length(); i++) {
+                    colors[i] = ta.getColor(i, 0);
+                }
+                ta.recycle();
+                int color = colors[state.tempList.size() % colors.length];
+                state.tempList.add(new MarketChartView.MaLine(20, color));
+                if (state.recycler != null && state.recycler.getAdapter() != null) {
+                    state.recycler.getAdapter().notifyDataSetChanged();
+                }
+            });
+        }
+
+        // ===== CHART OPTIONS =====
+        state.sbBody = content.findViewById(R.id.sbBody);
+        state.sbWick = content.findViewById(R.id.sbWick);
+        state.sbMaW = content.findViewById(R.id.sbMaW);
+        state.sbVis = content.findViewById(R.id.sbVis);
+        state.swGrid = content.findViewById(R.id.swGrid);
+        state.swVol = content.findViewById(R.id.swVol);
+
+        // ===== LAST PRICE LINE =====
+        state.swLast = content.findViewById(R.id.swLast);
+        state.sbTxtSize = content.findViewById(R.id.sbTxtSize);
+        state.sbLastW = content.findViewById(R.id.sbLastW);
+        state.swDash = content.findViewById(R.id.swDash);
+        state.sbLabelSize = content.findViewById(R.id.sbLabelSize);
+
+        View viewLastColor = content.findViewById(R.id.viewLastColor);
+        View viewGridColor = content.findViewById(R.id.viewGridColor);
+        View viewTxtColor = content.findViewById(R.id.viewTxtColor);
+        View viewLabelBg = content.findViewById(R.id.viewLabelBg);
+        View viewLabelTextColor = content.findViewById(R.id.viewLabelTextColor);
+
+        if (viewLastColor != null) {
+            viewLastColor.setBackground(createColorViewDrawable(state.curLastColor[0]));
+            viewLastColor.setOnClickListener(v -> {
+                int idx = 0;
+                for (int i = 0; i < state.candlePalette.length; i++) {
+                    if (state.candlePalette[i] == state.curLastColor[0]) {
+                        idx = i;
+                        break;
+                    }
+                }
+                int next = state.candlePalette[(idx + 1) % state.candlePalette.length];
+                state.curLastColor[0] = next;
+                v.setBackground(createColorViewDrawable(next));
+            });
+        }
+
+        if (viewGridColor != null) {
+            viewGridColor.setBackground(createColorViewDrawable(state.curGridColor[0]));
+            viewGridColor.setOnClickListener(v -> {
+                int idx = 0;
+                for (int i = 0; i < state.candlePalette.length; i++) {
+                    if (state.candlePalette[i] == state.curGridColor[0]) {
+                        idx = i;
+                        break;
+                    }
+                }
+                int next = state.candlePalette[(idx + 1) % state.candlePalette.length];
+                state.curGridColor[0] = next;
+                v.setBackground(createColorViewDrawable(next));
+            });
+        }
+
+        if (viewTxtColor != null) {
+            viewTxtColor.setBackground(createColorViewDrawable(state.curPriceTxtColor[0]));
+            viewTxtColor.setOnClickListener(v -> {
+                int idx = 0;
+                for (int i = 0; i < state.candlePalette.length; i++) {
+                    if (state.candlePalette[i] == state.curPriceTxtColor[0]) {
+                        idx = i;
+                        break;
+                    }
+                }
+                int next = state.candlePalette[(idx + 1) % state.candlePalette.length];
+                state.curPriceTxtColor[0] = next;
+                v.setBackground(createColorViewDrawable(next));
+            });
+        }
+
+        if (viewLabelBg != null) {
+            viewLabelBg.setBackground(createColorViewDrawable(state.curLabelBg[0]));
+            viewLabelBg.setOnClickListener(v -> {
+                int idx = 0;
+                for (int i = 0; i < state.candlePalette.length; i++) {
+                    if (state.candlePalette[i] == state.curLabelBg[0]) {
+                        idx = i;
+                        break;
+                    }
+                }
+                int next = state.candlePalette[(idx + 1) % state.candlePalette.length];
+                state.curLabelBg[0] = next;
+                v.setBackground(createColorViewDrawable(next));
+            });
+        }
+
+        if (viewLabelTextColor != null) {
+            viewLabelTextColor.setBackground(createColorViewDrawable(state.curLabelTextColorFinal[0]));
+            viewLabelTextColor.setOnClickListener(v -> {
+                int idx = 0;
+                for (int i = 0; i < state.candlePalette.length; i++) {
+                    if (state.candlePalette[i] == state.curLabelTextColorFinal[0]) {
+                        idx = i;
+                        break;
+                    }
+                }
+                int next = state.candlePalette[(idx + 1) % state.candlePalette.length];
+                state.curLabelTextColorFinal[0] = next;
+                v.setBackground(createColorViewDrawable(next));
+            });
+        }
+
+        // ===== APPLY BUTTON =====
+        View btnApply = content.findViewById(R.id.btnApply);
+        if (btnApply != null) {
+            btnApply.setOnClickListener(v -> {
+                // Save all settings from UI
+                applyChartSettings(state, dialog);
+            });
+        }
+
+        // ===== RESET BUTTON =====
+        View btnReset = content.findViewById(R.id.btnReset);
+        if (btnReset != null) {
+            btnReset.setOnClickListener(v -> {
+                showResetConfirm(dialog);
+            });
+        }
+
         dialog.show();
     }
+
+    // ===== LEGACY METHODS - kept for compatibility but no longer used =====
+    // These methods are no longer called from showChartSettingsPopup()
+    // but kept in case they are referenced elsewhere.
 
     private void addDivider(LinearLayout root)
     {
@@ -651,701 +799,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         root.addView(divider);
     }
 
-    private void addCandleSection(LinearLayout root, final ChartSettingsState state, TypedValue outValue)
-    {
-        LinearLayout candleHeader = new LinearLayout(this);
-        candleHeader.setOrientation(LinearLayout.HORIZONTAL);
-        candleHeader.setGravity(Gravity.CENTER_VERTICAL);
-        candleHeader.setPadding(0, 16, 0, 16);
-        candleHeader.setClickable(true);
-        candleHeader.setFocusable(true);
-        candleHeader.setBackgroundResource(outValue.resourceId);
-
-        final TextView titleCandle = new TextView(this);
-        titleCandle.setText("\u25B6 " + getString(R.string.chart_settings_candle));
-        titleCandle.setTextSize(14f);
-        titleCandle.setTypeface(null, Typeface.BOLD);
-        LinearLayout.LayoutParams lpTitleCandle = new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f);
-        titleCandle.setLayoutParams(lpTitleCandle);
-
-        TextView arrowCandle = new TextView(this);
-        arrowCandle.setText("\u25BC");
-        arrowCandle.setTextSize(12f);
-
-        candleHeader.addView(titleCandle);
-        candleHeader.addView(arrowCandle);
-        root.addView(candleHeader);
-
-        final LinearLayout containerCandle = new LinearLayout(this);
-        containerCandle.setOrientation(LinearLayout.VERTICAL);
-        containerCandle.setVisibility(View.GONE);
-
-        LinearLayout rowBull = new LinearLayout(this);
-        rowBull.setOrientation(LinearLayout.HORIZONTAL);
-        rowBull.setGravity(Gravity.CENTER_VERTICAL);
-        rowBull.setPadding(0, 8, 0, 8);
-        TextView lbBull = new TextView(this);
-        lbBull.setText(getString(R.string.chart_settings_bullish));
-        lbBull.setTextSize(13f);
-        lbBull.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
-        final View viewBull = new View(this);
-        viewBull.setLayoutParams(new LinearLayout.LayoutParams(48, 48));
-        viewBull.setBackground(createColorViewDrawable(state.curBull[0]));
-        rowBull.addView(lbBull);
-        rowBull.addView(viewBull);
-        containerCandle.addView(rowBull);
-
-        LinearLayout rowBear = new LinearLayout(this);
-        rowBear.setOrientation(LinearLayout.HORIZONTAL);
-        rowBear.setGravity(Gravity.CENTER_VERTICAL);
-        rowBear.setPadding(0, 8, 0, 8);
-        TextView lbBear = new TextView(this);
-        lbBear.setText(getString(R.string.chart_settings_bearish));
-        lbBear.setTextSize(13f);
-        lbBear.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
-        final View viewBear = new View(this);
-        viewBear.setLayoutParams(new LinearLayout.LayoutParams(48, 48));
-        viewBear.setBackground(createColorViewDrawable(state.curBear[0]));
-        rowBear.addView(lbBear);
-        rowBear.addView(viewBear);
-        containerCandle.addView(rowBear);
-
-        viewBull.setOnClickListener(v -> {
-            state.bullIdx[0] = (state.bullIdx[0] + 1) % state.candlePalette.length;
-            int next = state.candlePalette[state.bullIdx[0]];
-            state.curBull[0] = next;
-            v.setBackground(createColorViewDrawable(next));
-        });
-
-        viewBear.setOnClickListener(v -> {
-            state.bearIdx[0] = (state.bearIdx[0] + 1) % state.candlePalette.length;
-            int next = state.candlePalette[state.bearIdx[0]];
-            state.curBear[0] = next;
-            v.setBackground(createColorViewDrawable(next));
-        });
-
-        root.addView(containerCandle);
-
-        final boolean[] isCandleExpanded = {false};
-        candleHeader.setOnClickListener(v -> {
-            isCandleExpanded[0] = !isCandleExpanded[0];
-            if (isCandleExpanded[0])
-            {
-                containerCandle.setVisibility(View.VISIBLE);
-                titleCandle.setText("\u25BC " + getString(R.string.chart_settings_candle));
-            }
-            else
-            {
-                containerCandle.setVisibility(View.GONE);
-                titleCandle.setText("\u25B6 " + getString(R.string.chart_settings_candle));
-            }
-        });
-    }
-
-    private void addMaSection(LinearLayout root, final ChartSettingsState state, TypedValue outValue)
-    {
-        LinearLayout maHeader = new LinearLayout(this);
-        maHeader.setOrientation(LinearLayout.HORIZONTAL);
-        maHeader.setGravity(Gravity.CENTER_VERTICAL);
-        maHeader.setPadding(0, 16, 0, 16);
-        maHeader.setClickable(true);
-        maHeader.setFocusable(true);
-        maHeader.setBackgroundResource(outValue.resourceId);
-
-        final TextView titleMa = new TextView(this);
-        titleMa.setText("\u25B6 " + getString(R.string.chart_settings_ma));
-        titleMa.setTextSize(14f);
-        titleMa.setTypeface(null, Typeface.BOLD);
-        titleMa.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
-
-        TextView arrowMa = new TextView(this);
-        arrowMa.setText("\u25BC");
-        arrowMa.setTextSize(12f);
-
-        maHeader.addView(titleMa);
-        maHeader.addView(arrowMa);
-        root.addView(maHeader);
-
-        final LinearLayout containerMa = new LinearLayout(this);
-        containerMa.setOrientation(LinearLayout.VERTICAL);
-        containerMa.setVisibility(View.GONE);
-
-        View maView = getLayoutInflater().inflate(R.layout.bottom_sheet_ma_settings, null);
-        state.recycler = maView.findViewById(R.id.recycler_ma_popup);
-        state.recycler.setLayoutManager(new LinearLayoutManager(this));
-        state.recycler.setNestedScrollingEnabled(false);
-
-        final MaPopupAdapter adapter = new MaPopupAdapter(state.tempList);
-        state.recycler.setAdapter(adapter);
-
-        View btnAdd = maView.findViewById(R.id.btn_add_ma);
-        GradientDrawable addBg = new GradientDrawable();
-        addBg.setCornerRadius(12f);
-        addBg.setColor(getResources().getColor(R.color.bg_level2, getTheme()));
-        btnAdd.setBackground(addBg);
-        btnAdd.setOnClickListener(v -> {
-            if (state.tempList.size() >= 6)
-            {
-                Toast.makeText(v.getContext(), getString(R.string.max_ma_reached), Toast.LENGTH_SHORT).show();
-                return;
-            }
-            Resources res = getResources();
-            TypedArray ta = res.obtainTypedArray(R.array.chart_color_palette);
-            int[] colors = new int[ta.length()];
-            for (int i = 0; i < ta.length(); i++)
-            {
-                colors[i] = ta.getColor(i, 0);
-            }
-            ta.recycle();
-            int color = colors[state.tempList.size() % colors.length];
-            state.tempList.add(new MarketChartView.MaLine(20, color));
-            adapter.notifyDataSetChanged();
-        });
-
-        View btnApplyOld = maView.findViewById(R.id.btn_apply);
-        if (btnApplyOld != null)
-        {
-            btnApplyOld.setVisibility(View.GONE);
-        }
-
-        containerMa.addView(maView);
-        root.addView(containerMa);
-
-        final boolean[] isMaExpanded = {false};
-        maHeader.setOnClickListener(v -> {
-            isMaExpanded[0] = !isMaExpanded[0];
-            if (isMaExpanded[0])
-            {
-                containerMa.setVisibility(View.VISIBLE);
-                titleMa.setText("\u25BC " + getString(R.string.chart_settings_ma));
-            }
-            else
-            {
-                containerMa.setVisibility(View.GONE);
-                titleMa.setText("\u25B6 " + getString(R.string.chart_settings_ma));
-            }
-        });
-    }
-
-    private void addChartOptionsSection(LinearLayout root, final ChartSettingsState state, TypedValue outValue)
-    {
-        LinearLayout chartHeader = new LinearLayout(this);
-        chartHeader.setOrientation(LinearLayout.HORIZONTAL);
-        chartHeader.setGravity(Gravity.CENTER_VERTICAL);
-        chartHeader.setPadding(0, 16, 0, 16);
-        chartHeader.setClickable(true);
-        chartHeader.setFocusable(true);
-        chartHeader.setBackgroundResource(outValue.resourceId);
-
-        final TextView titleChart = new TextView(this);
-        titleChart.setText("\u25B6 " + getString(R.string.chart_settings_chart_options));
-        titleChart.setTextSize(14f);
-        titleChart.setTypeface(null, Typeface.BOLD);
-        titleChart.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
-
-        TextView arrowChart = new TextView(this);
-        arrowChart.setText("\u25BC");
-        arrowChart.setTextSize(12f);
-
-        chartHeader.addView(titleChart);
-        chartHeader.addView(arrowChart);
-        root.addView(chartHeader);
-
-        final LinearLayout containerChart = new LinearLayout(this);
-        containerChart.setOrientation(LinearLayout.VERTICAL);
-        containerChart.setVisibility(View.GONE);
-        containerChart.setPadding(0, 8, 0, 8);
-
-        buildBodyWidthControl(containerChart, state);
-        buildWickWidthControl(containerChart, state);
-        buildMaWidthControl(containerChart, state);
-        buildGridVolumeSwitches(containerChart, state);
-        buildVisibleCountControl(containerChart, state);
-        buildLastPriceLineSection(containerChart, state);
-        buildPriceTextSection(containerChart, state);
-        buildGridColorSection(containerChart, state);
-        buildPriceTextColorSection(containerChart, state);
-        buildLastLineWidthSection(containerChart, state);
-        buildDashedSwitchSection(containerChart, state);
-        buildCurrentPriceLabelSection(containerChart, state);
-
-        root.addView(containerChart);
-
-        final boolean[] isChartExpanded = {false};
-        chartHeader.setOnClickListener(v -> {
-            isChartExpanded[0] = !isChartExpanded[0];
-            if (isChartExpanded[0])
-            {
-                containerChart.setVisibility(View.VISIBLE);
-                titleChart.setText("\u25BC " + getString(R.string.chart_settings_chart_options));
-            }
-            else
-            {
-                containerChart.setVisibility(View.GONE);
-                titleChart.setText("\u25B6 " + getString(R.string.chart_settings_chart_options));
-            }
-        });
-    }
-
-    private void buildBodyWidthControl(LinearLayout container, final ChartSettingsState state)
-    {
-        TextView lbBody = new TextView(this);
-        lbBody.setText(getString(R.string.chart_body_width, String.valueOf(marketChartView.getBodyWidthFraction())));
-        lbBody.setTextSize(12f);
-        container.addView(lbBody);
-        android.widget.SeekBar sbBody = new android.widget.SeekBar(this);
-        sbBody.setMax(70);
-        sbBody.setProgress((int) ((marketChartView.getBodyWidthFraction() - 0.3f) * 100));
-        container.addView(sbBody);
-        state.sbBody = sbBody;
-        sbBody.setOnSeekBarChangeListener(new android.widget.SeekBar.OnSeekBarChangeListener()
-        {
-            @Override
-            public void onProgressChanged(android.widget.SeekBar seekBar, int progress, boolean fromUser)
-            {
-                float fraction = 0.3f + progress / 100f;
-                lbBody.setText(getString(R.string.chart_body_width, String.format(Locale.US, "%.2f", fraction)));
-            }
-            @Override public void onStartTrackingTouch(android.widget.SeekBar seekBar) {}
-            @Override public void onStopTrackingTouch(android.widget.SeekBar seekBar) {}
-        });
-    }
-
-    private void buildWickWidthControl(LinearLayout container, final ChartSettingsState state)
-    {
-        TextView lbWick = new TextView(this);
-        lbWick.setText(getString(R.string.chart_wick_width, (int) state.curWick[0]));
-        lbWick.setTextSize(12f);
-        container.addView(lbWick);
-        android.widget.SeekBar sbWick = new android.widget.SeekBar(this);
-        sbWick.setMax(20);
-        sbWick.setProgress((int) state.curWick[0]);
-        container.addView(sbWick);
-        state.sbWick = sbWick;
-        sbWick.setOnSeekBarChangeListener(new android.widget.SeekBar.OnSeekBarChangeListener()
-        {
-            @Override
-            public void onProgressChanged(android.widget.SeekBar seekBar, int progress, boolean fromUser)
-            {
-                if (progress < 1) progress = 1;
-                state.curWick[0] = progress;
-                lbWick.setText(getString(R.string.chart_wick_width, progress));
-            }
-            @Override public void onStartTrackingTouch(android.widget.SeekBar seekBar) {}
-            @Override public void onStopTrackingTouch(android.widget.SeekBar seekBar) {}
-        });
-    }
-
-    private void buildMaWidthControl(LinearLayout container, final ChartSettingsState state)
-    {
-        TextView lbMaW = new TextView(this);
-        lbMaW.setText(getString(R.string.chart_ma_line_width, (int) state.curMaW[0]));
-        lbMaW.setTextSize(12f);
-        container.addView(lbMaW);
-        android.widget.SeekBar sbMaW = new android.widget.SeekBar(this);
-        sbMaW.setMax(20);
-        sbMaW.setProgress((int) state.curMaW[0]);
-        container.addView(sbMaW);
-        state.sbMaW = sbMaW;
-        sbMaW.setOnSeekBarChangeListener(new android.widget.SeekBar.OnSeekBarChangeListener()
-        {
-            @Override
-            public void onProgressChanged(android.widget.SeekBar seekBar, int progress, boolean fromUser)
-            {
-                if (progress < 1) progress = 1;
-                state.curMaW[0] = progress;
-                lbMaW.setText(getString(R.string.chart_ma_line_width, progress));
-            }
-            @Override public void onStartTrackingTouch(android.widget.SeekBar seekBar) {}
-            @Override public void onStopTrackingTouch(android.widget.SeekBar seekBar) {}
-        });
-    }
-
-    private void buildGridVolumeSwitches(LinearLayout container, final ChartSettingsState state)
-    {
-        LinearLayout rowGrid = new LinearLayout(this);
-        rowGrid.setOrientation(LinearLayout.HORIZONTAL);
-        rowGrid.setGravity(Gravity.CENTER_VERTICAL);
-        TextView lbGrid = new TextView(this);
-        lbGrid.setText(getString(R.string.chart_show_grid));
-        lbGrid.setTextSize(12f);
-        lbGrid.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
-        final android.widget.Switch swGrid = new android.widget.Switch(this);
-        swGrid.setChecked(marketChartView.isShowGrid());
-        rowGrid.addView(lbGrid);
-        rowGrid.addView(swGrid);
-        container.addView(rowGrid);
-        state.swGrid = swGrid;
-
-        LinearLayout rowVol = new LinearLayout(this);
-        rowVol.setOrientation(LinearLayout.HORIZONTAL);
-        rowVol.setGravity(Gravity.CENTER_VERTICAL);
-        TextView lbVol = new TextView(this);
-        lbVol.setText(getString(R.string.chart_show_volume));
-        lbVol.setTextSize(12f);
-        lbVol.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
-        final android.widget.Switch swVol = new android.widget.Switch(this);
-        swVol.setChecked(marketChartView.isShowVolume());
-        rowVol.addView(lbVol);
-        rowVol.addView(swVol);
-        container.addView(rowVol);
-        state.swVol = swVol;
-    }
-
-    private void buildVisibleCountControl(LinearLayout container, final ChartSettingsState state)
-    {
-        TextView lbVis = new TextView(this);
-        lbVis.setText(getString(R.string.chart_visible_candles, marketChartView.getVisibleCandleCountValue()));
-        lbVis.setTextSize(12f);
-        container.addView(lbVis);
-        android.widget.SeekBar sbVis = new android.widget.SeekBar(this);
-        sbVis.setMax(130);
-        sbVis.setProgress(marketChartView.getVisibleCandleCountValue() - 20);
-        container.addView(sbVis);
-        state.sbVis = sbVis;
-        sbVis.setOnSeekBarChangeListener(new android.widget.SeekBar.OnSeekBarChangeListener()
-        {
-            @Override
-            public void onProgressChanged(android.widget.SeekBar seekBar, int progress, boolean fromUser)
-            {
-                int count = 20 + progress;
-                lbVis.setText(getString(R.string.chart_visible_candles, count));
-            }
-            @Override public void onStartTrackingTouch(android.widget.SeekBar seekBar) {}
-            @Override public void onStopTrackingTouch(android.widget.SeekBar seekBar) {}
-        });
-    }
-
-    private void buildLastPriceLineSection(LinearLayout container, final ChartSettingsState state)
-    {
-        TextView lbLastPrice = new TextView(this);
-        lbLastPrice.setText(getString(R.string.chart_last_price_section));
-        lbLastPrice.setTextSize(12f);
-        lbLastPrice.setTypeface(null, Typeface.BOLD);
-        lbLastPrice.setPadding(0, 16, 0, 8);
-        container.addView(lbLastPrice);
-
-        LinearLayout rowLast = new LinearLayout(this);
-        rowLast.setOrientation(LinearLayout.HORIZONTAL);
-        rowLast.setGravity(Gravity.CENTER_VERTICAL);
-        TextView lbShowLast = new TextView(this);
-        lbShowLast.setText(getString(R.string.chart_show_last_price));
-        lbShowLast.setTextSize(12f);
-        lbShowLast.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
-        final android.widget.Switch swLast = new android.widget.Switch(this);
-        swLast.setChecked(marketChartView.isShowLastPriceLine());
-        rowLast.addView(lbShowLast);
-        rowLast.addView(swLast);
-        container.addView(rowLast);
-        state.swLast = swLast;
-
-        LinearLayout rowLastColor = new LinearLayout(this);
-        rowLastColor.setOrientation(LinearLayout.HORIZONTAL);
-        rowLastColor.setGravity(Gravity.CENTER_VERTICAL);
-        rowLastColor.setPadding(0, 8, 0, 8);
-        TextView lbLastColor = new TextView(this);
-        lbLastColor.setText(getString(R.string.chart_last_price_color));
-        lbLastColor.setTextSize(12f);
-        lbLastColor.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
-        final View viewLastColor = new View(this);
-        viewLastColor.setLayoutParams(new LinearLayout.LayoutParams(48, 48));
-        viewLastColor.setBackground(createColorViewDrawable(state.curLastColor[0]));
-        rowLastColor.addView(lbLastColor);
-        rowLastColor.addView(viewLastColor);
-        container.addView(rowLastColor);
-
-        viewLastColor.setOnClickListener(v -> {
-            int idx = 0;
-            for (int i = 0; i < state.candlePalette.length; i++)
-            {
-                if (state.candlePalette[i] == state.curLastColor[0])
-                {
-                    idx = i;
-                    break;
-                }
-            }
-            int next = state.candlePalette[(idx + 1) % state.candlePalette.length];
-            state.curLastColor[0] = next;
-            v.setBackground(createColorViewDrawable(next));
-        });
-    }
-
-    private void buildPriceTextSection(LinearLayout container, final ChartSettingsState state)
-    {
-        TextView lbTxtSize = new TextView(this);
-        lbTxtSize.setText(getString(R.string.chart_price_text_size, (int) state.curTxtSize[0]));
-        lbTxtSize.setTextSize(12f);
-        container.addView(lbTxtSize);
-        android.widget.SeekBar sbTxtSize = new android.widget.SeekBar(this);
-        sbTxtSize.setMax(30);
-        sbTxtSize.setProgress((int) state.curTxtSize[0]);
-        container.addView(sbTxtSize);
-        state.sbTxtSize = sbTxtSize;
-        sbTxtSize.setOnSeekBarChangeListener(new android.widget.SeekBar.OnSeekBarChangeListener()
-        {
-            @Override
-            public void onProgressChanged(android.widget.SeekBar seekBar, int progress, boolean fromUser)
-            {
-                if (progress < 8) progress = 8;
-                state.finalTxtSize[0] = progress;
-                lbTxtSize.setText(getString(R.string.chart_price_text_size, progress));
-            }
-            @Override public void onStartTrackingTouch(android.widget.SeekBar seekBar) {}
-            @Override public void onStopTrackingTouch(android.widget.SeekBar seekBar) {}
-        });
-    }
-
-    private void buildGridColorSection(LinearLayout container, final ChartSettingsState state)
-    {
-        LinearLayout rowGridColor = new LinearLayout(this);
-        rowGridColor.setOrientation(LinearLayout.HORIZONTAL);
-        rowGridColor.setGravity(Gravity.CENTER_VERTICAL);
-        rowGridColor.setPadding(0, 8, 0, 8);
-        TextView lbGridColor = new TextView(this);
-        lbGridColor.setText(getString(R.string.chart_grid_color));
-        lbGridColor.setTextSize(13f);
-        lbGridColor.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
-        final View viewGridColor = new View(this);
-        viewGridColor.setLayoutParams(new LinearLayout.LayoutParams(48, 48));
-        viewGridColor.setBackground(createColorViewDrawable(state.curGridColor[0]));
-        rowGridColor.addView(lbGridColor);
-        rowGridColor.addView(viewGridColor);
-        container.addView(rowGridColor);
-
-        viewGridColor.setOnClickListener(v -> {
-            int idx = 0;
-            for (int i = 0; i < state.candlePalette.length; i++)
-            {
-                if (state.candlePalette[i] == state.curGridColor[0])
-                {
-                    idx = i;
-                    break;
-                }
-            }
-            int next = state.candlePalette[(idx + 1) % state.candlePalette.length];
-            state.curGridColor[0] = next;
-            v.setBackground(createColorViewDrawable(next));
-        });
-    }
-
-    private void buildPriceTextColorSection(LinearLayout container, final ChartSettingsState state)
-    {
-        LinearLayout rowTxtColor = new LinearLayout(this);
-        rowTxtColor.setOrientation(LinearLayout.HORIZONTAL);
-        rowTxtColor.setGravity(Gravity.CENTER_VERTICAL);
-        rowTxtColor.setPadding(0, 8, 0, 8);
-        TextView lbTxtColor = new TextView(this);
-        lbTxtColor.setText(getString(R.string.chart_price_text_color));
-        lbTxtColor.setTextSize(13f);
-        lbTxtColor.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
-        final View viewTxtColor = new View(this);
-        viewTxtColor.setLayoutParams(new LinearLayout.LayoutParams(48, 48));
-        viewTxtColor.setBackground(createColorViewDrawable(state.curPriceTxtColor[0]));
-        rowTxtColor.addView(lbTxtColor);
-        rowTxtColor.addView(viewTxtColor);
-        container.addView(rowTxtColor);
-
-        viewTxtColor.setOnClickListener(v -> {
-            int idx = 0;
-            for (int i = 0; i < state.candlePalette.length; i++)
-            {
-                if (state.candlePalette[i] == state.curPriceTxtColor[0])
-                {
-                    idx = i;
-                    break;
-                }
-            }
-            int next = state.candlePalette[(idx + 1) % state.candlePalette.length];
-            state.curPriceTxtColor[0] = next;
-            v.setBackground(createColorViewDrawable(next));
-        });
-    }
-
-    private void buildLastLineWidthSection(LinearLayout container, final ChartSettingsState state)
-    {
-        TextView lbLastW = new TextView(this);
-        lbLastW.setText(getString(R.string.chart_last_line_width, (int) state.curLastW[0]));
-        lbLastW.setTextSize(12f);
-        container.addView(lbLastW);
-        android.widget.SeekBar sbLastW = new android.widget.SeekBar(this);
-        sbLastW.setMax(10);
-        sbLastW.setProgress((int) state.curLastW[0]);
-        container.addView(sbLastW);
-        state.sbLastW = sbLastW;
-        sbLastW.setOnSeekBarChangeListener(new android.widget.SeekBar.OnSeekBarChangeListener()
-        {
-            @Override
-            public void onProgressChanged(android.widget.SeekBar seekBar, int progress, boolean fromUser)
-            {
-                if (progress < 1) progress = 1;
-                state.curLastW[0] = progress;
-                lbLastW.setText(getString(R.string.chart_last_line_width, progress));
-            }
-            @Override public void onStartTrackingTouch(android.widget.SeekBar seekBar) {}
-            @Override public void onStopTrackingTouch(android.widget.SeekBar seekBar) {}
-        });
-    }
-
-    private void buildDashedSwitchSection(LinearLayout container, final ChartSettingsState state)
-    {
-        LinearLayout rowDash = new LinearLayout(this);
-        rowDash.setOrientation(LinearLayout.HORIZONTAL);
-        rowDash.setGravity(Gravity.CENTER_VERTICAL);
-        TextView lbDash = new TextView(this);
-        lbDash.setText(getString(R.string.chart_last_line_dashed));
-        lbDash.setTextSize(12f);
-        lbDash.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
-        final android.widget.Switch swDash = new android.widget.Switch(this);
-        swDash.setChecked(marketChartView.isLastLineDashed());
-        rowDash.addView(lbDash);
-        rowDash.addView(swDash);
-        container.addView(rowDash);
-        state.swDash = swDash;
-    }
-
-    private void buildCurrentPriceLabelSection(LinearLayout container, final ChartSettingsState state)
-    {
-        View dividerLabel = new View(this);
-        LinearLayout.LayoutParams lpDivLabel = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, (int) (1 * getResources().getDisplayMetrics().density));
-        lpDivLabel.topMargin = 16;
-        lpDivLabel.bottomMargin = 8;
-        dividerLabel.setLayoutParams(lpDivLabel);
-        dividerLabel.setBackgroundColor(getResources().getColor(R.color.chart_grid, getTheme()));
-        container.addView(dividerLabel);
-
-        TextView lbLabelSection = new TextView(this);
-        lbLabelSection.setText(getString(R.string.chart_last_price_label_section));
-        lbLabelSection.setTextSize(12f);
-        lbLabelSection.setTypeface(null, Typeface.BOLD);
-        lbLabelSection.setPadding(0, 8, 0, 8);
-        container.addView(lbLabelSection);
-
-        LinearLayout rowLabelBg = new LinearLayout(this);
-        rowLabelBg.setOrientation(LinearLayout.HORIZONTAL);
-        rowLabelBg.setGravity(Gravity.CENTER_VERTICAL);
-        rowLabelBg.setPadding(0, 8, 0, 8);
-        TextView lbLabelBg = new TextView(this);
-        lbLabelBg.setText(getString(R.string.chart_last_price_label_bg));
-        lbLabelBg.setTextSize(13f);
-        lbLabelBg.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
-        final View viewLabelBg = new View(this);
-        viewLabelBg.setLayoutParams(new LinearLayout.LayoutParams(48, 48));
-        viewLabelBg.setBackground(createColorViewDrawable(state.curLabelBg[0]));
-        rowLabelBg.addView(lbLabelBg);
-        rowLabelBg.addView(viewLabelBg);
-        container.addView(rowLabelBg);
-
-        LinearLayout rowLabelTextColor = new LinearLayout(this);
-        rowLabelTextColor.setOrientation(LinearLayout.HORIZONTAL);
-        rowLabelTextColor.setGravity(Gravity.CENTER_VERTICAL);
-        rowLabelTextColor.setPadding(0, 8, 0, 8);
-        TextView lbLabelTextColor = new TextView(this);
-        lbLabelTextColor.setText(getString(R.string.chart_last_price_label_text_color));
-        lbLabelTextColor.setTextSize(13f);
-        lbLabelTextColor.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
-        final View viewLabelTextColor = new View(this);
-        viewLabelTextColor.setLayoutParams(new LinearLayout.LayoutParams(48, 48));
-        viewLabelTextColor.setBackground(createColorViewDrawable(state.curLabelTextColorFinal[0]));
-        rowLabelTextColor.addView(lbLabelTextColor);
-        rowLabelTextColor.addView(viewLabelTextColor);
-        container.addView(rowLabelTextColor);
-
-        TextView lbLabelSize = new TextView(this);
-        lbLabelSize.setText(getString(R.string.chart_last_price_label_text_size, (int) state.curLabelSize[0]));
-        lbLabelSize.setTextSize(12f);
-        container.addView(lbLabelSize);
-
-        android.widget.SeekBar sbLabelSize = new android.widget.SeekBar(this);
-        sbLabelSize.setMax(30);
-        sbLabelSize.setProgress((int) state.curLabelSize[0]);
-        container.addView(sbLabelSize);
-        state.sbLabelSize = sbLabelSize;
-
-        viewLabelBg.setOnClickListener(v -> {
-            int idx = 0;
-            for (int i = 0; i < state.candlePalette.length; i++)
-            {
-                if (state.candlePalette[i] == state.curLabelBg[0])
-                {
-                    idx = i;
-                    break;
-                }
-            }
-            int next = state.candlePalette[(idx + 1) % state.candlePalette.length];
-            state.curLabelBg[0] = next;
-            v.setBackground(createColorViewDrawable(next));
-        });
-
-        viewLabelTextColor.setOnClickListener(v -> {
-            int idx = 0;
-            for (int i = 0; i < state.candlePalette.length; i++)
-            {
-                if (state.candlePalette[i] == state.curLabelTextColorFinal[0])
-                {
-                    idx = i;
-                    break;
-                }
-            }
-            int next = state.candlePalette[(idx + 1) % state.candlePalette.length];
-            state.curLabelTextColorFinal[0] = next;
-            v.setBackground(createColorViewDrawable(next));
-        });
-
-        sbLabelSize.setOnSeekBarChangeListener(new android.widget.SeekBar.OnSeekBarChangeListener()
-        {
-            @Override
-            public void onProgressChanged(android.widget.SeekBar seekBar, int progress, boolean fromUser)
-            {
-                if (progress < 8) progress = 8;
-                state.finalLabelSize[0] = progress;
-                lbLabelSize.setText(getString(R.string.chart_last_price_label_text_size, progress));
-            }
-            @Override public void onStartTrackingTouch(android.widget.SeekBar seekBar) {}
-            @Override public void onStopTrackingTouch(android.widget.SeekBar seekBar) {}
-        });
-    }
-
-    private void addApplyButton(LinearLayout root, final ChartSettingsState state, final Dialog dialog)
-    {
-        TextView btnApply = new TextView(this);
-        btnApply.setText(getString(R.string.chart_settings_apply));
-        btnApply.setTextSize(14f);
-        btnApply.setTypeface(null, Typeface.BOLD);
-        btnApply.setGravity(Gravity.CENTER);
-        btnApply.setPadding(0, 28, 0, 28);
-        btnApply.setTextColor(getResources().getColor(android.R.color.white, getTheme()));
-        GradientDrawable bgApply = new GradientDrawable();
-        bgApply.setCornerRadius(12f);
-        bgApply.setColor(getThemeColor(android.R.attr.colorPrimary));
-        btnApply.setBackground(bgApply);
-        LinearLayout.LayoutParams lpApply = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        lpApply.topMargin = 24;
-        btnApply.setLayoutParams(lpApply);
-        btnApply.setOnClickListener(v -> applyChartSettings(state, dialog));
-        root.addView(btnApply);
-    }
-
-    private void addResetButton(LinearLayout root, final ChartSettingsState state, final Dialog dialog)
-    {
-        TextView btnReset = new TextView(this);
-        btnReset.setText(getString(R.string.chart_settings_reset));
-        btnReset.setTextSize(13f);
-        btnReset.setTypeface(null, Typeface.BOLD);
-        btnReset.setGravity(Gravity.CENTER);
-        btnReset.setPadding(0, 28, 0, 28);
-        btnReset.setTextColor(getResources().getColor(R.color.palette_red, getTheme()));
-        GradientDrawable bgReset = new GradientDrawable();
-        bgReset.setCornerRadius(12f);
-        bgReset.setStroke((int) (1 * getResources().getDisplayMetrics().density), getResources().getColor(R.color.palette_red, getTheme()));
-        bgReset.setColor(getResources().getColor(android.R.color.transparent, getTheme()));
-        btnReset.setBackground(bgReset);
-        LinearLayout.LayoutParams lpReset = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        lpReset.topMargin = 12;
-        btnReset.setLayoutParams(lpReset);
-        btnReset.setOnClickListener(v -> showResetConfirm(dialog));
-        root.addView(btnReset);
-    }
-
+    // ===== APPLY CHART SETTINGS =====
     private void applyChartSettings(ChartSettingsState state, Dialog dialog)
     {
         try
@@ -1354,6 +808,8 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
             {
                 dialog.getCurrentFocus().clearFocus();
             }
+
+            // Read period from EditTexts in RecyclerView
             if (state.recycler != null)
             {
                 state.recycler.clearFocus();
@@ -1410,7 +866,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         dialog.dismiss();
     }
 
-    // ======== FIX: Reset bao gồm cả interval ========
+    // ======== RESET CONFIRMATION ========
     private void showResetConfirm(final Dialog settingsDialog)
     {
         new AlertDialog.Builder(this)
@@ -1420,7 +876,6 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
                     if (marketChartView != null) {
                         marketChartView.resetToDefaults();
                     }
-                    // Reset interval về mặc định
                     resetToDefaultInterval();
                     settingsDialog.dismiss();
                     Toast.makeText(MarketChartActivity.this, getString(R.string.chart_settings_reset), Toast.LENGTH_SHORT).show();
@@ -1429,6 +884,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
                 .show();
     }
 
+    // ===== MA POPUP ADAPTER =====
     static class MaPopupAdapter extends RecyclerView.Adapter<MaPopupAdapter.Holder>
     {
         List<MarketChartView.MaLine> list;
