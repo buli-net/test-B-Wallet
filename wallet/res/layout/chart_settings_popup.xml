@@ -8,7 +8,9 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="16dp"
+        android:padding="8dp"
+        android:paddingTop="2dp"
+        android:paddingBottom="4dp"
         android:background="@android:color/transparent">
 
         <TextView
@@ -17,7 +19,8 @@
             android:text="@string/chart_settings_title"
             android:textSize="18sp"
             android:textStyle="bold"
-            android:paddingBottom="12dp" />
+            android:paddingTop="0dp"
+            android:paddingBottom="4dp" />
 
         <!-- Candle Settings -->
         <LinearLayout
