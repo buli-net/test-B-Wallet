@@ -771,6 +771,15 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         state.swGrid = content.findViewById(R.id.swGrid);
         state.swVol = content.findViewById(R.id.swVol);
 
+        // Update labels when seekbars change
+        TextView lbBody = content.findViewById(R.id.lbBody);
+        TextView lbWick = content.findViewById(R.id.lbWick);
+        TextView lbMaW = content.findViewById(R.id.lbMaW);
+        TextView lbVis = content.findViewById(R.id.lbVis);
+
+        // --- FIX: lấy min/max từ xml, không hardcode 20 ---
+        int defaultMinVis = getResources().getInteger(R.integer.default_min_visible_candle_count);
+
         // Set initial progress/state from current chart values
         if (state.sbBody != null) {
             state.sbBody.setProgress((int) ((marketChartView.getBodyWidthFraction() - 0.3f) * 100));
@@ -782,7 +791,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
             state.sbMaW.setProgress((int) marketChartView.getMaLineWidthPx());
         }
         if (state.sbVis != null) {
-            state.sbVis.setProgress(marketChartView.getVisibleCandleCountValue() - 20);
+            state.sbVis.setProgress(marketChartView.getVisibleCandleCountValue() - defaultMinVis);
         }
         if (state.swGrid != null) {
             state.swGrid.setChecked(marketChartView.isShowGrid());
@@ -791,11 +800,23 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
             state.swVol.setChecked(marketChartView.isShowVolume());
         }
 
-        // Update labels when seekbars change
-        TextView lbBody = content.findViewById(R.id.lbBody);
-        TextView lbWick = content.findViewById(R.id.lbWick);
-        TextView lbMaW = content.findViewById(R.id.lbMaW);
-        TextView lbVis = content.findViewById(R.id.lbVis);
+        // --- FIX QUAN TRỌNG: set text ban đầu để không hiện %1$s / %1$d ---
+        if (lbBody != null && state.sbBody != null) {
+            float fraction = 0.3f + state.sbBody.getProgress() / 100f;
+            lbBody.setText(getString(R.string.chart_body_width, String.format(Locale.US, "%.2f", fraction)));
+        }
+        if (lbWick != null && state.sbWick != null) {
+            int p = state.sbWick.getProgress(); if (p < 1) p = 1;
+            lbWick.setText(getString(R.string.chart_wick_width, p));
+        }
+        if (lbMaW != null && state.sbMaW != null) {
+            int p = state.sbMaW.getProgress(); if (p < 1) p = 1;
+            lbMaW.setText(getString(R.string.chart_ma_line_width, p));
+        }
+        if (lbVis != null && state.sbVis != null) {
+            int count = defaultMinVis + state.sbVis.getProgress();
+            lbVis.setText(getString(R.string.chart_visible_candles, count));
+        }
 
         if (state.sbBody != null && lbBody != null) {
             state.sbBody.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
@@ -837,7 +858,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
             state.sbVis.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
                 @Override
                 public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                    int count = 20 + progress;
+                    int count = defaultMinVis + progress;
                     lbVis.setText(getString(R.string.chart_visible_candles, count));
                 }
                 @Override public void onStartTrackingTouch(SeekBar seekBar) {}
@@ -893,6 +914,16 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
 
         TextView lbTxtSize = content.findViewById(R.id.lbTxtSize);
         TextView lbLastW = content.findViewById(R.id.lbLastW);
+
+        // --- FIX: set text ban đầu cho 2 cái này nữa ---
+        if (lbTxtSize != null && state.sbTxtSize != null) {
+            int p = state.sbTxtSize.getProgress(); if (p < 8) p = 8;
+            lbTxtSize.setText(getString(R.string.chart_price_text_size, p));
+        }
+        if (lbLastW != null && state.sbLastW != null) {
+            int p = state.sbLastW.getProgress(); if (p < 1) p = 1;
+            lbLastW.setText(getString(R.string.chart_last_line_width, p));
+        }
 
         if (state.sbTxtSize != null && lbTxtSize != null) {
             state.sbTxtSize.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
@@ -1000,6 +1031,12 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         }
 
         TextView lbLabelSize = content.findViewById(R.id.lbLabelSize);
+
+        // --- FIX: set text ban đầu ---
+        if (lbLabelSize != null && state.sbLabelSize != null) {
+            int p = state.sbLabelSize.getProgress(); if (p < 8) p = 8;
+            lbLabelSize.setText(getString(R.string.chart_last_price_label_text_size, p));
+        }
 
         if (state.sbLabelSize != null && lbLabelSize != null) {
             state.sbLabelSize.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
@@ -1128,7 +1165,8 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         if (wickW < 1) wickW = 1;
         float maW = state.sbMaW.getProgress();
         if (maW < 1) maW = 1;
-        int visCount = 20 + state.sbVis.getProgress();
+        int defaultMinVis = getResources().getInteger(R.integer.default_min_visible_candle_count);
+        int visCount = defaultMinVis + state.sbVis.getProgress();
         boolean showG = state.swGrid.isChecked();
         boolean showV = state.swVol.isChecked();
         boolean showLast = state.swLast.isChecked();
