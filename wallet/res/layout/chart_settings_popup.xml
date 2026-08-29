@@ -1,28 +1,90 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical"
-    android:padding="16dp">
+    android:fillViewport="true">
 
-    <TextView
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/chart_settings_title"
-        android:textSize="18sp"
-        android:textStyle="bold"
-        android:paddingBottom="16dp" />
+        android:orientation="vertical"
+        android:padding="16dp">
 
-    <!-- Candle Settings -->
-    <include layout="@layout/chart_settings_candle" />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/chart_settings_title"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:paddingBottom="16dp" />
 
-    <!-- MA Settings -->
-    <include layout="@layout/chart_settings_ma" />
+        <!-- Candle Settings -->
+        <include layout="@layout/chart_settings_candle" />
 
-    <!-- Các phần khác sẽ thêm sau -->
-    <!-- <include layout="@layout/chart_settings_options" /> -->
-    <!-- <include layout="@layout/chart_settings_last_price" /> -->
-    <!-- <include layout="@layout/chart_settings_label" /> -->
-    <!-- <include layout="@layout/chart_settings_apply_reset" /> -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginVertical="16dp"
+            android:background="@color/chart_grid" />
 
-</LinearLayout>
+        <!-- MA Settings -->
+        <include layout="@layout/chart_settings_ma" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginVertical="16dp"
+            android:background="@color/chart_grid" />
+
+        <!-- Chart Options -->
+        <include layout="@layout/chart_settings_options" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginVertical="16dp"
+            android:background="@color/chart_grid" />
+
+        <!-- Last Price Line -->
+        <include layout="@layout/chart_settings_last_price" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginVertical="16dp"
+            android:background="@color/chart_grid" />
+
+        <!-- Current Price Label -->
+        <include layout="@layout/chart_settings_label" />
+
+        <!-- Apply and Reset Buttons -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="24dp"
+            android:gravity="center">
+
+            <Button
+                android:id="@+id/btnApply"
+                android:layout_width="0dp"
+                android:layout_height="48dp"
+                android:layout_weight="1"
+                android:layout_marginEnd="8dp"
+                android:text="@string/chart_settings_apply"
+                android:textAllCaps="false" />
+
+            <Button
+                android:id="@+id/btnReset"
+                android:layout_width="0dp"
+                android:layout_height="48dp"
+                android:layout_weight="1"
+                android:layout_marginStart="8dp"
+                android:text="@string/chart_settings_reset"
+                android:textAllCaps="false" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</ScrollView>
