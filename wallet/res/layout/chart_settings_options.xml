@@ -133,7 +133,7 @@
             android:id="@+id/lbVis"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Visible candles: 80"
+            
             android:textSize="12sp" />
 
         <SeekBar
