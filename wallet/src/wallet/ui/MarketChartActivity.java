@@ -3,6 +3,7 @@
  *
  * FULL VERSION - MarketChartActivity with complete XML-based chart settings popup.
  * All XML files must exist for this to compile.
+ * Includes expandable/collapsible sections with theme-aware background.
  */
 
 package wallet.ui;
@@ -523,7 +524,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         }
     }
 
-    // ========== CHART SETTINGS POPUP ==========
+    // ========== SHOW CHART SETTINGS POPUP ==========
     private void showChartSettingsPopup()
     {
         if (marketChartView == null)
@@ -589,12 +590,19 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
 
         if (dialog.getWindow() != null)
         {
-            dialog.getWindow().setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT));
+            // KHÔNG set transparent background ở đây, để layout tự quyết định
+            // dialog.getWindow().setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT));
             dialog.getWindow().setLayout(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
             dialog.getWindow().setGravity(Gravity.CENTER);
         }
 
-        // ===== 1. CANDLE SETTINGS =====
+        // ============================================================
+        // 1. CANDLE SETTINGS
+        // ============================================================
+        View headerCandle = content.findViewById(R.id.headerCandle);
+        TextView arrowCandle = content.findViewById(R.id.arrowCandle);
+        View containerCandle = content.findViewById(R.id.containerCandle);
+
         View viewBull = content.findViewById(R.id.viewBull);
         View viewBear = content.findViewById(R.id.viewBear);
 
@@ -618,7 +626,25 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
             });
         }
 
-        // ===== 2. MA SETTINGS =====
+        if (headerCandle != null && containerCandle != null) {
+            final boolean[] candleExpanded = {true};
+            containerCandle.setVisibility(View.VISIBLE);
+            headerCandle.setOnClickListener(v -> {
+                candleExpanded[0] = !candleExpanded[0];
+                containerCandle.setVisibility(candleExpanded[0] ? View.VISIBLE : View.GONE);
+                if (arrowCandle != null) {
+                    arrowCandle.setText(candleExpanded[0] ? "▾" : "▸");
+                }
+            });
+        }
+
+        // ============================================================
+        // 2. MA SETTINGS
+        // ============================================================
+        View headerMa = content.findViewById(R.id.headerMa);
+        TextView arrowMa = content.findViewById(R.id.arrowMa);
+        View containerMa = content.findViewById(R.id.containerMa);
+
         RecyclerView recycler = content.findViewById(R.id.recycler_ma_popup);
         View btnAddMa = content.findViewById(R.id.btn_add_ma);
 
@@ -651,7 +677,25 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
             });
         }
 
-        // ===== 3. CHART OPTIONS =====
+        if (headerMa != null && containerMa != null) {
+            final boolean[] maExpanded = {true};
+            containerMa.setVisibility(View.VISIBLE);
+            headerMa.setOnClickListener(v -> {
+                maExpanded[0] = !maExpanded[0];
+                containerMa.setVisibility(maExpanded[0] ? View.VISIBLE : View.GONE);
+                if (arrowMa != null) {
+                    arrowMa.setText(maExpanded[0] ? "▾" : "▸");
+                }
+            });
+        }
+
+        // ============================================================
+        // 3. CHART OPTIONS
+        // ============================================================
+        View headerOptions = content.findViewById(R.id.headerOptions);
+        TextView arrowOptions = content.findViewById(R.id.arrowOptions);
+        View containerOptions = content.findViewById(R.id.containerOptions);
+
         state.sbBody = content.findViewById(R.id.sbBody);
         state.sbWick = content.findViewById(R.id.sbWick);
         state.sbMaW = content.findViewById(R.id.sbMaW);
@@ -659,7 +703,6 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         state.swGrid = content.findViewById(R.id.swGrid);
         state.swVol = content.findViewById(R.id.swVol);
 
-        // Set initial values for Chart Options
         if (state.sbBody != null) {
             state.sbBody.setProgress((int) ((marketChartView.getBodyWidthFraction() - 0.3f) * 100));
         }
@@ -679,7 +722,6 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
             state.swVol.setChecked(marketChartView.isShowVolume());
         }
 
-        // Update labels for Chart Options
         TextView lbBody = content.findViewById(R.id.lbBody);
         TextView lbWick = content.findViewById(R.id.lbWick);
         TextView lbMaW = content.findViewById(R.id.lbMaW);
@@ -733,7 +775,25 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
             });
         }
 
-        // ===== 4. LAST PRICE LINE =====
+        if (headerOptions != null && containerOptions != null) {
+            final boolean[] optionsExpanded = {true};
+            containerOptions.setVisibility(View.VISIBLE);
+            headerOptions.setOnClickListener(v -> {
+                optionsExpanded[0] = !optionsExpanded[0];
+                containerOptions.setVisibility(optionsExpanded[0] ? View.VISIBLE : View.GONE);
+                if (arrowOptions != null) {
+                    arrowOptions.setText(optionsExpanded[0] ? "▾" : "▸");
+                }
+            });
+        }
+
+        // ============================================================
+        // 4. LAST PRICE LINE
+        // ============================================================
+        View headerLastPrice = content.findViewById(R.id.headerLastPrice);
+        TextView arrowLastPrice = content.findViewById(R.id.arrowLastPrice);
+        View containerLastPrice = content.findViewById(R.id.containerLastPrice);
+
         state.swLast = content.findViewById(R.id.swLast);
         state.sbTxtSize = content.findViewById(R.id.sbTxtSize);
         state.sbLastW = content.findViewById(R.id.sbLastW);
@@ -832,7 +892,25 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
             });
         }
 
-        // ===== 5. CURRENT PRICE LABEL =====
+        if (headerLastPrice != null && containerLastPrice != null) {
+            final boolean[] lastPriceExpanded = {true};
+            containerLastPrice.setVisibility(View.VISIBLE);
+            headerLastPrice.setOnClickListener(v -> {
+                lastPriceExpanded[0] = !lastPriceExpanded[0];
+                containerLastPrice.setVisibility(lastPriceExpanded[0] ? View.VISIBLE : View.GONE);
+                if (arrowLastPrice != null) {
+                    arrowLastPrice.setText(lastPriceExpanded[0] ? "▾" : "▸");
+                }
+            });
+        }
+
+        // ============================================================
+        // 5. CURRENT PRICE LABEL
+        // ============================================================
+        View headerLabel = content.findViewById(R.id.headerLabel);
+        TextView arrowLabel = content.findViewById(R.id.arrowLabel);
+        View containerLabel = content.findViewById(R.id.containerLabel);
+
         state.sbLabelSize = content.findViewById(R.id.sbLabelSize);
         View viewLabelBg = content.findViewById(R.id.viewLabelBg);
         View viewLabelTextColor = content.findViewById(R.id.viewLabelTextColor);
@@ -888,7 +966,21 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
             });
         }
 
-        // ===== 6. APPLY AND RESET BUTTONS =====
+        if (headerLabel != null && containerLabel != null) {
+            final boolean[] labelExpanded = {true};
+            containerLabel.setVisibility(View.VISIBLE);
+            headerLabel.setOnClickListener(v -> {
+                labelExpanded[0] = !labelExpanded[0];
+                containerLabel.setVisibility(labelExpanded[0] ? View.VISIBLE : View.GONE);
+                if (arrowLabel != null) {
+                    arrowLabel.setText(labelExpanded[0] ? "▾" : "▸");
+                }
+            });
+        }
+
+        // ============================================================
+        // 6. APPLY AND RESET
+        // ============================================================
         Button btnApply = content.findViewById(R.id.btnApply);
         Button btnReset = content.findViewById(R.id.btnReset);
 
@@ -917,7 +1009,6 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
                 dialog.getCurrentFocus().clearFocus();
             }
 
-            // Read period from EditTexts in RecyclerView
             if (state.recycler != null)
             {
                 state.recycler.clearFocus();
@@ -955,7 +1046,6 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         {
         }
 
-        // Apply all settings
         float bodyFraction = 0.3f + state.sbBody.getProgress() / 100f;
         float wickW = state.sbWick.getProgress();
         if (wickW < 1) wickW = 1;
