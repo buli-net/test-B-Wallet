@@ -651,7 +651,8 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         if (dialog.getWindow() != null) {
             // No background override: let the XML define the background
             // This ensures the dialog respects the theme
-            dialog.getWindow().setLayout(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+           // dialog.getWindow().setLayout(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+            dialog.getWindow().setLayout((int)(getResources().getDisplayMetrics().widthPixels * 0.9f), ViewGroup.LayoutParams.WRAP_CONTENT);
             dialog.getWindow().setGravity(Gravity.CENTER);
         }
         
