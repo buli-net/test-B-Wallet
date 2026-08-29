@@ -1,3 +1,5 @@
+
+}
 /*
  * Copyright (c) 2024
  *
@@ -8,8 +10,8 @@
  * Fixed interval persistence: saves and restores selected time interval.
  * Fixed color view borders: added 1dp stroke to all color picker views.
  * Added reset interval to default on chart reset (interval default from XML).
- * Migrated chart settings popup to XML layout with include structure.
- * Temporarily commented out missing XML IDs (Chart Options, Last Price, Label)
+ * Migrated chart settings popup to XML layout with include structure (partial).
+ * Temporarily commented out missing XML IDs (Chart Options, Last Price, Label, Apply, Reset)
  * to allow build. These parts will be migrated in next steps.
  */
 
@@ -38,7 +40,6 @@ import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.GridLayout;
 import android.widget.LinearLayout;
-import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -155,18 +156,19 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         float[] finalTxtSize = new float[1];
         float[] finalLabelSize = new float[1];
         List<MarketChartView.MaLine> tempList;
-        android.widget.SeekBar sbBody;
-        android.widget.SeekBar sbWick;
-        android.widget.SeekBar sbMaW;
-        android.widget.SeekBar sbVis;
-        android.widget.SeekBar sbTxtSize;
-        android.widget.SeekBar sbLastW;
-        android.widget.SeekBar sbLabelSize;
-        android.widget.Switch swGrid;
-        android.widget.Switch swVol;
-        android.widget.Switch swLast;
-        android.widget.Switch swDash;
         RecyclerView recycler;
+        // Temporarily commented out - will be added when XML files are created
+        // android.widget.SeekBar sbBody;
+        // android.widget.SeekBar sbWick;
+        // android.widget.SeekBar sbMaW;
+        // android.widget.SeekBar sbVis;
+        // android.widget.SeekBar sbTxtSize;
+        // android.widget.SeekBar sbLastW;
+        // android.widget.SeekBar sbLabelSize;
+        // android.widget.Switch swGrid;
+        // android.widget.Switch swVol;
+        // android.widget.Switch swLast;
+        // android.widget.Switch swDash;
     }
 
     private static final Map<String, String> FIAT_SYMBOLS = new HashMap<String, String>()
@@ -690,12 +692,25 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
 
         if (viewLastColor != null) {
             viewLastColor.setBackground(createColorViewDrawable(state.curLastColor[0]));
-            viewLastColor.setOnClickListener(v -> { ... });
+            viewLastColor.setOnClickListener(v -> {
+                int idx = 0;
+                for (int i = 0; i < state.candlePalette.length; i++) {
+                    if (state.candlePalette[i] == state.curLastColor[0]) {
+                        idx = i;
+                        break;
+                    }
+                }
+                int next = state.candlePalette[(idx + 1) % state.candlePalette.length];
+                state.curLastColor[0] = next;
+                v.setBackground(createColorViewDrawable(next));
+            });
         }
         // ... similar for other color pickers ...
         */
 
-        // ===== APPLY BUTTON =====
+        // ===== APPLY & RESET BUTTONS - TEMPORARILY COMMENTED OUT =====
+        // Will be added when chart_settings_popup.xml has btnApply and btnReset
+        /*
         View btnApply = content.findViewById(R.id.btnApply);
         if (btnApply != null) {
             btnApply.setOnClickListener(v -> {
@@ -703,13 +718,16 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
             });
         }
 
-        // ===== RESET BUTTON =====
         View btnReset = content.findViewById(R.id.btnReset);
         if (btnReset != null) {
             btnReset.setOnClickListener(v -> {
                 showResetConfirm(dialog);
             });
         }
+        */
+
+        // Show a toast to indicate the popup is partially working
+        Toast.makeText(this, "Settings: Candle & MA only. Other options coming soon.", Toast.LENGTH_SHORT).show();
 
         dialog.show();
     }
@@ -761,11 +779,13 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         {
         }
 
-        // For now, only apply MA changes. Other settings are not yet saved.
-        // This will be updated when the other sections are migrated.
+        // Apply candle colors and MA changes
         marketChartView.setCandleColors(state.curBull[0], state.curBear[0]);
         marketChartView.setMaLines(state.tempList);
+        
+        // TODO: Apply other settings when they are migrated to XML
         dialog.dismiss();
+        Toast.makeText(this, "Settings applied!", Toast.LENGTH_SHORT).show();
     }
 
     // ======== RESET CONFIRMATION ========
