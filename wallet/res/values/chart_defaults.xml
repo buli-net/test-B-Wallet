@@ -6,7 +6,7 @@
     <integer name="default_min_visible_candle_count">20</integer>
     <integer name="default_max_visible_candle_count">150</integer>
     <integer name="default_body_fraction_percent">70</integer>
-    <integer name="chart_fetch_limit">200</integer>
+    <integer name="chart_fetch_limit">20000</integer>
     <integer name="chart_live_interval_ms">1000</integer>
     <integer name="chart_countdown_interval_ms">1000</integer>
 
