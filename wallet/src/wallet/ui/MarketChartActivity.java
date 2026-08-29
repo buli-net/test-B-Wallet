@@ -643,6 +643,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
 
         // Create dialog and inflate the XML layout
         final Dialog dialog = new Dialog(this);
+        dialog.requestWindowFeature(android.view.Window.FEATURE_NO_TITLE);// No title setting
         View content = getLayoutInflater().inflate(R.layout.chart_settings_popup, null);
         dialog.setContentView(content);
 
@@ -650,10 +651,12 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         if (dialog.getWindow() != null) {
             // No background override: let the XML define the background
             // This ensures the dialog respects the theme
-            dialog.getWindow().setLayout(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+          //  dialog.getWindow().setLayout(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+            dialog.getWindow().setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT)); //
+            dialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT); //
             dialog.getWindow().setGravity(Gravity.CENTER);
         }
-
+        
         // --------------------------------------------------------------------
         // 1. CANDLE SETTINGS
         // --------------------------------------------------------------------
