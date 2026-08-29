@@ -52,7 +52,7 @@
     <dimen name="default_body_min_width">2dp</dimen>
     <dimen name="default_body_max_width">12dp</dimen>
     <dimen name="default_candle_min_height">2dp</dimen>
-    <dimen name="default_price_axis_width">32dp</dimen>
+    <dimen name="default_price_axis_width">72dp</dimen>
     <dimen name="default_time_axis_height">20dp</dimen>
     <dimen name="default_volume_height">30dp</dimen>
     <dimen name="default_top_padding">12dp</dimen>
