@@ -2,11 +2,11 @@
 <resources>
 
     <!-- ===== INTEGERS ===== -->
-    <integer name="default_visible_candle_count">70</integer>
+    <integer name="default_visible_candle_count">80</integer>
     <integer name="default_min_visible_candle_count">20</integer>
     <integer name="default_max_visible_candle_count">150</integer>
     <integer name="default_body_fraction_percent">70</integer>
-    <integer name="chart_fetch_limit">20000</integer>
+    <integer name="chart_fetch_limit">200</integer>
     <integer name="chart_live_interval_ms">1000</integer>
     <integer name="chart_countdown_interval_ms">1000</integer>
 
@@ -52,7 +52,7 @@
     <dimen name="default_body_min_width">2dp</dimen>
     <dimen name="default_body_max_width">12dp</dimen>
     <dimen name="default_candle_min_height">2dp</dimen>
-    <dimen name="default_price_axis_width">72dp</dimen>
+    <dimen name="default_price_axis_width">32dp</dimen>
     <dimen name="default_time_axis_height">20dp</dimen>
     <dimen name="default_volume_height">30dp</dimen>
     <dimen name="default_top_padding">12dp</dimen>
