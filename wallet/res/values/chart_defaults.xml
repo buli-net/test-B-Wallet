@@ -2,7 +2,7 @@
 <resources>
 
     <!-- ===== INTEGERS ===== -->
-    <integer name="default_visible_candle_count">80</integer>
+    <integer name="default_visible_candle_count">70</integer>
     <integer name="default_min_visible_candle_count">20</integer>
     <integer name="default_max_visible_candle_count">150</integer>
     <integer name="default_body_fraction_percent">70</integer>
