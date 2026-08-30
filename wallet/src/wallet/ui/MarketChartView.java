@@ -194,7 +194,6 @@ public class MarketChartView extends View {
     private float defPriceTextSizePx;
     private float defLastLineWidthPx;
     private float defLabelTextSizePx;
-    private float defSelectedLineWidthPx;
     private int defBullColor;
     private int defBearColor;
     private List<MaLine> defMaLines = new ArrayList<>();
@@ -203,8 +202,6 @@ public class MarketChartView extends View {
     private int defPriceTextColor;
     private int defGridColor;
     private int defLabelTextColor;
-    private int defSelectedLineColor;
-    private boolean defShowSelectedLine;
 
     // --------------------------------------------------------------------
     // Runtime State - translation, selection, price range
@@ -266,11 +263,6 @@ public class MarketChartView extends View {
     private float lastPriceLabelTextSizePx;
     private int lastPriceLabelTextColor;
 
-    // Selected line settings
-    private int selectedLineColor;
-    private float selectedLineWidthPx;
-    private boolean showSelectedLine;
-
     // --------------------------------------------------------------------
     // Constructor - initializes dimensions, gestures, and paints
     // --------------------------------------------------------------------
@@ -288,6 +280,7 @@ public class MarketChartView extends View {
     // Dimension Loading - all values from resources, no hardcoded numbers
     // --------------------------------------------------------------------
     private void loadViewDimensions(Context context) {
+        // Core layout dimensions
         TOP_PADDING_PX = (int) context.getResources().getDimension(R.dimen.default_top_padding);
         BOTTOM_PADDING_PX = (int) context.getResources().getDimension(R.dimen.default_bottom_padding);
         VOLUME_CHART_HEIGHT_DP = (int) context.getResources().getDimension(R.dimen.default_volume_height);
@@ -306,12 +299,14 @@ public class MarketChartView extends View {
         TIME_TEXT_OFFSET = (int) context.getResources().getDimension(R.dimen.time_text_offset);
         LOADING_TEXT_OFFSET = (int) context.getResources().getDimension(R.dimen.loading_text_offset);
 
+        // Fallback for candle min height
         try {
             CANDLE_MIN_HEIGHT = (int) context.getResources().getDimension(R.dimen.default_candle_min_height);
         } catch (Exception e) {
             CANDLE_MIN_HEIGHT = (int) context.getResources().getDimension(R.dimen.default_candle_min_width);
         }
 
+        // Integer and fraction resources
         try {
             FETCH_LIMIT = context.getResources().getInteger(R.integer.default_fetch_limit);
         } catch (Exception e) {
@@ -356,6 +351,9 @@ public class MarketChartView extends View {
         }
     }
 
+    /**
+     * Set view dimensions from Activity using values from dimens.xml
+     */
     public void setViewDimensionsFromLayout(int topPad, int bottomPad, int volumeHeight,
                                             int volumeTopMargin, int priceAxisWidth,
                                             int timeAxisHeight, int priceTextMargin,
@@ -388,20 +386,18 @@ public class MarketChartView extends View {
 
     /**
      * Configure default style from child layouts. Must be called before drawing.
-     * Includes selected line defaults - clean separated params.
      */
     public void setDefaultsFromLayout(float bodyFrac, float wickW, float maW, int visCount,
                                       boolean showG, boolean showV, boolean showLast, boolean dashed,
                                       float txtSize, float lastW, float labelSize,
                                       int bullColor, int bearColor, int lastColor, int gridColor,
                                       int txtColor, int labelBg, int labelTextColor,
-                                      List<MaLine> maDefaults,
-                                      float selectedW, int selectedColor, boolean showSelected) {
+                                      List<MaLine> maDefaults) {
         if (maDefaults == null || maDefaults.isEmpty()) {
             throw new IllegalStateException(getContext().getString(R.string.err_ma_empty));
         }
         if (bullColor == 0 || bearColor == 0 || lastColor == 0 || gridColor == 0 ||
-                txtColor == 0 || labelBg == 0 || labelTextColor == 0 || selectedColor == 0) {
+                txtColor == 0 || labelBg == 0 || labelTextColor == 0) {
             throw new IllegalStateException(getContext().getString(R.string.err_color_0));
         }
 
@@ -423,10 +419,6 @@ public class MarketChartView extends View {
         this.defGridColor = gridColor;
         this.defPriceTextColor = txtColor;
         this.defLabelTextColor = labelTextColor;
-        this.defSelectedLineWidthPx = selectedW;
-        this.defSelectedLineColor = selectedColor;
-        this.defShowSelectedLine = showSelected;
-
         this.defMaLines = new ArrayList<>();
         for (MaLine m : maDefaults) {
             this.defMaLines.add(new MaLine(m.period, m.color));
@@ -441,19 +433,6 @@ public class MarketChartView extends View {
         loadChartOptions(getContext());
         initPaints(getContext());
         invalidate();
-    }
-
-    // Backward compatible overload without selected line (use defaults)
-    public void setDefaultsFromLayout(float bodyFrac, float wickW, float maW, int visCount,
-                                      boolean showG, boolean showV, boolean showLast, boolean dashed,
-                                      float txtSize, float lastW, float labelSize,
-                                      int bullColor, int bearColor, int lastColor, int gridColor,
-                                      int txtColor, int labelBg, int labelTextColor,
-                                      List<MaLine> maDefaults) {
-        setDefaultsFromLayout(bodyFrac, wickW, maW, visCount, showG, showV, showLast, dashed,
-                txtSize, lastW, labelSize, bullColor, bearColor, lastColor, gridColor,
-                txtColor, labelBg, labelTextColor, maDefaults, SELECTED_WIDTH,
-                bearColor, true);
     }
 
     private void ensureDefaultsLoaded() {
@@ -533,14 +512,6 @@ public class MarketChartView extends View {
             lastPriceLabelTextSizePx = getFloatCompat(sp, context.getString(R.string.key_last_label_text_size), defLabelTextSizePx);
             lastPriceLabelTextColor = sp.contains(context.getString(R.string.key_last_label_text_color))?
                     sp.getInt(context.getString(R.string.key_last_label_text_color), defLabelTextColor) : defLabelTextColor;
-
-            // Selected line - use existing keys from strings.xml, fallback to defaults
-            selectedLineWidthPx = getFloatCompat(sp, context.getString(R.string.key_selected_width), defSelectedLineWidthPx);
-            selectedLineColor = sp.contains(context.getString(R.string.key_selected_color))?
-                    sp.getInt(context.getString(R.string.key_selected_color), defSelectedLineColor) : defSelectedLineColor;
-            showSelectedLine = sp.contains(context.getString(R.string.key_show_selected))?
-                    sp.getBoolean(context.getString(R.string.key_show_selected), defShowSelectedLine) : defShowSelectedLine;
-
         } catch (Exception e) {
             bodyWidthFraction = defBodyFraction;
             wickWidthPx = defWickWidthPx;
@@ -559,9 +530,6 @@ public class MarketChartView extends View {
             lastLineDashed = defLastDashed;
             lastPriceLabelTextSizePx = defLabelTextSizePx;
             lastPriceLabelTextColor = defLabelTextColor;
-            selectedLineWidthPx = defSelectedLineWidthPx;
-            selectedLineColor = defSelectedLineColor;
-            showSelectedLine = defShowSelectedLine;
         }
     }
 
@@ -587,11 +555,6 @@ public class MarketChartView extends View {
     public boolean isLastLineDashed() { return lastLineDashed; }
     public float getLastPriceLabelTextSizePx() { return lastPriceLabelTextSizePx; }
     public int getLastPriceLabelTextColor() { return lastPriceLabelTextColor; }
-
-    // Selected line API
-    public int getSelectedLineColor() { return selectedLineColor; }
-    public float getSelectedLineWidthPx() { return selectedLineWidthPx; }
-    public boolean isShowSelectedLine() { return showSelectedLine; }
 
     public void setChartAppearance(boolean sLastPrice, int lastLineColor, int lastBgColor,
                                    float txtSize, int txtColor, int gColor, int bColor,
@@ -646,40 +609,13 @@ public class MarketChartView extends View {
             SharedPreferences sp = getContext().getSharedPreferences(
                     getContext().getString(R.string.prefs_chart), Context.MODE_PRIVATE);
             sp.edit()
-           .putInt(getContext().getString(R.string.key_last_price_bg_color), bgColor)
-           .putInt(getContext().getString(R.string.key_last_label_text_color), textColor)
-           .putFloat(getContext().getString(R.string.key_last_label_text_size), textSizePx)
-           .apply();
+             .putInt(getContext().getString(R.string.key_last_price_bg_color), bgColor)
+             .putInt(getContext().getString(R.string.key_last_label_text_color), textColor)
+             .putFloat(getContext().getString(R.string.key_last_label_text_size), textSizePx)
+             .apply();
         } catch (Exception e) {
             // Ignore
         }
-        initPaints(getContext());
-        invalidate();
-    }
-
-    /**
-     * Set selected line appearance - separate clean method
-     */
-    public void setSelectedLineAppearance(boolean showSelected, int color, float widthPx) {
-        if (color == 0) {
-            throw new IllegalStateException(getContext().getString(R.string.err_appearance_color));
-        }
-        this.showSelectedLine = showSelected;
-        this.selectedLineColor = color;
-        this.selectedLineWidthPx = widthPx;
-
-        try {
-            SharedPreferences sp = getContext().getSharedPreferences(
-                    getContext().getString(R.string.prefs_chart), Context.MODE_PRIVATE);
-            sp.edit()
-            .putBoolean(getContext().getString(R.string.key_show_selected), showSelected)
-            .putInt(getContext().getString(R.string.key_selected_color), color)
-            .putFloat(getContext().getString(R.string.key_selected_width), widthPx)
-            .apply();
-        } catch (Exception e) {
-            // Ignore
-        }
-
         initPaints(getContext());
         invalidate();
     }
@@ -694,9 +630,9 @@ public class MarketChartView extends View {
             SharedPreferences sp = getContext().getSharedPreferences(
                     getContext().getString(R.string.prefs_candle), Context.MODE_PRIVATE);
             sp.edit()
-           .putInt(getContext().getString(R.string.key_bull), bull)
-           .putInt(getContext().getString(R.string.key_bear), bear)
-           .apply();
+             .putInt(getContext().getString(R.string.key_bull), bull)
+             .putInt(getContext().getString(R.string.key_bear), bear)
+             .apply();
         } catch (Exception e) {
             // Ignore
         }
@@ -717,13 +653,13 @@ public class MarketChartView extends View {
             SharedPreferences sp = getContext().getSharedPreferences(
                     getContext().getString(R.string.prefs_chart), Context.MODE_PRIVATE);
             sp.edit()
-           .putFloat(getContext().getString(R.string.key_body_fraction), bodyFraction)
-           .putFloat(getContext().getString(R.string.key_wick_width), wickWidth)
-           .putFloat(getContext().getString(R.string.key_ma_width), maWidth)
-           .putBoolean(getContext().getString(R.string.key_show_grid), sGrid)
-           .putBoolean(getContext().getString(R.string.key_show_volume), sVolume)
-           .putInt(getContext().getString(R.string.key_visible_count), this.visibleCandleCount)
-           .apply();
+             .putFloat(getContext().getString(R.string.key_body_fraction), bodyFraction)
+             .putFloat(getContext().getString(R.string.key_wick_width), wickWidth)
+             .putFloat(getContext().getString(R.string.key_ma_width), maWidth)
+             .putBoolean(getContext().getString(R.string.key_show_grid), sGrid)
+             .putBoolean(getContext().getString(R.string.key_show_volume), sVolume)
+             .putInt(getContext().getString(R.string.key_visible_count), this.visibleCandleCount)
+             .apply();
         } catch (Exception e) {
             // Ignore
         }
@@ -772,17 +708,6 @@ public class MarketChartView extends View {
         lastLineDashed = defLastDashed;
         lastPriceLabelTextSizePx = defLabelTextSizePx;
         lastPriceLabelTextColor = defLabelTextColor;
-        selectedLineColor = defSelectedLineColor;
-        selectedLineWidthPx = defSelectedLineWidthPx;
-        showSelectedLine = defShowSelectedLine;
-
-        // FIX: reset luôn đường đứng đang chọn
-        selectedIndex = -1;
-        translationX = 0f;
-        extraOffsetX = 0f;
-        if (updateListener!= null) {
-            updateListener.onNothingSelected();
-        }
 
         maLines.clear();
         for (MaLine m : defMaLines) {
@@ -795,7 +720,6 @@ public class MarketChartView extends View {
         setChartAppearance(showLastPriceLine, lastPriceLineColor, lastPriceBgColor,
                 priceTextSizePx, priceTextColor, gridColor, bgColor, lastLineWidthPx, lastLineDashed);
         setLastPriceLabelAppearance(lastPriceBgColor, lastPriceLabelTextColor, lastPriceLabelTextSizePx);
-        setSelectedLineAppearance(showSelectedLine, selectedLineColor, selectedLineWidthPx);
 
         initPaints(getContext());
         clampTranslationX();
@@ -927,10 +851,11 @@ public class MarketChartView extends View {
             throw new IllegalStateException(context.getString(R.string.err_candle_0));
         }
         if (gridColor == 0 || priceTextColor == 0 || lastPriceLineColor == 0 ||
-                lastPriceBgColor == 0 || lastPriceLabelTextColor == 0 || selectedLineColor == 0) {
+                lastPriceBgColor == 0 || lastPriceLabelTextColor == 0) {
             throw new IllegalStateException(context.getString(R.string.err_color_tag));
         }
 
+        // Bullish / bearish candle body
         bullishPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         bullishPaint.setColor(bullishColor);
         bullishPaint.setStyle(Paint.Style.FILL);
@@ -939,6 +864,7 @@ public class MarketChartView extends View {
         bearishPaint.setColor(bearishColor);
         bearishPaint.setStyle(Paint.Style.FILL);
 
+        // Volume bars with transparency
         volumeBullishPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         volumeBullishPaint.setColor(bullishColor);
         volumeBullishPaint.setAlpha(VOLUME_ALPHA);
@@ -949,6 +875,7 @@ public class MarketChartView extends View {
         volumeBearishPaint.setAlpha(VOLUME_ALPHA);
         volumeBearishPaint.setStyle(Paint.Style.FILL);
 
+        // Wick paints
         wickBullishPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         wickBullishPaint.setColor(bullishColor);
         wickBullishPaint.setStrokeWidth(wickWidthPx);
@@ -957,6 +884,7 @@ public class MarketChartView extends View {
         wickBearishPaint.setColor(bearishColor);
         wickBearishPaint.setStrokeWidth(wickWidthPx);
 
+        // Grid and axis text
         gridPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         gridPaint.setColor(gridColor);
         gridPaint.setStrokeWidth(GRID_WIDTH);
@@ -965,6 +893,7 @@ public class MarketChartView extends View {
         textPaint.setColor(priceTextColor);
         textPaint.setTextSize(priceTextSizePx);
 
+        // Last price line and label
         lastPriceLinePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         lastPriceLinePaint.setColor(lastPriceLineColor);
         lastPriceLinePaint.setStrokeWidth(lastLineWidthPx);
@@ -985,6 +914,7 @@ public class MarketChartView extends View {
         lastPriceTextPaint.setTextSize(lastPriceLabelTextSizePx);
         lastPriceTextPaint.setFakeBoldText(true);
 
+        // Moving average paints
         movingAverage5Paint = new Paint(Paint.ANTI_ALIAS_FLAG);
         movingAverage5Paint.setStyle(Paint.Style.STROKE);
         movingAverage5Paint.setStrokeWidth(maLineWidthPx);
@@ -1026,15 +956,15 @@ public class MarketChartView extends View {
             p.setColor(maLines.get(i).color);
         }
 
-        // Selection highlight line - uses selectedLineColor and width
+        // Selection highlight line
         selectedLinePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        selectedLinePaint.setColor(selectedLineColor);
-        selectedLinePaint.setStrokeWidth(selectedLineWidthPx);
+        selectedLinePaint.setColor(context.getResources().getColor(R.color.chart_text, null));
+        selectedLinePaint.setStrokeWidth(SELECTED_WIDTH);
         selectedLinePaint.setAlpha(SELECTED_ALPHA);
     }
 
     // --------------------------------------------------------------------
-    // Configuration Change
+    // Configuration Change - reloads theme and repaints
     // --------------------------------------------------------------------
     @Override
     protected void onConfigurationChanged(android.content.res.Configuration newConfig) {
@@ -1057,7 +987,7 @@ public class MarketChartView extends View {
     }
 
     // --------------------------------------------------------------------
-    // Gesture Handling
+    // Gesture Handling - zoom and pan
     // --------------------------------------------------------------------
     private void initGestures(Context context) {
         scaleGestureDetector = new ScaleGestureDetector(context,
@@ -1401,7 +1331,7 @@ public class MarketChartView extends View {
     }
 
     // --------------------------------------------------------------------
-    // Calculation
+    // Calculation - moving average
     // --------------------------------------------------------------------
     private float calculateMovingAverage(int currentIndex, int period) {
         if (currentIndex < period - 1 || data.isEmpty()) return 0f;
@@ -1413,7 +1343,7 @@ public class MarketChartView extends View {
     }
 
     // --------------------------------------------------------------------
-    // Touch Handling
+    // Touch Handling - pan, zoom, selection
     // --------------------------------------------------------------------
     @Override
     public boolean onTouchEvent(MotionEvent event) {
@@ -1435,12 +1365,14 @@ public class MarketChartView extends View {
     }
 
     // --------------------------------------------------------------------
-    // Main Drawing Entry
+    // Main Drawing Entry - splits canvas into 3 independent blocks
     // --------------------------------------------------------------------
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
 
+        // Block 1: Calculate layout areas for price, volume, and time.
+        // This is responsive - adapts to any screen height.
         int priceAxisWidth = PRICE_AXIS_WIDTH_DP;
         int timeAxisHeight = TIME_AXIS_HEIGHT;
         int volumeHeightPx = VOLUME_CHART_HEIGHT_DP;
@@ -1449,6 +1381,7 @@ public class MarketChartView extends View {
         int fullHeight = getHeight();
         int chartWidth = fullWidth - priceAxisWidth;
 
+        // Price chart height = total - paddings - volume - time
         int priceChartHeight = fullHeight - TOP_PADDING_PX - BOTTOM_PADDING_PX
                 - VOLUME_TOP_MARGIN_PX - volumeHeightPx - timeAxisHeight;
 
@@ -1456,6 +1389,7 @@ public class MarketChartView extends View {
             throw new IllegalStateException(getContext().getString(R.string.err_price_height));
         }
 
+        // Block 2: Draw grid background
         drawGrid(canvas, chartWidth, priceChartHeight, volumeHeightPx);
 
         if (data.isEmpty()) {
@@ -1466,6 +1400,7 @@ public class MarketChartView extends View {
             return;
         }
 
+        // Block 3: Prepare shared drawing info
         int count = Math.min(visibleCandleCount, data.size());
         float candleWidth = chartWidth / (float) count;
         int startIndex = calcStartIndex(count, candleWidth);
@@ -1485,14 +1420,16 @@ public class MarketChartView extends View {
             info.displayMax = info.displayMin + 1f;
         }
 
+        // Block 4: Draw chart elements in order
         drawCandles(canvas, info);
         drawMovingAverages(canvas, info);
         drawSelectedLine(canvas, info);
         drawLastPriceLine(canvas, info);
         drawPriceAxis(canvas, info);
-        drawVolumeAndTime(canvas, info);
+        drawVolumeAndTime(canvas, info); // Volume and time now separated
     }
 
+    /** Internal holder for layout calculations */
     private static class DrawInfo {
         int chartWidth;
         int fullWidth;
@@ -1523,20 +1460,26 @@ public class MarketChartView extends View {
     // --------------------------------------------------------------------
     // Drawing Blocks
     // --------------------------------------------------------------------
+
+    /** Block: Grid lines and vertical price axis separator */
     private void drawGrid(Canvas canvas, int chartWidth, int priceChartHeight, int volumeHeightPx) {
         if (!showGrid) {
             canvas.drawLine(chartWidth, 0f, chartWidth, getHeight(), gridPaint);
             return;
         }
+        // Horizontal grid for price area
         for (int i = 0; i <= 4; i++) {
             float y = TOP_PADDING_PX + priceChartHeight * i / 4f;
             canvas.drawLine(0f, y, chartWidth, y, gridPaint);
         }
+        // Separator between price and volume
         float volumeSeparatorY = TOP_PADDING_PX + priceChartHeight + VOLUME_TOP_MARGIN_PX;
         canvas.drawLine(0f, volumeSeparatorY, chartWidth, volumeSeparatorY, gridPaint);
+        // Vertical price axis line
         canvas.drawLine(chartWidth, 0f, chartWidth, getHeight(), gridPaint);
     }
 
+    /** Block: Candlesticks - body and wick */
     private void drawCandles(Canvas canvas, DrawInfo info) {
         float bodyWidth = info.candleWidth * bodyWidthFraction;
         float minBody = BODY_MIN_WIDTH;
@@ -1578,6 +1521,7 @@ public class MarketChartView extends View {
         }
     }
 
+    /** Block: Moving average lines */
     private void drawMovingAverages(Canvas canvas, DrawInfo info) {
         float priceRange = info.displayMax - info.displayMin;
         if (priceRange == 0f) priceRange = 1f;
@@ -1615,9 +1559,8 @@ public class MarketChartView extends View {
         }
     }
 
-    /** Selected vertical line - respects showSelectedLine flag */
+    /** Block: Vertical selection line */
     private void drawSelectedLine(Canvas canvas, DrawInfo info) {
-        if (!showSelectedLine) return;
         if (selectedIndex >= info.startIndex && selectedIndex < info.startIndex + info.count) {
             float selectedX = (selectedIndex - info.startIndex) * info.candleWidth
                     + info.candleWidth / 2f + extraOffsetX;
@@ -1626,6 +1569,7 @@ public class MarketChartView extends View {
         }
     }
 
+    /** Block: Last price horizontal line and label */
     private void drawLastPriceLine(Canvas canvas, DrawInfo info) {
         if (lastPrice <= 0f ||!showLastPriceLine) return;
         float priceRange = info.displayMax - info.displayMin;
@@ -1650,6 +1594,7 @@ public class MarketChartView extends View {
         canvas.drawText(label, tx, ty, lastPriceTextPaint);
     }
 
+    /** Block: Price axis labels on the right */
     private void drawPriceAxis(Canvas canvas, DrawInfo info) {
         boolean isBigFiatAxis = fiatMultiplier > BIG_FIAT_THRESHOLD;
         String axisFmt = isBigFiatAxis? getContext().getString(R.string.fmt_price_0) :
@@ -1663,10 +1608,16 @@ public class MarketChartView extends View {
         }
     }
 
+    /**
+     * Block: Volume bars and time labels - fixed to prevent overlap.
+     * Layout: Price Chart -> Margin -> Volume Area -> Time Axis Area
+     * Volume and Time are in separate vertical zones, responsive to screen size.
+     */
     private void drawVolumeAndTime(Canvas canvas, DrawInfo info) {
+        // Calculate separate zones
         float volumeTop = TOP_PADDING_PX + info.priceChartHeight + VOLUME_TOP_MARGIN_PX;
         float volumeBottom = volumeTop + info.volumeHeightPx;
-        float timeTop = volumeBottom;
+        float timeTop = volumeBottom; // Time starts right after volume
         float timeBottom = timeTop + info.timeAxisHeight;
 
         if (maxVolume == 0f) maxVolume = 1f;
@@ -1677,6 +1628,7 @@ public class MarketChartView extends View {
         if (bodyWidth < minBody) bodyWidth = minBody;
         if (bodyWidth > maxBody) bodyWidth = maxBody;
 
+        // Draw volume bars within dedicated volume zone
         if (showVolume) {
             for (int i = 0; i < info.count; i++) {
                 int dataIndex = info.startIndex + i;
@@ -1684,6 +1636,7 @@ public class MarketChartView extends View {
                 Candle candle = data.get(dataIndex);
                 float x = i * info.candleWidth + info.candleWidth / 2f + extraOffsetX;
                 float volumeBarHeight = info.volumeHeightPx * (candle.volume / maxVolume);
+                // Clamp bar inside volume zone
                 float barTop = volumeBottom - volumeBarHeight;
                 if (barTop < volumeTop) barTop = volumeTop;
                 Paint volumePaint = (candle.close >= candle.open)? volumeBullishPaint : volumeBearishPaint;
@@ -1691,6 +1644,8 @@ public class MarketChartView extends View {
             }
         }
 
+        // Draw time labels centered in dedicated time axis zone
+        // This ensures time never overlaps volume
         float timeBaseline = timeTop + (info.timeAxisHeight / 2f) + (TEXT_SIZE / 3f);
         for (int i = 0; i < info.count; i += Math.max(1, info.count / 4)) {
             int dataIndex = info.startIndex + i;
@@ -1701,6 +1656,9 @@ public class MarketChartView extends View {
         }
     }
 
+    // --------------------------------------------------------------------
+    // Lifecycle - stop handlers when detached
+    // --------------------------------------------------------------------
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
