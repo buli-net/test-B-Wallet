@@ -77,10 +77,6 @@
     <color name="palette_grey">#9E9E9E</color>
     <color name="palette_white">#FFFFFF</color>
 
-    <color name="chart_bg">#ffeaaef0</color>
-    <color name="chart_grid">#1F000000</color>
-    <color name="chart_text">#FF000000</color>
-
     <!-- defaults mới cho reset -->
     <color name="chart_bull_default">#26A69A</color>
     <color name="chart_bear_default">#EF5350</color>
