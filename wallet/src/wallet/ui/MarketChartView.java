@@ -346,26 +346,44 @@ public class MarketChartView extends View {
         }
     }
 
+    // FIX: đọc được cả int và float cho 2 slider bị lỗi
+    private float getFloatCompat(SharedPreferences sp, String key, float defVal) {
+        try {
+            if (!sp.contains(key)) return defVal;
+            try {
+                return sp.getFloat(key, defVal);
+            } catch (ClassCastException e) {
+                try {
+                    return (float) sp.getInt(key, (int) defVal);
+                } catch (ClassCastException e2) {
+                    return defVal;
+                }
+            }
+        } catch (Exception e) {
+            return defVal;
+        }
+    }
+
     private void loadChartOptions(Context context) {
         ensureDefaultsLoaded();
         try {
             SharedPreferences sp = context.getSharedPreferences(context.getString(R.string.prefs_chart), Context.MODE_PRIVATE);
-            bodyWidthFraction = sp.contains(context.getString(R.string.key_body_fraction))? sp.getFloat(context.getString(R.string.key_body_fraction), defBodyFraction) : defBodyFraction;
-            wickWidthPx = sp.contains(context.getString(R.string.key_wick_width))? sp.getFloat(context.getString(R.string.key_wick_width), defWickWidthPx) : defWickWidthPx;
-            maLineWidthPx = sp.contains(context.getString(R.string.key_ma_width))? sp.getFloat(context.getString(R.string.key_ma_width), defMaWidthPx) : defMaWidthPx;
+            bodyWidthFraction = getFloatCompat(sp, context.getString(R.string.key_body_fraction), defBodyFraction);
+            wickWidthPx = getFloatCompat(sp, context.getString(R.string.key_wick_width), defWickWidthPx);
+            maLineWidthPx = getFloatCompat(sp, context.getString(R.string.key_ma_width), defMaWidthPx);
             showGrid = sp.contains(context.getString(R.string.key_show_grid))? sp.getBoolean(context.getString(R.string.key_show_grid), defShowGrid) : defShowGrid;
             showVolume = sp.contains(context.getString(R.string.key_show_volume))? sp.getBoolean(context.getString(R.string.key_show_volume), defShowVolume) : defShowVolume;
             visibleCandleCount = sp.contains(context.getString(R.string.key_visible_count))? sp.getInt(context.getString(R.string.key_visible_count), defVisibleCount) : defVisibleCount;
             showLastPriceLine = sp.contains(context.getString(R.string.key_show_last_price))? sp.getBoolean(context.getString(R.string.key_show_last_price), defShowLastPrice) : defShowLastPrice;
             lastPriceLineColor = sp.contains(context.getString(R.string.key_last_price_line_color))? sp.getInt(context.getString(R.string.key_last_price_line_color), defLastPriceLineColor) : defLastPriceLineColor;
             lastPriceBgColor = sp.contains(context.getString(R.string.key_last_price_bg_color))? sp.getInt(context.getString(R.string.key_last_price_bg_color), defLastPriceBgColor) : defLastPriceBgColor;
-            priceTextSizePx = sp.contains(context.getString(R.string.key_price_text_size))? sp.getFloat(context.getString(R.string.key_price_text_size), defPriceTextSizePx) : defPriceTextSizePx;
+            priceTextSizePx = getFloatCompat(sp, context.getString(R.string.key_price_text_size), defPriceTextSizePx);
             priceTextColor = sp.contains(context.getString(R.string.key_price_text_color))? sp.getInt(context.getString(R.string.key_price_text_color), defPriceTextColor) : defPriceTextColor;
             gridColor = sp.contains(context.getString(R.string.key_grid_color))? sp.getInt(context.getString(R.string.key_grid_color), defGridColor) : defGridColor;
             bgColor = sp.contains(context.getString(R.string.key_bg_color))? sp.getInt(context.getString(R.string.key_bg_color), 0) : 0;
-            lastLineWidthPx = sp.contains(context.getString(R.string.key_last_line_width))? sp.getFloat(context.getString(R.string.key_last_line_width), defLastLineWidthPx) : defLastLineWidthPx;
+            lastLineWidthPx = getFloatCompat(sp, context.getString(R.string.key_last_line_width), defLastLineWidthPx);
             lastLineDashed = sp.contains(context.getString(R.string.key_last_line_dash))? sp.getBoolean(context.getString(R.string.key_last_line_dash), defLastDashed) : defLastDashed;
-            lastPriceLabelTextSizePx = sp.contains(context.getString(R.string.key_last_label_text_size))? sp.getFloat(context.getString(R.string.key_last_label_text_size), defLabelTextSizePx) : defLabelTextSizePx;
+            lastPriceLabelTextSizePx = getFloatCompat(sp, context.getString(R.string.key_last_label_text_size), defLabelTextSizePx);
             lastPriceLabelTextColor = sp.contains(context.getString(R.string.key_last_label_text_color))? sp.getInt(context.getString(R.string.key_last_label_text_color), defLabelTextColor) : defLabelTextColor;
         } catch (Exception e) {
             bodyWidthFraction = defBodyFraction;
@@ -456,10 +474,10 @@ public class MarketChartView extends View {
         try {
             SharedPreferences sp = getContext().getSharedPreferences(getContext().getString(R.string.prefs_chart), Context.MODE_PRIVATE);
             sp.edit()
-                 .putInt(getContext().getString(R.string.key_last_price_bg_color), bgColor)
-                 .putInt(getContext().getString(R.string.key_last_label_text_color), textColor)
-                 .putFloat(getContext().getString(R.string.key_last_label_text_size), textSizePx)
-                 .apply();
+                .putInt(getContext().getString(R.string.key_last_price_bg_color), bgColor)
+                .putInt(getContext().getString(R.string.key_last_label_text_color), textColor)
+                .putFloat(getContext().getString(R.string.key_last_label_text_size), textSizePx)
+                .apply();
         } catch (Exception e) { }
         initPaints(getContext());
         invalidate();
@@ -489,13 +507,13 @@ public class MarketChartView extends View {
         try {
             SharedPreferences sp = getContext().getSharedPreferences(getContext().getString(R.string.prefs_chart), Context.MODE_PRIVATE);
             sp.edit()
-                 .putFloat(getContext().getString(R.string.key_body_fraction), bodyFraction)
-                 .putFloat(getContext().getString(R.string.key_wick_width), wickWidth)
-                 .putFloat(getContext().getString(R.string.key_ma_width), maWidth)
-                 .putBoolean(getContext().getString(R.string.key_show_grid), sGrid)
-                 .putBoolean(getContext().getString(R.string.key_show_volume), sVolume)
-                 .putInt(getContext().getString(R.string.key_visible_count), this.visibleCandleCount)
-                 .apply();
+                .putFloat(getContext().getString(R.string.key_body_fraction), bodyFraction)
+                .putFloat(getContext().getString(R.string.key_wick_width), wickWidth)
+                .putFloat(getContext().getString(R.string.key_ma_width), maWidth)
+                .putBoolean(getContext().getString(R.string.key_show_grid), sGrid)
+                .putBoolean(getContext().getString(R.string.key_show_volume), sVolume)
+                .putInt(getContext().getString(R.string.key_visible_count), this.visibleCandleCount)
+                .apply();
         } catch (Exception e) { }
         initPaints(getContext());
         clampTranslationX();
