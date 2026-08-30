@@ -55,7 +55,8 @@
             android:id="@+id/viewLastColor"
             android:layout_width="48dp"
             android:layout_height="48dp"
-            android:background="@drawable/color_picker_border" />
+            android:background="@drawable/color_picker_border"
+            android:tag="@color/chart_last_price_line" />
     </LinearLayout>
 
     <!-- Price Text Size -->
@@ -99,7 +100,8 @@
             android:id="@+id/viewGridColor"
             android:layout_width="48dp"
             android:layout_height="48dp"
-            android:background="@drawable/color_picker_border" />
+            android:background="@drawable/color_picker_border"
+            android:tag="@color/chart_grid" />
     </LinearLayout>
 
     <!-- Price Text Color -->
@@ -121,7 +123,8 @@
             android:id="@+id/viewTxtColor"
             android:layout_width="48dp"
             android:layout_height="48dp"
-            android:background="@drawable/color_picker_border" />
+            android:background="@drawable/color_picker_border"
+            android:tag="@color/chart_price_text" />
     </LinearLayout>
 
     <!-- Last Line Width -->
