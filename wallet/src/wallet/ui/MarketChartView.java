@@ -298,9 +298,9 @@ public class MarketChartView extends View {
         try { VOLUME_CHART_HEIGHT_DP = res.getDimensionPixelSize(R.dimen.default_volume_height); } catch(Exception ignored){}
         try { VOLUME_TOP_MARGIN_PX = res.getDimensionPixelSize(R.dimen.default_volume_top_margin); } catch(Exception ignored){}
         try { PRICE_AXIS_WIDTH_DP = res.getDimensionPixelSize(R.dimen.default_price_axis_width); } catch(Exception ignored){}
-        try { FETCH_LIMIT = res.getInteger(R.integer.chart_fetch_limit); } catch(Exception ignored){}
-        try { LIVE_REFRESH_INTERVAL_MS = res.getInteger(R.integer.chart_live_interval_ms); } catch(Exception ignored){}
-        try { COUNTDOWN_INTERVAL_MS = res.getInteger(R.integer.chart_countdown_interval_ms); } catch(Exception ignored){}
+        FETCH_LIMIT = 200;
+        LIVE_REFRESH_INTERVAL_MS = 1000;
+        COUNTDOWN_INTERVAL_MS = 1000;
     }
 
     /**
