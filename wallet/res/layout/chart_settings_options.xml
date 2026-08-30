@@ -14,7 +14,7 @@
         android:textStyle="bold"
         android:paddingBottom="8dp" />
 
-    <!-- Body Width -->
+    <!-- Body Width - layout con riêng -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -36,7 +36,7 @@
             android:progress="40" />
     </LinearLayout>
 
-    <!-- Wick Width -->
+    <!-- Wick Width - layout con riêng -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -58,7 +58,7 @@
             android:progress="2" />
     </LinearLayout>
 
-    <!-- MA Line Width -->
+    <!-- MA Line Width - layout con riêng -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -80,7 +80,7 @@
             android:progress="2" />
     </LinearLayout>
 
-    <!-- Show Grid -->
+    <!-- Show Grid - layout con riêng -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -102,7 +102,7 @@
             android:checked="true" />
     </LinearLayout>
 
-    <!-- Show Volume -->
+    <!-- Show Volume - layout con riêng -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -124,7 +124,7 @@
             android:checked="true" />
     </LinearLayout>
 
-    <!-- Visible Candles -->
+    <!-- Visible Candles - layout con riêng -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -142,9 +142,8 @@
             android:id="@+id/sbVis"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:min="20"
             android:max="160"
             android:progress="70" />
+    </LinearLayout>
 
-        </LinearLayout>
 </LinearLayout>
