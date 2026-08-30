@@ -420,6 +420,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
 
     // ------------------------------------------------------------------------
     // FIX: helper đọc màu từ tag - hỗ trợ cả Integer resource và String #...
+    // KHÔNG set cứng #FFFFFF nữa, thiếu là crash
     // ------------------------------------------------------------------------
     private int getColorFromTag(View v) {
         if (v == null || v.getTag() == null) {
@@ -434,10 +435,9 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
             if (s.startsWith("#")) {
                 return Color.parseColor(s);
             } else if (s.startsWith("@color/")) {
-                // fallback nếu tag là string "@color/..."
                 int resId = getResources().getIdentifier(s.replace("@color/", ""), "color", getPackageName());
                 if (resId!= 0) return ContextCompat.getColor(this, resId);
-                return Color.parseColor("#FFFFFF");
+                throw new IllegalStateException("Color resource not found for tag: " + s);
             } else {
                 // có thể là chuỗi số resource
                 try {
@@ -451,8 +451,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
     }
 
     // ------------------------------------------------------------------------
-    // NEW: Load defaults from layout (no hardcoded fallback, crash if missing)
-    // FIXED: đọc màu bull/bear qua getColorFromTag để không bị trắng ở light
+    // FIXED ONLY THIS METHOD: đọc đủ 7 màu từ layout bao gồm #FFFF8000
     // ------------------------------------------------------------------------
     private void loadDefaultsFromLayoutAndApply() {
         // Inflate the popup layout as a source of truth for defaults
@@ -473,6 +472,11 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
 
         View defBull = defRoot.findViewById(R.id.viewBull);
         View defBear = defRoot.findViewById(R.id.viewBear);
+        View defLastColor = defRoot.findViewById(R.id.viewLastColor);
+        View defGridColor = defRoot.findViewById(R.id.viewGridColor);
+        View defTxtColor = defRoot.findViewById(R.id.viewTxtColor);
+        View defLabelBg = defRoot.findViewById(R.id.viewLabelBg);
+        View defLabelTextColor = defRoot.findViewById(R.id.viewLabelTextColor);
 
         TextView tvPeriods = defRoot.findViewById(R.id.tvDefMaPeriods);
         TextView tvColors = defRoot.findViewById(R.id.tvDefMaColors);
@@ -481,10 +485,14 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         if (defBody == null || defWick == null || defMaW == null || defVis == null ||
             defGrid == null || defVol == null || defTxt == null || defLastW == null ||
             defLabel == null || defLast == null || defDash == null ||
-            defBull == null || defBear == null || tvPeriods == null || tvColors == null) {
+            defBull == null || defBear == null || defLastColor == null ||
+            defGridColor == null || defTxtColor == null || defLabelBg == null ||
+            defLabelTextColor == null || tvPeriods == null || tvColors == null) {
             throw new IllegalStateException(getString(R.string.err_missing_default_view));
         }
-        if (defBull.getTag() == null || defBear.getTag() == null) {
+        if (defBull.getTag() == null || defBear.getTag() == null || defLastColor.getTag() == null ||
+            defGridColor.getTag() == null || defTxtColor.getTag() == null ||
+            defLabelBg.getTag() == null || defLabelTextColor.getTag() == null) {
             throw new IllegalStateException(getString(R.string.err_bull_bear_tag_missing));
         }
 
@@ -500,9 +508,14 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         float lastW = defLastW.getProgress();
         float labelSize = defLabel.getProgress();
 
-        // FIX: đọc qua helper để hỗ trợ @color resource
+        // FIX: đọc qua helper để hỗ trợ @color resource + #FFFF8000
         int bullColor = getColorFromTag(defBull);
         int bearColor = getColorFromTag(defBear);
+        int lastColor = getColorFromTag(defLastColor);
+        int gridColor = getColorFromTag(defGridColor);
+        int txtColor = getColorFromTag(defTxtColor);
+        int labelBg = getColorFromTag(defLabelBg);
+        int labelText = getColorFromTag(defLabelTextColor);
 
         List<MarketChartView.MaLine> defMa = new ArrayList<>();
         String[] pArr = tvPeriods.getText().toString().split(",");
@@ -520,7 +533,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         if (marketChartView!= null) {
             marketChartView.setDefaultsFromLayout(bodyFrac, wickW, maW, visCount,
                     showG, showV, showLast, dashed, txtSize, lastW, labelSize,
-                    bullColor, bearColor, defMa);
+                    bullColor, bearColor, lastColor, gridColor, txtColor, labelBg, labelText, defMa);
         }
     }
 
@@ -1310,9 +1323,9 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
     // ------------------------------------------------------------------------
     private void showResetConfirm(final Dialog settingsDialog) {
         new AlertDialog.Builder(this)
-            .setTitle(getString(R.string.chart_reset_confirm_title))
-            .setMessage(getString(R.string.chart_reset_confirm_message))
-            .setPositiveButton(getString(R.string.chart_reset), (d, which) -> {
+          .setTitle(getString(R.string.chart_reset_confirm_title))
+          .setMessage(getString(R.string.chart_reset_confirm_message))
+          .setPositiveButton(getString(R.string.chart_reset), (d, which) -> {
                     if (marketChartView!= null) {
                         // NEW: reset from layout-stored defaults, not from chart_defaults.xml
                         marketChartView.resetToDefaultsFromLayout();
@@ -1321,8 +1334,8 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
                     settingsDialog.dismiss();
                     Toast.makeText(MarketChartActivity.this, getString(R.string.chart_settings_reset), Toast.LENGTH_SHORT).show();
                 })
-            .setNegativeButton(getString(R.string.close), null)
-            .show();
+          .setNegativeButton(getString(R.string.close), null)
+          .show();
     }
 
     // ------------------------------------------------------------------------
@@ -1577,9 +1590,9 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         };
 
         final AlertDialog dialog = new AlertDialog.Builder(this)
-            .setView(root)
-            .setNegativeButton(R.string.close, (d, w) -> d.dismiss())
-            .create();
+          .setView(root)
+          .setNegativeButton(R.string.close, (d, w) -> d.dismiss())
+          .create();
 
         for (int i = 0; i < realLoad.length; i++) {
             TextView tv = new TextView(this);
@@ -1621,7 +1634,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
                 if (load.isEmpty()) return;
                 currentInterval = load;
                 getSharedPreferences(PREFS_CHART_STATE, MODE_PRIVATE)
-                    .edit().putString(KEY_INTERVAL, currentInterval).apply();
+                  .edit().putString(KEY_INTERVAL, currentInterval).apply();
                 if (marketChartView!= null) {
                     marketChartView.loadChart(currentSymbol, currentInterval);
                 }
@@ -1711,7 +1724,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
             tv.setOnClickListener(v -> {
                 currentInterval = load;
                 getSharedPreferences(PREFS_CHART_STATE, MODE_PRIVATE)
-                    .edit().putString(KEY_INTERVAL, currentInterval).apply();
+                  .edit().putString(KEY_INTERVAL, currentInterval).apply();
                 if (marketChartView!= null) {
                     marketChartView.loadChart(currentSymbol, currentInterval);
                 }
