@@ -145,4 +145,5 @@
             android:max="160"
             android:progress="70" />
 
+        </LinearLayout>
 </LinearLayout>
