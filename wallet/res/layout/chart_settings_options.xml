@@ -142,6 +142,7 @@
             android:id="@+id/sbVis"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:min="20"
             android:max="160"
             android:progress="70" />
 
