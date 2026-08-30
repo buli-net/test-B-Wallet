@@ -51,7 +51,7 @@
                     android:id="@+id/arrowCandle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="▸"
+                    android:text="@string/arrow_collapsed"
                     android:textSize="28sp"
                     android:textStyle="bold" />
             </LinearLayout>
@@ -104,7 +104,7 @@
                     android:id="@+id/arrowMa"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="▸"
+                    android:text="@string/arrow_collapsed"
                     android:textSize="28sp"
                     android:textStyle="bold" />
             </LinearLayout>
@@ -157,7 +157,7 @@
                     android:id="@+id/arrowOptions"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="▸"
+                    android:text="@string/arrow_collapsed"
                     android:textSize="28sp"
                     android:textStyle="bold" />
             </LinearLayout>
@@ -210,7 +210,7 @@
                     android:id="@+id/arrowLastPrice"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="▸"
+                    android:text="@string/arrow_collapsed"
                     android:textSize="28sp"
                     android:textStyle="bold" />
             </LinearLayout>
@@ -263,7 +263,7 @@
                     android:id="@+id/arrowLabel"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="▸"
+                    android:text="@string/arrow_collapsed"
                     android:textSize="28sp"
                     android:textStyle="bold" />
             </LinearLayout>
@@ -287,7 +287,60 @@
                 android:background="@color/chart_grid" />
         </LinearLayout>
 
-        <!-- Apply và Reset -->
+        <!-- Selected Line -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:id="@+id/headerSelected"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:paddingVertical="12dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:background="?android:attr/selectableItemBackground">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/chart_settings_selected"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/arrowSelected"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/arrow_collapsed"
+                    android:textSize="28sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/containerSelected"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp"
+                android:visibility="gone">
+
+                <include layout="@layout/chart_settings_selected" />
+            </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginVertical="8dp"
+                android:background="@color/chart_grid" />
+        </LinearLayout>
+
+        <!-- Apply and Reset -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
