@@ -4,73 +4,95 @@
     android:layout_height="wrap_content"
     android:orientation="vertical">
 
+    <!-- Header expandable - uses arrow_collapsed / arrow_expanded from strings.xml -->
     <LinearLayout
+        android:id="@+id/headerSelected"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:gravity="center_vertical"
-        android:paddingVertical="8dp">
+        android:padding="12dp"
+        android:background="?attr/selectableItemBackground">
 
         <TextView
             android:layout_width="0dp"
-            android:layout_weight="1"
             android:layout_height="wrap_content"
-            android:text="@string/chart_settings_show_selected"
-            android:textSize="12sp" />
-
-        <Switch
-            android:id="@+id/switchSelectedLine"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center_vertical"
-        android:paddingVertical="8dp">
+            android:layout_weight="1"
+            android:text="@string/chart_settings_selected"
+            android:textSize="14sp"
+            android:textStyle="bold" />
 
         <TextView
+            android:id="@+id/arrowSelected"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/arrow_collapsed"
+            android:textSize="14sp" />
+    </LinearLayout>
+
+    <!-- Container -->
+    <LinearLayout
+        android:id="@+id/containerSelected"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:visibility="gone"
+        android:padding="12dp">
+
+        <!-- Show selected line switch -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="8dp">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/chart_settings_show_selected" />
+
+            <Switch
+                android:id="@+id/swShowSelected"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+        </LinearLayout>
+
+        <!-- Selected color - NO bg_color_circle reference, background set by code -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="12dp">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/chart_settings_color" />
+
+            <View
+                android:id="@+id/viewSelectedColor"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:tag="@color/palette_blue" />
+        </LinearLayout>
+
+        <!-- Width -->
+        <TextView
+            android:id="@+id/lbSelectedWidth"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/chart_settings_width"
-            android:textSize="12sp" />
+            android:layout_marginBottom="4dp" />
 
         <SeekBar
-            android:id="@+id/seekSelectedWidth"
-            android:layout_width="0dp"
-            android:layout_weight="1"
+            android:id="@+id/sbSelectedWidth"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginStart="12dp"
-            android:max="10" />
+            android:max="10"
+            android:progress="2" />
 
-        <TextView
-            android:id="@+id/textSelectedWidth"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:textSize="12sp" />
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center_vertical"
-        android:paddingVertical="8dp">
-
-        <TextView
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:layout_height="wrap_content"
-            android:text="@string/chart_settings_color"
-            android:textSize="12sp" />
-
-        <View
-            android:id="@+id/viewSelectedColor"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:background="@drawable/bg_color_circle" />
     </LinearLayout>
 </LinearLayout>
