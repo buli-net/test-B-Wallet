@@ -79,6 +79,11 @@ import wallet.exchangerate.ExchangeRatesRepository;
 public class MarketChartActivity extends Activity implements ViewModelStoreOwner, LifecycleOwner {
 
     // ------------------------------------------------------------------------
+    // Constants
+    // ------------------------------------------------------------------------
+    private static final float BODY_BASE_FRACTION = 0.3f;
+
+    // ------------------------------------------------------------------------
     // UI Views
     // ------------------------------------------------------------------------
     private MarketChartView marketChartView;
@@ -114,7 +119,8 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
     // ------------------------------------------------------------------------
     // Date/Time formatting
     // ------------------------------------------------------------------------
-    private SimpleDateFormat fullTimeFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US);
+    private final SimpleDateFormat fullTimeFormat =
+            new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US);
 
     // ------------------------------------------------------------------------
     // Exchange rate and currency
@@ -130,8 +136,8 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
     // ------------------------------------------------------------------------
     // ViewModel and Lifecycle
     // ------------------------------------------------------------------------
-    private ViewModelStore viewModelStore = new ViewModelStore();
-    private LifecycleRegistry lifecycleRegistry = new LifecycleRegistry(this);
+    private final ViewModelStore viewModelStore = new ViewModelStore();
+    private final LifecycleRegistry lifecycleRegistry = new LifecycleRegistry(this);
 
     private WalletBalanceViewModel balanceViewModel;
     private Coin currentBalance = null;
@@ -153,8 +159,12 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
 
         float density = getResources().getDisplayMetrics().density;
         int borderColor = getResources().getColor(R.color.chart_grid, getTheme());
-        int borderWidth = (int) (getResources().getDimension(R.dimen.default_grid_width));
-        if (borderWidth < 1) borderWidth = (int) (1 * density);
+        int borderWidth = (int) getResources().getDimension(R.dimen.default_grid_width);
+
+        if (borderWidth < 1) {
+            borderWidth = (int) (1 * density);
+        }
+
         drawable.setStroke(borderWidth, borderColor);
 
         return drawable;
@@ -162,15 +172,19 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
 
     private int[] loadPaletteFromColorsXml() {
         String prefix = getString(R.string.palette_prefix);
+
         if (prefix == null || prefix.trim().isEmpty()) {
             throw new IllegalStateException(getString(R.string.err_palette_prefix_missing));
         }
 
         List<Integer> colors = new ArrayList<>();
+
         try {
             Field[] fields = R.color.class.getFields();
+
             for (Field f : fields) {
                 String name = f.getName();
+
                 if (name.startsWith(prefix)) {
                     int resId = f.getInt(null);
                     int c = getResources().getColor(resId, getTheme());
@@ -197,35 +211,29 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
     // Chart Settings State (holds all temporary UI state)
     // ------------------------------------------------------------------------
     private static class ChartSettingsState {
-        // Candle colors
         int[] candlePalette;
         int[] curBull = new int[1];
         int[] curBear = new int[1];
         int[] bullIdx = new int[1];
         int[] bearIdx = new int[1];
 
-        // Various dimensions (wick, MA width, text sizes, etc.)
         float[] curWick = new float[1];
         float[] curMaW = new float[1];
         float[] curTxtSize = new float[1];
         float[] curLastW = new float[1];
         float[] curLabelSize = new float[1];
 
-        // Colors
         int[] curLastColor = new int[1];
         int[] curGridColor = new int[1];
         int[] curPriceTxtColor = new int[1];
         int[] curLabelBg = new int[1];
         int[] curLabelTextColorFinal = new int[1];
 
-        // Final text sizes (after user adjustments)
         float[] finalTxtSize = new float[1];
         float[] finalLabelSize = new float[1];
 
-        // MA lines
         List<MarketChartView.MaLine> tempList;
 
-        // UI controls
         SeekBar sbBody;
         SeekBar sbWick;
         SeekBar sbMaW;
@@ -281,7 +289,6 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
 
     // ------------------------------------------------------------------------
     // Helper: read color from view tag
-    // Supports Integer resource ID and String #RRGGBB or @color/name
     // ------------------------------------------------------------------------
     private int getColorFromTag(View v) {
         if (v == null || v.getTag() == null) {
@@ -289,10 +296,12 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         }
 
         Object tag = v.getTag();
+
         if (tag instanceof Integer) {
             return ContextCompat.getColor(this, (Integer) tag);
         } else {
             String s = tag.toString().trim();
+
             if (s.startsWith("#")) {
                 return Color.parseColor(s);
             } else if (s.startsWith("@color/")) {
@@ -301,9 +310,11 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
                         "color",
                         getPackageName()
                 );
+
                 if (resId!= 0) {
                     return ContextCompat.getColor(this, resId);
                 }
+
                 throw new IllegalStateException("Color resource not found for tag: " + s);
             } else {
                 try {
@@ -318,12 +329,10 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
 
     // ------------------------------------------------------------------------
     // Load defaults from individual child layouts and dimens.xml
-    // No hardcoded numbers - all values come from XML
     // ------------------------------------------------------------------------
     private void loadDefaultsFromLayoutAndApply() {
         LayoutInflater inflater = getLayoutInflater();
 
-        // Inflate each child layout separately
         View candleRoot = inflater.inflate(R.layout.chart_settings_candle, null);
         View maRoot = inflater.inflate(R.layout.chart_settings_ma, null);
         View optionsRoot = inflater.inflate(R.layout.chart_settings_options, null);
@@ -353,27 +362,25 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         float defPopupTimeSize = getResources().getDimension(R.dimen.default_popup_time_size);
         float defPopupSize = getResources().getDimension(R.dimen.default_popup_size);
 
-        // ---- Sync min/max for visible candles from integers.xml ----
         int minVis = getResources().getInteger(R.integer.min_visible_candle_count);
         int maxVis = getResources().getInteger(R.integer.max_visible_candle_count);
 
-        // ---- Candle layout child ----
         View defBull = candleRoot.findViewById(R.id.viewBull);
         View defBear = candleRoot.findViewById(R.id.viewBear);
         SeekBar defWickFromCandle = candleRoot.findViewById(R.id.sbWick);
 
-        // ---- Options layout child ----
         SeekBar defBody = optionsRoot.findViewById(R.id.sbBody);
         SeekBar defWick = optionsRoot.findViewById(R.id.sbWick);
+
         if (defWick == null) {
             defWick = defWickFromCandle;
         }
+
         SeekBar defMaW = optionsRoot.findViewById(R.id.sbMaW);
         SeekBar defVis = optionsRoot.findViewById(R.id.sbVis);
         Switch defGrid = optionsRoot.findViewById(R.id.swGrid);
         Switch defVol = optionsRoot.findViewById(R.id.swVol);
 
-        // Sync SeekBar range from integers.xml
         if (defVis!= null) {
             defVis.setMax(maxVis);
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
@@ -381,7 +388,6 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
             }
         }
 
-        // ---- LastPrice layout child ----
         SeekBar defTxt = lastPriceRoot.findViewById(R.id.sbTxtSize);
         SeekBar defLastW = lastPriceRoot.findViewById(R.id.sbLastW);
         Switch defLast = lastPriceRoot.findViewById(R.id.swLast);
@@ -390,16 +396,13 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         View defGridColor = lastPriceRoot.findViewById(R.id.viewGridColor);
         View defTxtColor = lastPriceRoot.findViewById(R.id.viewTxtColor);
 
-        // ---- Label layout child ----
         SeekBar defLabel = labelRoot.findViewById(R.id.sbLabelSize);
         View defLabelBg = labelRoot.findViewById(R.id.viewLabelBg);
         View defLabelTextColor = labelRoot.findViewById(R.id.viewLabelTextColor);
 
-        // ---- MA layout child ----
         TextView tvPeriods = maRoot.findViewById(R.id.tvDefMaPeriods);
         TextView tvColors = maRoot.findViewById(R.id.tvDefMaColors);
 
-        // Strict validation
         if (defBody == null
                 || defWick == null
                 || defMaW == null
@@ -433,8 +436,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
             throw new IllegalStateException(getString(R.string.err_bull_bear_tag_missing));
         }
 
-        // Read progress / checked state from child layouts
-        float bodyFrac = 0.3f + defBody.getProgress() / 100f;
+        float bodyFrac = BODY_BASE_FRACTION + defBody.getProgress() / 100f;
         float wickW = defWick.getProgress();
         float maW = defMaW.getProgress();
         int visCount = defVis.getProgress();
@@ -446,7 +448,6 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         float lastW = defLastW.getProgress();
         float labelSize = defLabel.getProgress();
 
-        // Read colors from tags
         int bullColor = getColorFromTag(defBull);
         int bearColor = getColorFromTag(defBear);
         int lastColor = getColorFromTag(defLastColor);
@@ -455,20 +456,20 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         int labelBg = getColorFromTag(defLabelBg);
         int labelText = getColorFromTag(defLabelTextColor);
 
-        // Read MA periods and colors
         List<MarketChartView.MaLine> defMa = new ArrayList<>();
         String[] pArr = tvPeriods.getText().toString().split(",");
         String[] cArr = tvColors.getText().toString().split(",");
+
         if (pArr.length == 0 || pArr[0].trim().isEmpty()) {
             throw new IllegalStateException(getString(R.string.err_ma_periods_empty));
         }
+
         for (int i = 0; i < pArr.length; i++) {
             int per = Integer.parseInt(pArr[i].trim());
             int col = Color.parseColor(cArr[i % cArr.length].trim());
             defMa.add(new MarketChartView.MaLine(per, col));
         }
 
-        // Apply to MarketChartView
         if (marketChartView!= null) {
             marketChartView.setViewDimensionsFromLayout(
                     defTopPadding,
@@ -527,7 +528,6 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_CREATE);
         setContentView(R.layout.activity_market_chart);
 
-        // Find views
         marketChartView = findViewById(R.id.marketChartView);
         textCurrentPrice = findViewById(R.id.textCurrentPrice);
         textFiat = findViewById(R.id.textFiat);
@@ -549,29 +549,24 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         popupVolume = findViewById(R.id.popupVolume);
         btnChartSettings = findViewById(R.id.btnChartSettings);
 
-        // Chart settings button
         if (btnChartSettings!= null) {
             btnChartSettings.setOnClickListener(v -> showChartSettingsPopup());
         }
 
-        // Get symbol from intent if provided
         if (getIntent()!= null && getIntent().hasExtra("symbol")) {
             currentSymbol = getIntent().getStringExtra("symbol");
         }
 
-        // Initialize app components
         WalletApplication application = (WalletApplication) getApplication();
         config = application.getConfiguration();
         prefs = application.getSharedPreferences("wallet_preferences", MODE_PRIVATE);
         exchangeRateDao = ExchangeRatesRepository.get(application).exchangeRateDao();
 
-        // Set current fiat currency
         currentFiatCode = config.getExchangeCurrencyCode();
         if (currentFiatCode == null) {
             currentFiatCode = "USD";
         }
 
-        // Listen for fiat currency changes
         prefsListener = (sharedPreferences, key) -> {
             if (Configuration.PREFS_KEY_EXCHANGE_CURRENCY.equals(key)) {
                 String newCode = config.getExchangeCurrencyCode();
@@ -581,50 +576,43 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
                 }
             }
         };
+
         prefs.registerOnSharedPreferenceChangeListener(prefsListener);
 
-        // Restore saved interval
         SharedPreferences statePrefs = getSharedPreferences(PREFS_CHART_STATE, MODE_PRIVATE);
         String savedInterval = statePrefs.getString(KEY_INTERVAL, null);
+
         if (savedInterval!= null &&!savedInterval.isEmpty()) {
             currentInterval = savedInterval;
         } else {
             currentInterval = getDefaultInterval();
         }
 
-        // Setup UI components
         setupTimeframeChips();
         setupChartListener();
-
-        // Load defaults from child layouts and dimens.xml
         loadDefaultsFromLayoutAndApply();
 
-        // Load chart
         if (marketChartView!= null) {
             marketChartView.loadChart(currentSymbol, currentInterval);
         }
 
         loadFiatRate();
 
-        // Initialize ViewModel for wallet balance
         balanceViewModel = new ViewModelProvider(
                 this,
                 new ViewModelProvider.AndroidViewModelFactory(application)
         ).get(WalletBalanceViewModel.class);
 
-        // Observe balance changes
         balanceViewModel.getBalance().observe(this, balance -> {
             currentBalance = balance;
             updateBalanceDisplay();
         });
 
-        // Observe exchange rate changes
         balanceViewModel.getExchangeRate().observe(this, exchangeRate -> {
             currentExchangeRate = exchangeRate;
             updateBalanceDisplay();
         });
 
-        // Observe blockchain sync state
         application.blockchainState.observe(this, blockchainState -> {
             if (blockchainState!= null) {
                 isBlockchainSynced =!blockchainState.replaying;
@@ -632,7 +620,6 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
             }
         });
 
-        // Set initial balance text
         if (textWalletBalance!= null) {
             textWalletBalance.setText(getString(R.string.balance_loading_wallet));
         }
@@ -667,6 +654,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         super.onDestroy();
         lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY);
         viewModelStore.clear();
+
         if (prefs!= null && prefsListener!= null) {
             prefs.unregisterOnSharedPreferenceChangeListener(prefsListener);
         }
@@ -694,16 +682,17 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
             double btcBalance = currentBalance.toBtc().doubleValue();
             String btcStr = String.format(Locale.US, "%.8f", btcBalance);
 
-            // Use live chart price if available
             if (currentMarketPriceFiat > 0) {
                 double fiatVal = btcBalance * currentMarketPriceFiat;
                 String symbol = getCurrencySymbol(currentFiatCode);
+
                 textWalletBalance.setText(
                         String.format(Locale.US, "%s BTC ≈ %s%,.2f", btcStr, symbol, fiatVal)
                 );
             } else {
                 boolean showLocal = getResources().getBoolean(R.bool.show_local_balance)
                         && config.isEnableExchangeRates();
+
                 if (showLocal && currentExchangeRate!= null) {
                     Fiat fiatValue = currentExchangeRate.exchangeRate().coinToFiat(currentBalance);
                     String fiatStr = fiatValue.toFriendlyString();
@@ -712,6 +701,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
                     textWalletBalance.setText(String.format("%s BTC", btcStr));
                 }
             }
+
             textWalletBalance.invalidate();
         } catch (Exception e) {
             e.printStackTrace();
@@ -720,7 +710,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
     }
 
     // ------------------------------------------------------------------------
-    // Chart Settings Popup (XML-based)
+    // Chart Settings Popup
     // ------------------------------------------------------------------------
     private void showChartSettingsPopup() {
         if (marketChartView == null) {
@@ -729,10 +719,8 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
 
         final ChartSettingsState state = new ChartSettingsState();
 
-        // Load color palette
         state.candlePalette = loadPaletteFromColorsXml();
 
-        // Current candle colors
         state.curBull[0] = marketChartView.getBullishColor();
         state.curBear[0] = marketChartView.getBearishColor();
 
@@ -742,6 +730,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
                 break;
             }
         }
+
         for (int i = 0; i < state.candlePalette.length; i++) {
             if (state.candlePalette[i] == state.curBear[0]) {
                 state.bearIdx[0] = i;
@@ -749,7 +738,6 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
             }
         }
 
-        // Other current settings
         state.curWick[0] = marketChartView.getWickWidthPx() > 0? marketChartView.getWickWidthPx() : 2f;
         state.curMaW[0] = marketChartView.getMaLineWidthPx() > 0? marketChartView.getMaLineWidthPx() : 2f;
         state.curTxtSize[0] = marketChartView.getPriceTextSizePx() > 0? marketChartView.getPriceTextSizePx() : 18f;
@@ -757,32 +745,36 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         state.curLabelSize[0] = marketChartView.getLastPriceLabelTextSizePx() > 0
                ? marketChartView.getLastPriceLabelTextSizePx()
                 : 19f;
+
         state.curLastColor[0] = marketChartView.getLastPriceLineColor();
         state.curGridColor[0] = marketChartView.getGridColor()!= -1
                ? marketChartView.getGridColor()
                 : getResources().getColor(R.color.chart_grid, getTheme());
+
         state.curPriceTxtColor[0] = marketChartView.getPriceTextColor()!= -1
                ? marketChartView.getPriceTextColor()
                 : getThemeColor(android.R.attr.textColorSecondary);
+
         state.curLabelBg[0] = marketChartView.getLastPriceBgColor()!= -1
                ? marketChartView.getLastPriceBgColor()
                 : getResources().getColor(R.color.chart_last_price_line, getTheme());
+
         state.curLabelTextColorFinal[0] = marketChartView.getLastPriceLabelTextColor()!= -1
                ? marketChartView.getLastPriceLabelTextColor()
                 : ContextCompat.getColor(this, R.color.last_label_text);
+
         state.finalTxtSize[0] = state.curTxtSize[0];
         state.finalLabelSize[0] = state.curLabelSize[0];
 
-        // Copy current MA lines
         state.tempList = new ArrayList<>();
         List<MarketChartView.MaLine> origLines = marketChartView.getMaLines();
         for (MarketChartView.MaLine o : origLines) {
             state.tempList.add(new MarketChartView.MaLine(o.period, o.color));
         }
 
-        // Create dialog
         final Dialog dialog = new Dialog(this);
         dialog.requestWindowFeature(android.view.Window.FEATURE_NO_TITLE);
+
         View content = getLayoutInflater().inflate(R.layout.chart_settings_popup, null);
         dialog.setContentView(content);
 
@@ -794,13 +786,10 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
             dialog.getWindow().setGravity(Gravity.CENTER);
         }
 
-        // --------------------------------------------------------------------
-        // 1. CANDLE SETTINGS
-        // --------------------------------------------------------------------
+        // 1. Candle settings
         View headerCandle = content.findViewById(R.id.headerCandle);
         TextView arrowCandle = content.findViewById(R.id.arrowCandle);
         View containerCandle = content.findViewById(R.id.containerCandle);
-
         View viewBull = content.findViewById(R.id.viewBull);
         View viewBear = content.findViewById(R.id.viewBear);
 
@@ -830,6 +819,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
             if (arrowCandle!= null) {
                 arrowCandle.setText(getString(R.string.arrow_collapsed));
             }
+
             headerCandle.setOnClickListener(v -> {
                 candleExpanded[0] =!candleExpanded[0];
                 containerCandle.setVisibility(candleExpanded[0]? View.VISIBLE : View.GONE);
@@ -841,13 +831,10 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
             });
         }
 
-        // --------------------------------------------------------------------
-        // 2. MA SETTINGS
-        // --------------------------------------------------------------------
+        // 2. MA settings
         View headerMa = content.findViewById(R.id.headerMa);
         TextView arrowMa = content.findViewById(R.id.arrowMa);
         View containerMa = content.findViewById(R.id.containerMa);
-
         RecyclerView recycler = content.findViewById(R.id.recycler_ma_popup);
         View btnAddMa = content.findViewById(R.id.btn_add_ma);
 
@@ -862,11 +849,9 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         if (btnAddMa!= null) {
             btnAddMa.setOnClickListener(v -> {
                 if (state.tempList.size() >= 6) {
-                    Toast.makeText(
-                            v.getContext(),
+                    Toast.makeText(v.getContext(),
                             getString(R.string.max_ma_reached),
-                            Toast.LENGTH_SHORT
-                    ).show();
+                            Toast.LENGTH_SHORT).show();
                     return;
                 }
                 int[] colors = state.candlePalette;
@@ -884,6 +869,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
             if (arrowMa!= null) {
                 arrowMa.setText(getString(R.string.arrow_collapsed));
             }
+
             headerMa.setOnClickListener(v -> {
                 maExpanded[0] =!maExpanded[0];
                 containerMa.setVisibility(maExpanded[0]? View.VISIBLE : View.GONE);
@@ -895,9 +881,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
             });
         }
 
-        // --------------------------------------------------------------------
-        // 3. CHART OPTIONS
-        // --------------------------------------------------------------------
+        // 3. Chart options
         View headerOptions = content.findViewById(R.id.headerOptions);
         TextView arrowOptions = content.findViewById(R.id.arrowOptions);
         View containerOptions = content.findViewById(R.id.containerOptions);
@@ -914,9 +898,9 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         TextView lbMaW = content.findViewById(R.id.lbMaW);
         TextView lbVis = content.findViewById(R.id.lbVis);
 
-        // Sync min/max from integers.xml for popup too
         int minVisPopup = getResources().getInteger(R.integer.min_visible_candle_count);
         int maxVisPopup = getResources().getInteger(R.integer.max_visible_candle_count);
+
         if (state.sbVis!= null) {
             state.sbVis.setMax(maxVisPopup);
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
@@ -925,56 +909,58 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         }
 
         if (state.sbBody!= null) {
-            state.sbBody.setProgress((int) ((marketChartView.getBodyWidthFraction() - 0.3f) * 100));
+            state.sbBody.setProgress((int) ((marketChartView.getBodyWidthFraction() - BODY_BASE_FRACTION) * 100));
         }
+
         if (state.sbWick!= null) {
             state.sbWick.setProgress((int) marketChartView.getWickWidthPx());
         }
+
         if (state.sbMaW!= null) {
             state.sbMaW.setProgress((int) marketChartView.getMaLineWidthPx());
         }
+
         if (state.sbVis!= null) {
             state.sbVis.setProgress(marketChartView.getVisibleCandleCountValue());
         }
+
         if (state.swGrid!= null) {
             state.swGrid.setChecked(marketChartView.isShowGrid());
         }
+
         if (state.swVol!= null) {
             state.swVol.setChecked(marketChartView.isShowVolume());
         }
 
         if (lbBody!= null && state.sbBody!= null) {
-            float fraction = 0.3f + state.sbBody.getProgress() / 100f;
-            lbBody.setText(getString(
-                    R.string.chart_body_width,
-                    String.format(Locale.US, "%.2f", fraction)
-            ));
+            float fraction = BODY_BASE_FRACTION + state.sbBody.getProgress() / 100f;
+            lbBody.setText(getString(R.string.chart_body_width,
+                    String.format(Locale.US, "%.2f", fraction)));
         }
+
         if (lbWick!= null && state.sbWick!= null) {
-            int p = state.sbWick.getProgress();
-            if (p < 1) p = 1;
+            int p = Math.max(1, state.sbWick.getProgress());
             lbWick.setText(getString(R.string.chart_wick_width, p));
         }
+
         if (lbMaW!= null && state.sbMaW!= null) {
-            int p = state.sbMaW.getProgress();
-            if (p < 1) p = 1;
+            int p = Math.max(1, state.sbMaW.getProgress());
             lbMaW.setText(getString(R.string.chart_ma_line_width, p));
         }
+
         if (lbVis!= null && state.sbVis!= null) {
-            int count = state.sbVis.getProgress();
-            lbVis.setText(getString(R.string.chart_visible_candles, count));
+            lbVis.setText(getString(R.string.chart_visible_candles, state.sbVis.getProgress()));
         }
 
         if (state.sbBody!= null && lbBody!= null) {
             state.sbBody.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
                 @Override
                 public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                    float fraction = 0.3f + progress / 100f;
-                    lbBody.setText(getString(
-                            R.string.chart_body_width,
-                            String.format(Locale.US, "%.2f", fraction)
-                    ));
+                    float fraction = BODY_BASE_FRACTION + progress / 100f;
+                    lbBody.setText(getString(R.string.chart_body_width,
+                            String.format(Locale.US, "%.2f", fraction)));
                 }
+
                 @Override public void onStartTrackingTouch(SeekBar seekBar) {}
                 @Override public void onStopTrackingTouch(SeekBar seekBar) {}
             });
@@ -984,9 +970,9 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
             state.sbWick.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
                 @Override
                 public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                    if (progress < 1) progress = 1;
-                    lbWick.setText(getString(R.string.chart_wick_width, progress));
+                    lbWick.setText(getString(R.string.chart_wick_width, Math.max(1, progress)));
                 }
+
                 @Override public void onStartTrackingTouch(SeekBar seekBar) {}
                 @Override public void onStopTrackingTouch(SeekBar seekBar) {}
             });
@@ -996,9 +982,9 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
             state.sbMaW.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
                 @Override
                 public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                    if (progress < 1) progress = 1;
-                    lbMaW.setText(getString(R.string.chart_ma_line_width, progress));
+                    lbMaW.setText(getString(R.string.chart_ma_line_width, Math.max(1, progress)));
                 }
+
                 @Override public void onStartTrackingTouch(SeekBar seekBar) {}
                 @Override public void onStopTrackingTouch(SeekBar seekBar) {}
             });
@@ -1010,6 +996,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
                 public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                     lbVis.setText(getString(R.string.chart_visible_candles, progress));
                 }
+
                 @Override public void onStartTrackingTouch(SeekBar seekBar) {}
                 @Override public void onStopTrackingTouch(SeekBar seekBar) {}
             });
@@ -1021,6 +1008,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
             if (arrowOptions!= null) {
                 arrowOptions.setText(getString(R.string.arrow_collapsed));
             }
+
             headerOptions.setOnClickListener(v -> {
                 optionsExpanded[0] =!optionsExpanded[0];
                 containerOptions.setVisibility(optionsExpanded[0]? View.VISIBLE : View.GONE);
@@ -1032,9 +1020,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
             });
         }
 
-        // --------------------------------------------------------------------
-        // 4. LAST PRICE LINE
-        // --------------------------------------------------------------------
+        // 4. Last price line
         View headerLastPrice = content.findViewById(R.id.headerLastPrice);
         TextView arrowLastPrice = content.findViewById(R.id.arrowLastPrice);
         View containerLastPrice = content.findViewById(R.id.containerLastPrice);
@@ -1051,12 +1037,15 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         if (state.swLast!= null) {
             state.swLast.setChecked(marketChartView.isShowLastPriceLine());
         }
+
         if (state.sbTxtSize!= null) {
             state.sbTxtSize.setProgress((int) marketChartView.getPriceTextSizePx());
         }
+
         if (state.sbLastW!= null) {
             state.sbLastW.setProgress((int) marketChartView.getLastLineWidthPx());
         }
+
         if (state.swDash!= null) {
             state.swDash.setChecked(marketChartView.isLastLineDashed());
         }
@@ -1065,24 +1054,24 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         TextView lbLastW = content.findViewById(R.id.lbLastW);
 
         if (lbTxtSize!= null && state.sbTxtSize!= null) {
-            int p = state.sbTxtSize.getProgress();
-            if (p < 8) p = 8;
-            lbTxtSize.setText(getString(R.string.chart_price_text_size, p));
+            lbTxtSize.setText(getString(R.string.chart_price_text_size,
+                    Math.max(8, state.sbTxtSize.getProgress())));
         }
+
         if (lbLastW!= null && state.sbLastW!= null) {
-            int p = state.sbLastW.getProgress();
-            if (p < 1) p = 1;
-            lbLastW.setText(getString(R.string.chart_last_line_width, p));
+            lbLastW.setText(getString(R.string.chart_last_line_width,
+                    Math.max(1, state.sbLastW.getProgress())));
         }
 
         if (state.sbTxtSize!= null && lbTxtSize!= null) {
             state.sbTxtSize.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
                 @Override
                 public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                    if (progress < 8) progress = 8;
-                    state.finalTxtSize[0] = progress;
-                    lbTxtSize.setText(getString(R.string.chart_price_text_size, progress));
+                    int p = Math.max(8, progress);
+                    state.finalTxtSize[0] = p;
+                    lbTxtSize.setText(getString(R.string.chart_price_text_size, p));
                 }
+
                 @Override public void onStartTrackingTouch(SeekBar seekBar) {}
                 @Override public void onStopTrackingTouch(SeekBar seekBar) {}
             });
@@ -1092,10 +1081,11 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
             state.sbLastW.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
                 @Override
                 public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                    if (progress < 1) progress = 1;
-                    state.curLastW[0] = progress;
-                    lbLastW.setText(getString(R.string.chart_last_line_width, progress));
+                    int p = Math.max(1, progress);
+                    state.curLastW[0] = p;
+                    lbLastW.setText(getString(R.string.chart_last_line_width, p));
                 }
+
                 @Override public void onStartTrackingTouch(SeekBar seekBar) {}
                 @Override public void onStopTrackingTouch(SeekBar seekBar) {}
             });
@@ -1155,6 +1145,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
             if (arrowLastPrice!= null) {
                 arrowLastPrice.setText(getString(R.string.arrow_collapsed));
             }
+
             headerLastPrice.setOnClickListener(v -> {
                 lastPriceExpanded[0] =!lastPriceExpanded[0];
                 containerLastPrice.setVisibility(lastPriceExpanded[0]? View.VISIBLE : View.GONE);
@@ -1166,9 +1157,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
             });
         }
 
-        // --------------------------------------------------------------------
-        // 5. CURRENT PRICE LABEL
-        // --------------------------------------------------------------------
+        // 5. Current price label
         View headerLabel = content.findViewById(R.id.headerLabel);
         TextView arrowLabel = content.findViewById(R.id.arrowLabel);
         View containerLabel = content.findViewById(R.id.containerLabel);
@@ -1184,19 +1173,19 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         TextView lbLabelSize = content.findViewById(R.id.lbLabelSize);
 
         if (lbLabelSize!= null && state.sbLabelSize!= null) {
-            int p = state.sbLabelSize.getProgress();
-            if (p < 8) p = 8;
-            lbLabelSize.setText(getString(R.string.chart_last_price_label_text_size, p));
+            lbLabelSize.setText(getString(R.string.chart_last_price_label_text_size,
+                    Math.max(8, state.sbLabelSize.getProgress())));
         }
 
         if (state.sbLabelSize!= null && lbLabelSize!= null) {
             state.sbLabelSize.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
                 @Override
                 public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                    if (progress < 8) progress = 8;
-                    state.finalLabelSize[0] = progress;
-                    lbLabelSize.setText(getString(R.string.chart_last_price_label_text_size, progress));
+                    int p = Math.max(8, progress);
+                    state.finalLabelSize[0] = p;
+                    lbLabelSize.setText(getString(R.string.chart_last_price_label_text_size, p));
                 }
+
                 @Override public void onStartTrackingTouch(SeekBar seekBar) {}
                 @Override public void onStopTrackingTouch(SeekBar seekBar) {}
             });
@@ -1240,6 +1229,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
             if (arrowLabel!= null) {
                 arrowLabel.setText(getString(R.string.arrow_collapsed));
             }
+
             headerLabel.setOnClickListener(v -> {
                 labelExpanded[0] =!labelExpanded[0];
                 containerLabel.setVisibility(labelExpanded[0]? View.VISIBLE : View.GONE);
@@ -1251,9 +1241,6 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
             });
         }
 
-        // --------------------------------------------------------------------
-        // 6. APPLY AND RESET BUTTONS
-        // --------------------------------------------------------------------
         Button btnApply = content.findViewById(R.id.btnApply);
         Button btnReset = content.findViewById(R.id.btnReset);
 
@@ -1279,13 +1266,16 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
 
             if (state.recycler!= null) {
                 state.recycler.clearFocus();
+
                 for (int i = 0; i < state.recycler.getChildCount(); i++) {
                     RecyclerView.ViewHolder vh = state.recycler.getChildViewHolder(
                             state.recycler.getChildAt(i)
                     );
+
                     if (vh instanceof MaPopupAdapter.Holder) {
                         MaPopupAdapter.Holder h = (MaPopupAdapter.Holder) vh;
                         int pos = h.getAdapterPosition();
+
                         if (pos >= 0 && pos < state.tempList.size()) {
                             String txt = h.et.getText().toString().trim();
                             if (!txt.isEmpty()) {
@@ -1298,6 +1288,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
                     }
                 }
             }
+
             for (int i = 0; i < state.tempList.size(); i++) {
                 if (state.tempList.get(i).period <= 0) {
                     state.tempList.get(i).period = 20;
@@ -1307,11 +1298,9 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
             // Ignore parse errors
         }
 
-        float bodyFraction = 0.3f + state.sbBody.getProgress() / 100f;
-        float wickW = state.sbWick.getProgress();
-        if (wickW < 1) wickW = 1;
-        float maW = state.sbMaW.getProgress();
-        if (maW < 1) maW = 1;
+        float bodyFraction = BODY_BASE_FRACTION + state.sbBody.getProgress() / 100f;
+        float wickW = Math.max(1, state.sbWick.getProgress());
+        float maW = Math.max(1, state.sbMaW.getProgress());
         int visCount = state.sbVis.getProgress();
         boolean showG = state.swGrid.isChecked();
         boolean showV = state.swVol.isChecked();
@@ -1321,6 +1310,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         marketChartView.setChartOptions(bodyFraction, wickW, maW, showG, showV, visCount);
 
         int bgColorForApply = getThemeColor(android.R.attr.colorBackground);
+
         marketChartView.setChartAppearance(
                 showLast,
                 state.curLastColor[0],
@@ -1332,11 +1322,13 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
                 state.curLastW[0],
                 state.swDash.isChecked()
         );
+
         marketChartView.setLastPriceLabelAppearance(
                 state.curLabelBg[0],
                 state.curLabelTextColorFinal[0],
                 state.finalLabelSize[0]
         );
+
         marketChartView.setMaLines(state.tempList);
 
         dialog.dismiss();
@@ -1426,6 +1418,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
                 if (colors == null || colors.length == 0) {
                     return;
                 }
+
                 int idx = 0;
                 for (int i = 0; i < colors.length; i++) {
                     if (colors[i] == line.color) {
@@ -1433,8 +1426,10 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
                         break;
                     }
                 }
+
                 int next = colors[(idx + 1) % colors.length];
                 line.color = next;
+
                 GradientDrawable ngd = new GradientDrawable();
                 ngd.setCornerRadius(0f);
                 ngd.setColor(next);
@@ -1463,18 +1458,23 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         new Thread(() -> {
             double fiatPerBtc = getFiatPerBtc(currentFiatCode);
             double basePerBtc = getFiatPerBtc("USD");
+
             if (fiatPerBtc == 0d || basePerBtc == 0d) {
                 return;
             }
+
             double usdToFiat = fiatPerBtc / basePerBtc;
+
             mainHandler.post(() -> {
                 if (textFiat!= null) {
                     textFiat.setText(currentFiatCode);
                 }
+
                 if (marketChartView!= null) {
                     marketChartView.setFiatCode(currentFiatCode);
                     marketChartView.setFiatMultiplier((float) usdToFiat);
                 }
+
                 updateBalanceDisplay();
             });
         }).start();
@@ -1485,29 +1485,34 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         if (entry == null) {
             return 0d;
         }
+
         try {
             long rateFiat = entry.getRateFiat();
             long rateCoin = entry.getRateCoin();
+
             if (rateCoin == 0) {
                 return 0d;
             }
+
             int fractionDigits;
+
             try {
                 Currency currency = Currency.getInstance(fiatCode);
                 fractionDigits = currency.getDefaultFractionDigits();
-                if (fractionDigits < 0) {
-                    fractionDigits = 2;
-                } else if (fractionDigits == 0) {
+                if (fractionDigits < 0 || fractionDigits == 0) {
                     fractionDigits = 2;
                 }
             } catch (Exception e) {
                 fractionDigits = 2;
             }
+
             double fiatMajor = rateFiat / Math.pow(10, fractionDigits);
             double coinMajor = (double) rateCoin / Coin.COIN.value;
+
             if (coinMajor == 0d) {
                 return 0d;
             }
+
             return fiatMajor / coinMajor;
         } catch (Exception e) {
             return 0d;
@@ -1519,26 +1524,28 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
     // ------------------------------------------------------------------------
     private String getCurrencySymbol(String fiatCode) {
         try {
-            // Try from arrays.xml first
             String[] codes = getResources().getStringArray(R.array.fiat_codes);
             String[] symbols = getResources().getStringArray(R.array.fiat_symbols);
 
             int len = Math.min(codes.length, symbols.length);
+
             for (int i = 0; i < len; i++) {
                 if (codes[i].equalsIgnoreCase(fiatCode)) {
                     return symbols[i];
                 }
             }
 
-            // Fallback to system currency
             Currency currency = Currency.getInstance(fiatCode);
             String sym = currency.getSymbol(Locale.US);
+
             if (sym.equals(fiatCode)) {
                 sym = currency.getSymbol();
             }
+
             if (sym.equals(fiatCode) || sym.length() > 6) {
                 return fiatCode + " ";
             }
+
             return sym;
         } catch (Exception e) {
             return fiatCode + " ";
@@ -1551,6 +1558,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
     private int getThemeColor(int attr) {
         TypedValue tv = new TypedValue();
         getTheme().resolveAttribute(attr, tv, true);
+
         if (tv.type >= TypedValue.TYPE_FIRST_COLOR_INT
                 && tv.type <= TypedValue.TYPE_LAST_COLOR_INT) {
             return tv.data;
@@ -1570,6 +1578,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         if (interval == null) {
             return R.string.more;
         }
+
         switch (interval) {
             case "1m": return R.string.interval_1m;
             case "3m": return R.string.interval_3m;
@@ -1591,13 +1600,14 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
     }
 
     // ------------------------------------------------------------------------
-    // Interval selection dialog
+    // Interval selection dialog - from arrays.xml
     // ------------------------------------------------------------------------
     private void showMoreIntervalsDialog() {
         LinearLayout root = new LinearLayout(this);
         root.setOrientation(LinearLayout.VERTICAL);
         root.setBackgroundColor(getResources().getColor(R.color.chart_bg, getTheme()));
-        int pad = (int) (16 * getResources().getDisplayMetrics().density);
+
+        int pad = (int) getResources().getDimension(R.dimen.default_popup_padding);
         root.setPadding(pad, pad, pad, pad);
 
         TextView title = new TextView(this);
@@ -1605,6 +1615,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         title.setTextSize(18f);
         title.setTypeface(null, Typeface.BOLD);
         title.setTextColor(getThemeColor(android.R.attr.textColorPrimary));
+
         LinearLayout.LayoutParams titleLp = new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.WRAP_CONTENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT
@@ -1618,23 +1629,19 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         grid.setUseDefaultMargins(false);
 
         android.content.res.Resources res = getResources();
-        String[] realLoad = {"", "1m", "3m", "5m", "15m", "30m", "1h", "2h", "4h", "6h", "12h", "1d", "1w", "1M"};
-        int[] intervalLabels = {
-                R.string.time,
-                R.string.interval_1m,
-                R.string.interval_3m,
-                R.string.interval_5m,
-                R.string.interval_15m,
-                R.string.interval_30m,
-                R.string.interval_1h,
-                R.string.interval_2h,
-                R.string.interval_4h,
-                R.string.interval_6h,
-                R.string.interval_12h,
-                R.string.interval_1d,
-                R.string.interval_1w,
-                R.string.interval_1M
-        };
+
+        // Load intervals from arrays.xml
+        String[] intervals = res.getStringArray(R.array.interval_values);
+        String[] realLoad = new String[intervals.length + 1];
+        int[] intervalLabels = new int[intervals.length + 1];
+
+        realLoad[0] = "";
+        intervalLabels[0] = R.string.time;
+
+        for (int i = 0; i < intervals.length; i++) {
+            realLoad[i + 1] = intervals[i];
+            intervalLabels[i + 1] = getLabelResForInterval(intervals[i]);
+        }
 
         final AlertDialog dialog = new AlertDialog.Builder(this)
                .setView(root)
@@ -1647,29 +1654,27 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
             tv.setTextSize(13f);
             tv.setGravity(Gravity.CENTER);
             tv.setSingleLine(true);
-            int vPad = (int) (14 * res.getDisplayMetrics().density);
+
+            int vPad = (int) getResources().getDimension(R.dimen.default_price_text_margin);
             tv.setPadding(0, vPad, 0, vPad);
 
             boolean isSelected = realLoad[i].equalsIgnoreCase(currentInterval);
-            if (realLoad[i].equals("1m") && currentInterval.equals("1m")) isSelected = true;
-            if (realLoad[i].equals("1M") && currentInterval.equals("1M")) isSelected = true;
-            if (!realLoad[i].equals("1m") &&!realLoad[i].equals("1M")) {
-                isSelected = realLoad[i].equalsIgnoreCase(currentInterval);
-            }
 
             GradientDrawable bg = new GradientDrawable();
             bg.setCornerRadius(0f);
-            if (isSelected) {
+
+            if (isSelected &&!realLoad[i].isEmpty()) {
                 bg.setColor(res.getColor(android.R.color.white, null));
                 tv.setTextColor(res.getColor(android.R.color.black, null));
             } else {
                 bg.setColor(getResources().getColor(R.color.chart_bg, getTheme()));
                 bg.setStroke(
-                        (int) (1 * res.getDisplayMetrics().density),
+                        (int) getResources().getDimension(R.dimen.default_grid_width),
                         res.getColor(R.color.chart_grid, null)
                 );
                 tv.setTextColor(getThemeColor(android.R.attr.textColorSecondary));
             }
+
             tv.setBackground(bg);
 
             GridLayout.LayoutParams lp = new GridLayout.LayoutParams();
@@ -1680,21 +1685,28 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
             tv.setLayoutParams(lp);
 
             final String load = realLoad[i];
+
             tv.setOnClickListener(v -> {
                 if (load.isEmpty()) return;
+
                 currentInterval = load;
+
                 getSharedPreferences(PREFS_CHART_STATE, MODE_PRIVATE)
                        .edit()
                        .putString(KEY_INTERVAL, currentInterval)
                        .apply();
+
                 if (marketChartView!= null) {
                     marketChartView.loadChart(currentSymbol, currentInterval);
                 }
+
                 setupTimeframeChips();
                 dialog.dismiss();
             });
+
             grid.addView(tv);
         }
+
         root.addView(grid);
         dialog.show();
     }
@@ -1709,13 +1721,6 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         chipGroupTimeframe.removeAllViews();
 
         String[] outerValues = {"15m", "1h", "4h", "1d", "1M"};
-        int[] outerLabels = {
-                R.string.interval_15m,
-                R.string.interval_1h,
-                R.string.interval_4h,
-                R.string.interval_1d,
-                R.string.interval_1M
-        };
 
         boolean isOuter = false;
         for (String v : outerValues) {
@@ -1726,8 +1731,8 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
             }
         }
 
-        int padH = (int) (12 * res.getDisplayMetrics().density);
-        int padV = (int) (8 * res.getDisplayMetrics().density);
+        int padH = (int) getResources().getDimension(R.dimen.default_price_text_margin);
+        int padV = (int) getResources().getDimension(R.dimen.default_time_text_offset);
 
         TextView tvTime = new TextView(this);
         tvTime.setText(R.string.time);
@@ -1736,6 +1741,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         tvTime.setPadding(padH, padV, padH, padV);
         tvTime.setTextColor(getThemeColor(android.R.attr.textColorSecondary));
         tvTime.setBackgroundColor(res.getColor(android.R.color.transparent, null));
+
         LinearLayout.LayoutParams lpTime = new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.WRAP_CONTENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT
@@ -1745,18 +1751,17 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         tvTime.setOnClickListener(v -> showMoreIntervalsDialog());
         chipGroupTimeframe.addView(tvTime);
 
-        for (int idx = 0; idx < outerValues.length; idx++) {
-            String realInterval = outerValues[idx];
-            int resId = outerLabels[idx];
+        for (String realInterval : outerValues) {
             TextView tv = new TextView(this);
-            tv.setText(resId);
+            tv.setText(getLabelResForInterval(realInterval));
             tv.setTextSize(13f);
             tv.setSingleLine(true);
             tv.setPadding(padH, padV, padH, padV);
 
             boolean isSelected = realInterval.equalsIgnoreCase(currentInterval);
-            if (realInterval.equals("1M") && currentInterval.equals("1m")) isSelected = false;
-            if (realInterval.equalsIgnoreCase("1d") && currentInterval.equalsIgnoreCase("1d")) isSelected = true;
+            if (realInterval.equals("1M") && currentInterval.equals("1m")) {
+                isSelected = false;
+            }
 
             if (isSelected) {
                 tv.setTextColor(getThemeColor(android.R.attr.colorBackground));
@@ -1774,17 +1779,22 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
             tv.setLayoutParams(lp);
 
             final String load = realInterval;
+
             tv.setOnClickListener(v -> {
                 currentInterval = load;
+
                 getSharedPreferences(PREFS_CHART_STATE, MODE_PRIVATE)
                        .edit()
                        .putString(KEY_INTERVAL, currentInterval)
                        .apply();
+
                 if (marketChartView!= null) {
                     marketChartView.loadChart(currentSymbol, currentInterval);
                 }
+
                 setupTimeframeChips();
             });
+
             chipGroupTimeframe.addView(tv);
         }
 
@@ -1792,6 +1802,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         tvMore.setTextSize(13f);
         tvMore.setSingleLine(true);
         tvMore.setPadding(padH, padV, padH, padV);
+
         LinearLayout.LayoutParams lpMore = new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.WRAP_CONTENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT
@@ -1804,11 +1815,11 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
             tvMore.setTextColor(getThemeColor(android.R.attr.textColorSecondary));
             tvMore.setBackgroundColor(res.getColor(android.R.color.transparent, null));
         } else {
-            int labelRes = getLabelResForInterval(currentInterval);
-            tvMore.setText(labelRes);
+            tvMore.setText(getLabelResForInterval(currentInterval));
             tvMore.setTextColor(getThemeColor(android.R.attr.colorBackground));
             tvMore.setBackgroundResource(R.drawable.bg_time_selected);
         }
+
         tvMore.setOnClickListener(v -> showMoreIntervalsDialog());
         chipGroupTimeframe.addView(tvMore);
     }
@@ -1823,19 +1834,26 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
 
         marketChartView.setOnVolumeClickListener(candle -> runOnUiThread(() -> {
             if (popupCandleDetail == null || candle == null) return;
+
             popupCandleDetail.setVisibility(View.VISIBLE);
+
             GradientDrawable bg = new GradientDrawable();
             bg.setColor(getResources().getColor(R.color.chart_bg, getTheme()));
             bg.setCornerRadius(0f);
             bg.setStroke(
-                    (int) (1 * res.getDisplayMetrics().density),
+                    (int) getResources().getDimension(R.dimen.default_grid_width),
                     res.getColor(R.color.chart_grid, null)
             );
+
             popupCandleDetail.setBackground(bg);
-            popupCandleDetail.setElevation(8f * res.getDisplayMetrics().density);
+            popupCandleDetail.setElevation(
+                    getResources().getDimension(R.dimen.default_popup_padding)
+            );
+
             if (popupTime!= null) {
                 popupTime.setText(fullTimeFormat.format(new Date(candle.openTime)));
             }
+
             if (popupVolume!= null) {
                 popupVolume.setText(getString(
                         R.string.chart_volume_label,
@@ -1845,18 +1863,22 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         }));
 
         marketChartView.setOnChartUpdateListener(new MarketChartView.OnChartUpdateListener() {
+
             @Override
             public void onPriceUpdate(final float price, float high24h, float low24h) {
                 runOnUiThread(() -> new Thread(() -> {
                     double fiatPerBtc = getFiatPerBtc(currentFiatCode);
                     double basePerBtc = getFiatPerBtc("USD");
+
                     if (fiatPerBtc == 0d || basePerBtc == 0d) {
                         final double priceInFiat = price;
                         mainHandler.post(() -> updatePriceDisplay(priceInFiat));
                         return;
                     }
+
                     double usdToFiat = fiatPerBtc / basePerBtc;
                     final double priceInFiat = price * usdToFiat;
+
                     mainHandler.post(() -> {
                         updatePriceDisplay(priceInFiat);
                         currentMarketPriceFiat = (float) priceInFiat;
@@ -1868,10 +1890,13 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
             private void updatePriceDisplay(double priceInFiat) {
                 if (textCurrentPrice!= null) {
                     String symbol = getCurrencySymbol(currentFiatCode);
+
                     textCurrentPrice.setText(
                             String.format(Locale.US, "%s%,.2f", symbol, priceInFiat)
                     );
+
                     int color;
+
                     if (lastDisplayPrice == 0f) {
                         color = getThemeColor(android.R.attr.textColorPrimary);
                     } else if (priceInFiat > lastDisplayPrice) {
@@ -1881,6 +1906,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
                     } else {
                         color = res.getColor(R.color.chart_last_price_line, null);
                     }
+
                     textCurrentPrice.setTextColor(color);
                     lastDisplayPrice = (float) priceInFiat;
                 }
@@ -1892,6 +1918,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
                                        final float volBtc,
                                        final float volUsdt,
                                        final float changePercent) {
+
                 runOnUiThread(() -> {
                     if (textChange24h!= null) {
                         textChange24h.setText(String.format(Locale.US, "%.2f%%", changePercent));
@@ -1900,16 +1927,20 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
                                 : res.getColor(R.color.palette_red, null);
                         textChange24h.setTextColor(c);
                     }
+
                     new Thread(() -> {
                         double fiatPerBtc = getFiatPerBtc(currentFiatCode);
                         double basePerBtc = getFiatPerBtc("USD");
+
                         if (fiatPerBtc == 0d || basePerBtc == 0d) return;
+
                         double usdToFiat = fiatPerBtc / basePerBtc;
                         final double highFiat = high24h * usdToFiat;
                         final double lowFiat = low24h * usdToFiat;
                         final double volFiat = volUsdt * usdToFiat;
 
                         String baseAsset = currentSymbol;
+
                         if (baseAsset.endsWith("USDT")) {
                             baseAsset = baseAsset.substring(0, baseAsset.length() - 4);
                         } else if (baseAsset.endsWith("BUSD")) {
@@ -1922,16 +1953,20 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
                                 R.string.chart_high_label,
                                 String.format(Locale.US, "%,.2f", highFiat)
                         );
+
                         final String lowStr = getString(
                                 R.string.chart_low_label,
                                 String.format(Locale.US, "%,.2f", lowFiat)
                         );
+
                         final String volBtcStr = getString(
                                 R.string.chart_vol_base_format,
                                 baseAsset,
                                 String.format(Locale.US, "%.2f", volBtc)
                         );
+
                         final String volFiatStr;
+
                         if (volFiat >= 1_000_000_000) {
                             volFiatStr = getString(
                                     R.string.chart_vol_quote_format,
@@ -1951,6 +1986,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
                                     String.format(Locale.US, "%.2f", volFiat)
                             );
                         }
+
                         mainHandler.post(() -> {
                             if (textHigh24h!= null) textHigh24h.setText(highStr);
                             if (textLow24h!= null) textLow24h.setText(lowStr);
@@ -1967,10 +2003,13 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
                     double fiatPerBtc = getFiatPerBtc(currentFiatCode);
                     double basePerBtc = getFiatPerBtc("USD");
                     double usdToFiat = 1d;
+
                     if (fiatPerBtc!= 0d && basePerBtc!= 0d) {
                         usdToFiat = fiatPerBtc / basePerBtc;
                     }
+
                     final double finalUsdToFiat = usdToFiat;
+
                     mainHandler.post(() -> {
                         if (textMaLabel!= null) {
                             if (maValues == null || maValues.isEmpty()) {
@@ -1978,20 +2017,26 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
                             } else {
                                 List<MarketChartView.MaLine> lines = marketChartView.getMaLines();
                                 SpannableStringBuilder sb = new SpannableStringBuilder();
+
                                 for (int i = 0; i < lines.size(); i++) {
                                     if (i >= maValues.size()) break;
+
                                     float value = maValues.get(i);
                                     if (value == 0f) continue;
+
                                     double fiatVal = value * finalUsdToFiat;
+
                                     String label = String.format(
                                             Locale.US,
                                             "MA%d: %,.2f",
                                             lines.get(i).period,
                                             fiatVal
                                     );
+
                                     if (sb.length() > 0) {
                                         sb.append(getString(R.string.bullet_separator));
                                     }
+
                                     int start = sb.length();
                                     sb.append(label);
                                     sb.setSpan(
@@ -2001,6 +2046,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
                                             Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
                                     );
                                 }
+
                                 textMaLabel.setText(sb);
                             }
                         }
@@ -2014,6 +2060,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
                     if (textCountdown!= null) {
                         textCountdown.setText(getString(R.string.chart_close_in, countdown));
                     }
+
                     if (marketChartView!= null) {
                         marketChartView.setCountdown(countdown);
                     }
@@ -2024,55 +2071,69 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
             public void onCandleSelected(final MarketChartView.Candle candle) {
                 runOnUiThread(() -> {
                     if (popupCandleDetail == null || candle == null) return;
+
                     new Thread(() -> {
                         double fiatPerBtc = getFiatPerBtc(currentFiatCode);
                         double basePerBtc = getFiatPerBtc("USD");
                         double usdToFiat = 1d;
+
                         if (fiatPerBtc!= 0d && basePerBtc!= 0d) {
                             usdToFiat = fiatPerBtc / basePerBtc;
                         }
+
                         final double openFiat = candle.open * usdToFiat;
                         final double highFiat = candle.high * usdToFiat;
                         final double lowFiat = candle.low * usdToFiat;
                         final double closeFiat = candle.close * usdToFiat;
+
                         mainHandler.post(() -> {
                             popupCandleDetail.setVisibility(View.VISIBLE);
+
                             GradientDrawable bg = new GradientDrawable();
                             bg.setColor(getResources().getColor(R.color.chart_bg, getTheme()));
                             bg.setCornerRadius(0f);
                             bg.setStroke(
-                                    (int) (1 * res.getDisplayMetrics().density),
+                                    (int) getResources().getDimension(R.dimen.default_grid_width),
                                     res.getColor(R.color.chart_grid, null)
                             );
+
                             popupCandleDetail.setBackground(bg);
-                            popupCandleDetail.setElevation(8f * res.getDisplayMetrics().density);
+                            popupCandleDetail.setElevation(
+                                    getResources().getDimension(R.dimen.default_popup_padding)
+                            );
+
                             if (popupTime!= null) {
                                 popupTime.setText(fullTimeFormat.format(new Date(candle.openTime)));
                             }
+
                             if (popupOpen!= null) {
                                 popupOpen.setText(getString(
                                         R.string.chart_open_label,
                                         String.format(Locale.US, "%,.2f", openFiat)
                                 ));
                             }
+
                             if (popupHigh!= null) {
                                 popupHigh.setText(getString(
                                         R.string.chart_high_detail,
                                         String.format(Locale.US, "%,.2f", highFiat)
                                 ));
                             }
+
                             if (popupLow!= null) {
                                 popupLow.setText(getString(
                                         R.string.chart_low_detail,
                                         String.format(Locale.US, "%,.2f", lowFiat)
                                 ));
                             }
+
                             if (popupClose!= null) {
                                 popupClose.setText(getString(
                                         R.string.chart_close_label,
                                         String.format(Locale.US, "%,.2f", closeFiat)
                                 ));
                             }
+
                             if (popupVolume!= null) {
                                 popupVolume.setText(getString(
                                         R.string.chart_volume_label,
