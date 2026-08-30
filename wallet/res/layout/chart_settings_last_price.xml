@@ -32,7 +32,8 @@
         <Switch
             android:id="@+id/swLast"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:checked="true" />
     </LinearLayout>
 
     <!-- Last Price Color -->
@@ -163,7 +164,8 @@
         <Switch
             android:id="@+id/swDash"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:checked="true" />
     </LinearLayout>
 
 </LinearLayout>
