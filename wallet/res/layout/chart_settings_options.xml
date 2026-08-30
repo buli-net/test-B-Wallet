@@ -98,7 +98,8 @@
         <Switch
             android:id="@+id/swGrid"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:checked="true" />
     </LinearLayout>
 
     <!-- Show Volume -->
@@ -119,7 +120,8 @@
         <Switch
             android:id="@+id/swVol"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:checked="true" />
     </LinearLayout>
 
     <!-- Visible Candles -->
