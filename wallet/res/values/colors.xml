@@ -57,6 +57,9 @@
     <color name="last_label_text">#ffeaeaf0</color>
     <color name="chart_last_price_line">@color/palette_orange</color>
 
+    <color name="chart_bull_default">#26A69A</color>
+    <color name="chart_bear_default">#EF5350</color>
+
     <!-- setting color maket-->
     <color name="palette_black">#FF000000</color>
     <color name="palette_white">#FFFFFFFF</color>
@@ -87,9 +90,4 @@
     <color name="palette_pink">#FFFFA0C0</color>
     <color name="palette_sky">#FF80C0FF</color>
 
-    <!-- defaults mới cho reset -->
-    <color name="chart_bull_default">#26A69A</color>
-    <color name="chart_bear_default">#EF5350</color>
-    
-    
 </resources>
