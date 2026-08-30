@@ -76,7 +76,7 @@
             android:id="@+id/sbLabelSize"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:max="30"
+            android:max="32"
             android:progress="19" />
     </LinearLayout>
 
