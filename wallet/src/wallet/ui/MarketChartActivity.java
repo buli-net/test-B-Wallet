@@ -1732,7 +1732,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         }
 
         int padH = (int) getResources().getDimension(R.dimen.default_price_text_margin);
-        int padV = (int) getResources().getDimension(R.dimen.default_time_text_offset);
+        int padV = (int) getResources().getDimension(R.dimen.time_text_offset);
 
         TextView tvTime = new TextView(this);
         tvTime.setText(R.string.time);
