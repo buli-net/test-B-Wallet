@@ -70,6 +70,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Label text size: 19px"
+            android:text="@string/chart_last_price_label_text_size"
+            
             android:textSize="12sp" />
 
         <SeekBar
