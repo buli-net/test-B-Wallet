@@ -4,7 +4,6 @@
     android:layout_height="wrap_content"
     android:orientation="vertical">
 
-    <!-- Header expandable - uses arrow_collapsed / arrow_expanded from strings.xml -->
     <LinearLayout
         android:id="@+id/headerSelected"
         android:layout_width="match_parent"
@@ -29,7 +28,6 @@
             android:textSize="14sp" />
     </LinearLayout>
 
-    <!-- Container -->
     <LinearLayout
         android:id="@+id/containerSelected"
         android:layout_width="match_parent"
@@ -38,13 +36,11 @@
         android:visibility="gone"
         android:padding="12dp">
 
-        <!-- Show selected line switch -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:gravity="center_vertical"
-            android:layout_marginBottom="8dp">
+            android:gravity="center_vertical">
 
             <TextView
                 android:layout_width="0dp"
@@ -58,13 +54,12 @@
                 android:layout_height="wrap_content" />
         </LinearLayout>
 
-        <!-- Selected color - NO bg_color_circle reference, background set by code -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:gravity="center_vertical"
-            android:layout_marginBottom="12dp">
+            android:layout_marginTop="8dp">
 
             <TextView
                 android:layout_width="0dp"
@@ -75,24 +70,21 @@
             <View
                 android:id="@+id/viewSelectedColor"
                 android:layout_width="32dp"
-                android:layout_height="32dp"
-                android:tag="@color/palette_blue" />
+                android:layout_height="32dp" />
         </LinearLayout>
 
-        <!-- Width -->
         <TextView
             android:id="@+id/lbSelectedWidth"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/chart_settings_width"
-            android:layout_marginBottom="4dp" />
+            android:layout_marginTop="12dp" />
 
         <SeekBar
             android:id="@+id/sbSelectedWidth"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:max="10"
-            android:progress="2" />
-
+            android:max="100"
+            android:progress="20" />
     </LinearLayout>
 </LinearLayout>
