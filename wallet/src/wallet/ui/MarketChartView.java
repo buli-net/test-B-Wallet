@@ -184,11 +184,6 @@ public class MarketChartView extends View {
     private int defLabelTextColor;
 
     // --------------------------------------------------------------------
-    // Preferences keys - FIX: no hardcoded text, use R.string
-    // --------------------------------------------------------------------
-    // NOTE: keys are loaded via getContext().getString(R.string.xxx) in methods, no literal here
-
-    // --------------------------------------------------------------------
     // Runtime state
     // --------------------------------------------------------------------
     private int visibleCandleCount;
@@ -461,10 +456,10 @@ public class MarketChartView extends View {
         try {
             SharedPreferences sp = getContext().getSharedPreferences(getContext().getString(R.string.prefs_chart), Context.MODE_PRIVATE);
             sp.edit()
-                  .putInt(getContext().getString(R.string.key_last_price_bg_color), bgColor)
-                  .putInt(getContext().getString(R.string.key_last_label_text_color), textColor)
-                  .putFloat(getContext().getString(R.string.key_last_label_text_size), textSizePx)
-                  .apply();
+                 .putInt(getContext().getString(R.string.key_last_price_bg_color), bgColor)
+                 .putInt(getContext().getString(R.string.key_last_label_text_color), textColor)
+                 .putFloat(getContext().getString(R.string.key_last_label_text_size), textSizePx)
+                 .apply();
         } catch (Exception e) { }
         initPaints(getContext());
         invalidate();
@@ -494,13 +489,13 @@ public class MarketChartView extends View {
         try {
             SharedPreferences sp = getContext().getSharedPreferences(getContext().getString(R.string.prefs_chart), Context.MODE_PRIVATE);
             sp.edit()
-                  .putFloat(getContext().getString(R.string.key_body_fraction), bodyFraction)
-                  .putFloat(getContext().getString(R.string.key_wick_width), wickWidth)
-                  .putFloat(getContext().getString(R.string.key_ma_width), maWidth)
-                  .putBoolean(getContext().getString(R.string.key_show_grid), sGrid)
-                  .putBoolean(getContext().getString(R.string.key_show_volume), sVolume)
-                  .putInt(getContext().getString(R.string.key_visible_count), this.visibleCandleCount)
-                  .apply();
+                 .putFloat(getContext().getString(R.string.key_body_fraction), bodyFraction)
+                 .putFloat(getContext().getString(R.string.key_wick_width), wickWidth)
+                 .putFloat(getContext().getString(R.string.key_ma_width), maWidth)
+                 .putBoolean(getContext().getString(R.string.key_show_grid), sGrid)
+                 .putBoolean(getContext().getString(R.string.key_show_volume), sVolume)
+                 .putInt(getContext().getString(R.string.key_visible_count), this.visibleCandleCount)
+                 .apply();
         } catch (Exception e) { }
         initPaints(getContext());
         clampTranslationX();
@@ -781,7 +776,7 @@ public class MarketChartView extends View {
     }
 
     // --------------------------------------------------------------------
-    // Gestures
+    // Gestures - FIXED: use PRICE_AXIS_WIDTH_DP pixel already, no density*2
     // --------------------------------------------------------------------
     private void initGestures(Context context) {
         scaleGestureDetector = new ScaleGestureDetector(context,
@@ -802,8 +797,7 @@ public class MarketChartView extends View {
                     public boolean onScroll(MotionEvent e1, MotionEvent e2,
                                             float distanceX, float distanceY) {
                         if (data.isEmpty()) return false;
-                        float density = getResources().getDisplayMetrics().density;
-                        int priceAxisW = (int) (PRICE_AXIS_WIDTH_DP * density);
+                        int priceAxisW = PRICE_AXIS_WIDTH_DP;
                         int chartW = getWidth() - priceAxisW;
                         if (chartW <= 0) return false;
                         translationX -= distanceX;
@@ -819,8 +813,7 @@ public class MarketChartView extends View {
                     @Override
                     public boolean onSingleTapUp(MotionEvent e) {
                         if (data.isEmpty()) return false;
-                        float density = getResources().getDisplayMetrics().density;
-                        int priceAxisW = (int) (PRICE_AXIS_WIDTH_DP * density);
+                        int priceAxisW = PRICE_AXIS_WIDTH_DP;
                         int chartW = getWidth() - priceAxisW;
                         int count = Math.min(visibleCandleCount, data.size());
                         if (count == 0) return false;
@@ -860,8 +853,7 @@ public class MarketChartView extends View {
             extraOffsetX = 0f;
             return;
         }
-        float density = getResources().getDisplayMetrics().density;
-        int priceAxisW = (int) (PRICE_AXIS_WIDTH_DP * density);
+        int priceAxisW = PRICE_AXIS_WIDTH_DP;
         int chartW = getWidth() - priceAxisW;
         if (chartW <= 0) return;
         int count = Math.min(visibleCandleCount, data.size());
@@ -1110,15 +1102,14 @@ public class MarketChartView extends View {
     }
 
     // --------------------------------------------------------------------
-    // Touch handling
+    // Touch handling - FIXED
     // --------------------------------------------------------------------
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         scaleGestureDetector.onTouchEvent(event);
         gestureDetector.onTouchEvent(event);
         if (event.getAction() == MotionEvent.ACTION_DOWN) {
-            float density = getResources().getDisplayMetrics().density;
-            int priceAxisW = (int) (PRICE_AXIS_WIDTH_DP * density);
+            int priceAxisW = PRICE_AXIS_WIDTH_DP;
             int chartW = getWidth() - priceAxisW;
             if (event.getX() > chartW) {
                 if (selectedIndex!= -1) {
