@@ -1,10 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Fetch & live update -->
+    <integer name="default_fetch_limit">300</integer>
     <integer name="fetch_limit">300</integer>
     <integer name="live_refresh_interval">1000</integer>
     <integer name="countdown_interval">1000</integer>
+
+    <!-- Visible candle count - từ SeekBar trong chart_settings_options.xml -->
+    <integer name="min_visible_candle_count">10</integer>
+    <integer name="max_visible_candle_count">260</integer>
+    <integer name="default_visible_candle_count">70</integer>
+
+    <!-- Paint alpha -->
     <integer name="volume_alpha">255</integer>
     <integer name="selected_alpha">100</integer>
+
+    <!-- Threshold & timeout -->
     <integer name="big_fiat_threshold">100</integer>
     <integer name="network_timeout">8000</integer>
 </resources>
