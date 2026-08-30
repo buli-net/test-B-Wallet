@@ -488,19 +488,34 @@
 <string name="browser_downloading_file">Downloading file...</string>
     
     <!-- maket chart-->
-    
+
+    <!-- Market chart - Title & Menu -->
     <string name="market_chart_title">Market Chart</string>
-    <string name="chart_loading">Loading chart...</string>
-    <string name="chart_close_in">Close in: %1$s</string>
-    <string name="chart_high_label">High: %1$s</string>
-    <string name="chart_low_label">Low: %1$s</string>
+    <string name="menu_market">Market</string>
+    <string name="menu_price_chart">Price Chart</string>
+
+    <!-- Market chart - Display -->
+    <string name="chart_loading">Loading…</string>
+    <string name="chart_close_in">Close in %1$s</string>
+    <string name="chart_high_label">H: %1$s</string>
+    <string name="chart_low_label">L: %1$s</string>
     <string name="chart_open_label">O: %1$s</string>
     <string name="chart_high_detail">H: %1$s</string>
     <string name="chart_low_detail">L: %1$s</string>
     <string name="chart_close_label">C: %1$s</string>
     <string name="chart_volume_label">V: %1$s</string>
-    <string name="menu_market">Market</string>
-    <string name="menu_price_chart">Price Chart</string>
+    <string name="chart_vol_base_format">Vol(%1$s) %2$s</string>
+    <string name="chart_vol_quote_format">Vol(%1$s) %2$s</string>
+    <string name="chart_ma_default">MA</string>
+    <string name="chart_body_width">Body: %1$s</string>
+    <string name="chart_wick_width">Wick: %1$d</string>
+    <string name="chart_ma_line_width">MA width: %1$d</string>
+    <string name="chart_visible_candles">Visible: %1$d</string>
+    <string name="chart_price_text_size">Text: %1$d</string>
+    <string name="chart_last_line_width">Last line: %1$d</string>
+    <string name="chart_last_price_label_text_size">Label: %1$d</string>
+
+    <!-- Market chart - Default texts for layout preview -->
     <string name="chart_price_default">--</string>
     <string name="chart_change_default">--</string>
     <string name="chart_countdown_default">Close in: --</string>
@@ -509,20 +524,20 @@
     <string name="chart_vol_default">Vol --</string>
     <string name="chart_vol_base_default">Vol(--) --</string>
     <string name="chart_vol_quote_default">Vol(--) --</string>
-    <string name="chart_vol_base_format">Vol(%1$s) %2$s</string>
-    <string name="chart_vol_quote_format">Vol(%1$s) %2$s</string>
     <string name="chart_fiat_default">--</string>
-    <string name="chart_ma_default">MA(7): -- • MA(25): -- • MA(99): --</string>
     <string name="chart_popup_time_default">--</string>
     <string name="chart_popup_open_default">Open --</string>
     <string name="chart_popup_high_default">High --</string>
     <string name="chart_popup_low_default">Low --</string>
     <string name="chart_popup_close_default">Close --</string>
     <string name="chart_popup_volume_default">Vol --</string>
+    <string name="chart_balance_default">--</string>
+
+    <!-- Market chart - Intervals -->
     <string name="intervals_title">Intervals</string>
-    <string name="close">CLOSE</string>
     <string name="time">Time</string>
     <string name="more">More</string>
+    <string name="close">Close</string>
     <string name="interval_1m">1m</string>
     <string name="interval_3m">3m</string>
     <string name="interval_5m">5m</string>
@@ -537,332 +552,135 @@
     <string name="interval_1w">1W</string>
     <string name="interval_1M">1M</string>
     <string name="default_interval">15m</string>
-
-<string name="ma">MA</string>
-<string name="add_ma">+ ADD MA</string>
-<string name="apply">APPLY</string>
-<string name="delete">X</string>
-    
-<string name="max_ma_reached">Maximum 6 MAs</string>
-
-<string name="chart_settings_title">Chart Settings</string>
-<string name="chart_settings_candle">Candle Settings</string>
-<string name="chart_settings_bullish">Bullish Color</string>
-<string name="chart_settings_bearish">Bearish Color</string>
-<string name="chart_settings_ma">MA Settings</string>
-<string name="chart_settings_apply">Apply</string>
-
-<string name="chart_settings_chart_options">Chart Options</string>
-<string name="chart_body_width">Body width: %1$s</string>
-<string name="chart_wick_width">Wick width: %1$dpx</string>
-<string name="chart_ma_line_width">MA line width: %1$dpx</string>
-<string name="chart_show_grid">Show Grid</string>
-<string name="chart_show_volume">Show Volume</string>
-<string name="chart_visible_candles">Visible candles: %1$d</string>
-
-
-<string name="chart_settings_current_price">Current Price Bar</string>
-<string name="chart_show_current_price_bar">Show Current Price Bar</string>
-<string name="chart_current_price_bar_color">Bar Color</string>
-<string name="chart_current_price_bar_size">Bar Size: %1$dpx</string>
-<string name="chart_current_price_text_color">Price Text Color</string>
-
-
-
-<string name="chart_last_price_section">Last Price Line</string>
-<string name="chart_show_last_price">Show Last Price Line</string>
-<string name="chart_last_price_color">Last Price Color</string>
-<string name="chart_price_text_size">Price Text Size: %1$dpx</string>
-<string name="chart_grid_color">Grid Color</string>
-<string name="chart_price_text_color">Price Text Color</string>
-<string name="chart_last_line_width">Last Line Width: %1$dpx</string>
-<string name="chart_last_line_dashed">Dashed Last Line</string>
-
-
-<string name="chart_last_price_label_section">Current Price Label</string>
-<string name="chart_last_price_label_bg">Label Background</string>
-<string name="chart_last_price_label_text_color">Label Text Color</string>
-<string name="chart_last_price_label_text_size">Label Text Size: %d</string>
-
-<string name="chart_settings_reset">Reset to Default</string>
-<string name="chart_reset_confirm_title">Reset Chart Settings?</string>
-<string name="chart_reset_confirm_message">All chart customizations will be restored to default. This action cannot be undone.</string>
-<string name="chart_reset">Reset</string>
-
-
-    <!-- Chart Balance - English only -->
-
-<string name="chart_balance_default">--</string>
-<string name="balance_loading_wallet">Loading wallet...</string>
-<string name="balance_syncing">Syncing...</string>
-<string name="balance_loading">Loading balance...</string>
-<string name="balance_error">Balance error</string>
-
-        <!-- Chart palette loader - không hard-code trong Java -->
-    <string name="palette_prefix" translatable="false">palette_</string>
-
-    <!-- Chart settings UI -->
-    <string name="chart_settings_applied">Settings applied!</string>
-    <string name="arrow_collapsed" translatable="false">▸</string>
-    <string name="arrow_expanded" translatable="false">▾</string>
-    <string name="bullet_separator" translatable="false"> • </string>
-
-    <!-- Chart errors - thiếu là crash -->
-    <string name="err_palette_prefix_missing" translatable="false">R.string.palette_prefix is missing or empty</string>
-    <string name="err_palette_load_failed" translatable="false">Failed to load %1$s* from colors.xml</string>
-    <string name="err_palette_not_found" translatable="false">No %1$s* colors found in colors.xml - add at least 1 &lt;color name=\"%1$s...\"&gt;</string>
-    <string name="err_missing_default_view" translatable="false">Missing default view in chart_settings_*.xml - check layout ids</string>
-    <string name="err_bull_bear_tag_missing" translatable="false">viewBull/viewBear missing android:tag with default color</string>
-    <string name="err_ma_periods_empty" translatable="false">tvDefMaPeriods is empty</string>
-
-
-
-    
-    <string name="prefs_ma">ma_prefs</string>
-    <string name="key_ma">ma_lines</string>
-    <string name="prefs_candle">candle_prefs</string>
-    <string name="key_bull">bull_color</string>
-    <string name="key_bear">bear_color</string>
-    <string name="prefs_chart">chart_options_prefs</string>
-    <string name="key_body_fraction">body_fraction</string>
-    <string name="key_wick_width">wick_width</string>
-    <string name="key_ma_width">ma_width</string>
-    <string name="key_show_grid">show_grid</string>
-    <string name="key_show_volume">show_volume</string>
-    <string name="key_visible_count">visible_count</string>
-    <string name="key_show_last_price">show_last_price</string>
-    <string name="key_last_price_line_color">last_price_line_color</string>
-    <string name="key_last_price_bg_color">last_price_bg_color</string>
-    <string name="key_price_text_size">price_text_size</string>
-    <string name="key_price_text_color">price_text_color</string>
-    <string name="key_grid_color">grid_color</string>
-    <string name="key_bg_color">bg_color</string>
-    <string name="key_last_line_width">last_line_width</string>
-    <string name="key_last_line_dash">last_line_dash</string>
-    <string name="key_last_label_text_size">last_label_text_size</string>
-    <string name="key_last_label_text_color">last_label_text_color</string>
-    
-    <string name="time_format">MM-dd HH:mm</string>
-    <string name="url_klines">https://api.binance.com/api/v3/klines?symbol=%1$s&amp;interval=%2$s&amp;limit=%3$d</string>
-    <string name="url_ticker">https://api.binance.com/api/v3/ticker/24hr?symbol=%1$s</string>
-    <string name="fmt_hms">%02d:%02d:%02d</string>
-    <string name="fmt_dhms">%02d:%02d:%02d:%02d</string>
-    <string name="fmt_price_0">%,.0f</string>
-    <string name="fmt_price_2">%,.2f</string>
-    <string name="chart_loading">Loading…</string>
-
-    <string name="err_ma_empty">defMaLines empty - check tvDefMaPeriods in layout</string>
-    <string name="err_color_0">Color from layout is 0 - check android:tag in chart_settings_popup.xml</string>
-    <string name="err_defaults_not_loaded">setDefaultsFromLayout() must be called before using MarketChartView - defaults come from layout</string>
-    <string name="err_missing_dimen">Missing dimen/integer - must define in res, no hardcoded</string>
-    <string name="err_candle_0">Candle color 0 from layout</string>
-    <string name="err_ma_color_0">MA color 0 - must come from layout</string>
-    <string name="err_interval_null">interval null - must come from layout</string>
-    <string name="err_symbol_null">symbol/interval null</string>
-    <string name="err_fiat_0">fiatMultiplier must be from layout, not 0</string>
-    <string name="err_unknown_interval">Unknown interval %1$s</string>
-    <string name="err_price_height">priceChartHeight &lt;=0 - check dimen</string>
-    <string name="err_theme_bg">Theme colorBackground missing - must be in theme</string>
-    <string name="err_color_tag">Color 0 - must from layout tag</string>
-    <string name="err_label_color">Label color 0</string>
-    <string name="err_appearance_color">ChartAppearance color 0 - must come from layout tag</string>
-<string name="fiat_usd">USD</string>
-<string name="sep_semicolon">;</string>
-<string name="sep_comma">,</string>
-<string name="sep_semicolon_regex">;</string>
-<string name="sep_comma_regex">,</string>
-<string name="json_lastPrice">lastPrice</string>
-<string name="json_highPrice">highPrice</string>
-<string name="json_lowPrice">lowPrice</string>
-<string name="json_volume">volume</string>
-<string name="json_quoteVolume">quoteVolume</string>
-<string name="json_priceChangePercent">priceChangePercent</string>
-
-    <string name="fiat_usd">USD</string>
-<string name="time_format">MM-dd HH:mm</string>
-<string name="url_klines">https://api.binance.com/api/v3/klines?symbol=%1$s&amp;interval=%2$s&amp;limit=%3$d</string>
-<string name="url_ticker">https://api.binance.com/api/v3/ticker/24hr?symbol=%1$s</string>
-<string name="fmt_hms">%02d:%02d:%02d</string>
-<string name="fmt_dhms">%02d:%02d:%02d:%02d</string>
-<string name="fmt_price_0">%,.0f</string>
-<string name="fmt_price_2">%,.2f</string>
-<string name="sep_semicolon">;</string>
-<string name="sep_comma">,</string>
-<string name="sep_semicolon_regex">;</string>
-<string name="sep_comma_regex">,</string>
-<string name="prefs_ma">ma_prefs</string>
-<string name="key_ma">ma_lines</string>
-<string name="prefs_candle">candle_prefs</string>
-<string name="key_bull">bull_color</string>
-<string name="key_bear">bear_color</string>
-<string name="prefs_chart">chart_options_prefs</string>
-<string name="key_body_fraction">body_fraction</string>
-<string name="key_wick_width">wick_width</string>
-<string name="key_ma_width">ma_width</string>
-<string name="key_show_grid">show_grid</string>
-<string name="key_show_volume">show_volume</string>
-<string name="key_visible_count">visible_count</string>
-<string name="key_show_last_price">show_last_price</string>
-<string name="key_last_price_line_color">last_price_line_color</string>
-<string name="key_last_price_bg_color">last_price_bg_color</string>
-<string name="key_price_text_size">price_text_size</string>
-<string name="key_price_text_color">price_text_color</string>
-<string name="key_grid_color">grid_color</string>
-<string name="key_bg_color">bg_color</string>
-<string name="key_last_line_width">last_line_width</string>
-<string name="key_last_line_dash">last_line_dash</string>
-<string name="key_last_label_text_size">last_label_text_size</string>
-<string name="key_last_label_text_color">last_label_text_color</string>
-<string name="json_lastPrice">lastPrice</string>
-<string name="json_highPrice">highPrice</string>
-<string name="json_lowPrice">lowPrice</string>
-<string name="json_volume">volume</string>
-<string name="json_quoteVolume">quoteVolume</string>
-<string name="json_priceChangePercent">priceChangePercent</string>
-<string name="err_ma_empty">defMaLines empty - check tvDefMaPeriods in layout</string>
-<string name="err_color_0">Color from layout is 0 - check android:tag in chart_settings_popup.xml</string>
-<string name="err_defaults_not_loaded">setDefaultsFromLayout() must be called before using MarketChartView - defaults come from layout</string>
-<string name="err_missing_dimen">Missing dimen/integer - must define in res, no hardcoded</string>
-<string name="err_candle_0">Candle color 0 from layout</string>
-<string name="err_ma_color_0">MA color 0 - must come from layout</string>
-<string name="err_appearance_color">ChartAppearance color 0 - must come from layout tag</string>
-<string name="err_label_color">Label color 0</string>
-<string name="err_color_tag">Color 0 - must from layout tag</string>
-<string name="err_theme_bg">Theme colorBackground missing - must be in theme</string>
-<string name="err_fiat_0">fiatMultiplier must be from layout, not 0</string>
-<string name="err_interval_null">interval null - must come from layout</string>
-<string name="err_symbol_null">symbol/interval null</string>
-<string name="err_unknown_interval">Unknown interval %1$s</string>
-<string name="err_price_height">priceChartHeight &lt;=0 - check dimen</string>
-
-    
-    <string name="fiat_usd">USD</string>
-    <string name="time_format">MM-dd HH:mm</string>
-    <string name="full_time_format">yyyy-MM-dd HH:mm:ss</string>
-    <string name="url_klines">https://api.binance.com/api/v3/klines?symbol=%1$s&amp;interval=%2$s&amp;limit=%3$d</string>
-    <string name="url_ticker">https://api.binance.com/api/v3/ticker/24hr?symbol=%1$s</string>
-    <string name="fmt_hms">%02d:%02d:%02d</string>
-    <string name="fmt_dhms">%02d:%02d:%02d:%02d</string>
-    <string name="fmt_price_0">%,.0f</string>
-    <string name="fmt_price_2">%,.2f</string>
-    <string name="fmt_price_8f">%.8f</string>
-    <string name="fmt_btc">%s BTC</string>
-    <string name="fmt_btc_fiat">%s BTC ≈ %s%,.2f</string>
-    <string name="fmt_btc_fiat_friendly">%s BTC ≈ %s</string>
-    <string name="sep_semicolon">;</string>
-    <string name="sep_comma">,</string>
-    <string name="sep_semicolon_regex">;</string>
-    <string name="sep_comma_regex">,</string>
-    <string name="bullet_separator"> • </string>
-    <string name="prefs_ma">ma_prefs</string>
-    <string name="key_ma">ma_lines</string>
-    <string name="prefs_candle">candle_prefs</string>
-    <string name="key_bull">bull_color</string>
-    <string name="key_bear">bear_color</string>
-    <string name="prefs_chart">chart_options_prefs</string>
-    <string name="key_body_fraction">body_fraction</string>
-    <string name="key_wick_width">wick_width</string>
-    <string name="key_ma_width">ma_width</string>
-    <string name="key_show_grid">show_grid</string>
-    <string name="key_show_volume">show_volume</string>
-    <string name="key_visible_count">visible_count</string>
-    <string name="key_show_last_price">show_last_price</string>
-    <string name="key_last_price_line_color">last_price_line_color</string>
-    <string name="key_last_price_bg_color">last_price_bg_color</string>
-    <string name="key_price_text_size">price_text_size</string>
-    <string name="key_price_text_color">price_text_color</string>
-    <string name="key_grid_color">grid_color</string>
-    <string name="key_bg_color">bg_color</string>
-    <string name="key_last_line_width">last_line_width</string>
-    <string name="key_last_line_dash">last_line_dash</string>
-    <string name="key_last_label_text_size">last_label_text_size</string>
-    <string name="key_last_label_text_color">last_label_text_color</string>
-    <string name="prefs_chart_state">chart_state_prefs</string>
-    <string name="key_interval">interval</string>
-    <string name="prefs_wallet">wallet_preferences</string>
-    <string name="key_symbol">symbol</string>
-    <string name="prefix_color_res">@color/</string>
-    <string name="type_color">color</string>
-    <string name="json_lastPrice">lastPrice</string>
-    <string name="json_highPrice">highPrice</string>
-    <string name="json_lowPrice">lowPrice</string>
-    <string name="json_volume">volume</string>
-    <string name="json_quoteVolume">quoteVolume</string>
-    <string name="json_priceChangePercent">priceChangePercent</string>
     <string name="default_symbol">BTCUSDT</string>
-    <string name="default_interval">15m</string>
-    <string name="suffix_usdt">USDT</string>
-    <string name="suffix_busd">BUSD</string>
-    <string name="chart_loading">Loading…</string>
-    <string name="arrow_collapsed">▼</string>
-    <string name="arrow_expanded">▲</string>
-    <string name="palette_prefix">palette_</string>
-    <string name="err_missing_dimen">Missing dimen/integer - must define in res, no hardcoded</string>
-    <string name="err_ma_empty">defMaLines empty - check tvDefMaPeriods in layout</string>
-    <string name="err_color_0">Color from layout is 0 - check android:tag in chart_settings_popup.xml</string>
-    <string name="err_defaults_not_loaded">setDefaultsFromLayout() must be called before using MarketChartView - defaults come from layout</string>
-    <string name="err_candle_0">Candle color 0 from layout</string>
-    <string name="err_ma_color_0">MA color 0 - must come from layout</string>
-    <string name="err_appearance_color">ChartAppearance color 0 - must come from layout tag</string>
-    <string name="err_label_color">Label color 0</string>
-    <string name="err_color_tag">Color 0 - must from layout tag</string>
-    <string name="err_theme_bg">Theme colorBackground missing - must be in theme</string>
-    <string name="err_fiat_0">fiatMultiplier must be from layout, not 0</string>
-    <string name="err_interval_null">interval null - must come from layout</string>
-    <string name="err_symbol_null">symbol/interval null</string>
-    <string name="err_unknown_interval">Unknown interval %1$s</string>
-    <string name="err_price_height">priceChartHeight &lt;=0 - check dimen</string>
-    <string name="err_palette_prefix_missing">palette_prefix empty - check strings.xml</string>
-    <string name="err_palette_load_failed">Failed to load palette with prefix %1$s</string>
-    <string name="err_palette_not_found">No palette found with prefix %1$s</string>
-    <string name="err_missing_default_view">Missing default view in chart_settings_popup.xml - check all ids</string>
-    <string name="err_bull_bear_tag_missing">Bull/Bear tag missing in layout</string>
-    <string name="err_ma_periods_empty">MA periods empty in layout</string>
-    <string name="err_view_tag_missing">View tag missing color</string>
+
+    <!-- Market chart - Settings UI -->
+    <string name="ma">MA</string>
+    <string name="add_ma">+ ADD MA</string>
+    <string name="apply">APPLY</string>
+    <string name="delete">X</string>
+    <string name="max_ma_reached">Max 6 MA</string>
+    <string name="chart_settings_title">Chart Settings</string>
+    <string name="chart_settings_candle">Candle Settings</string>
+    <string name="chart_settings_bullish">Bullish Color</string>
+    <string name="chart_settings_bearish">Bearish Color</string>
+    <string name="chart_settings_ma">MA Settings</string>
+    <string name="chart_settings_apply">Apply</string>
+    <string name="chart_settings_chart_options">Chart Options</string>
+    <string name="chart_show_grid">Show Grid</string>
+    <string name="chart_show_volume">Show Volume</string>
+    <string name="chart_settings_current_price">Current Price Bar</string>
+    <string name="chart_show_current_price_bar">Show Current Price Bar</string>
+    <string name="chart_current_price_bar_color">Bar Color</string>
+    <string name="chart_current_price_bar_size">Bar Size: %1$dpx</string>
+    <string name="chart_current_price_text_color">Price Text Color</string>
+    <string name="chart_last_price_section">Last Price Line</string>
+    <string name="chart_show_last_price">Show Last Price Line</string>
+    <string name="chart_last_price_color">Last Price Color</string>
+    <string name="chart_grid_color">Grid Color</string>
+    <string name="chart_price_text_color">Price Text Color</string>
+    <string name="chart_last_line_width">Last Line Width: %1$dpx</string>
+    <string name="chart_last_line_dashed">Dashed Last Line</string>
+    <string name="chart_last_price_label_section">Current Price Label</string>
+    <string name="chart_last_price_label_bg">Label Background</string>
+    <string name="chart_last_price_label_text_color">Label Text Color</string>
+    <string name="chart_last_price_label_text_size">Label Text Size: %d</string>
+    <string name="chart_settings_reset">Reset done</string>
+    <string name="chart_reset">Reset</string>
+    <string name="chart_reset_confirm_title">Reset?</string>
+    <string name="chart_reset_confirm_message">Reset all chart settings to defaults from layout?</string>
+    <string name="chart_settings_applied">Applied</string>
+
+    <!-- Market chart - Balance -->
     <string name="balance_loading_wallet">Loading wallet…</string>
     <string name="balance_syncing">Syncing…</string>
     <string name="balance_loading">Loading…</string>
     <string name="balance_error">Error</string>
-    <string name="chart_body_width">Body: %1$s</string>
-    <string name="chart_wick_width">Wick: %1$d</string>
-    <string name="chart_ma_line_width">MA width: %1$d</string>
-    <string name="chart_visible_candles">Visible: %1$d</string>
-    <string name="chart_price_text_size">Text: %1$d</string>
-    <string name="chart_last_line_width">Last line: %1$d</string>
-    <string name="chart_last_price_label_text_size">Label: %1$d</string>
-    <string name="chart_settings_applied">Applied</string>
-    <string name="chart_reset_confirm_title">Reset?</string>
-    <string name="chart_reset_confirm_message">Reset all chart settings to defaults from layout?</string>
-    <string name="chart_reset">Reset</string>
-    <string name="close">Close</string>
-    <string name="max_ma_reached">Max 6 MA</string>
-    <string name="more">More</string>
-    <string name="time">Time</string>
-    <string name="intervals_title">Intervals</string>
-    <string name="interval_1m">1m</string>
-    <string name="interval_3m">3m</string>
-    <string name="interval_5m">5m</string>
-    <string name="interval_15m">15m</string>
-    <string name="interval_30m">30m</string>
-    <string name="interval_1h">1h</string>
-    <string name="interval_2h">2h</string>
-    <string name="interval_4h">4h</string>
-    <string name="interval_6h">6h</string>
-    <string name="interval_12h">12h</string>
-    <string name="interval_1d">1D</string>
-    <string name="interval_1w">1W</string>
-    <string name="interval_1M">1M</string>
-    <string name="chart_high_label">H: %1$s</string>
-    <string name="chart_low_label">L: %1$s</string>
-    <string name="chart_vol_base_format">Vol %1$s %2$s</string>
-    <string name="chart_vol_quote_format">Vol %1$s %2$s</string>
-    <string name="chart_ma_default">MA</string>
-    <string name="chart_close_in">Close in %1$s</string>
-    <string name="chart_open_label">O: %1$s</string>
-    <string name="chart_high_detail">H: %1$s</string>
-    <string name="chart_low_detail">L: %1$s</string>
-    <string name="chart_close_label">C: %1$s</string>
-    <string name="chart_volume_label">V: %1$s</string>
-    <string name="chart_settings_reset">Reset done</string>
+
+    <!-- Market chart - Core / Format / URL -->
+    <string name="fiat_usd" translatable="false">USD</string>
+    <string name="suffix_usdt" translatable="false">USDT</string>
+    <string name="suffix_busd" translatable="false">BUSD</string>
+    <string name="time_format" translatable="false">MM-dd HH:mm</string>
+    <string name="full_time_format" translatable="false">yyyy-MM-dd HH:mm:ss</string>
+    <string name="url_klines" translatable="false">https://api.binance.com/api/v3/klines?symbol=%1$s&amp;interval=%2$s&amp;limit=%3$d</string>
+    <string name="url_ticker" translatable="false">https://api.binance.com/api/v3/ticker/24hr?symbol=%1$s</string>
+    <string name="fmt_hms" translatable="false">%02d:%02d:%02d</string>
+    <string name="fmt_dhms" translatable="false">%02d:%02d:%02d:%02d</string>
+    <string name="fmt_price_0" translatable="false">%,.0f</string>
+    <string name="fmt_price_2" translatable="false">%,.2f</string>
+    <string name="fmt_price_8f" translatable="false">%.8f</string>
+    <string name="fmt_btc" translatable="false">%s BTC</string>
+    <string name="fmt_btc_fiat" translatable="false">%s BTC ≈ %s%,.2f</string>
+    <string name="fmt_btc_fiat_friendly" translatable="false">%s BTC ≈ %s</string>
+    <string name="json_lastPrice" translatable="false">lastPrice</string>
+    <string name="json_highPrice" translatable="false">highPrice</string>
+    <string name="json_lowPrice" translatable="false">lowPrice</string>
+    <string name="json_volume" translatable="false">volume</string>
+    <string name="json_quoteVolume" translatable="false">quoteVolume</string>
+    <string name="json_priceChangePercent" translatable="false">priceChangePercent</string>
+
+    <!-- Market chart - Prefs keys (không dịch) -->
+    <string name="prefs_ma" translatable="false">ma_prefs</string>
+    <string name="key_ma" translatable="false">ma_lines</string>
+    <string name="prefs_candle" translatable="false">candle_prefs</string>
+    <string name="key_bull" translatable="false">bull_color</string>
+    <string name="key_bear" translatable="false">bear_color</string>
+    <string name="prefs_chart" translatable="false">chart_options_prefs</string>
+    <string name="key_body_fraction" translatable="false">body_fraction</string>
+    <string name="key_wick_width" translatable="false">wick_width</string>
+    <string name="key_ma_width" translatable="false">ma_width</string>
+    <string name="key_show_grid" translatable="false">show_grid</string>
+    <string name="key_show_volume" translatable="false">show_volume</string>
+    <string name="key_visible_count" translatable="false">visible_count</string>
+    <string name="key_show_last_price" translatable="false">show_last_price</string>
+    <string name="key_last_price_line_color" translatable="false">last_price_line_color</string>
+    <string name="key_last_price_bg_color" translatable="false">last_price_bg_color</string>
+    <string name="key_price_text_size" translatable="false">price_text_size</string>
+    <string name="key_price_text_color" translatable="false">price_text_color</string>
+    <string name="key_grid_color" translatable="false">grid_color</string>
+    <string name="key_bg_color" translatable="false">bg_color</string>
+    <string name="key_last_line_width" translatable="false">last_line_width</string>
+    <string name="key_last_line_dash" translatable="false">last_line_dash</string>
+    <string name="key_last_label_text_size" translatable="false">last_label_text_size</string>
+    <string name="key_last_label_text_color" translatable="false">last_label_text_color</string>
+    <string name="prefs_chart_state" translatable="false">chart_state_prefs</string>
+    <string name="key_interval" translatable="false">interval</string>
+    <string name="prefs_wallet" translatable="false">wallet_preferences</string>
+    <string name="key_symbol" translatable="false">symbol</string>
+    <string name="prefix_color_res" translatable="false">@color/</string>
+    <string name="type_color" translatable="false">color</string>
+    <string name="sep_semicolon" translatable="false">;</string>
+    <string name="sep_comma" translatable="false">,</string>
+    <string name="sep_semicolon_regex" translatable="false">;</string>
+    <string name="sep_comma_regex" translatable="false">,</string>
+    <string name="palette_prefix" translatable="false">palette_</string>
+    <string name="bullet_separator" translatable="false"> • </string>
+    <string name="arrow_collapsed" translatable="false">▼</string>
+    <string name="arrow_expanded" translatable="false">▲</string>
+
+    <!-- Market chart - Errors (bắt buộc, thiếu là crash) -->
+    <string name="err_missing_dimen" translatable="false">Missing dimen/integer - must define in res, no hardcoded</string>
+    <string name="err_ma_empty" translatable="false">defMaLines empty - check tvDefMaPeriods in layout</string>
+    <string name="err_color_0" translatable="false">Color from layout is 0 - check android:tag in chart_settings_popup.xml</string>
+    <string name="err_defaults_not_loaded" translatable="false">setDefaultsFromLayout() must be called before using MarketChartView - defaults come from layout</string>
+    <string name="err_candle_0" translatable="false">Candle color 0 from layout</string>
+    <string name="err_ma_color_0" translatable="false">MA color 0 - must come from layout</string>
+    <string name="err_appearance_color" translatable="false">ChartAppearance color 0 - must come from layout tag</string>
+    <string name="err_label_color" translatable="false">Label color 0</string>
+    <string name="err_color_tag" translatable="false">Color 0 - must from layout tag</string>
+    <string name="err_theme_bg" translatable="false">Theme colorBackground missing - must be in theme</string>
+    <string name="err_fiat_0" translatable="false">fiatMultiplier must be from layout, not 0</string>
+    <string name="err_interval_null" translatable="false">interval null - must come from layout</string>
+    <string name="err_symbol_null" translatable="false">symbol/interval null</string>
+    <string name="err_unknown_interval" translatable="false">Unknown interval %1$s</string>
+    <string name="err_price_height" translatable="false">priceChartHeight &lt;=0 - check dimen</string>
+    <string name="err_palette_prefix_missing" translatable="false">R.string.palette_prefix is missing or empty</string>
+    <string name="err_palette_load_failed" translatable="false">Failed to load palette with prefix %1$s</string>
+    <string name="err_palette_not_found" translatable="false">No palette found with prefix %1$s</string>
+    <string name="err_missing_default_view" translatable="false">Missing default view in chart_settings_popup.xml - check all ids</string>
+    <string name="err_bull_bear_tag_missing" translatable="false">Bull/Bear tag missing in layout</string>
+    <string name="err_ma_periods_empty" translatable="false">MA periods empty in layout</string>
+    <string name="err_view_tag_missing" translatable="false">View tag missing color</string>
 
 </resources>
