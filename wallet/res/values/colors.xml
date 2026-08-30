@@ -56,6 +56,7 @@
     <color name="chart_text">#FF000000</color>
     <color name="chart_wick">#FF000000</color>
     <color name="chart_last_price_line">#FFFF8000</color>
+    <color name="last_label_text">@color/palette_black</color>
     
 
     <color name="chart_bull_default">#26A69A</color>
