@@ -28,7 +28,6 @@
     <color name="chart_grid">#1FFFFFFF</color>
     <color name="chart_text">#FF9AA0A6</color>
     <color name="chart_wick">#FF9AA0A6</color>
-    <color name="chart_last_price_line">#FFFFC107</color>
     
     
     <color name="chart_bull_default">#26A69A</color>
