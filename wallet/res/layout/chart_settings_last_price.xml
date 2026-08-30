@@ -134,7 +134,7 @@
             android:id="@+id/lbLastW"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Last line width: 2px"
+            android:text="@string/chart_last_line_width"
             android:textSize="12sp" />
 
         <SeekBar
