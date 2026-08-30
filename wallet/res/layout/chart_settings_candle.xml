@@ -12,6 +12,7 @@
         android:textStyle="bold"
         android:paddingBottom="8dp" />
 
+    <!-- Bullish Color - set từng layout riêng -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -41,6 +42,7 @@
         </FrameLayout>
     </LinearLayout>
 
+    <!-- Bearish Color - set từng layout riêng -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -68,6 +70,50 @@
                 android:background="@color/chart_bear_default"
                 android:tag="@color/chart_bear_default" />
         </FrameLayout>
+    </LinearLayout>
+
+    <!-- Wick Width - layout con riêng, trước để ở xml cha nên thiếu -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingTop="8dp">
+
+        <TextView
+            android:id="@+id/lbWick"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/chart_wick_width"
+            android:textSize="13sp" />
+
+        <SeekBar
+            android:id="@+id/sbWick"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:max="10"
+            android:progress="2" />
+    </LinearLayout>
+
+    <!-- Body Width - thêm vào cho đủ, trước nằm ở options nhưng cần cho candle -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingTop="8dp">
+
+        <TextView
+            android:id="@+id/lbBody"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/chart_body_width"
+            android:textSize="13sp" />
+
+        <SeekBar
+            android:id="@+id/sbBody"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:max="70"
+            android:progress="50" />
     </LinearLayout>
 
 </LinearLayout>
