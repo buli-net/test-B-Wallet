@@ -50,10 +50,7 @@
     <!-- Chart market -->
 
     <!-- Chart market -->
-    <color name="chart_bg">#ffeaeaf0</color>
-    <color name="chart_grid">#1F000000</color>
-    <color name="chart_text">#FF000000</color>
-    <color name="chart_wick">@color/palette_black</color>
+
     
 
     <color name="chart_bull_default">#26A69A</color>
