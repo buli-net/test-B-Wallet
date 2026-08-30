@@ -14,7 +14,7 @@
         android:textStyle="bold"
         android:paddingBottom="8dp" />
 
-    <!-- DEFAULT MA - lấy từ layout, không hardcode trong Java nữa -->
+    <!-- DEFAULT MA - lấy từ layout con riêng, không hardcode Java -->
     <TextView
         android:id="@+id/tvDefMaPeriods"
         android:layout_width="wrap_content"
