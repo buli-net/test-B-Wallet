@@ -743,9 +743,8 @@ public class MarketChartView extends View {
         lastPriceTextPaint.setFakeBoldText(true);
 
         float defaultMaWidth = 2f;
-        try { defaultMaWidth = res.getDimension(R.dimen.default_ma_line_width); } catch(Exception ignored){}
         float thin = (maLineWidthPx > 0f)? maLineWidthPx : (defaultsLoadedFromLayout? defMaWidthPx : defaultMaWidth);
-
+        
         movingAverage5Paint = new Paint(Paint.ANTI_ALIAS_FLAG);
         movingAverage5Paint.setStyle(Paint.Style.STROKE);
         movingAverage5Paint.setStrokeWidth(thin);
