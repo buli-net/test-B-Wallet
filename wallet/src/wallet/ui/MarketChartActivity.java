@@ -1073,6 +1073,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
                 @Override
                 public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                     if (progress < 1) progress = 1;
+                    state.curLastW[0] = progress;
                     lbLastW.setText(getString(R.string.chart_last_line_width, progress));
                 }
                 @Override public void onStartTrackingTouch(SeekBar seekBar) {}
