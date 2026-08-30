@@ -646,10 +646,10 @@ public class MarketChartView extends View {
             SharedPreferences sp = getContext().getSharedPreferences(
                     getContext().getString(R.string.prefs_chart), Context.MODE_PRIVATE);
             sp.edit()
-            .putInt(getContext().getString(R.string.key_last_price_bg_color), bgColor)
-            .putInt(getContext().getString(R.string.key_last_label_text_color), textColor)
-            .putFloat(getContext().getString(R.string.key_last_label_text_size), textSizePx)
-            .apply();
+           .putInt(getContext().getString(R.string.key_last_price_bg_color), bgColor)
+           .putInt(getContext().getString(R.string.key_last_label_text_color), textColor)
+           .putFloat(getContext().getString(R.string.key_last_label_text_size), textSizePx)
+           .apply();
         } catch (Exception e) {
             // Ignore
         }
@@ -672,10 +672,10 @@ public class MarketChartView extends View {
             SharedPreferences sp = getContext().getSharedPreferences(
                     getContext().getString(R.string.prefs_chart), Context.MODE_PRIVATE);
             sp.edit()
-             .putBoolean(getContext().getString(R.string.key_show_selected), showSelected)
-             .putInt(getContext().getString(R.string.key_selected_color), color)
-             .putFloat(getContext().getString(R.string.key_selected_width), widthPx)
-             .apply();
+            .putBoolean(getContext().getString(R.string.key_show_selected), showSelected)
+            .putInt(getContext().getString(R.string.key_selected_color), color)
+            .putFloat(getContext().getString(R.string.key_selected_width), widthPx)
+            .apply();
         } catch (Exception e) {
             // Ignore
         }
@@ -694,9 +694,9 @@ public class MarketChartView extends View {
             SharedPreferences sp = getContext().getSharedPreferences(
                     getContext().getString(R.string.prefs_candle), Context.MODE_PRIVATE);
             sp.edit()
-            .putInt(getContext().getString(R.string.key_bull), bull)
-            .putInt(getContext().getString(R.string.key_bear), bear)
-            .apply();
+           .putInt(getContext().getString(R.string.key_bull), bull)
+           .putInt(getContext().getString(R.string.key_bear), bear)
+           .apply();
         } catch (Exception e) {
             // Ignore
         }
@@ -717,13 +717,13 @@ public class MarketChartView extends View {
             SharedPreferences sp = getContext().getSharedPreferences(
                     getContext().getString(R.string.prefs_chart), Context.MODE_PRIVATE);
             sp.edit()
-            .putFloat(getContext().getString(R.string.key_body_fraction), bodyFraction)
-            .putFloat(getContext().getString(R.string.key_wick_width), wickWidth)
-            .putFloat(getContext().getString(R.string.key_ma_width), maWidth)
-            .putBoolean(getContext().getString(R.string.key_show_grid), sGrid)
-            .putBoolean(getContext().getString(R.string.key_show_volume), sVolume)
-            .putInt(getContext().getString(R.string.key_visible_count), this.visibleCandleCount)
-            .apply();
+           .putFloat(getContext().getString(R.string.key_body_fraction), bodyFraction)
+           .putFloat(getContext().getString(R.string.key_wick_width), wickWidth)
+           .putFloat(getContext().getString(R.string.key_ma_width), maWidth)
+           .putBoolean(getContext().getString(R.string.key_show_grid), sGrid)
+           .putBoolean(getContext().getString(R.string.key_show_volume), sVolume)
+           .putInt(getContext().getString(R.string.key_visible_count), this.visibleCandleCount)
+           .apply();
         } catch (Exception e) {
             // Ignore
         }
@@ -775,6 +775,14 @@ public class MarketChartView extends View {
         selectedLineColor = defSelectedLineColor;
         selectedLineWidthPx = defSelectedLineWidthPx;
         showSelectedLine = defShowSelectedLine;
+
+        // FIX: reset luôn đường đứng đang chọn
+        selectedIndex = -1;
+        translationX = 0f;
+        extraOffsetX = 0f;
+        if (updateListener!= null) {
+            updateListener.onNothingSelected();
+        }
 
         maLines.clear();
         for (MaLine m : defMaLines) {
