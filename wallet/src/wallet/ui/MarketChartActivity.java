@@ -810,7 +810,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
             state.recycler = recycler;
             recycler.setLayoutManager(new LinearLayoutManager(this));
             recycler.setNestedScrollingEnabled(false);
-            final MaPopupAdapter adapter = new MaPopupAdapter(state.tempList);
+            final MaPopupAdapter adapter = new MaPopupAdapter(state.tempList, state.candlePalette);
             recycler.setAdapter(adapter);
         }
 
@@ -820,7 +820,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
                     Toast.makeText(v.getContext(), getString(R.string.max_ma_reached), Toast.LENGTH_SHORT).show();
                     return;
                 }
-                int[] colors = loadPaletteFromColorsXml();
+                int[] colors = state.candlePalette;
                 int color = colors[state.tempList.size() % colors.length];
                 state.tempList.add(new MarketChartView.MaLine(20, color));
                 if (state.recycler!= null && state.recycler.getAdapter()!= null) {
@@ -1274,9 +1274,9 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
     // ------------------------------------------------------------------------
     private void showResetConfirm(final Dialog settingsDialog) {
         new AlertDialog.Builder(this)
-              .setTitle(getString(R.string.chart_reset_confirm_title))
-              .setMessage(getString(R.string.chart_reset_confirm_message))
-              .setPositiveButton(getString(R.string.chart_reset), (d, which) -> {
+             .setTitle(getString(R.string.chart_reset_confirm_title))
+             .setMessage(getString(R.string.chart_reset_confirm_message))
+             .setPositiveButton(getString(R.string.chart_reset), (d, which) -> {
                     if (marketChartView!= null) {
                         // NEW: reset from layout-stored defaults, not from chart_defaults.xml
                         marketChartView.resetToDefaultsFromLayout();
@@ -1285,18 +1285,20 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
                     settingsDialog.dismiss();
                     Toast.makeText(MarketChartActivity.this, getString(R.string.chart_settings_reset), Toast.LENGTH_SHORT).show();
                 })
-              .setNegativeButton(getString(R.string.close), null)
-              .show();
+             .setNegativeButton(getString(R.string.close), null)
+             .show();
     }
 
     // ------------------------------------------------------------------------
-    // MA Popup Adapter for RecyclerView
+    // MA Popup Adapter for RecyclerView - FIXED STATIC CONTEXT
     // ------------------------------------------------------------------------
     static class MaPopupAdapter extends RecyclerView.Adapter<MaPopupAdapter.Holder> {
         List<MarketChartView.MaLine> list;
+        int[] palette;
 
-        MaPopupAdapter(List<MarketChartView.MaLine> list) {
+        MaPopupAdapter(List<MarketChartView.MaLine> list, int[] palette) {
             this.list = list;
+            this.palette = palette;
         }
 
         static class Holder extends RecyclerView.ViewHolder {
@@ -1341,7 +1343,8 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
             });
 
             h.color.setOnClickListener(v -> {
-                int[] colors = loadPaletteFromColorsXml();
+                int[] colors = palette;
+                if (colors == null || colors.length == 0) return;
                 int idx = 0;
                 for (int i = 0; i < colors.length; i++) {
                     if (colors[i] == line.color) {
@@ -1538,9 +1541,9 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         };
 
         final AlertDialog dialog = new AlertDialog.Builder(this)
-              .setView(root)
-              .setNegativeButton(R.string.close, (d, w) -> d.dismiss())
-              .create();
+             .setView(root)
+             .setNegativeButton(R.string.close, (d, w) -> d.dismiss())
+             .create();
 
         for (int i = 0; i < realLoad.length; i++) {
             TextView tv = new TextView(this);
@@ -1582,7 +1585,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
                 if (load.isEmpty()) return;
                 currentInterval = load;
                 getSharedPreferences(PREFS_CHART_STATE, MODE_PRIVATE)
-                      .edit().putString(KEY_INTERVAL, currentInterval).apply();
+                     .edit().putString(KEY_INTERVAL, currentInterval).apply();
                 if (marketChartView!= null) {
                     marketChartView.loadChart(currentSymbol, currentInterval);
                 }
@@ -1672,7 +1675,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
             tv.setOnClickListener(v -> {
                 currentInterval = load;
                 getSharedPreferences(PREFS_CHART_STATE, MODE_PRIVATE)
-                      .edit().putString(KEY_INTERVAL, currentInterval).apply();
+                     .edit().putString(KEY_INTERVAL, currentInterval).apply();
                 if (marketChartView!= null) {
                     marketChartView.loadChart(currentSymbol, currentInterval);
                 }
