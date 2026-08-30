@@ -692,4 +692,7 @@
     <string name="key_show_selected" translatable="false">show_selected_line</string>
     <string name="key_selected_width" translatable="false">selected_width</string>
     <string name="key_selected_color" translatable="false">selected_color</string>
+
+   <string name="chart_selected_line_width">Width: %1$d</string>
+
 </resources>
