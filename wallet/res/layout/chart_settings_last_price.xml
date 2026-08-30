@@ -51,12 +51,19 @@
             android:text="@string/chart_last_price_color"
             android:textSize="13sp" />
 
-        <View
-            android:id="@+id/viewLastColor"
+        <FrameLayout
             android:layout_width="48dp"
             android:layout_height="48dp"
-            android:background="@drawable/color_picker_border"
-            android:tag="@color/chart_last_price_line" />
+            android:background="@drawable/color_picker_border">
+
+            <View
+                android:id="@+id/viewLastColor"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_margin="2dp"
+                android:background="@color/chart_last_price_line"
+                android:tag="@color/chart_last_price_line" />
+        </FrameLayout>
     </LinearLayout>
 
     <!-- Price Text Size -->
@@ -96,12 +103,19 @@
             android:text="@string/chart_grid_color"
             android:textSize="13sp" />
 
-        <View
-            android:id="@+id/viewGridColor"
+        <FrameLayout
             android:layout_width="48dp"
             android:layout_height="48dp"
-            android:background="@drawable/color_picker_border"
-            android:tag="@color/chart_grid" />
+            android:background="@drawable/color_picker_border">
+
+            <View
+                android:id="@+id/viewGridColor"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_margin="2dp"
+                android:background="@color/chart_grid"
+                android:tag="@color/chart_grid" />
+        </FrameLayout>
     </LinearLayout>
 
     <!-- Price Text Color -->
@@ -119,12 +133,19 @@
             android:text="@string/chart_price_text_color"
             android:textSize="13sp" />
 
-        <View
-            android:id="@+id/viewTxtColor"
+        <FrameLayout
             android:layout_width="48dp"
             android:layout_height="48dp"
-            android:background="@drawable/color_picker_border"
-            android:tag="@color/chart_price_text" />
+            android:background="@drawable/color_picker_border">
+
+            <View
+                android:id="@+id/viewTxtColor"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_margin="2dp"
+                android:background="@color/chart_text"
+                android:tag="@color/chart_text" />
+        </FrameLayout>
     </LinearLayout>
 
     <!-- Last Line Width -->
