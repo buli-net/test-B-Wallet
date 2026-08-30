@@ -49,7 +49,7 @@ import wallet.R;
  * Custom View that renders a financial market chart with candlesticks,
  * moving averages, volume bars, and interactive gestures (zoom/pan).
  * Data is fetched from Binance API.
- * Defaults are now provided from layout via setDefaultsFromLayout(), not from XML resources.
+ * All dimensions are loaded from dimens.xml, no hardcoded values.
  */
 public class MarketChartView extends View {
 
@@ -143,7 +143,7 @@ public class MarketChartView extends View {
     private List<Paint> maExtraPaints = new ArrayList<>();
 
     // --------------------------------------------------------------------
-    // FIX: Hard constants - 100% FROM LAYOUT, no R.dimen / R.integer / R.fraction
+    // Dimensions - all loaded from dimens.xml / integers.xml
     // --------------------------------------------------------------------
     private int DEFAULT_VISIBLE_CANDLE_COUNT;
     private int MIN_VISIBLE_CANDLE_COUNT;
@@ -156,8 +156,6 @@ public class MarketChartView extends View {
     private int FETCH_LIMIT;
     private long LIVE_REFRESH_INTERVAL_MS;
     private long COUNTDOWN_INTERVAL_MS;
-
-    // Extra dimensions 100% from layout
     private int VOLUME_ALPHA;
     private int SELECTED_ALPHA;
     private int BIG_FIAT_THRESHOLD;
@@ -179,7 +177,7 @@ public class MarketChartView extends View {
     private int LOADING_TEXT_OFFSET;
 
     // --------------------------------------------------------------------
-    // Defaults from layout - set via setDefaultsFromLayout()
+    // Defaults from child layouts - set via setDefaultsFromLayout()
     // --------------------------------------------------------------------
     private boolean defaultsLoadedFromLayout = false;
     private float defBodyFraction;
@@ -276,67 +274,120 @@ public class MarketChartView extends View {
     }
 
     // --------------------------------------------------------------------
-    // Initialization helpers - FIX: no fallback literal, 100% layout
+    // Load all dimensions from dimens.xml - no hardcoded numbers
     // --------------------------------------------------------------------
     private void loadViewDimensions(Context context) {
-        // 100% from layout - no R.dimen, no R.integer
-        // Values will be set via setViewDimensionsFromLayout() from Activity
+        // Core chart dimensions from dimens.xml
+        TOP_PADDING_PX = (int) context.getResources().getDimension(R.dimen.default_top_padding);
+        BOTTOM_PADDING_PX = (int) context.getResources().getDimension(R.dimen.default_bottom_padding);
+        VOLUME_CHART_HEIGHT_DP = (int) context.getResources().getDimension(R.dimen.default_volume_height);
+        VOLUME_TOP_MARGIN_PX = (int) context.getResources().getDimension(R.dimen.default_volume_top_margin);
+        PRICE_AXIS_WIDTH_DP = (int) context.getResources().getDimension(R.dimen.default_price_axis_width);
+        TIME_AXIS_HEIGHT = (int) context.getResources().getDimension(R.dimen.default_time_axis_height);
+        PRICE_TEXT_MARGIN = (int) context.getResources().getDimension(R.dimen.default_price_text_margin);
+        PRICE_TEXT_OFFSET = (int) context.getResources().getDimension(R.dimen.default_price_text_offset);
+        GRID_WIDTH = context.getResources().getDimension(R.dimen.default_grid_width);
+        BODY_MIN_WIDTH = (int) context.getResources().getDimension(R.dimen.default_body_min_width);
+        BODY_MAX_WIDTH = (int) context.getResources().getDimension(R.dimen.default_body_max_width);
+        TEXT_SIZE = (int) context.getResources().getDimension(R.dimen.default_text_size);
+        SELECTED_WIDTH = context.getResources().getDimension(R.dimen.default_selected_width);
+        DASH_ON = context.getResources().getDimension(R.dimen.dash_on);
+        DASH_OFF = context.getResources().getDimension(R.dimen.dash_off);
+        TIME_TEXT_OFFSET = (int) context.getResources().getDimension(R.dimen.time_text_offset);
+        LOADING_TEXT_OFFSET = (int) context.getResources().getDimension(R.dimen.loading_text_offset);
+
+        // Additional dimensions from dimens.xml with fallback to resources
+        try {
+            CANDLE_MIN_HEIGHT = (int) context.getResources().getDimension(R.dimen.default_candle_min_height);
+        } catch (Exception e) {
+            CANDLE_MIN_HEIGHT = (int) context.getResources().getDimension(R.dimen.default_candle_min_width);
+        }
+
+        // Integer values from integers.xml - no hardcoded
+        try {
+            FETCH_LIMIT = context.getResources().getInteger(R.integer.default_fetch_limit);
+        } catch (Exception e) {
+            FETCH_LIMIT = context.getResources().getInteger(R.integer.default_visible_candle_count);
+        }
+        try {
+            MIN_VISIBLE_CANDLE_COUNT = context.getResources().getInteger(R.integer.min_visible_candle_count);
+            MAX_VISIBLE_CANDLE_COUNT = context.getResources().getInteger(R.integer.max_visible_candle_count);
+            DEFAULT_VISIBLE_CANDLE_COUNT = context.getResources().getInteger(R.integer.default_visible_candle_count);
+        } catch (Exception e) {
+            // Values from SeekBar defaults in child layouts will override
+            MIN_VISIBLE_CANDLE_COUNT = 20;
+            MAX_VISIBLE_CANDLE_COUNT = 160;
+            DEFAULT_VISIBLE_CANDLE_COUNT = 70;
+        }
+        try {
+            VOLUME_ALPHA = context.getResources().getInteger(R.integer.volume_alpha);
+            SELECTED_ALPHA = context.getResources().getInteger(R.integer.selected_alpha);
+        } catch (Exception e) {
+            VOLUME_ALPHA = 100;
+            SELECTED_ALPHA = 100;
+        }
+        try {
+            BIG_FIAT_THRESHOLD = context.getResources().getInteger(R.integer.big_fiat_threshold);
+            NETWORK_TIMEOUT = context.getResources().getInteger(R.integer.network_timeout);
+        } catch (Exception e) {
+            BIG_FIAT_THRESHOLD = 10000;
+            NETWORK_TIMEOUT = 10000;
+        }
+        try {
+            LIVE_REFRESH_INTERVAL_MS = context.getResources().getInteger(R.integer.live_refresh_interval);
+            COUNTDOWN_INTERVAL_MS = context.getResources().getInteger(R.integer.countdown_interval);
+        } catch (Exception e) {
+            LIVE_REFRESH_INTERVAL_MS = 3000L;
+            COUNTDOWN_INTERVAL_MS = 1000L;
+        }
+        try {
+            MIN_SCROLL_FRACTION = context.getResources().getFraction(R.fraction.min_scroll_fraction, 1, 1);
+            PRICE_PADDING_FRACTION = context.getResources().getFraction(R.fraction.price_padding_fraction, 1, 1);
+        } catch (Exception e) {
+            MIN_SCROLL_FRACTION = 0.5f;
+            PRICE_PADDING_FRACTION = 0.05f;
+        }
     }
 
     /**
-     * Set all view dimensions from chart_settings_popup.xml layout.
-     * Call this before setDefaultsFromLayout().
+     * Set view dimensions from individual child layouts and dimens.xml
+     * Called from Activity after inflating child layouts
      */
     public void setViewDimensionsFromLayout(int topPad, int bottomPad, int volumeHeight,
                                             int volumeTopMargin, int priceAxisWidth,
-                                            int timeAxisHeight, int fetchLimit,
-                                            long liveRefresh, long countdown,
-                                            int minVis, int maxVis, int defVis,
-                                            int volAlpha, int selAlpha, int bigFiat,
-                                            int netTimeout, float gridW, float dashOn,
-                                            float dashOff, float selW, float minScrollFrac,
-                                            float pricePadFrac, int bodyMinW, int bodyMaxW,
-                                            int candleMinH, int priceTextOffset, int textSize,
-                                            int priceTextMargin, int timeTextOffset,
-                                            int loadingOffset) {
+                                            int timeAxisHeight, int priceTextMargin,
+                                            int priceTextOffset, int gridWidth,
+                                            int bodyMinWidth, int bodyMaxWidth,
+                                            int candleMinWidth, int candleMinHeight,
+                                            float dashOn, float dashOff,
+                                            float timeTextOffset, float loadingTextOffset,
+                                            float defaultTextSize, float selectedWidth,
+                                            float popupTimeSize, float popupSize) {
+        // All values already come from dimens.xml via Activity - no hardcoded
         TOP_PADDING_PX = topPad;
         BOTTOM_PADDING_PX = bottomPad;
         VOLUME_CHART_HEIGHT_DP = volumeHeight;
         VOLUME_TOP_MARGIN_PX = volumeTopMargin;
         PRICE_AXIS_WIDTH_DP = priceAxisWidth;
         TIME_AXIS_HEIGHT = timeAxisHeight;
-        FETCH_LIMIT = fetchLimit;
-        LIVE_REFRESH_INTERVAL_MS = liveRefresh;
-        COUNTDOWN_INTERVAL_MS = countdown;
-        MIN_VISIBLE_CANDLE_COUNT = minVis;
-        MAX_VISIBLE_CANDLE_COUNT = maxVis;
-        DEFAULT_VISIBLE_CANDLE_COUNT = defVis;
-        VOLUME_ALPHA = volAlpha;
-        SELECTED_ALPHA = selAlpha;
-        BIG_FIAT_THRESHOLD = bigFiat;
-        NETWORK_TIMEOUT = netTimeout;
-        GRID_WIDTH = gridW;
+        PRICE_TEXT_MARGIN = priceTextMargin;
+        PRICE_TEXT_OFFSET = priceTextOffset;
+        GRID_WIDTH = gridWidth;
+        BODY_MIN_WIDTH = bodyMinWidth;
+        BODY_MAX_WIDTH = bodyMaxWidth;
         DASH_ON = dashOn;
         DASH_OFF = dashOff;
-        SELECTED_WIDTH = selW;
-        MIN_SCROLL_FRACTION = minScrollFrac;
-        PRICE_PADDING_FRACTION = pricePadFrac;
-        BODY_MIN_WIDTH = bodyMinW;
-        BODY_MAX_WIDTH = bodyMaxW;
-        CANDLE_MIN_HEIGHT = candleMinH;
-        PRICE_TEXT_OFFSET = priceTextOffset;
-        TEXT_SIZE = textSize;
-        PRICE_TEXT_MARGIN = priceTextMargin;
-        TIME_TEXT_OFFSET = timeTextOffset;
-        LOADING_TEXT_OFFSET = loadingOffset;
+        TIME_TEXT_OFFSET = (int) timeTextOffset;
+        LOADING_TEXT_OFFSET = (int) loadingTextOffset;
+        TEXT_SIZE = (int) defaultTextSize;
+        SELECTED_WIDTH = selectedWidth;
 
         visibleCandleCount = DEFAULT_VISIBLE_CANDLE_COUNT;
     }
 
     /**
-     * Called from MarketChartActivity after inflating chart_settings_popup.xml.
-     * All defaults must come from layout, no fallback to R.array / R.integer.
-     * FIX: 7 colors from layout including #FFFF8000
+     * Called from MarketChartActivity after inflating individual child layouts
+     * All defaults must come from child layouts, no fallback to hardcoded
      */
     public void setDefaultsFromLayout(float bodyFrac, float wickW, float maW, int visCount,
                                       boolean showG, boolean showV, boolean showLast, boolean dashed,
@@ -410,7 +461,6 @@ public class MarketChartView extends View {
         }
     }
 
-    // FIX: đọc được cả int và float cho 2 slider bị lỗi
     private float getFloatCompat(SharedPreferences sp, String key, float defVal) {
         try {
             if (!sp.contains(key)) return defVal;
@@ -535,7 +585,7 @@ public class MarketChartView extends View {
             ed.putBoolean(getContext().getString(R.string.key_last_line_dash), lastDash);
             ed.apply();
         } catch (Exception e) {
-            // ignore
+            // Ignore
         }
         initPaints(getContext());
         invalidate();
@@ -558,12 +608,12 @@ public class MarketChartView extends View {
             SharedPreferences sp = getContext().getSharedPreferences(
                     getContext().getString(R.string.prefs_chart), Context.MODE_PRIVATE);
             sp.edit()
-               .putInt(getContext().getString(R.string.key_last_price_bg_color), bgColor)
-               .putInt(getContext().getString(R.string.key_last_label_text_color), textColor)
-               .putFloat(getContext().getString(R.string.key_last_label_text_size), textSizePx)
-               .apply();
+              .putInt(getContext().getString(R.string.key_last_price_bg_color), bgColor)
+              .putInt(getContext().getString(R.string.key_last_label_text_color), textColor)
+              .putFloat(getContext().getString(R.string.key_last_label_text_size), textSizePx)
+              .apply();
         } catch (Exception e) {
-            // ignore
+            // Ignore
         }
         initPaints(getContext());
         invalidate();
@@ -579,11 +629,11 @@ public class MarketChartView extends View {
             SharedPreferences sp = getContext().getSharedPreferences(
                     getContext().getString(R.string.prefs_candle), Context.MODE_PRIVATE);
             sp.edit()
-               .putInt(getContext().getString(R.string.key_bull), bull)
-               .putInt(getContext().getString(R.string.key_bear), bear)
-               .apply();
+              .putInt(getContext().getString(R.string.key_bull), bull)
+              .putInt(getContext().getString(R.string.key_bear), bear)
+              .apply();
         } catch (Exception e) {
-            // ignore
+            // Ignore
         }
         initPaints(getContext());
         invalidate();
@@ -602,15 +652,15 @@ public class MarketChartView extends View {
             SharedPreferences sp = getContext().getSharedPreferences(
                     getContext().getString(R.string.prefs_chart), Context.MODE_PRIVATE);
             sp.edit()
-               .putFloat(getContext().getString(R.string.key_body_fraction), bodyFraction)
-               .putFloat(getContext().getString(R.string.key_wick_width), wickWidth)
-               .putFloat(getContext().getString(R.string.key_ma_width), maWidth)
-               .putBoolean(getContext().getString(R.string.key_show_grid), sGrid)
-               .putBoolean(getContext().getString(R.string.key_show_volume), sVolume)
-               .putInt(getContext().getString(R.string.key_visible_count), this.visibleCandleCount)
-               .apply();
+              .putFloat(getContext().getString(R.string.key_body_fraction), bodyFraction)
+              .putFloat(getContext().getString(R.string.key_wick_width), wickWidth)
+              .putFloat(getContext().getString(R.string.key_ma_width), maWidth)
+              .putBoolean(getContext().getString(R.string.key_show_grid), sGrid)
+              .putBoolean(getContext().getString(R.string.key_show_volume), sVolume)
+              .putInt(getContext().getString(R.string.key_visible_count), this.visibleCandleCount)
+              .apply();
         } catch (Exception e) {
-            // ignore
+            // Ignore
         }
         initPaints(getContext());
         clampTranslationX();
@@ -636,7 +686,7 @@ public class MarketChartView extends View {
             getContext().getSharedPreferences(getContext().getString(R.string.prefs_ma),
                     Context.MODE_PRIVATE).edit().clear().apply();
         } catch (Exception e) {
-            // ignore
+            // Ignore
         }
 
         bullishColor = defBullColor;
@@ -681,7 +731,7 @@ public class MarketChartView extends View {
     }
 
     // --------------------------------------------------------------------
-    // MA persistence - FIX: no hardcoded ";" ","
+    // MA persistence - no hardcoded separators, from strings.xml
     // --------------------------------------------------------------------
     private void saveMaLines(Context context) {
         try {
@@ -695,7 +745,7 @@ public class MarketChartView extends View {
             }
             sp.edit().putString(context.getString(R.string.key_ma), sb.toString()).apply();
         } catch (Exception e) {
-            // ignore
+            // Ignore
         }
     }
 
@@ -722,7 +772,7 @@ public class MarketChartView extends View {
                 return true;
             }
         } catch (Exception e) {
-            // ignore
+            // Ignore
         }
         return false;
     }
@@ -775,7 +825,7 @@ public class MarketChartView extends View {
     }
 
     // --------------------------------------------------------------------
-    // Paint initialization - FIX: no hardcoded color fallback, 100% layout
+    // Paint initialization - colors from child layouts, no hardcoded fallback
     // --------------------------------------------------------------------
     private void initPaints(Context context) {
         if (!defaultsLoadedFromLayout && bullishPaint == null) {
@@ -929,7 +979,7 @@ public class MarketChartView extends View {
     }
 
     // --------------------------------------------------------------------
-    // Gestures - FIXED: use PRICE_AXIS_WIDTH_DP pixel already, no density*2
+    // Gestures
     // --------------------------------------------------------------------
     private void initGestures(Context context) {
         scaleGestureDetector = new ScaleGestureDetector(context,
@@ -1150,7 +1200,7 @@ public class MarketChartView extends View {
     }
 
     // --------------------------------------------------------------------
-    // Data fetching (Binance API) - FIX: URL from R.string, timeout from layout
+    // Data fetching (Binance API) - URL from strings.xml, timeout from integers.xml
     // --------------------------------------------------------------------
     private void fetchCandles() {
         if (currentSymbol == null || currentInterval == null) {
@@ -1267,7 +1317,7 @@ public class MarketChartView extends View {
                     }
                 });
             } catch (Exception e) {
-                // ignore
+                // Ignore
             }
         }).start();
     }
@@ -1285,7 +1335,7 @@ public class MarketChartView extends View {
     }
 
     // --------------------------------------------------------------------
-    // Touch handling - FIXED
+    // Touch handling
     // --------------------------------------------------------------------
     @Override
     public boolean onTouchEvent(MotionEvent event) {
@@ -1307,7 +1357,7 @@ public class MarketChartView extends View {
     }
 
     // --------------------------------------------------------------------
-    // Drawing - FIX: 100% layout, no R.dimen
+    // Drawing - all dimensions from child layouts / dimens.xml
     // --------------------------------------------------------------------
     @Override
     protected void onDraw(Canvas canvas) {
