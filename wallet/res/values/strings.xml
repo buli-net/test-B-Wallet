@@ -615,4 +615,56 @@
     <string name="err_bull_bear_tag_missing" translatable="false">viewBull/viewBear missing android:tag with default color</string>
     <string name="err_ma_periods_empty" translatable="false">tvDefMaPeriods is empty</string>
 
+
+
+    
+    <string name="prefs_ma">ma_prefs</string>
+    <string name="key_ma">ma_lines</string>
+    <string name="prefs_candle">candle_prefs</string>
+    <string name="key_bull">bull_color</string>
+    <string name="key_bear">bear_color</string>
+    <string name="prefs_chart">chart_options_prefs</string>
+    <string name="key_body_fraction">body_fraction</string>
+    <string name="key_wick_width">wick_width</string>
+    <string name="key_ma_width">ma_width</string>
+    <string name="key_show_grid">show_grid</string>
+    <string name="key_show_volume">show_volume</string>
+    <string name="key_visible_count">visible_count</string>
+    <string name="key_show_last_price">show_last_price</string>
+    <string name="key_last_price_line_color">last_price_line_color</string>
+    <string name="key_last_price_bg_color">last_price_bg_color</string>
+    <string name="key_price_text_size">price_text_size</string>
+    <string name="key_price_text_color">price_text_color</string>
+    <string name="key_grid_color">grid_color</string>
+    <string name="key_bg_color">bg_color</string>
+    <string name="key_last_line_width">last_line_width</string>
+    <string name="key_last_line_dash">last_line_dash</string>
+    <string name="key_last_label_text_size">last_label_text_size</string>
+    <string name="key_last_label_text_color">last_label_text_color</string>
+    
+    <string name="time_format">MM-dd HH:mm</string>
+    <string name="url_klines">https://api.binance.com/api/v3/klines?symbol=%1$s&amp;interval=%2$s&amp;limit=%3$d</string>
+    <string name="url_ticker">https://api.binance.com/api/v3/ticker/24hr?symbol=%1$s</string>
+    <string name="fmt_hms">%02d:%02d:%02d</string>
+    <string name="fmt_dhms">%02d:%02d:%02d:%02d</string>
+    <string name="fmt_price_0">%,.0f</string>
+    <string name="fmt_price_2">%,.2f</string>
+    <string name="chart_loading">Loading…</string>
+
+    <string name="err_ma_empty">defMaLines empty - check tvDefMaPeriods in layout</string>
+    <string name="err_color_0">Color from layout is 0 - check android:tag in chart_settings_popup.xml</string>
+    <string name="err_defaults_not_loaded">setDefaultsFromLayout() must be called before using MarketChartView - defaults come from layout</string>
+    <string name="err_missing_dimen">Missing dimen/integer - must define in res, no hardcoded</string>
+    <string name="err_candle_0">Candle color 0 from layout</string>
+    <string name="err_ma_color_0">MA color 0 - must come from layout</string>
+    <string name="err_interval_null">interval null - must come from layout</string>
+    <string name="err_symbol_null">symbol/interval null</string>
+    <string name="err_fiat_0">fiatMultiplier must be from layout, not 0</string>
+    <string name="err_unknown_interval">Unknown interval %1$s</string>
+    <string name="err_price_height">priceChartHeight &lt;=0 - check dimen</string>
+    <string name="err_theme_bg">Theme colorBackground missing - must be in theme</string>
+    <string name="err_color_tag">Color 0 - must from layout tag</string>
+    <string name="err_label_color">Label color 0</string>
+    <string name="err_appearance_color">ChartAppearance color 0 - must come from layout tag</string>
+
 </resources>
