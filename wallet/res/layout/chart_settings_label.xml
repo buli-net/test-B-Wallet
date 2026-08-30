@@ -33,7 +33,8 @@
             android:id="@+id/viewLabelBg"
             android:layout_width="48dp"
             android:layout_height="48dp"
-            android:background="@drawable/color_picker_border" />
+            android:background="@drawable/color_picker_border"
+            android:tag="@color/chart_last_price_line" />
     </LinearLayout>
 
     <!-- Label Text Color -->
@@ -55,7 +56,8 @@
             android:id="@+id/viewLabelTextColor"
             android:layout_width="48dp"
             android:layout_height="48dp"
-            android:background="@drawable/color_picker_border" />
+            android:background="@drawable/color_picker_border"
+            android:tag="@color/last_label_text" />
     </LinearLayout>
 
     <!-- Label Text Size -->
