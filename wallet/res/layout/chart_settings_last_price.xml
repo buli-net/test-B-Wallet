@@ -68,14 +68,14 @@
             android:id="@+id/lbTxtSize"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Price text size: 18px"
+            android:text="@string/chart_price_text_size"
             android:textSize="12sp" />
 
         <SeekBar
             android:id="@+id/sbTxtSize"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:max="30"
+            android:max="32"
             android:progress="18" />
     </LinearLayout>
 
