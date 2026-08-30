@@ -50,7 +50,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
-            android:text="@string/chart_settings_width"
             android:textSize="12sp" />
     </LinearLayout>
 
