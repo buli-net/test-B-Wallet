@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <integer name="default_visible_count">80</integer>
+    <integer name="default_visible_count">82</integer>
     <integer name="min_visible_count">20</integer>
     <integer name="max_visible_count">150</integer>
     <integer name="fetch_limit">300</integer>
