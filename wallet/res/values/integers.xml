@@ -19,6 +19,4 @@
     <integer name="big_fiat_threshold">100</integer>
     <integer name="network_timeout">8000</integer>
 
-    <integer name="min_visible_candle_count">20</integer>
-<integer name="max_visible_candle_count">200</integer>
 </resources>
