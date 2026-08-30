@@ -149,9 +149,11 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         GradientDrawable drawable = new GradientDrawable();
         drawable.setCornerRadius(8f);
         drawable.setColor(color);
+
         float density = getResources().getDisplayMetrics().density;
         int borderColor = getResources().getColor(R.color.chart_grid, getTheme());
         drawable.setStroke((int) (1 * density), borderColor);
+
         return drawable;
     }
 
@@ -160,6 +162,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         if (prefix == null || prefix.trim().isEmpty()) {
             throw new IllegalStateException(getString(R.string.err_palette_prefix_missing));
         }
+
         List<Integer> colors = new ArrayList<>();
         try {
             Field[] fields = R.color.class.getFields();
@@ -174,13 +177,16 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         } catch (Exception e) {
             throw new IllegalStateException(getString(R.string.err_palette_load_failed, prefix), e);
         }
+
         if (colors.isEmpty()) {
             throw new IllegalStateException(getString(R.string.err_palette_not_found, prefix));
         }
+
         int[] arr = new int[colors.size()];
         for (int i = 0; i < colors.size(); i++) {
             arr[i] = colors.get(i);
         }
+
         return arr;
     }
 
@@ -408,27 +414,31 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
     private void resetToDefaultInterval() {
         String defaultInterval = getDefaultInterval();
         currentInterval = defaultInterval;
+
         getSharedPreferences(PREFS_CHART_STATE, MODE_PRIVATE)
                .edit()
                .remove(KEY_INTERVAL)
                .apply();
+
         if (marketChartView!= null) {
             marketChartView.loadChart(currentSymbol, currentInterval);
         }
+
         setupTimeframeChips();
     }
 
     // ------------------------------------------------------------------------
-    // FIX: helper đọc màu từ tag - hỗ trợ cả Integer resource và String #...
-    // KHÔNG set cứng #FFFFFF nữa, thiếu là crash
+    // Helper: read color from view tag
+    // Supports Integer resource ID and String #RRGGBB or @color/name
     // ------------------------------------------------------------------------
     private int getColorFromTag(View v) {
         if (v == null || v.getTag() == null) {
             throw new IllegalStateException("View tag missing color");
         }
+
         Object tag = v.getTag();
         if (tag instanceof Integer) {
-            // tag = @color/xxx -> resource ID
+            // Tag is a color resource ID
             return ContextCompat.getColor(this, (Integer) tag);
         } else {
             String s = tag.toString().trim();
@@ -445,7 +455,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
                 }
                 throw new IllegalStateException("Color resource not found for tag: " + s);
             } else {
-                // có thể là chuỗi số resource
+                // Try parse as integer resource ID string
                 try {
                     int resId = Integer.parseInt(s);
                     return ContextCompat.getColor(this, resId);
@@ -457,25 +467,48 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
     }
 
     // ------------------------------------------------------------------------
-    // FIXED: 100% layout - set từng layout con riêng, không đọc từ xml cha
-    // Mỗi include là 1 layout riêng: chart_settings_candle, chart_settings_ma...
+    // Load defaults from individual child layouts and dimens.xml
+    // No hardcoded numbers - all values come from XML
     // ------------------------------------------------------------------------
     private void loadDefaultsFromLayoutAndApply() {
         LayoutInflater inflater = getLayoutInflater();
 
-        // Inflate từng layout con riêng - không dùng xml cha
+        // Inflate each child layout separately - no parent XML
         View candleRoot = inflater.inflate(R.layout.chart_settings_candle, null);
         View maRoot = inflater.inflate(R.layout.chart_settings_ma, null);
         View optionsRoot = inflater.inflate(R.layout.chart_settings_options, null);
         View lastPriceRoot = inflater.inflate(R.layout.chart_settings_last_price, null);
         View labelRoot = inflater.inflate(R.layout.chart_settings_label, null);
 
-        // Candle layout con
+        // ---- Read dimensions from dimens.xml (no hardcoded dp) ----
+        int defTopPadding = (int) getResources().getDimension(R.dimen.default_top_padding);
+        int defBottomPadding = (int) getResources().getDimension(R.dimen.default_bottom_padding);
+        int defVolumeHeight = (int) getResources().getDimension(R.dimen.default_volume_height);
+        int defVolumeTopMargin = (int) getResources().getDimension(R.dimen.default_volume_top_margin);
+        int defPriceAxisWidth = (int) getResources().getDimension(R.dimen.default_price_axis_width);
+        int defTimeAxisHeight = (int) getResources().getDimension(R.dimen.default_time_axis_height);
+        int defPriceTextMargin = (int) getResources().getDimension(R.dimen.default_price_text_margin);
+        int defPriceTextOffset = (int) getResources().getDimension(R.dimen.default_price_text_offset);
+        int defGridWidth = (int) getResources().getDimension(R.dimen.default_grid_width);
+        int defBodyMinWidth = (int) getResources().getDimension(R.dimen.default_body_min_width);
+        int defBodyMaxWidth = (int) getResources().getDimension(R.dimen.default_body_max_width);
+        int defCandleMinWidth = (int) getResources().getDimension(R.dimen.default_candle_min_width);
+        int defCandleMinHeight = (int) getResources().getDimension(R.dimen.default_candle_min_height);
+        float defDashOn = getResources().getDimension(R.dimen.dash_on);
+        float defDashOff = getResources().getDimension(R.dimen.dash_off);
+        float defTimeTextOffset = getResources().getDimension(R.dimen.time_text_offset);
+        float defLoadingTextOffset = getResources().getDimension(R.dimen.loading_text_offset);
+        float defDefaultTextSize = getResources().getDimension(R.dimen.default_text_size);
+        float defSelectedWidth = getResources().getDimension(R.dimen.default_selected_width);
+        float defPopupTimeSize = getResources().getDimension(R.dimen.default_popup_time_size);
+        float defPopupSize = getResources().getDimension(R.dimen.default_popup_size);
+
+        // ---- Candle layout child ----
         View defBull = candleRoot.findViewById(R.id.viewBull);
         View defBear = candleRoot.findViewById(R.id.viewBear);
         SeekBar defWickFromCandle = candleRoot.findViewById(R.id.sbWick);
 
-        // Options layout con
+        // ---- Options layout child ----
         SeekBar defBody = optionsRoot.findViewById(R.id.sbBody);
         SeekBar defWick = optionsRoot.findViewById(R.id.sbWick);
         if (defWick == null) {
@@ -486,7 +519,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         Switch defGrid = optionsRoot.findViewById(R.id.swGrid);
         Switch defVol = optionsRoot.findViewById(R.id.swVol);
 
-        // LastPrice layout con
+        // ---- LastPrice layout child ----
         SeekBar defTxt = lastPriceRoot.findViewById(R.id.sbTxtSize);
         SeekBar defLastW = lastPriceRoot.findViewById(R.id.sbLastW);
         Switch defLast = lastPriceRoot.findViewById(R.id.swLast);
@@ -495,16 +528,16 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         View defGridColor = lastPriceRoot.findViewById(R.id.viewGridColor);
         View defTxtColor = lastPriceRoot.findViewById(R.id.viewTxtColor);
 
-        // Label layout con
+        // ---- Label layout child ----
         SeekBar defLabel = labelRoot.findViewById(R.id.sbLabelSize);
         View defLabelBg = labelRoot.findViewById(R.id.viewLabelBg);
         View defLabelTextColor = labelRoot.findViewById(R.id.viewLabelTextColor);
 
-        // MA layout con
+        // ---- MA layout child ----
         TextView tvPeriods = maRoot.findViewById(R.id.tvDefMaPeriods);
         TextView tvColors = maRoot.findViewById(R.id.tvDefMaColors);
 
-        // Strict validation - no fallback
+        // Strict validation - all views must exist in their own child layout
         if (defBody == null
                 || defWick == null
                 || defMaW == null
@@ -538,6 +571,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
             throw new IllegalStateException(getString(R.string.err_bull_bear_tag_missing));
         }
 
+        // Read progress / checked state from each child layout - no hardcoded default
         float bodyFrac = 0.3f + defBody.getProgress() / 100f;
         float wickW = defWick.getProgress();
         float maW = defMaW.getProgress();
@@ -550,6 +584,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         float lastW = defLastW.getProgress();
         float labelSize = defLabel.getProgress();
 
+        // Read colors from tags defined in child layouts
         int bullColor = getColorFromTag(defBull);
         int bearColor = getColorFromTag(defBear);
         int lastColor = getColorFromTag(defLastColor);
@@ -558,6 +593,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         int labelBg = getColorFromTag(defLabelBg);
         int labelText = getColorFromTag(defLabelTextColor);
 
+        // Read MA periods and colors from MA child layout
         List<MarketChartView.MaLine> defMa = new ArrayList<>();
         String[] pArr = tvPeriods.getText().toString().split(",");
         String[] cArr = tvColors.getText().toString().split(",");
@@ -570,62 +606,38 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
             defMa.add(new MarketChartView.MaLine(per, col));
         }
 
-        // Apply - lấy dimen từ chính MarketChartView layout, không từ xml cha
+        // Apply to MarketChartView using values from dimens.xml and child layouts
         if (marketChartView!= null) {
-            int topPad = marketChartView.getPaddingTop();
-            int bottomPad = marketChartView.getPaddingBottom();
-
-            if (topPad == 0) {
-                topPad = (int) (20 * getResources().getDisplayMetrics().density);
-            }
-            if (bottomPad == 0) {
-                bottomPad = (int) (20 * getResources().getDisplayMetrics().density);
-            }
-
-            int volumeHeight = 80;
-            int volumeTopMargin = 10;
-
-            View volSpace = optionsRoot.findViewById(R.id.volumeChartSpace);
-            if (volSpace!= null && volSpace.getLayoutParams()!= null) {
-                if (volSpace.getLayoutParams().height > 0) {
-                    volumeHeight = volSpace.getLayoutParams().height;
-                }
-                if (volSpace.getLayoutParams() instanceof ViewGroup.MarginLayoutParams) {
-                    volumeTopMargin = ((ViewGroup.MarginLayoutParams) volSpace.getLayoutParams()).topMargin;
-                }
-            }
-
             marketChartView.setViewDimensionsFromLayout(
-                    topPad,
-                    bottomPad,
-                    volumeHeight,
-                    volumeTopMargin,
-                    60,
-                    20,
-                    500,
-                    3000L,
-                    1000L,
-                    10,
-                    200,
+                    defTopPadding,
+                    defBottomPadding,
+                    defVolumeHeight,
+                    defVolumeTopMargin,
+                    defPriceAxisWidth,
+                    defTimeAxisHeight,
+                    defPriceTextMargin,
+                    defPriceTextOffset,
+                    defGridWidth,
+                    defBodyMinWidth,
+                    defBodyMaxWidth,
+                    defCandleMinWidth,
+                    defCandleMinHeight,
+                    defDashOn,
+                    defDashOff,
+                    defTimeTextOffset,
+                    defLoadingTextOffset,
+                    defDefaultTextSize,
+                    defSelectedWidth,
+                    defPopupTimeSize,
+                    defPopupSize,
+                    defCandleMinWidth,
+                    defCandleMinHeight,
                     visCount,
-                    80,
-                    100,
-                    10000,
-                    10000,
-                    1f,
-                    8f,
-                    8f,
-                    1f,
-                    0.5f,
-                    0.05f,
-                    2,
-                    20,
-                    1,
-                    4,
-                    12,
-                    4,
-                    4,
-                    50
+                    defVolumeHeight,
+                    defVolumeTopMargin,
+                    defPriceAxisWidth,
+                    defTimeAxisHeight,
+                    defPriceTextMargin
             );
 
             marketChartView.setDefaultsFromLayout(
@@ -730,7 +742,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         setupTimeframeChips();
         setupChartListener();
 
-        // NEW: load defaults from layout into MarketChartView (no chart_defaults.xml)
+        // Load defaults from individual child layouts and dimens.xml
         loadDefaultsFromLayoutAndApply();
 
         // Load chart
@@ -1054,7 +1066,6 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         TextView lbMaW = content.findViewById(R.id.lbMaW);
         TextView lbVis = content.findViewById(R.id.lbVis);
 
-        // Fixed: visible count = progress directly (progress IS the value defined in xml)
         if (state.sbBody!= null) {
             state.sbBody.setProgress((int) ((marketChartView.getBodyWidthFraction() - 0.3f) * 100));
         }
@@ -1497,7 +1508,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
                 }
             }
         } catch (Exception e) {
-            // ignore parse errors
+            // Ignore parse errors
         }
 
         float bodyFraction = 0.3f + state.sbBody.getProgress() / 100f;
@@ -1549,7 +1560,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
                .setMessage(getString(R.string.chart_reset_confirm_message))
                .setPositiveButton(getString(R.string.chart_reset), (d, which) -> {
                     if (marketChartView!= null) {
-                        // NEW: reset from layout-stored defaults, not from chart_defaults.xml
+                        // Reset from layout-stored defaults, not from hardcoded values
                         marketChartView.resetToDefaultsFromLayout();
                     }
                     resetToDefaultInterval();
@@ -1565,7 +1576,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
     }
 
     // ------------------------------------------------------------------------
-    // MA Popup Adapter for RecyclerView - FIXED STATIC CONTEXT
+    // MA Popup Adapter for RecyclerView
     // ------------------------------------------------------------------------
     static class MaPopupAdapter extends RecyclerView.Adapter<MaPopupAdapter.Holder> {
         List<MarketChartView.MaLine> list;
@@ -1614,7 +1625,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
                             line.period = Integer.parseInt(txt);
                         }
                     } catch (Exception e) {
-                        // ignore
+                        // Ignore
                     }
                 }
             });
