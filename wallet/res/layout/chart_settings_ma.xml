@@ -14,6 +14,21 @@
         android:textStyle="bold"
         android:paddingBottom="8dp" />
 
+    <!-- DEFAULT MA - lấy từ layout, không hardcode trong Java nữa -->
+    <TextView
+        android:id="@+id/tvDefMaPeriods"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        android:text="7,25,99" />
+
+    <TextView
+        android:id="@+id/tvDefMaColors"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        android:text="#FFC107,#2196F3,#E91E63" />
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recycler_ma_popup"
         android:layout_width="match_parent"
