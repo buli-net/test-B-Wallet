@@ -579,12 +579,10 @@
     <string name="chart_last_price_color">Last Price Color</string>
     <string name="chart_grid_color">Grid Color</string>
     <string name="chart_price_text_color">Price Text Color</string>
-    <string name="chart_last_line_width">Last Line Width: %1$dpx</string>
     <string name="chart_last_line_dashed">Dashed Last Line</string>
     <string name="chart_last_price_label_section">Current Price Label</string>
     <string name="chart_last_price_label_bg">Label Background</string>
     <string name="chart_last_price_label_text_color">Label Text Color</string>
-    <string name="chart_last_price_label_text_size">Label Text Size: %d</string>
     <string name="chart_settings_reset">Reset done</string>
     <string name="chart_reset">Reset</string>
     <string name="chart_reset_confirm_title">Reset?</string>
@@ -620,7 +618,7 @@
     <string name="json_quoteVolume" translatable="false">quoteVolume</string>
     <string name="json_priceChangePercent" translatable="false">priceChangePercent</string>
 
-    <!-- Market chart - Prefs keys (không dịch) -->
+    <!-- Market chart - Prefs keys -->
     <string name="prefs_ma" translatable="false">ma_prefs</string>
     <string name="key_ma" translatable="false">ma_lines</string>
     <string name="prefs_candle" translatable="false">candle_prefs</string>
@@ -659,7 +657,7 @@
     <string name="arrow_collapsed" translatable="false">▼</string>
     <string name="arrow_expanded" translatable="false">▲</string>
 
-    <!-- Market chart - Errors (bắt buộc, thiếu là crash) -->
+    <!-- Market chart - Errors -->
     <string name="err_missing_dimen" translatable="false">Missing dimen/integer - must define in res, no hardcoded</string>
     <string name="err_ma_empty" translatable="false">defMaLines empty - check tvDefMaPeriods in layout</string>
     <string name="err_color_0" translatable="false">Color from layout is 0 - check android:tag in chart_settings_popup.xml</string>
