@@ -666,5 +666,15 @@
     <string name="err_color_tag">Color 0 - must from layout tag</string>
     <string name="err_label_color">Label color 0</string>
     <string name="err_appearance_color">ChartAppearance color 0 - must come from layout tag</string>
-
+<string name="fiat_usd">USD</string>
+<string name="sep_semicolon">;</string>
+<string name="sep_comma">,</string>
+<string name="sep_semicolon_regex">;</string>
+<string name="sep_comma_regex">,</string>
+<string name="json_lastPrice">lastPrice</string>
+<string name="json_highPrice">highPrice</string>
+<string name="json_lowPrice">lowPrice</string>
+<string name="json_volume">volume</string>
+<string name="json_quoteVolume">quoteVolume</string>
+<string name="json_priceChangePercent">priceChangePercent</string>
 </resources>
