@@ -57,7 +57,7 @@
     <!-- MarketChartView - dashed last line & labels -->
     <dimen name="dash_on">10dp</dimen>
     <dimen name="dash_off">6dp</dimen>
-    <dimen name="time_text_offset">16dp</dimen>
+    <dimen name="time_text_offset">4dp</dimen>
     <dimen name="loading_text_offset">100dp</dimen>
     
 </resources>
