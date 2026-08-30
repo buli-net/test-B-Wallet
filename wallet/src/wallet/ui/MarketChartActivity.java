@@ -881,47 +881,25 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
             });
         }
 
-        // 3. Chart options
-      //  View headerOptions = content.findViewById(R.id.headerOptions);
-        //TextView arrowOptions = content.findViewById(R.id.arrowOptions);
-      //  View containerOptions = content.findViewById(R.id.containerOptions);
+        // 3. Chart options  
+       View headerOptions = content.findViewById(R.id.headerOptions);
+       TextView arrowOptions = content.findViewById(R.id.arrowOptions);
+       View containerOptions = content.findViewById(R.id.containerOptions);
 
-      //  state.sbBody = content.findViewById(R.id.sbBody);
-     //   state.sbWick = content.findViewById(R.id.sbWick);
-     //   state.sbMaW = content.findViewById(R.id.sbMaW);
-     //   state.sbVis = content.findViewById(R.id.sbVis);
-     //   state.swGrid = content.findViewById(R.id.swGrid);
-     //   state.swVol = content.findViewById(R.id.swVol);
+       state.sbBody = containerOptions.findViewById(R.id.sbBody);
+       state.sbWick = containerOptions.findViewById(R.id.sbWick);
+       state.sbMaW = containerOptions.findViewById(R.id.sbMaW);
+       state.sbVis = containerOptions.findViewById(R.id.sbVis);
+       state.swGrid = containerOptions.findViewById(R.id.swGrid);
+       state.swVol = containerOptions.findViewById(R.id.swVol);
 
-    //    TextView lbBody = content.findViewById(R.id.lbBody);
-     //   TextView lbWick = content.findViewById(R.id.lbWick);
-      //  TextView lbMaW = content.findViewById(R.id.lbMaW);
-      //  TextView lbVis = content.findViewById(R.id.lbVis);
+       TextView lbBody = containerOptions.findViewById(R.id.lbBody);
+       TextView lbWick = containerOptions.findViewById(R.id.lbWick);
+       TextView lbMaW = containerOptions.findViewById(R.id.lbMaW);
+       TextView lbVis = containerOptions.findViewById(R.id.lbVis);
 
-      //  int minVisPopup = getResources().getInteger(R.integer.min_visible_candle_count);
-     //   int maxVisPopup = getResources().getInteger(R.integer.max_visible_candle_count);
-        
-    View headerOptions = content.findViewById(R.id.headerOptions);
-    TextView arrowOptions = content.findViewById(R.id.arrowOptions);
-    View containerOptions = content.findViewById(R.id.containerOptions);
-
-    state.sbBody = containerOptions.findViewById(R.id.sbBody);
-    state.sbWick = containerOptions.findViewById(R.id.sbWick);
-    state.sbMaW = containerOptions.findViewById(R.id.sbMaW);
-    state.sbVis = containerOptions.findViewById(R.id.sbVis);
-    state.swGrid = containerOptions.findViewById(R.id.swGrid);
-    state.swVol = containerOptions.findViewById(R.id.swVol);
-
-    TextView lbBody = containerOptions.findViewById(R.id.lbBody);
-    TextView lbWick = containerOptions.findViewById(R.id.lbWick);
-    TextView lbMaW = containerOptions.findViewById(R.id.lbMaW);
-    TextView lbVis = containerOptions.findViewById(R.id.lbVis);
-
-    int minVisPopup = getResources().getInteger(R.integer.min_visible_candle_count);
-    int maxVisPopup = getResources().getInteger(R.integer.max_visible_candle_count);
-
-
-
+       int minVisPopup = getResources().getInteger(R.integer.min_visible_candle_count);
+       int maxVisPopup = getResources().getInteger(R.integer.max_visible_candle_count);
         
         if (state.sbVis!= null) {
             state.sbVis.setMax(maxVisPopup);
