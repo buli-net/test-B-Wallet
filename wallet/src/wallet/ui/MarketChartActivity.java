@@ -58,6 +58,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import org.bitcoinj.base.Coin;
 import org.bitcoinj.base.utils.Fiat;
 
+import java.lang.reflect.Field;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Currency;
@@ -155,6 +156,33 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         int borderColor = getResources().getColor(R.color.chart_grid, getTheme());
         drawable.setStroke((int) (1 * density), borderColor);
         return drawable;
+    }
+
+    private int[] loadPaletteFromColorsXml() {
+        String prefix = getString(R.string.palette_prefix);
+        if (prefix == null || prefix.trim().isEmpty()) {
+            throw new IllegalStateException(getString(R.string.err_palette_prefix_missing));
+        }
+        List<Integer> colors = new ArrayList<>();
+        try {
+            Field[] fields = R.color.class.getFields();
+            for (Field f : fields) {
+                String name = f.getName();
+                if (name.startsWith(prefix)) {
+                    int resId = f.getInt(null);
+                    int c = getResources().getColor(resId, getTheme());
+                    colors.add(c);
+                }
+            }
+        } catch (Exception e) {
+            throw new IllegalStateException(getString(R.string.err_palette_load_failed, prefix), e);
+        }
+        if (colors.isEmpty()) {
+            throw new IllegalStateException(getString(R.string.err_palette_not_found, prefix));
+        }
+        int[] arr = new int[colors.size()];
+        for (int i = 0; i < colors.size(); i++) arr[i] = colors.get(i);
+        return arr;
     }
 
     // ------------------------------------------------------------------------
@@ -419,10 +447,10 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
             defGrid == null || defVol == null || defTxt == null || defLastW == null ||
             defLabel == null || defLast == null || defDash == null ||
             defBull == null || defBear == null || tvPeriods == null || tvColors == null) {
-            throw new IllegalStateException("Missing default view in chart_settings_*.xml - check layout ids");
+            throw new IllegalStateException(getString(R.string.err_missing_default_view));
         }
         if (defBull.getTag() == null || defBear.getTag() == null) {
-            throw new IllegalStateException("viewBull/viewBear missing android:tag with default color");
+            throw new IllegalStateException(getString(R.string.err_bull_bear_tag_missing));
         }
 
         float bodyFrac = 0.3f + defBody.getProgress() / 100f;
@@ -444,7 +472,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         String[] pArr = tvPeriods.getText().toString().split(",");
         String[] cArr = tvColors.getText().toString().split(",");
         if (pArr.length == 0 || pArr[0].trim().isEmpty()) {
-            throw new IllegalStateException("tvDefMaPeriods is empty");
+            throw new IllegalStateException(getString(R.string.err_ma_periods_empty));
         }
         for (int i = 0; i < pArr.length; i++) {
             int per = Integer.parseInt(pArr[i].trim());
@@ -669,13 +697,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         final ChartSettingsState state = new ChartSettingsState();
 
         // Load color palette
-        Resources resPal = getResources();
-        TypedArray palTa = resPal.obtainTypedArray(R.array.chart_color_palette);
-        state.candlePalette = new int[palTa.length()];
-        for (int i = 0; i < palTa.length(); i++) {
-            state.candlePalette[i] = palTa.getColor(i, 0);
-        }
-        palTa.recycle();
+        state.candlePalette = loadPaletteFromColorsXml();
 
         // Current candle colors
         state.curBull[0] = marketChartView.getBullishColor();
@@ -763,13 +785,13 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
             final boolean[] candleExpanded = {false};
             containerCandle.setVisibility(View.GONE);
             if (arrowCandle!= null) {
-                arrowCandle.setText("▸");
+                arrowCandle.setText(getString(R.string.arrow_collapsed));
             }
             headerCandle.setOnClickListener(v -> {
                 candleExpanded[0] =!candleExpanded[0];
                 containerCandle.setVisibility(candleExpanded[0]? View.VISIBLE : View.GONE);
                 if (arrowCandle!= null) {
-                    arrowCandle.setText(candleExpanded[0]? "▾" : "▸");
+                    arrowCandle.setText(getString(candleExpanded[0]? R.string.arrow_expanded : R.string.arrow_collapsed));
                 }
             });
         }
@@ -798,13 +820,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
                     Toast.makeText(v.getContext(), getString(R.string.max_ma_reached), Toast.LENGTH_SHORT).show();
                     return;
                 }
-                Resources res = getResources();
-                TypedArray ta = res.obtainTypedArray(R.array.chart_color_palette);
-                int[] colors = new int[ta.length()];
-                for (int i = 0; i < ta.length(); i++) {
-                    colors[i] = ta.getColor(i, 0);
-                }
-                ta.recycle();
+                int[] colors = loadPaletteFromColorsXml();
                 int color = colors[state.tempList.size() % colors.length];
                 state.tempList.add(new MarketChartView.MaLine(20, color));
                 if (state.recycler!= null && state.recycler.getAdapter()!= null) {
@@ -818,13 +834,13 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
             final boolean[] maExpanded = {false};
             containerMa.setVisibility(View.GONE);
             if (arrowMa!= null) {
-                arrowMa.setText("▸");
+                arrowMa.setText(getString(R.string.arrow_collapsed));
             }
             headerMa.setOnClickListener(v -> {
                 maExpanded[0] =!maExpanded[0];
                 containerMa.setVisibility(maExpanded[0]? View.VISIBLE : View.GONE);
                 if (arrowMa!= null) {
-                    arrowMa.setText(maExpanded[0]? "▾" : "▸");
+                    arrowMa.setText(getString(maExpanded[0]? R.string.arrow_expanded : R.string.arrow_collapsed));
                 }
             });
         }
@@ -938,13 +954,13 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
             final boolean[] optionsExpanded = {false};
             containerOptions.setVisibility(View.GONE);
             if (arrowOptions!= null) {
-                arrowOptions.setText("▸");
+                arrowOptions.setText(getString(R.string.arrow_collapsed));
             }
             headerOptions.setOnClickListener(v -> {
                 optionsExpanded[0] =!optionsExpanded[0];
                 containerOptions.setVisibility(optionsExpanded[0]? View.VISIBLE : View.GONE);
                 if (arrowOptions!= null) {
-                    arrowOptions.setText(optionsExpanded[0]? "▾" : "▸");
+                    arrowOptions.setText(getString(optionsExpanded[0]? R.string.arrow_expanded : R.string.arrow_collapsed));
                 }
             });
         }
@@ -1067,13 +1083,13 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
             final boolean[] lastPriceExpanded = {false};
             containerLastPrice.setVisibility(View.GONE);
             if (arrowLastPrice!= null) {
-                arrowLastPrice.setText("▸");
+                arrowLastPrice.setText(getString(R.string.arrow_collapsed));
             }
             headerLastPrice.setOnClickListener(v -> {
                 lastPriceExpanded[0] =!lastPriceExpanded[0];
                 containerLastPrice.setVisibility(lastPriceExpanded[0]? View.VISIBLE : View.GONE);
                 if (arrowLastPrice!= null) {
-                    arrowLastPrice.setText(lastPriceExpanded[0]? "▾" : "▸");
+                    arrowLastPrice.setText(getString(lastPriceExpanded[0]? R.string.arrow_expanded : R.string.arrow_collapsed));
                 }
             });
         }
@@ -1149,13 +1165,13 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
             final boolean[] labelExpanded = {false};
             containerLabel.setVisibility(View.GONE);
             if (arrowLabel!= null) {
-                arrowLabel.setText("▸");
+                arrowLabel.setText(getString(R.string.arrow_collapsed));
             }
             headerLabel.setOnClickListener(v -> {
                 labelExpanded[0] =!labelExpanded[0];
                 containerLabel.setVisibility(labelExpanded[0]? View.VISIBLE : View.GONE);
                 if (arrowLabel!= null) {
-                    arrowLabel.setText(labelExpanded[0]? "▾" : "▸");
+                    arrowLabel.setText(getString(labelExpanded[0]? R.string.arrow_expanded : R.string.arrow_collapsed));
                 }
             });
         }
@@ -1250,7 +1266,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         marketChartView.setMaLines(state.tempList);
 
         dialog.dismiss();
-        Toast.makeText(this, "Settings applied!", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, getString(R.string.chart_settings_applied), Toast.LENGTH_SHORT).show();
     }
 
     // ------------------------------------------------------------------------
@@ -1258,9 +1274,9 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
     // ------------------------------------------------------------------------
     private void showResetConfirm(final Dialog settingsDialog) {
         new AlertDialog.Builder(this)
-               .setTitle(getString(R.string.chart_reset_confirm_title))
-               .setMessage(getString(R.string.chart_reset_confirm_message))
-               .setPositiveButton(getString(R.string.chart_reset), (d, which) -> {
+              .setTitle(getString(R.string.chart_reset_confirm_title))
+              .setMessage(getString(R.string.chart_reset_confirm_message))
+              .setPositiveButton(getString(R.string.chart_reset), (d, which) -> {
                     if (marketChartView!= null) {
                         // NEW: reset from layout-stored defaults, not from chart_defaults.xml
                         marketChartView.resetToDefaultsFromLayout();
@@ -1269,8 +1285,8 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
                     settingsDialog.dismiss();
                     Toast.makeText(MarketChartActivity.this, getString(R.string.chart_settings_reset), Toast.LENGTH_SHORT).show();
                 })
-               .setNegativeButton(getString(R.string.close), null)
-               .show();
+              .setNegativeButton(getString(R.string.close), null)
+              .show();
     }
 
     // ------------------------------------------------------------------------
@@ -1325,13 +1341,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
             });
 
             h.color.setOnClickListener(v -> {
-                Resources res = v.getContext().getResources();
-                TypedArray ta = res.obtainTypedArray(R.array.chart_color_palette);
-                int[] colors = new int[ta.length()];
-                for (int i = 0; i < ta.length(); i++) {
-                    colors[i] = ta.getColor(i, 0);
-                }
-                ta.recycle();
+                int[] colors = loadPaletteFromColorsXml();
                 int idx = 0;
                 for (int i = 0; i < colors.length; i++) {
                     if (colors[i] == line.color) {
@@ -1528,9 +1538,9 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         };
 
         final AlertDialog dialog = new AlertDialog.Builder(this)
-               .setView(root)
-               .setNegativeButton(R.string.close, (d, w) -> d.dismiss())
-               .create();
+              .setView(root)
+              .setNegativeButton(R.string.close, (d, w) -> d.dismiss())
+              .create();
 
         for (int i = 0; i < realLoad.length; i++) {
             TextView tv = new TextView(this);
@@ -1572,7 +1582,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
                 if (load.isEmpty()) return;
                 currentInterval = load;
                 getSharedPreferences(PREFS_CHART_STATE, MODE_PRIVATE)
-                       .edit().putString(KEY_INTERVAL, currentInterval).apply();
+                      .edit().putString(KEY_INTERVAL, currentInterval).apply();
                 if (marketChartView!= null) {
                     marketChartView.loadChart(currentSymbol, currentInterval);
                 }
@@ -1662,7 +1672,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
             tv.setOnClickListener(v -> {
                 currentInterval = load;
                 getSharedPreferences(PREFS_CHART_STATE, MODE_PRIVATE)
-                       .edit().putString(KEY_INTERVAL, currentInterval).apply();
+                      .edit().putString(KEY_INTERVAL, currentInterval).apply();
                 if (marketChartView!= null) {
                     marketChartView.loadChart(currentSymbol, currentInterval);
                 }
@@ -1839,7 +1849,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
                                     double fiatVal = value * finalUsdToFiat;
                                     String label = String.format(Locale.US, "MA%d: %,.2f",
                                             lines.get(i).period, fiatVal);
-                                    if (sb.length() > 0) sb.append(" \u2022 ");
+                                    if (sb.length() > 0) sb.append(getString(R.string.bullet_separator));
                                     int start = sb.length();
                                     sb.append(label);
                                     sb.setSpan(new ForegroundColorSpan(lines.get(i).color),
