@@ -1,8 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <integer name="default_visible_count">82</integer>
-    <integer name="min_visible_count">20</integer>
-    <integer name="max_visible_count">150</integer>
     <integer name="fetch_limit">300</integer>
     <integer name="live_refresh_interval">1000</integer>
     <integer name="countdown_interval">1000</integer>
