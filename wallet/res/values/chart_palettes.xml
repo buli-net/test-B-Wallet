@@ -30,5 +30,9 @@
         <item>@color/palette_lime</item>
         <item>@color/palette_pink</item>
         <item>@color/palette_sky</item>
+
+        <item>@color/palette_chart_grid_custom</item>
+        <item>@color/palette_price_text_custom</item>
+
     </array>
 </resources>
