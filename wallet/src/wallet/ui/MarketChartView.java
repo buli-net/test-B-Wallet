@@ -489,8 +489,9 @@ public class MarketChartView extends View {
     }
 
     /**
-     * Reload default colors from current theme - FIX for dark/light switch after reset
+     * Reload default colors from current theme.
      * All colors are loaded from R.color with values-night qualifier, not hardcoded.
+     * This is the source of truth for auto mode.
      */
     private void reloadDefaultColorsFromCurrentTheme() {
         try {
@@ -507,8 +508,8 @@ public class MarketChartView extends View {
     }
 
     /**
-     * Check if two colors are visually similar - FIX for invisible grid / price bug
-     * If grid color or text color is similar to background, it will be invisible
+     * Check if two colors are visually similar.
+     * Used to detect invisible case: black grid on black background after theme switch.
      */
     private boolean isColorSimilar(int color1, int color2) {
         if (color1 == 0 || color2 == 0) {
@@ -573,11 +574,18 @@ public class MarketChartView extends View {
         }
     }
 
+    /**
+     * Load options with auto-theme fallback.
+     * If user never set grid/price text/selected, it uses def (auto from theme).
+     * If user set but color is similar to background after theme switch, fallback to def.
+     * This prevents invisible grid/price bug and supports future settings expansion.
+     */
     private void loadChartOptions(Context context) {
         ensureDefaultsLoaded();
         try {
             SharedPreferences sp = context.getSharedPreferences(
                     context.getString(R.string.prefs_chart), Context.MODE_PRIVATE);
+
             bodyWidthFraction = getFloatCompat(sp, context.getString(R.string.key_body_fraction), defBodyFraction);
             wickWidthPx = getFloatCompat(sp, context.getString(R.string.key_wick_width), defWickWidthPx);
             maLineWidthPx = getFloatCompat(sp, context.getString(R.string.key_ma_width), defMaWidthPx);
@@ -589,6 +597,8 @@ public class MarketChartView extends View {
                     sp.getInt(context.getString(R.string.key_visible_count), defVisibleCount) : defVisibleCount;
             showLastPriceLine = sp.contains(context.getString(R.string.key_show_last_price))?
                     sp.getBoolean(context.getString(R.string.key_show_last_price), defShowLastPrice) : defShowLastPrice;
+
+            // Colors that can be auto (theme) or custom (user set)
             lastPriceLineColor = sp.contains(context.getString(R.string.key_last_price_line_color))?
                     sp.getInt(context.getString(R.string.key_last_price_line_color), defLastPriceLineColor) : defLastPriceLineColor;
             lastPriceBgColor = sp.contains(context.getString(R.string.key_last_price_bg_color))?
@@ -607,7 +617,7 @@ public class MarketChartView extends View {
             lastPriceLabelTextColor = sp.contains(context.getString(R.string.key_last_label_text_color))?
                     sp.getInt(context.getString(R.string.key_last_label_text_color), defLabelTextColor) : defLabelTextColor;
 
-            // Load selected / crosshair line options
+            // Selected / crosshair line
             selectedLineColor = sp.contains(context.getString(R.string.key_selected_line_color))?
                     sp.getInt(context.getString(R.string.key_selected_line_color), defSelectedLineColor) : defSelectedLineColor;
             selectedLineWidthPx = getFloatCompat(sp, context.getString(R.string.key_selected_line_width), defSelectedLineWidthPx);
@@ -615,8 +625,7 @@ public class MarketChartView extends View {
             selectedLineDashed = sp.contains(context.getString(R.string.key_selected_line_dash))?
                     sp.getBoolean(context.getString(R.string.key_selected_line_dash), defSelectedDashed) : defSelectedDashed;
 
-            // FIX: if grid color or price text color is similar to background, fallback to theme default
-            // This handles case: Light set black grid then switch to Dark -> invisible
+            // Auto-correct invisible colors after Light/Dark switch
             int themeBg = getThemeColor(android.R.attr.colorBackground);
             if (gridColor == 0 || isColorSimilar(gridColor, themeBg)) {
                 gridColor = defGridColor;
@@ -626,6 +635,9 @@ public class MarketChartView extends View {
             }
             if (selectedLineColor == 0 || isColorSimilar(selectedLineColor, themeBg)) {
                 selectedLineColor = defSelectedLineColor;
+            }
+            if (lastPriceLabelTextColor == 0 || isColorSimilar(lastPriceLabelTextColor, lastPriceBgColor)) {
+                lastPriceLabelTextColor = defLabelTextColor;
             }
 
         } catch (Exception e) {
@@ -680,6 +692,13 @@ public class MarketChartView extends View {
     public int getSelectedLineAlpha() { return selectedLineAlpha; }
     public boolean isSelectedLineDashed() { return selectedLineDashed; }
 
+    /**
+     * Set appearance for Last Price Line section.
+     * This is called from Activity when user presses Apply in Last Price Line group.
+     * It saves ONLY what belongs to this group. Grid and Price Text Color are saved here
+     * because in your UI they are inside Last Price Line group (see video).
+     * If in future you move Grid Color to separate group, create dedicated setter below.
+     */
     public void setChartAppearance(boolean sLastPrice, int lastLineColor, int lastBgColor,
                                    float txtSize, int txtColor, int gColor, int bColor,
                                    float lastW, boolean lastDash) {
@@ -699,15 +718,21 @@ public class MarketChartView extends View {
             SharedPreferences sp = getContext().getSharedPreferences(
                     getContext().getString(R.string.prefs_chart), Context.MODE_PRIVATE);
             SharedPreferences.Editor ed = sp.edit();
+            // Save only fields belonging to Last Price Line UI group
             ed.putBoolean(getContext().getString(R.string.key_show_last_price), sLastPrice);
             ed.putInt(getContext().getString(R.string.key_last_price_line_color), lastLineColor);
             ed.putInt(getContext().getString(R.string.key_last_price_bg_color), lastBgColor);
             ed.putFloat(getContext().getString(R.string.key_price_text_size), txtSize);
             ed.putInt(getContext().getString(R.string.key_price_text_color), txtColor);
             ed.putInt(getContext().getString(R.string.key_grid_color), gColor);
-            ed.remove(getContext().getString(R.string.key_bg_color));
             ed.putFloat(getContext().getString(R.string.key_last_line_width), lastW);
             ed.putBoolean(getContext().getString(R.string.key_last_line_dash), lastDash);
+            // bgColor is theme background, do not persist if 0 (auto)
+            if (bColor!= 0) {
+                ed.putInt(getContext().getString(R.string.key_bg_color), bColor);
+            } else {
+                ed.remove(getContext().getString(R.string.key_bg_color));
+            }
             ed.apply();
         } catch (Exception e) {
             // Ignore persistence errors
@@ -722,6 +747,42 @@ public class MarketChartView extends View {
                 bgColor, lastLineWidthPx, lastLineDashed);
     }
 
+    /**
+     * Individual setters for future expansion.
+     * Each setter saves ONLY its own key -> set what is set, others stay auto.
+     */
+    public void setGridColor(int color) {
+        if (color == 0) {
+            throw new IllegalStateException(getContext().getString(R.string.err_appearance_color));
+        }
+        this.gridColor = color;
+        try {
+            SharedPreferences sp = getContext().getSharedPreferences(
+                    getContext().getString(R.string.prefs_chart), Context.MODE_PRIVATE);
+            sp.edit().putInt(getContext().getString(R.string.key_grid_color), color).apply();
+        } catch (Exception e) {
+            // Ignore
+        }
+        initPaints(getContext());
+        invalidate();
+    }
+
+    public void setPriceTextColor(int color) {
+        if (color == 0) {
+            throw new IllegalStateException(getContext().getString(R.string.err_appearance_color));
+        }
+        this.priceTextColor = color;
+        try {
+            SharedPreferences sp = getContext().getSharedPreferences(
+                    getContext().getString(R.string.prefs_chart), Context.MODE_PRIVATE);
+            sp.edit().putInt(getContext().getString(R.string.key_price_text_color), color).apply();
+        } catch (Exception e) {
+            // Ignore
+        }
+        initPaints(getContext());
+        invalidate();
+    }
+
     public void setLastPriceLabelAppearance(int bgColor, int textColor, float textSizePx) {
         if (bgColor == 0 || textColor == 0) {
             throw new IllegalStateException(getContext().getString(R.string.err_label_color));
@@ -733,10 +794,42 @@ public class MarketChartView extends View {
             SharedPreferences sp = getContext().getSharedPreferences(
                     getContext().getString(R.string.prefs_chart), Context.MODE_PRIVATE);
             sp.edit()
-                 .putInt(getContext().getString(R.string.key_last_price_bg_color), bgColor)
-                 .putInt(getContext().getString(R.string.key_last_label_text_color), textColor)
-                 .putFloat(getContext().getString(R.string.key_last_label_text_size), textSizePx)
-                 .apply();
+                .putInt(getContext().getString(R.string.key_last_price_bg_color), bgColor)
+                .putInt(getContext().getString(R.string.key_last_label_text_color), textColor)
+                .putFloat(getContext().getString(R.string.key_last_label_text_size), textSizePx)
+                .apply();
+        } catch (Exception e) {
+            // Ignore
+        }
+        initPaints(getContext());
+        invalidate();
+    }
+
+    public void setCurrentPriceLabelBackground(int color) {
+        if (color == 0) {
+            throw new IllegalStateException(getContext().getString(R.string.err_label_color));
+        }
+        this.lastPriceBgColor = color;
+        try {
+            SharedPreferences sp = getContext().getSharedPreferences(
+                    getContext().getString(R.string.prefs_chart), Context.MODE_PRIVATE);
+            sp.edit().putInt(getContext().getString(R.string.key_last_price_bg_color), color).apply();
+        } catch (Exception e) {
+            // Ignore
+        }
+        initPaints(getContext());
+        invalidate();
+    }
+
+    public void setCurrentPriceLabelTextColor(int color) {
+        if (color == 0) {
+            throw new IllegalStateException(getContext().getString(R.string.err_label_color));
+        }
+        this.lastPriceLabelTextColor = color;
+        try {
+            SharedPreferences sp = getContext().getSharedPreferences(
+                    getContext().getString(R.string.prefs_chart), Context.MODE_PRIVATE);
+            sp.edit().putInt(getContext().getString(R.string.key_last_label_text_color), color).apply();
         } catch (Exception e) {
             // Ignore
         }
@@ -771,11 +864,11 @@ public class MarketChartView extends View {
             SharedPreferences sp = getContext().getSharedPreferences(
                     getContext().getString(R.string.prefs_chart), Context.MODE_PRIVATE);
             sp.edit()
-                 .putInt(getContext().getString(R.string.key_selected_line_color), color)
-                 .putFloat(getContext().getString(R.string.key_selected_line_width), widthPx)
-                 .putInt(getContext().getString(R.string.key_selected_line_alpha), alpha)
-                 .putBoolean(getContext().getString(R.string.key_selected_line_dash), dashed)
-                 .apply();
+                .putInt(getContext().getString(R.string.key_selected_line_color), color)
+                .putFloat(getContext().getString(R.string.key_selected_line_width), widthPx)
+                .putInt(getContext().getString(R.string.key_selected_line_alpha), alpha)
+                .putBoolean(getContext().getString(R.string.key_selected_line_dash), dashed)
+                .apply();
         } catch (Exception e) {
             // Ignore persistence errors
         }
@@ -794,9 +887,9 @@ public class MarketChartView extends View {
             SharedPreferences sp = getContext().getSharedPreferences(
                     getContext().getString(R.string.prefs_candle), Context.MODE_PRIVATE);
             sp.edit()
-                 .putInt(getContext().getString(R.string.key_bull), bull)
-                 .putInt(getContext().getString(R.string.key_bear), bear)
-                 .apply();
+                .putInt(getContext().getString(R.string.key_bull), bull)
+                .putInt(getContext().getString(R.string.key_bear), bear)
+                .apply();
         } catch (Exception e) {
             // Ignore
         }
@@ -817,13 +910,13 @@ public class MarketChartView extends View {
             SharedPreferences sp = getContext().getSharedPreferences(
                     getContext().getString(R.string.prefs_chart), Context.MODE_PRIVATE);
             sp.edit()
-                 .putFloat(getContext().getString(R.string.key_body_fraction), bodyFraction)
-                 .putFloat(getContext().getString(R.string.key_wick_width), wickWidth)
-                 .putFloat(getContext().getString(R.string.key_ma_width), maWidth)
-                 .putBoolean(getContext().getString(R.string.key_show_grid), sGrid)
-                 .putBoolean(getContext().getString(R.string.key_show_volume), sVolume)
-                 .putInt(getContext().getString(R.string.key_visible_count), this.visibleCandleCount)
-                 .apply();
+                .putFloat(getContext().getString(R.string.key_body_fraction), bodyFraction)
+                .putFloat(getContext().getString(R.string.key_wick_width), wickWidth)
+                .putFloat(getContext().getString(R.string.key_ma_width), maWidth)
+                .putBoolean(getContext().getString(R.string.key_show_grid), sGrid)
+                .putBoolean(getContext().getString(R.string.key_show_volume), sVolume)
+                .putInt(getContext().getString(R.string.key_visible_count), this.visibleCandleCount)
+                .apply();
         } catch (Exception e) {
             // Ignore
         }
@@ -842,8 +935,8 @@ public class MarketChartView extends View {
     }
 
     /**
-     * Clear all saved settings - used by Activity reset
-     * FIX: Use commit() for synchronous clear to avoid race
+     * Clear all saved settings - used by Activity reset.
+     * Uses commit() for synchronous clear to avoid race.
      */
     public void clearSavedSettings() {
         try {
@@ -863,17 +956,16 @@ public class MarketChartView extends View {
     }
 
     /**
-     * Reset to defaults from layout
-     * FIX FOR THEME SWITCH BUG:
-     * After reset, do NOT persist theme-dependent colors (grid, price text, selected).
-     * If we save Light theme's black grid then user switches to Dark, it would be invisible.
-     * So we clear prefs and only persist non-color options.
+     * Reset to defaults from layout - 100% auto theme.
+     * After reset, do NOT persist theme-dependent colors.
+     * Grid, price text, selected line, label colors will be loaded from R.color
+     * with values-night qualifier, so Light/Dark switch works without invisible bug.
      */
     public void resetToDefaultsFromLayout() {
         ensureDefaultsLoaded();
         reloadDefaultColorsFromCurrentTheme();
 
-        // Step 1: Clear all prefs synchronously
+        // Step 1: Clear all prefs synchronously - auto 100%
         clearSavedSettings();
 
         // Step 2: Reset runtime variables to defaults from current theme
@@ -910,36 +1002,36 @@ public class MarketChartView extends View {
             maLines.add(new MaLine(m.period, m.color));
         }
 
-        // Step 4: Persist ONLY non-theme colors synchronously
-        // IMPORTANT: Do NOT save grid_color, price_text_color, selected_line_color, etc.
-        // Those will be reloaded from theme on next launch / theme change.
+        // Step 4: Persist ONLY non-theme-dependent options
+        // Theme-dependent colors (grid, price text, selected, label) are NOT saved
+        // so they will stay auto and follow Light/Dark.
         try {
             Context ctx = getContext();
             SharedPreferences spChart = ctx.getSharedPreferences(
                     ctx.getString(R.string.prefs_chart), Context.MODE_PRIVATE);
             spChart.edit()
-                 .putFloat(ctx.getString(R.string.key_body_fraction), bodyWidthFraction)
-                 .putFloat(ctx.getString(R.string.key_wick_width), wickWidthPx)
-                 .putFloat(ctx.getString(R.string.key_ma_width), maLineWidthPx)
-                 .putBoolean(ctx.getString(R.string.key_show_grid), showGrid)
-                 .putBoolean(ctx.getString(R.string.key_show_volume), showVolume)
-                 .putInt(ctx.getString(R.string.key_visible_count), visibleCandleCount)
-                 .putBoolean(ctx.getString(R.string.key_show_last_price), showLastPriceLine)
-                 .putFloat(ctx.getString(R.string.key_last_line_width), lastLineWidthPx)
-                 .putBoolean(ctx.getString(R.string.key_last_line_dash), lastLineDashed)
-                 .putFloat(ctx.getString(R.string.key_price_text_size), priceTextSizePx)
-                 .putFloat(ctx.getString(R.string.key_last_label_text_size), lastPriceLabelTextSizePx)
-                 .putFloat(ctx.getString(R.string.key_selected_line_width), selectedLineWidthPx)
-                 .putInt(ctx.getString(R.string.key_selected_line_alpha), selectedLineAlpha)
-                 .putBoolean(ctx.getString(R.string.key_selected_line_dash), selectedLineDashed)
-                 .commit();
+                .putFloat(ctx.getString(R.string.key_body_fraction), bodyWidthFraction)
+                .putFloat(ctx.getString(R.string.key_wick_width), wickWidthPx)
+                .putFloat(ctx.getString(R.string.key_ma_width), maLineWidthPx)
+                .putBoolean(ctx.getString(R.string.key_show_grid), showGrid)
+                .putBoolean(ctx.getString(R.string.key_show_volume), showVolume)
+                .putInt(ctx.getString(R.string.key_visible_count), visibleCandleCount)
+                .putBoolean(ctx.getString(R.string.key_show_last_price), showLastPriceLine)
+                .putFloat(ctx.getString(R.string.key_last_line_width), lastLineWidthPx)
+                .putBoolean(ctx.getString(R.string.key_last_line_dash), lastLineDashed)
+                .putFloat(ctx.getString(R.string.key_price_text_size), priceTextSizePx)
+                .putFloat(ctx.getString(R.string.key_last_label_text_size), lastPriceLabelTextSizePx)
+                .putFloat(ctx.getString(R.string.key_selected_line_width), selectedLineWidthPx)
+                .putInt(ctx.getString(R.string.key_selected_line_alpha), selectedLineAlpha)
+                .putBoolean(ctx.getString(R.string.key_selected_line_dash), selectedLineDashed)
+                .commit();
 
             SharedPreferences spCandle = ctx.getSharedPreferences(
                     ctx.getString(R.string.prefs_candle), Context.MODE_PRIVATE);
             spCandle.edit()
-                 .putInt(ctx.getString(R.string.key_bull), bullishColor)
-                 .putInt(ctx.getString(R.string.key_bear), bearishColor)
-                 .commit();
+                .putInt(ctx.getString(R.string.key_bull), bullishColor)
+                .putInt(ctx.getString(R.string.key_bear), bearishColor)
+                .commit();
 
             // Save MA lines (not theme dependent)
             SharedPreferences spMa = ctx.getSharedPreferences(
@@ -1132,8 +1224,8 @@ public class MarketChartView extends View {
             selectedLineColor = defSelectedLineColor;
         }
 
-        // FIX: if color is similar to background, it will be invisible after theme switch
-        if (isColorSimilar(gridColor, themeBg) || isColorSimilar(gridColor, bgColor)) {
+        // Auto-correct invisible colors - critical for Light/Dark switch
+        if (isColorSimilar(gridColor, themeBg)) {
             gridColor = defGridColor;
         }
         if (isColorSimilar(priceTextColor, themeBg)) {
@@ -1141,6 +1233,9 @@ public class MarketChartView extends View {
         }
         if (isColorSimilar(selectedLineColor, themeBg)) {
             selectedLineColor = defSelectedLineColor;
+        }
+        if (isColorSimilar(lastPriceLabelTextColor, lastPriceBgColor)) {
+            lastPriceLabelTextColor = defLabelTextColor;
         }
 
         // Bullish / bearish candle body
@@ -1263,33 +1358,18 @@ public class MarketChartView extends View {
 
     // --------------------------------------------------------------------
     // Configuration Change - reloads theme and repaints
-    // This is called when user switches Light/Dark in system settings
     // --------------------------------------------------------------------
     @Override
     protected void onConfigurationChanged(android.content.res.Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
         if (defaultsLoadedFromLayout) {
-            // FIX 1 chiều: Light lưu màu đen, qua Dark bị đen trên đen tàng hình
-            // Buộc xóa các màu phụ thuộc theme để load lại từ layout R.color.chart_* có values-night
-            try {
-                Context ctx = getContext();
-                SharedPreferences sp = ctx.getSharedPreferences(
-                        ctx.getString(R.string.prefs_chart), Context.MODE_PRIVATE);
-
-                // Xóa luôn không cần check similar để tránh lỗi 1 chiều bạn gặp
-                sp.edit()
-                 .remove(ctx.getString(R.string.key_grid_color))
-                 .remove(ctx.getString(R.string.key_price_text_color))
-                 .remove(ctx.getString(R.string.key_selected_line_color))
-                 .remove(ctx.getString(R.string.key_last_price_bg_color))
-                 .remove(ctx.getString(R.string.key_last_price_line_color))
-                 .remove(ctx.getString(R.string.key_last_label_text_color))
-                 .commit();
-            } catch (Exception e) {
-                // Ignore
-            }
-
+            // Reload theme defaults first - this is source of truth for auto mode
             reloadDefaultColorsFromCurrentTheme();
+
+            // Then reload user options with auto-correct for invisible colors.
+            // If user set grid to black in Light, after switch to Dark it will be similar
+            // to dark background, so loadChartOptions will fallback to defGridColor (light gray)
+            // and keep it auto. This avoids chìm màu lưới và giá.
             loadChartOptions(getContext());
             initCandleColors(getContext());
         }
@@ -1300,13 +1380,7 @@ public class MarketChartView extends View {
     public void refreshTheme() {
         if (defaultsLoadedFromLayout) {
             reloadDefaultColorsFromCurrentTheme();
-            // Force use theme defaults, not saved ones, to fix invisible after theme switch
-            gridColor = defGridColor;
-            priceTextColor = defPriceTextColor;
-            selectedLineColor = defSelectedLineColor;
-            lastPriceLabelTextColor = defLabelTextColor;
-            lastPriceLineColor = defLastPriceLineColor;
-            lastPriceBgColor = defLastPriceBgColor;
+            loadChartOptions(getContext());
         }
         initPaints(getContext());
         invalidate();
