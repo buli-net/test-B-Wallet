@@ -13,7 +13,7 @@
 
     <!-- Paint alpha -->
     <integer name="volume_alpha">255</integer>
-    <integer name="selected_alpha">80</integer>
+    <integer name="selected_alpha">120</integer>
 
     <!-- Threshold & timeout -->
     <integer name="big_fiat_threshold">100</integer>
