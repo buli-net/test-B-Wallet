@@ -489,6 +489,11 @@
     
     <!-- maket chart-->
 
+<!-- Title & Menu - use in AndroidManifest.xml -->
+    <string name="market_chart_title">Market Chart</string>
+    <string name="menu_price_chart">Price Chart</string>
+    
+    
     <!-- ================== MARKET CHART CORE ================== -->
     <string name="chart_loading">Loading…</string>
     <string name="chart_close_in">Close in %1$s</string>
