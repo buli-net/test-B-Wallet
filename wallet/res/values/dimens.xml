@@ -59,5 +59,9 @@
     <dimen name="dash_off">6dp</dimen>
     <dimen name="time_text_offset">4dp</dimen>
     <dimen name="loading_text_offset">100dp</dimen>
+
+    <dimen name="color_picker_size">32dp</dimen>
+<dimen name="color_picker_corner_radius">8dp</dimen>
+<dimen name="color_picker_border_width">1dp</dimen>
     
 </resources>
