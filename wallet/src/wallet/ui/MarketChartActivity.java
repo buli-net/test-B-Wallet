@@ -1813,7 +1813,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
 
             boolean isSelected = realLoad[i].equalsIgnoreCase(currentInterval);
 
-            GradientDrawable bg = new GradientDrawable();
+          /*  GradientDrawable bg = new GradientDrawable();
             bg.setCornerRadius(0f);
 
             if (isSelected &&!realLoad[i].isEmpty()) {
@@ -1829,7 +1829,17 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
             }
 
             tv.setBackground(bg);
+            */
+            boolean isSelected = realLoad[i].equalsIgnoreCase(currentInterval);
 
+             if (isSelected &&!realLoad[i].isEmpty()) {
+                tv.setBackgroundResource(R.drawable.bg_time_selected);
+                tv.setTextColor(getThemeColor(android.R.attr.colorBackground));
+             } else {
+                tv.setBackgroundColor(res.getColor(android.R.color.transparent, getTheme()));
+                tv.setTextColor(getThemeColor(android.R.attr.textColorSecondary));
+             }
+        /////////////////
             GridLayout.LayoutParams lp = new GridLayout.LayoutParams();
             lp.width = 0;
             lp.height = GridLayout.LayoutParams.WRAP_CONTENT;
