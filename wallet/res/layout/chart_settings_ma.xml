@@ -9,25 +9,25 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:paddingBottom="8dp"
         android:text="@string/chart_settings_ma"
         android:textSize="14sp"
-        android:textStyle="bold"
-        android:paddingBottom="8dp" />
+        android:textStyle="bold" />
 
-    <!-- DEFAULT MA - lấy từ layout con riêng, không hardcode Java -->
+    <!-- DEFAULT MA - from layout, no hardcode in Java -->
     <TextView
         android:id="@+id/tvDefMaPeriods"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:visibility="gone"
-        android:text="7,25,99" />
+        android:text="7,25,99"
+        android:visibility="gone" />
 
     <TextView
         android:id="@+id/tvDefMaColors"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:visibility="gone"
-        android:text="#FFC107,#2196F3,#E91E63" />
+        android:text="#FFC107,#2196F3,#E91E63"
+        android:visibility="gone" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recycler_ma_popup"
