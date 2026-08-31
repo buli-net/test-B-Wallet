@@ -222,12 +222,15 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         float[] curTxtSize = new float[1];
         float[] curLastW = new float[1];
         float[] curLabelSize = new float[1];
+        float[] curSelectedW = new float[1];
 
         int[] curLastColor = new int[1];
         int[] curGridColor = new int[1];
         int[] curPriceTxtColor = new int[1];
         int[] curLabelBg = new int[1];
         int[] curLabelTextColorFinal = new int[1];
+        int[] curSelectedColor = new int[1];
+        int[] curSelectedAlpha = new int[1];
 
         float[] finalTxtSize = new float[1];
         float[] finalLabelSize = new float[1];
@@ -241,10 +244,13 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         SeekBar sbTxtSize;
         SeekBar sbLastW;
         SeekBar sbLabelSize;
+        SeekBar sbSelectedW;
+        SeekBar sbSelectedAlpha;
         Switch swGrid;
         Switch swVol;
         Switch swLast;
         Switch swDash;
+        Switch swSelectedDash;
         RecyclerView recycler;
     }
 
@@ -338,6 +344,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         View optionsRoot = inflater.inflate(R.layout.chart_settings_options, null);
         View lastPriceRoot = inflater.inflate(R.layout.chart_settings_last_price, null);
         View labelRoot = inflater.inflate(R.layout.chart_settings_label, null);
+        View selectedRoot = inflater.inflate(R.layout.chart_settings_selected, null);
 
         // ---- Read dimensions from dimens.xml ----
         int defTopPadding = (int) getResources().getDimension(R.dimen.default_top_padding);
@@ -400,6 +407,12 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         View defLabelBg = labelRoot.findViewById(R.id.viewLabelBg);
         View defLabelTextColor = labelRoot.findViewById(R.id.viewLabelTextColor);
 
+        // Selected line defaults from its own layout
+        SeekBar defSelW = selectedRoot.findViewById(R.id.sbSelectedW);
+        SeekBar defSelAlpha = selectedRoot.findViewById(R.id.sbSelectedAlpha);
+        Switch defSelDash = selectedRoot.findViewById(R.id.swSelectedDash);
+        View defSelColor = selectedRoot.findViewById(R.id.viewSelectedColor);
+
         TextView tvPeriods = maRoot.findViewById(R.id.tvDefMaPeriods);
         TextView tvColors = maRoot.findViewById(R.id.tvDefMaColors);
 
@@ -421,6 +434,10 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
                 || defTxtColor == null
                 || defLabelBg == null
                 || defLabelTextColor == null
+                || defSelW == null
+                || defSelAlpha == null
+                || defSelDash == null
+                || defSelColor == null
                 || tvPeriods == null
                 || tvColors == null) {
             throw new IllegalStateException(getString(R.string.err_missing_default_view));
@@ -432,7 +449,8 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
                 || defGridColor.getTag() == null
                 || defTxtColor.getTag() == null
                 || defLabelBg.getTag() == null
-                || defLabelTextColor.getTag() == null) {
+                || defLabelTextColor.getTag() == null
+                || defSelColor.getTag() == null) {
             throw new IllegalStateException(getString(R.string.err_bull_bear_tag_missing));
         }
 
@@ -455,6 +473,15 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         int txtColor = getColorFromTag(defTxtColor);
         int labelBg = getColorFromTag(defLabelBg);
         int labelText = getColorFromTag(defLabelTextColor);
+
+        // Selected line values from layout XML
+        int selColor = getColorFromTag(defSelColor);
+        float selW = defSelW.getProgress();
+        int selAlpha = defSelAlpha.getProgress();
+        boolean selDashed = defSelDash.isChecked();
+
+        if (selW <= 0) selW = defSelectedWidth;
+        if (selAlpha <= 0) selAlpha = getResources().getInteger(R.integer.selected_alpha);
 
         List<MarketChartView.MaLine> defMa = new ArrayList<>();
         String[] pArr = tvPeriods.getText().toString().split(",");
@@ -514,7 +541,11 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
                     txtColor,
                     labelBg,
                     labelText,
-                    defMa
+                    defMa,
+                    selColor,
+                    selW,
+                    selAlpha,
+                    selDashed
             );
         }
     }
@@ -745,6 +776,9 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         state.curLabelSize[0] = marketChartView.getLastPriceLabelTextSizePx() > 0
                ? marketChartView.getLastPriceLabelTextSizePx()
                 : 19f;
+        state.curSelectedW[0] = marketChartView.getSelectedLineWidthPx() > 0
+               ? marketChartView.getSelectedLineWidthPx()
+                : getResources().getDimension(R.dimen.default_selected_width);
 
         state.curLastColor[0] = marketChartView.getLastPriceLineColor();
         state.curGridColor[0] = marketChartView.getGridColor()!= -1
@@ -762,6 +796,12 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         state.curLabelTextColorFinal[0] = marketChartView.getLastPriceLabelTextColor()!= -1
                ? marketChartView.getLastPriceLabelTextColor()
                 : ContextCompat.getColor(this, R.color.last_label_text);
+
+        state.curSelectedColor[0] = marketChartView.getSelectedLineColor()!= 0
+               ? marketChartView.getSelectedLineColor()
+                : getResources().getColor(R.color.chart_selected_line, getTheme());
+
+        state.curSelectedAlpha[0] = marketChartView.getSelectedLineAlpha();
 
         state.finalTxtSize[0] = state.curTxtSize[0];
         state.finalLabelSize[0] = state.curLabelSize[0];
@@ -881,26 +921,26 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
             });
         }
 
-        // 3. Chart options  
-       View headerOptions = content.findViewById(R.id.headerOptions);
-       TextView arrowOptions = content.findViewById(R.id.arrowOptions);
-       View containerOptions = content.findViewById(R.id.containerOptions);
+        // 3. Chart options
+        View headerOptions = content.findViewById(R.id.headerOptions);
+        TextView arrowOptions = content.findViewById(R.id.arrowOptions);
+        View containerOptions = content.findViewById(R.id.containerOptions);
 
-       state.sbBody = containerOptions.findViewById(R.id.sbBody);
-       state.sbWick = containerOptions.findViewById(R.id.sbWick);
-       state.sbMaW = containerOptions.findViewById(R.id.sbMaW);
-       state.sbVis = containerOptions.findViewById(R.id.sbVis);
-       state.swGrid = containerOptions.findViewById(R.id.swGrid);
-       state.swVol = containerOptions.findViewById(R.id.swVol);
+        state.sbBody = containerOptions.findViewById(R.id.sbBody);
+        state.sbWick = containerOptions.findViewById(R.id.sbWick);
+        state.sbMaW = containerOptions.findViewById(R.id.sbMaW);
+        state.sbVis = containerOptions.findViewById(R.id.sbVis);
+        state.swGrid = containerOptions.findViewById(R.id.swGrid);
+        state.swVol = containerOptions.findViewById(R.id.swVol);
 
-       TextView lbBody = containerOptions.findViewById(R.id.lbBody);
-       TextView lbWick = containerOptions.findViewById(R.id.lbWick);
-       TextView lbMaW = containerOptions.findViewById(R.id.lbMaW);
-       TextView lbVis = containerOptions.findViewById(R.id.lbVis);
+        TextView lbBody = containerOptions.findViewById(R.id.lbBody);
+        TextView lbWick = containerOptions.findViewById(R.id.lbWick);
+        TextView lbMaW = containerOptions.findViewById(R.id.lbMaW);
+        TextView lbVis = containerOptions.findViewById(R.id.lbVis);
 
-       int minVisPopup = getResources().getInteger(R.integer.min_visible_candle_count);
-       int maxVisPopup = getResources().getInteger(R.integer.max_visible_candle_count);
-        
+        int minVisPopup = getResources().getInteger(R.integer.min_visible_candle_count);
+        int maxVisPopup = getResources().getInteger(R.integer.max_visible_candle_count);
+
         if (state.sbVis!= null) {
             state.sbVis.setMax(maxVisPopup);
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
@@ -1241,6 +1281,96 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
             });
         }
 
+        // 6. Selected / Crosshair vertical line - NEW
+        View headerSelected = content.findViewById(R.id.headerSelected);
+        TextView arrowSelected = content.findViewById(R.id.arrowSelected);
+        View containerSelected = content.findViewById(R.id.containerSelected);
+
+        if (headerSelected!= null && containerSelected!= null) {
+            state.sbSelectedW = containerSelected.findViewById(R.id.sbSelectedW);
+            state.sbSelectedAlpha = containerSelected.findViewById(R.id.sbSelectedAlpha);
+            state.swSelectedDash = containerSelected.findViewById(R.id.swSelectedDash);
+            View viewSelectedColor = containerSelected.findViewById(R.id.viewSelectedColor);
+            TextView lbSelectedW = containerSelected.findViewById(R.id.lbSelectedW);
+            TextView lbSelectedAlpha = containerSelected.findViewById(R.id.lbSelectedAlpha);
+
+            if (state.sbSelectedW!= null) {
+                state.sbSelectedW.setProgress((int) state.curSelectedW[0]);
+            }
+            if (state.sbSelectedAlpha!= null) {
+                state.sbSelectedAlpha.setMax(255);
+                state.sbSelectedAlpha.setProgress(state.curSelectedAlpha[0]);
+            }
+            if (state.swSelectedDash!= null) {
+                state.swSelectedDash.setChecked(marketChartView.isSelectedLineDashed());
+            }
+            if (lbSelectedW!= null && state.sbSelectedW!= null) {
+                lbSelectedW.setText(getString(R.string.chart_selected_line_width,
+                        Math.max(1, state.sbSelectedW.getProgress())));
+            }
+            if (lbSelectedAlpha!= null && state.sbSelectedAlpha!= null) {
+                lbSelectedAlpha.setText(getString(R.string.chart_selected_line_alpha,
+                        state.sbSelectedAlpha.getProgress()));
+            }
+
+            if (state.sbSelectedW!= null && lbSelectedW!= null) {
+                state.sbSelectedW.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+                    @Override
+                    public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                        int p = Math.max(1, progress);
+                        state.curSelectedW[0] = p;
+                        lbSelectedW.setText(getString(R.string.chart_selected_line_width, p));
+                    }
+                    @Override public void onStartTrackingTouch(SeekBar seekBar) {}
+                    @Override public void onStopTrackingTouch(SeekBar seekBar) {}
+                });
+            }
+
+            if (state.sbSelectedAlpha!= null && lbSelectedAlpha!= null) {
+                state.sbSelectedAlpha.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+                    @Override
+                    public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                        state.curSelectedAlpha[0] = progress;
+                        lbSelectedAlpha.setText(getString(R.string.chart_selected_line_alpha, progress));
+                    }
+                    @Override public void onStartTrackingTouch(SeekBar seekBar) {}
+                    @Override public void onStopTrackingTouch(SeekBar seekBar) {}
+                });
+            }
+
+            if (viewSelectedColor!= null) {
+                viewSelectedColor.setBackground(createColorViewDrawable(state.curSelectedColor[0]));
+                viewSelectedColor.setOnClickListener(v -> {
+                    int idx = 0;
+                    for (int i = 0; i < state.candlePalette.length; i++) {
+                        if (state.candlePalette[i] == state.curSelectedColor[0]) {
+                            idx = i;
+                            break;
+                        }
+                    }
+                    int next = state.candlePalette[(idx + 1) % state.candlePalette.length];
+                    state.curSelectedColor[0] = next;
+                    v.setBackground(createColorViewDrawable(next));
+                });
+            }
+
+            final boolean[] selectedExpanded = {false};
+            containerSelected.setVisibility(View.GONE);
+            if (arrowSelected!= null) {
+                arrowSelected.setText(getString(R.string.arrow_collapsed));
+            }
+
+            headerSelected.setOnClickListener(v -> {
+                selectedExpanded[0] =!selectedExpanded[0];
+                containerSelected.setVisibility(selectedExpanded[0]? View.VISIBLE : View.GONE);
+                if (arrowSelected!= null) {
+                    arrowSelected.setText(getString(selectedExpanded[0]
+                           ? R.string.arrow_expanded
+                            : R.string.arrow_collapsed));
+                }
+            });
+        }
+
         Button btnApply = content.findViewById(R.id.btnApply);
         Button btnReset = content.findViewById(R.id.btnReset);
 
@@ -1328,6 +1458,16 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
                 state.curLabelTextColorFinal[0],
                 state.finalLabelSize[0]
         );
+
+        // Apply selected line appearance
+        if (state.sbSelectedW!= null && state.sbSelectedAlpha!= null && state.swSelectedDash!= null) {
+            marketChartView.setSelectedLineAppearance(
+                    state.curSelectedColor[0],
+                    state.curSelectedW[0],
+                    state.curSelectedAlpha[0],
+                    state.swSelectedDash.isChecked()
+            );
+        }
 
         marketChartView.setMaLines(state.tempList);
 
