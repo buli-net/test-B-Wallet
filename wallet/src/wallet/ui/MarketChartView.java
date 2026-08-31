@@ -1,3 +1,5 @@
+
+}
 /*
  * Copyright (c) 2024
  *
@@ -203,7 +205,6 @@ public class MarketChartView extends View {
     private int defPriceTextColor;
     private int defGridColor;
     private int defLabelTextColor;
-    // Default values for selected / crosshair vertical line
     private int defSelectedLineColor;
     private float defSelectedLineWidthPx;
     private int defSelectedAlpha;
@@ -249,6 +250,7 @@ public class MarketChartView extends View {
 
     // --------------------------------------------------------------------
     // Chart Style Settings - persisted in SharedPreferences
+    // Each setting is saved with its own key - fully separated
     // --------------------------------------------------------------------
     private int bullishColor;
     private int bearishColor;
@@ -268,19 +270,21 @@ public class MarketChartView extends View {
     private boolean lastLineDashed;
     private float lastPriceLabelTextSizePx;
     private int lastPriceLabelTextColor;
-    // Selected / crosshair vertical line settings
     private int selectedLineColor;
     private float selectedLineWidthPx;
     private int selectedLineAlpha;
     private boolean selectedLineDashed;
 
     // --------------------------------------------------------------------
-    // Constructor - initializes dimensions, gestures, and paints
+    // Constructor
     // --------------------------------------------------------------------
     public MarketChartView(Context context, AttributeSet attrs) {
         super(context, attrs);
         fiatCode = context.getString(R.string.fiat_usd);
-        timeFormat = new SimpleDateFormat(context.getString(R.string.time_format), Locale.US);
+        timeFormat = new SimpleDateFormat(
+                context.getString(R.string.time_format),
+                Locale.US
+        );
         loadViewDimensions(context);
         visibleCandleCount = DEFAULT_VISIBLE_CANDLE_COUNT;
         initGestures(context);
@@ -288,83 +292,109 @@ public class MarketChartView extends View {
     }
 
     // --------------------------------------------------------------------
-    // Dimension Loading - all values from resources, no hardcoded numbers
+    // Dimension Loading
     // --------------------------------------------------------------------
     private void loadViewDimensions(Context context) {
-        // Core layout dimensions
-        TOP_PADDING_PX = (int) context.getResources().getDimension(R.dimen.default_top_padding);
-        BOTTOM_PADDING_PX = (int) context.getResources().getDimension(R.dimen.default_bottom_padding);
-        VOLUME_CHART_HEIGHT_DP = (int) context.getResources().getDimension(R.dimen.default_volume_height);
-        VOLUME_TOP_MARGIN_PX = (int) context.getResources().getDimension(R.dimen.default_volume_top_margin);
-        PRICE_AXIS_WIDTH_DP = (int) context.getResources().getDimension(R.dimen.default_price_axis_width);
-        TIME_AXIS_HEIGHT = (int) context.getResources().getDimension(R.dimen.default_time_axis_height);
-        PRICE_TEXT_MARGIN = (int) context.getResources().getDimension(R.dimen.default_price_text_margin);
-        PRICE_TEXT_OFFSET = (int) context.getResources().getDimension(R.dimen.default_price_text_offset);
-        GRID_WIDTH = context.getResources().getDimension(R.dimen.default_grid_width);
-        BODY_MIN_WIDTH = (int) context.getResources().getDimension(R.dimen.default_body_min_width);
-        BODY_MAX_WIDTH = (int) context.getResources().getDimension(R.dimen.default_body_max_width);
-        TEXT_SIZE = (int) context.getResources().getDimension(R.dimen.default_text_size);
-        SELECTED_WIDTH = context.getResources().getDimension(R.dimen.default_selected_width);
-        DASH_ON = context.getResources().getDimension(R.dimen.dash_on);
-        DASH_OFF = context.getResources().getDimension(R.dimen.dash_off);
-        TIME_TEXT_OFFSET = (int) context.getResources().getDimension(R.dimen.time_text_offset);
-        LOADING_TEXT_OFFSET = (int) context.getResources().getDimension(R.dimen.loading_text_offset);
+        TOP_PADDING_PX = (int) context.getResources()
+               .getDimension(R.dimen.default_top_padding);
+        BOTTOM_PADDING_PX = (int) context.getResources()
+               .getDimension(R.dimen.default_bottom_padding);
+        VOLUME_CHART_HEIGHT_DP = (int) context.getResources()
+               .getDimension(R.dimen.default_volume_height);
+        VOLUME_TOP_MARGIN_PX = (int) context.getResources()
+               .getDimension(R.dimen.default_volume_top_margin);
+        PRICE_AXIS_WIDTH_DP = (int) context.getResources()
+               .getDimension(R.dimen.default_price_axis_width);
+        TIME_AXIS_HEIGHT = (int) context.getResources()
+               .getDimension(R.dimen.default_time_axis_height);
+        PRICE_TEXT_MARGIN = (int) context.getResources()
+               .getDimension(R.dimen.default_price_text_margin);
+        PRICE_TEXT_OFFSET = (int) context.getResources()
+               .getDimension(R.dimen.default_price_text_offset);
+        GRID_WIDTH = context.getResources()
+               .getDimension(R.dimen.default_grid_width);
+        BODY_MIN_WIDTH = (int) context.getResources()
+               .getDimension(R.dimen.default_body_min_width);
+        BODY_MAX_WIDTH = (int) context.getResources()
+               .getDimension(R.dimen.default_body_max_width);
+        TEXT_SIZE = (int) context.getResources()
+               .getDimension(R.dimen.default_text_size);
+        SELECTED_WIDTH = context.getResources()
+               .getDimension(R.dimen.default_selected_width);
+        DASH_ON = context.getResources()
+               .getDimension(R.dimen.dash_on);
+        DASH_OFF = context.getResources()
+               .getDimension(R.dimen.dash_off);
+        TIME_TEXT_OFFSET = (int) context.getResources()
+               .getDimension(R.dimen.time_text_offset);
+        LOADING_TEXT_OFFSET = (int) context.getResources()
+               .getDimension(R.dimen.loading_text_offset);
 
-        // Fallback for candle min height
         try {
-            CANDLE_MIN_HEIGHT = (int) context.getResources().getDimension(R.dimen.default_candle_min_height);
+            CANDLE_MIN_HEIGHT = (int) context.getResources()
+                   .getDimension(R.dimen.default_candle_min_height);
         } catch (Exception e) {
-            CANDLE_MIN_HEIGHT = (int) context.getResources().getDimension(R.dimen.default_candle_min_width);
+            CANDLE_MIN_HEIGHT = (int) context.getResources()
+                   .getDimension(R.dimen.default_candle_min_width);
         }
 
-        // Integer and fraction resources
         try {
-            FETCH_LIMIT = context.getResources().getInteger(R.integer.default_fetch_limit);
+            FETCH_LIMIT = context.getResources()
+                   .getInteger(R.integer.default_fetch_limit);
         } catch (Exception e) {
-            FETCH_LIMIT = context.getResources().getInteger(R.integer.default_visible_candle_count);
+            FETCH_LIMIT = context.getResources()
+                   .getInteger(R.integer.default_visible_candle_count);
         }
         try {
-            MIN_VISIBLE_CANDLE_COUNT = context.getResources().getInteger(R.integer.min_visible_candle_count);
-            MAX_VISIBLE_CANDLE_COUNT = context.getResources().getInteger(R.integer.max_visible_candle_count);
-            DEFAULT_VISIBLE_CANDLE_COUNT = context.getResources().getInteger(R.integer.default_visible_candle_count);
+            MIN_VISIBLE_CANDLE_COUNT = context.getResources()
+                   .getInteger(R.integer.min_visible_candle_count);
+            MAX_VISIBLE_CANDLE_COUNT = context.getResources()
+                   .getInteger(R.integer.max_visible_candle_count);
+            DEFAULT_VISIBLE_CANDLE_COUNT = context.getResources()
+                   .getInteger(R.integer.default_visible_candle_count);
         } catch (Exception e) {
             MIN_VISIBLE_CANDLE_COUNT = 20;
             MAX_VISIBLE_CANDLE_COUNT = 160;
             DEFAULT_VISIBLE_CANDLE_COUNT = 70;
         }
         try {
-            VOLUME_ALPHA = context.getResources().getInteger(R.integer.volume_alpha);
-            SELECTED_ALPHA = context.getResources().getInteger(R.integer.selected_alpha);
+            VOLUME_ALPHA = context.getResources()
+                   .getInteger(R.integer.volume_alpha);
+            SELECTED_ALPHA = context.getResources()
+                   .getInteger(R.integer.selected_alpha);
         } catch (Exception e) {
             VOLUME_ALPHA = 100;
             SELECTED_ALPHA = 100;
         }
         try {
-            BIG_FIAT_THRESHOLD = context.getResources().getInteger(R.integer.big_fiat_threshold);
-            NETWORK_TIMEOUT = context.getResources().getInteger(R.integer.network_timeout);
+            BIG_FIAT_THRESHOLD = context.getResources()
+                   .getInteger(R.integer.big_fiat_threshold);
+            NETWORK_TIMEOUT = context.getResources()
+                   .getInteger(R.integer.network_timeout);
         } catch (Exception e) {
             BIG_FIAT_THRESHOLD = 10000;
             NETWORK_TIMEOUT = 10000;
         }
         try {
-            LIVE_REFRESH_INTERVAL_MS = context.getResources().getInteger(R.integer.live_refresh_interval);
-            COUNTDOWN_INTERVAL_MS = context.getResources().getInteger(R.integer.countdown_interval);
+            LIVE_REFRESH_INTERVAL_MS = context.getResources()
+                   .getInteger(R.integer.live_refresh_interval);
+            COUNTDOWN_INTERVAL_MS = context.getResources()
+                   .getInteger(R.integer.countdown_interval);
         } catch (Exception e) {
             LIVE_REFRESH_INTERVAL_MS = 3000L;
             COUNTDOWN_INTERVAL_MS = 1000L;
         }
         try {
-            MIN_SCROLL_FRACTION = context.getResources().getFraction(R.fraction.min_scroll_fraction, 1, 1);
-            PRICE_PADDING_FRACTION = context.getResources().getFraction(R.fraction.price_padding_fraction, 1, 1);
+            MIN_SCROLL_FRACTION = context.getResources()
+                   .getFraction(R.fraction.min_scroll_fraction, 1, 1);
+            PRICE_PADDING_FRACTION = context.getResources()
+                   .getFraction(R.fraction.price_padding_fraction, 1, 1);
         } catch (Exception e) {
             MIN_SCROLL_FRACTION = 0.5f;
             PRICE_PADDING_FRACTION = 0.05f;
         }
     }
 
-    /**
-     * Set view dimensions from Activity using values from dimens.xml
-     */
     public void setViewDimensionsFromLayout(int topPad, int bottomPad, int volumeHeight,
                                             int volumeTopMargin, int priceAxisWidth,
                                             int timeAxisHeight, int priceTextMargin,
@@ -395,23 +425,24 @@ public class MarketChartView extends View {
         visibleCandleCount = DEFAULT_VISIBLE_CANDLE_COUNT;
     }
 
-    /**
-     * Configure default style from child layouts. Must be called before drawing.
-     * Extended version that includes selected / crosshair line defaults.
-     */
     public void setDefaultsFromLayout(float bodyFrac, float wickW, float maW, int visCount,
                                       boolean showG, boolean showV, boolean showLast, boolean dashed,
                                       float txtSize, float lastW, float labelSize,
                                       int bullColor, int bearColor, int lastColor, int gridColor,
                                       int txtColor, int labelBg, int labelTextColor,
                                       List<MaLine> maDefaults,
-                                      int selectedColor, float selectedWidth, int selectedAlpha, boolean selectedDashed) {
+                                      int selectedColor, float selectedWidth,
+                                      int selectedAlpha, boolean selectedDashed) {
         if (maDefaults == null || maDefaults.isEmpty()) {
-            throw new IllegalStateException(getContext().getString(R.string.err_ma_empty));
+            throw new IllegalStateException(
+                    getContext().getString(R.string.err_ma_empty)
+            );
         }
         if (bullColor == 0 || bearColor == 0 || lastColor == 0 || gridColor == 0 ||
                 txtColor == 0 || labelBg == 0 || labelTextColor == 0 || selectedColor == 0) {
-            throw new IllegalStateException(getContext().getString(R.string.err_color_0));
+            throw new IllegalStateException(
+                    getContext().getString(R.string.err_color_0)
+            );
         }
 
         this.defBodyFraction = bodyFrac;
@@ -439,7 +470,9 @@ public class MarketChartView extends View {
 
         this.defMaLines = new ArrayList<>();
         for (MaLine m : maDefaults) {
-            this.defMaLines.add(new MaLine(m.period, m.color));
+            this.defMaLines.add(
+                    new MaLine(m.period, m.color)
+            );
         }
 
         DEFAULT_VISIBLE_CANDLE_COUNT = visCount;
@@ -453,92 +486,97 @@ public class MarketChartView extends View {
         invalidate();
     }
 
-    /**
-     * Legacy overload for backward compatibility - uses grid color as selected color fallback
-     * and dimensions from resources for width / alpha.
-     */
     public void setDefaultsFromLayout(float bodyFrac, float wickW, float maW, int visCount,
                                       boolean showG, boolean showV, boolean showLast, boolean dashed,
                                       float txtSize, float lastW, float labelSize,
                                       int bullColor, int bearColor, int lastColor, int gridColor,
                                       int txtColor, int labelBg, int labelTextColor,
                                       List<MaLine> maDefaults) {
-        // Fallback values loaded from resources to avoid hardcoded values
         int fallbackSelectedColor = gridColor;
         float fallbackSelectedWidth = SELECTED_WIDTH;
         int fallbackSelectedAlpha = SELECTED_ALPHA;
         boolean fallbackSelectedDashed = false;
 
         try {
-            // Try to load dedicated default selected color if exists
-            fallbackSelectedColor = getContext().getResources().getColor(R.color.chart_selected_line, getContext().getTheme());
+            fallbackSelectedColor = getContext().getResources()
+                   .getColor(R.color.chart_selected_line, getContext().getTheme());
         } catch (Exception e) {
             fallbackSelectedColor = gridColor;
         }
 
-        setDefaultsFromLayout(bodyFrac, wickW, maW, visCount, showG, showV, showLast, dashed,
-                txtSize, lastW, labelSize, bullColor, bearColor, lastColor, gridColor,
-                txtColor, labelBg, labelTextColor, maDefaults,
-                fallbackSelectedColor, fallbackSelectedWidth, fallbackSelectedAlpha, fallbackSelectedDashed);
+        setDefaultsFromLayout(
+                bodyFrac,
+                wickW,
+                maW,
+                visCount,
+                showG,
+                showV,
+                showLast,
+                dashed,
+                txtSize,
+                lastW,
+                labelSize,
+                bullColor,
+                bearColor,
+                lastColor,
+                gridColor,
+                txtColor,
+                labelBg,
+                labelTextColor,
+                maDefaults,
+                fallbackSelectedColor,
+                fallbackSelectedWidth,
+                fallbackSelectedAlpha,
+                fallbackSelectedDashed
+        );
     }
 
     private void ensureDefaultsLoaded() {
         if (!defaultsLoadedFromLayout) {
-            throw new IllegalStateException(getContext().getString(R.string.err_defaults_not_loaded));
+            throw new IllegalStateException(
+                    getContext().getString(R.string.err_defaults_not_loaded)
+            );
         }
     }
 
-    /**
-     * Reload default colors from current theme.
-     * All colors are loaded from R.color with values-night qualifier, not hardcoded.
-     * This is the source of truth for auto mode.
-     */
     private void reloadDefaultColorsFromCurrentTheme() {
         try {
             Context ctx = getContext();
-            defGridColor = ctx.getResources().getColor(R.color.chart_grid, ctx.getTheme());
-            defPriceTextColor = ctx.getResources().getColor(R.color.chart_text, ctx.getTheme());
-            defSelectedLineColor = ctx.getResources().getColor(R.color.chart_selected_line, ctx.getTheme());
-            defLabelTextColor = ctx.getResources().getColor(R.color.last_label_text, ctx.getTheme());
-            defLastPriceLineColor = ctx.getResources().getColor(R.color.chart_last_price_line, ctx.getTheme());
-            defLastPriceBgColor = ctx.getResources().getColor(R.color.chart_last_price_label_bg, ctx.getTheme());
+            defGridColor = ctx.getResources()
+                   .getColor(R.color.chart_grid, ctx.getTheme());
+            defPriceTextColor = ctx.getResources()
+                   .getColor(R.color.chart_text, ctx.getTheme());
+            defSelectedLineColor = ctx.getResources()
+                   .getColor(R.color.chart_selected_line, ctx.getTheme());
+            defLabelTextColor = ctx.getResources()
+                   .getColor(R.color.last_label_text, ctx.getTheme());
+            defLastPriceLineColor = ctx.getResources()
+                   .getColor(R.color.chart_last_price_line, ctx.getTheme());
+            defLastPriceBgColor = ctx.getResources()
+                   .getColor(R.color.chart_last_price_label_bg, ctx.getTheme());
         } catch (Exception e) {
-            // Ignore, keep old defaults if reload fails
+            // Keep old defaults if reload fails
         }
     }
 
-    /**
-     * Check if two colors are visually similar.
-     * Used to detect invisible case: black grid on black background after theme switch.
-     */
-    private boolean isColorSimilar(int color1, int color2) {
-        if (color1 == 0 || color2 == 0) {
-            return false;
-        }
-        int r1 = Color.red(color1);
-        int g1 = Color.green(color1);
-        int b1 = Color.blue(color1);
-        int r2 = Color.red(color2);
-        int g2 = Color.green(color2);
-        int b2 = Color.blue(color2);
-        int diff = Math.abs(r1 - r2) + Math.abs(g1 - g2) + Math.abs(b1 - b2);
-        return diff < 90;
-    }
-
-    // --------------------------------------------------------------------
-    // Preference Loading - candle colors and chart options
-    // --------------------------------------------------------------------
     private void initCandleColors(Context context) {
         ensureDefaultsLoaded();
         try {
             SharedPreferences sp = context.getSharedPreferences(
-                    context.getString(R.string.prefs_candle), Context.MODE_PRIVATE);
+                    context.getString(R.string.prefs_candle),
+                    Context.MODE_PRIVATE
+            );
             bullishColor = sp.contains(context.getString(R.string.key_bull))?
-                    sp.getInt(context.getString(R.string.key_bull), defBullColor) : defBullColor;
+                    sp.getInt(context.getString(R.string.key_bull), defBullColor) :
+                    defBullColor;
             bearishColor = sp.contains(context.getString(R.string.key_bear))?
-                    sp.getInt(context.getString(R.string.key_bear), defBearColor) : defBearColor;
+                    sp.getInt(context.getString(R.string.key_bear), defBearColor) :
+                    defBearColor;
+
             if (bullishColor == 0 || bearishColor == 0) {
-                throw new IllegalStateException(context.getString(R.string.err_candle_0));
+                throw new IllegalStateException(
+                        context.getString(R.string.err_candle_0)
+                );
             }
         } catch (Exception e) {
             bullishColor = defBullColor;
@@ -575,70 +613,141 @@ public class MarketChartView extends View {
     }
 
     /**
-     * Load options with auto-theme fallback.
-     * If user never set grid/price text/selected, it uses def (auto from theme).
-     * If user set but color is similar to background after theme switch, fallback to def.
-     * This prevents invisible grid/price bug and supports future settings expansion.
+     * Load options - each key separated.
+     * If not set -> use def auto from theme.
+     * If set -> keep it even if same as theme, do NOT remove.
      */
     private void loadChartOptions(Context context) {
         ensureDefaultsLoaded();
         try {
             SharedPreferences sp = context.getSharedPreferences(
-                    context.getString(R.string.prefs_chart), Context.MODE_PRIVATE);
+                    context.getString(R.string.prefs_chart),
+                    Context.MODE_PRIVATE
+            );
 
-            bodyWidthFraction = getFloatCompat(sp, context.getString(R.string.key_body_fraction), defBodyFraction);
-            wickWidthPx = getFloatCompat(sp, context.getString(R.string.key_wick_width), defWickWidthPx);
-            maLineWidthPx = getFloatCompat(sp, context.getString(R.string.key_ma_width), defMaWidthPx);
+            bodyWidthFraction = getFloatCompat(
+                    sp,
+                    context.getString(R.string.key_body_fraction),
+                    defBodyFraction
+            );
+            wickWidthPx = getFloatCompat(
+                    sp,
+                    context.getString(R.string.key_wick_width),
+                    defWickWidthPx
+            );
+            maLineWidthPx = getFloatCompat(
+                    sp,
+                    context.getString(R.string.key_ma_width),
+                    defMaWidthPx
+            );
             showGrid = sp.contains(context.getString(R.string.key_show_grid))?
-                    sp.getBoolean(context.getString(R.string.key_show_grid), defShowGrid) : defShowGrid;
+                    sp.getBoolean(context.getString(R.string.key_show_grid), defShowGrid) :
+                    defShowGrid;
             showVolume = sp.contains(context.getString(R.string.key_show_volume))?
-                    sp.getBoolean(context.getString(R.string.key_show_volume), defShowVolume) : defShowVolume;
+                    sp.getBoolean(context.getString(R.string.key_show_volume), defShowVolume) :
+                    defShowVolume;
             visibleCandleCount = sp.contains(context.getString(R.string.key_visible_count))?
-                    sp.getInt(context.getString(R.string.key_visible_count), defVisibleCount) : defVisibleCount;
+                    sp.getInt(context.getString(R.string.key_visible_count), defVisibleCount) :
+                    defVisibleCount;
             showLastPriceLine = sp.contains(context.getString(R.string.key_show_last_price))?
-                    sp.getBoolean(context.getString(R.string.key_show_last_price), defShowLastPrice) : defShowLastPrice;
+                    sp.getBoolean(context.getString(R.string.key_show_last_price), defShowLastPrice) :
+                    defShowLastPrice;
 
-            // Colors that can be auto (theme) or custom (user set)
-            lastPriceLineColor = sp.contains(context.getString(R.string.key_last_price_line_color))?
-                    sp.getInt(context.getString(R.string.key_last_price_line_color), defLastPriceLineColor) : defLastPriceLineColor;
-            lastPriceBgColor = sp.contains(context.getString(R.string.key_last_price_bg_color))?
-                    sp.getInt(context.getString(R.string.key_last_price_bg_color), defLastPriceBgColor) : defLastPriceBgColor;
-            priceTextSizePx = getFloatCompat(sp, context.getString(R.string.key_price_text_size), defPriceTextSizePx);
-            priceTextColor = sp.contains(context.getString(R.string.key_price_text_color))?
-                    sp.getInt(context.getString(R.string.key_price_text_color), defPriceTextColor) : defPriceTextColor;
+            lastPriceLineColor = sp.contains(
+                    context.getString(R.string.key_last_price_line_color)
+            )?
+                    sp.getInt(
+                            context.getString(R.string.key_last_price_line_color),
+                            defLastPriceLineColor
+                    ) :
+                    defLastPriceLineColor;
+
+            lastPriceBgColor = sp.contains(
+                    context.getString(R.string.key_last_price_bg_color)
+            )?
+                    sp.getInt(
+                            context.getString(R.string.key_last_price_bg_color),
+                            defLastPriceBgColor
+                    ) :
+                    defLastPriceBgColor;
+
+            priceTextSizePx = getFloatCompat(
+                    sp,
+                    context.getString(R.string.key_price_text_size),
+                    defPriceTextSizePx
+            );
+
+            priceTextColor = sp.contains(
+                    context.getString(R.string.key_price_text_color)
+            )?
+                    sp.getInt(
+                            context.getString(R.string.key_price_text_color),
+                            defPriceTextColor
+                    ) :
+                    defPriceTextColor;
+
             gridColor = sp.contains(context.getString(R.string.key_grid_color))?
-                    sp.getInt(context.getString(R.string.key_grid_color), defGridColor) : defGridColor;
+                    sp.getInt(context.getString(R.string.key_grid_color), defGridColor) :
+                    defGridColor;
+
             bgColor = sp.contains(context.getString(R.string.key_bg_color))?
-                    sp.getInt(context.getString(R.string.key_bg_color), 0) : 0;
-            lastLineWidthPx = getFloatCompat(sp, context.getString(R.string.key_last_line_width), defLastLineWidthPx);
+                    sp.getInt(context.getString(R.string.key_bg_color), 0) :
+                    0;
+
+            lastLineWidthPx = getFloatCompat(
+                    sp,
+                    context.getString(R.string.key_last_line_width),
+                    defLastLineWidthPx
+            );
+
             lastLineDashed = sp.contains(context.getString(R.string.key_last_line_dash))?
-                    sp.getBoolean(context.getString(R.string.key_last_line_dash), defLastDashed) : defLastDashed;
-            lastPriceLabelTextSizePx = getFloatCompat(sp, context.getString(R.string.key_last_label_text_size), defLabelTextSizePx);
-            lastPriceLabelTextColor = sp.contains(context.getString(R.string.key_last_label_text_color))?
-                    sp.getInt(context.getString(R.string.key_last_label_text_color), defLabelTextColor) : defLabelTextColor;
+                    sp.getBoolean(context.getString(R.string.key_last_line_dash), defLastDashed) :
+                    defLastDashed;
 
-            // Selected / crosshair line
-            selectedLineColor = sp.contains(context.getString(R.string.key_selected_line_color))?
-                    sp.getInt(context.getString(R.string.key_selected_line_color), defSelectedLineColor) : defSelectedLineColor;
-            selectedLineWidthPx = getFloatCompat(sp, context.getString(R.string.key_selected_line_width), defSelectedLineWidthPx);
-            selectedLineAlpha = getIntCompat(sp, context.getString(R.string.key_selected_line_alpha), defSelectedAlpha);
-            selectedLineDashed = sp.contains(context.getString(R.string.key_selected_line_dash))?
-                    sp.getBoolean(context.getString(R.string.key_selected_line_dash), defSelectedDashed) : defSelectedDashed;
+            lastPriceLabelTextSizePx = getFloatCompat(
+                    sp,
+                    context.getString(R.string.key_last_label_text_size),
+                    defLabelTextSizePx
+            );
 
-            // Auto-correct invisible colors after Light/Dark switch
-            int themeBg = getThemeColor(android.R.attr.colorBackground);
-            if (gridColor == 0 || isColorSimilar(gridColor, themeBg)) {
-                gridColor = defGridColor;
-            }
-            if (priceTextColor == 0 || isColorSimilar(priceTextColor, themeBg)) {
-                priceTextColor = defPriceTextColor;
-            }
-            if (selectedLineColor == 0 || isColorSimilar(selectedLineColor, themeBg)) {
-                selectedLineColor = defSelectedLineColor;
-            }
-            if (lastPriceLabelTextColor == 0 || isColorSimilar(lastPriceLabelTextColor, lastPriceBgColor)) {
-                lastPriceLabelTextColor = defLabelTextColor;
-            }
+            lastPriceLabelTextColor = sp.contains(
+                    context.getString(R.string.key_last_label_text_color)
+            )?
+                    sp.getInt(
+                            context.getString(R.string.key_last_label_text_color),
+                            defLabelTextColor
+                    ) :
+                    defLabelTextColor;
+
+            selectedLineColor = sp.contains(
+                    context.getString(R.string.key_selected_line_color)
+            )?
+                    sp.getInt(
+                            context.getString(R.string.key_selected_line_color),
+                            defSelectedLineColor
+                    ) :
+                    defSelectedLineColor;
+
+            selectedLineWidthPx = getFloatCompat(
+                    sp,
+                    context.getString(R.string.key_selected_line_width),
+                    defSelectedLineWidthPx
+            );
+
+            selectedLineAlpha = getIntCompat(
+                    sp,
+                    context.getString(R.string.key_selected_line_alpha),
+                    defSelectedAlpha
+            );
+
+            selectedLineDashed = sp.contains(
+                    context.getString(R.string.key_selected_line_dash)
+            )?
+                    sp.getBoolean(
+                            context.getString(R.string.key_selected_line_dash),
+                            defSelectedDashed
+                    ) :
+                    defSelectedDashed;
 
         } catch (Exception e) {
             bodyWidthFraction = defBodyFraction;
@@ -666,413 +775,464 @@ public class MarketChartView extends View {
     }
 
     // --------------------------------------------------------------------
-    // Public API - appearance and options used by Activity
+    // Public getters
     // --------------------------------------------------------------------
-    public int getBullishColor() { return bullishColor; }
-    public int getBearishColor() { return bearishColor; }
-    public float getBodyWidthFraction() { return bodyWidthFraction; }
-    public float getWickWidthPx() { return wickWidthPx; }
-    public float getMaLineWidthPx() { return maLineWidthPx; }
-    public boolean isShowGrid() { return showGrid; }
-    public boolean isShowVolume() { return showVolume; }
-    public int getVisibleCandleCountValue() { return visibleCandleCount; }
-    public boolean isShowLastPriceLine() { return showLastPriceLine; }
-    public int getLastPriceLineColor() { return lastPriceLineColor; }
-    public int getLastPriceBgColor() { return lastPriceBgColor; }
-    public float getPriceTextSizePx() { return priceTextSizePx; }
-    public int getPriceTextColor() { return priceTextColor; }
-    public int getGridColor() { return gridColor; }
-    public int getBgColor() { return bgColor; }
-    public float getLastLineWidthPx() { return lastLineWidthPx; }
-    public boolean isLastLineDashed() { return lastLineDashed; }
-    public float getLastPriceLabelTextSizePx() { return lastPriceLabelTextSizePx; }
-    public int getLastPriceLabelTextColor() { return lastPriceLabelTextColor; }
-    public int getSelectedLineColor() { return selectedLineColor; }
-    public float getSelectedLineWidthPx() { return selectedLineWidthPx; }
-    public int getSelectedLineAlpha() { return selectedLineAlpha; }
-    public boolean isSelectedLineDashed() { return selectedLineDashed; }
+    public int getBullishColor() {
+        return bullishColor;
+    }
+
+    public int getBearishColor() {
+        return bearishColor;
+    }
+
+    public float getBodyWidthFraction() {
+        return bodyWidthFraction;
+    }
+
+    public float getWickWidthPx() {
+        return wickWidthPx;
+    }
+
+    public float getMaLineWidthPx() {
+        return maLineWidthPx;
+    }
+
+    public boolean isShowGrid() {
+        return showGrid;
+    }
+
+    public boolean isShowVolume() {
+        return showVolume;
+    }
+
+    public int getVisibleCandleCountValue() {
+        return visibleCandleCount;
+    }
+
+    public boolean isShowLastPriceLine() {
+        return showLastPriceLine;
+    }
+
+    public int getLastPriceLineColor() {
+        return lastPriceLineColor;
+    }
+
+    public int getLastPriceBgColor() {
+        return lastPriceBgColor;
+    }
+
+    public float getPriceTextSizePx() {
+        return priceTextSizePx;
+    }
+
+    public int getPriceTextColor() {
+        return priceTextColor;
+    }
+
+    public int getGridColor() {
+        return gridColor;
+    }
+
+    public int getBgColor() {
+        return bgColor;
+    }
+
+    public float getLastLineWidthPx() {
+        return lastLineWidthPx;
+    }
+
+    public boolean isLastLineDashed() {
+        return lastLineDashed;
+    }
+
+    public float getLastPriceLabelTextSizePx() {
+        return lastPriceLabelTextSizePx;
+    }
+
+    public int getLastPriceLabelTextColor() {
+        return lastPriceLabelTextColor;
+    }
+
+    public int getSelectedLineColor() {
+        return selectedLineColor;
+    }
+
+    public float getSelectedLineWidthPx() {
+        return selectedLineWidthPx;
+    }
+
+    public int getSelectedLineAlpha() {
+        return selectedLineAlpha;
+    }
+
+    public boolean isSelectedLineDashed() {
+        return selectedLineDashed;
+    }
 
     // --------------------------------------------------------------------
-    // FIXED SECTION: SEPARATED SETTERS - Each saves ONLY its own key
-    // Requirement: "tách mỗi thứ riêng ra hết, set cái nào thì chỉ lưu cái đó"
+    // Separated setters - each saves ONLY its own key
     // --------------------------------------------------------------------
 
-    /**
-     * Set body width fraction for candle bodies.
-     * Saves ONLY body fraction key, other settings remain auto.
-     */
     public void setBodyFraction(float fraction) {
         this.bodyWidthFraction = fraction;
         try {
             SharedPreferences sp = getContext().getSharedPreferences(
-                    getContext().getString(R.string.prefs_chart), Context.MODE_PRIVATE);
-            sp.edit().putFloat(getContext().getString(R.string.key_body_fraction), fraction).apply();
+                    getContext().getString(R.string.prefs_chart),
+                    Context.MODE_PRIVATE
+            );
+            sp.edit()
+                   .putFloat(getContext().getString(R.string.key_body_fraction), fraction)
+                   .apply();
         } catch (Exception e) {
-            // Ignore persistence errors
         }
         initPaints(getContext());
         invalidate();
     }
 
-    /**
-     * Set wick width in pixels.
-     * Saves ONLY wick width key.
-     */
     public void setWickWidthPx(float widthPx) {
         this.wickWidthPx = widthPx;
         try {
             SharedPreferences sp = getContext().getSharedPreferences(
-                    getContext().getString(R.string.prefs_chart), Context.MODE_PRIVATE);
-            sp.edit().putFloat(getContext().getString(R.string.key_wick_width), widthPx).apply();
+                    getContext().getString(R.string.prefs_chart),
+                    Context.MODE_PRIVATE
+            );
+            sp.edit()
+                   .putFloat(getContext().getString(R.string.key_wick_width), widthPx)
+                   .apply();
         } catch (Exception e) {
-            // Ignore
         }
         initPaints(getContext());
         invalidate();
     }
 
-    /**
-     * Set moving average line width.
-     * Saves ONLY MA width key.
-     */
     public void setMaLineWidthPx(float widthPx) {
         this.maLineWidthPx = widthPx;
         try {
             SharedPreferences sp = getContext().getSharedPreferences(
-                    getContext().getString(R.string.prefs_chart), Context.MODE_PRIVATE);
-            sp.edit().putFloat(getContext().getString(R.string.key_ma_width), widthPx).apply();
+                    getContext().getString(R.string.prefs_chart),
+                    Context.MODE_PRIVATE
+            );
+            sp.edit()
+                   .putFloat(getContext().getString(R.string.key_ma_width), widthPx)
+                   .apply();
         } catch (Exception e) {
-            // Ignore
         }
         initPaints(getContext());
         invalidate();
     }
 
-    /**
-     * Set show/hide grid lines.
-     * Saves ONLY show grid boolean key.
-     */
     public void setShowGrid(boolean show) {
         this.showGrid = show;
         try {
             SharedPreferences sp = getContext().getSharedPreferences(
-                    getContext().getString(R.string.prefs_chart), Context.MODE_PRIVATE);
-            sp.edit().putBoolean(getContext().getString(R.string.key_show_grid), show).apply();
+                    getContext().getString(R.string.prefs_chart),
+                    Context.MODE_PRIVATE
+            );
+            sp.edit()
+                   .putBoolean(getContext().getString(R.string.key_show_grid), show)
+                   .apply();
         } catch (Exception e) {
-            // Ignore
         }
         invalidate();
     }
 
-    /**
-     * Set show/hide volume chart.
-     * Saves ONLY show volume key.
-     */
     public void setShowVolume(boolean show) {
         this.showVolume = show;
         try {
             SharedPreferences sp = getContext().getSharedPreferences(
-                    getContext().getString(R.string.prefs_chart), Context.MODE_PRIVATE);
-            sp.edit().putBoolean(getContext().getString(R.string.key_show_volume), show).apply();
+                    getContext().getString(R.string.prefs_chart),
+                    Context.MODE_PRIVATE
+            );
+            sp.edit()
+                   .putBoolean(getContext().getString(R.string.key_show_volume), show)
+                   .apply();
         } catch (Exception e) {
-            // Ignore
         }
         invalidate();
     }
 
-    /**
-     * Set visible candle count.
-     * Saves ONLY visible count key.
-     */
     public void setVisibleCandleCount(int count) {
         this.visibleCandleCount = count;
         clampVisibleCount();
         try {
             SharedPreferences sp = getContext().getSharedPreferences(
-                    getContext().getString(R.string.prefs_chart), Context.MODE_PRIVATE);
-            sp.edit().putInt(getContext().getString(R.string.key_visible_count), this.visibleCandleCount).apply();
+                    getContext().getString(R.string.prefs_chart),
+                    Context.MODE_PRIVATE
+            );
+            sp.edit()
+                   .putInt(
+                            getContext().getString(R.string.key_visible_count),
+                            this.visibleCandleCount
+                    )
+                   .apply();
         } catch (Exception e) {
-            // Ignore
         }
         clampTranslationX();
         invalidate();
     }
 
-    /**
-     * Set show/hide last price horizontal line.
-     * Saves ONLY this boolean key.
-     */
     public void setShowLastPriceLine(boolean show) {
         this.showLastPriceLine = show;
         try {
             SharedPreferences sp = getContext().getSharedPreferences(
-                    getContext().getString(R.string.prefs_chart), Context.MODE_PRIVATE);
-            sp.edit().putBoolean(getContext().getString(R.string.key_show_last_price), show).apply();
+                    getContext().getString(R.string.prefs_chart),
+                    Context.MODE_PRIVATE
+            );
+            sp.edit()
+                   .putBoolean(getContext().getString(R.string.key_show_last_price), show)
+                   .apply();
         } catch (Exception e) {
-            // Ignore
         }
         invalidate();
     }
 
-    /**
-     * Set last price line color.
-     * Saves ONLY last price line color key.
-     * If color equals theme default, remove custom key to stay auto.
-     */
     public void setLastPriceLineColor(int color) {
         if (color == 0) {
-            throw new IllegalStateException(getContext().getString(R.string.err_appearance_color));
+            throw new IllegalStateException(
+                    getContext().getString(R.string.err_appearance_color)
+            );
         }
         this.lastPriceLineColor = color;
         try {
             SharedPreferences sp = getContext().getSharedPreferences(
-                    getContext().getString(R.string.prefs_chart), Context.MODE_PRIVATE);
-            if (color == defLastPriceLineColor) {
-                sp.edit().remove(getContext().getString(R.string.key_last_price_line_color)).apply();
-            } else {
-                sp.edit().putInt(getContext().getString(R.string.key_last_price_line_color), color).apply();
-            }
+                    getContext().getString(R.string.prefs_chart),
+                    Context.MODE_PRIVATE
+            );
+            sp.edit()
+                   .putInt(
+                            getContext().getString(R.string.key_last_price_line_color),
+                            color
+                    )
+                   .apply();
         } catch (Exception e) {
-            // Ignore
         }
         initPaints(getContext());
         invalidate();
     }
 
-    /**
-     * Set chart background color.
-     * Saves ONLY background color key. 0 means auto theme.
-     */
     public void setBgColor(int color) {
         this.bgColor = color;
         try {
             SharedPreferences sp = getContext().getSharedPreferences(
-                    getContext().getString(R.string.prefs_chart), Context.MODE_PRIVATE);
+                    getContext().getString(R.string.prefs_chart),
+                    Context.MODE_PRIVATE
+            );
             if (color == 0) {
-                sp.edit().remove(getContext().getString(R.string.key_bg_color)).apply();
+                sp.edit()
+                       .remove(getContext().getString(R.string.key_bg_color))
+                       .apply();
             } else {
-                sp.edit().putInt(getContext().getString(R.string.key_bg_color), color).apply();
+                sp.edit()
+                       .putInt(getContext().getString(R.string.key_bg_color), color)
+                       .apply();
             }
         } catch (Exception e) {
-            // Ignore
         }
         initPaints(getContext());
         invalidate();
     }
 
-    /**
-     * Set price text size for right axis.
-     * Saves ONLY price text size key.
-     */
     public void setPriceTextSizePx(float sizePx) {
         this.priceTextSizePx = sizePx;
         try {
             SharedPreferences sp = getContext().getSharedPreferences(
-                    getContext().getString(R.string.prefs_chart), Context.MODE_PRIVATE);
-            sp.edit().putFloat(getContext().getString(R.string.key_price_text_size), sizePx).apply();
+                    getContext().getString(R.string.prefs_chart),
+                    Context.MODE_PRIVATE
+            );
+            sp.edit()
+                   .putFloat(
+                            getContext().getString(R.string.key_price_text_size),
+                            sizePx
+                    )
+                   .apply();
         } catch (Exception e) {
-            // Ignore
         }
         initPaints(getContext());
         invalidate();
     }
 
-    /**
-     * Set last price line width.
-     * Saves ONLY last line width key.
-     */
     public void setLastLineWidthPx(float widthPx) {
         this.lastLineWidthPx = widthPx;
         try {
             SharedPreferences sp = getContext().getSharedPreferences(
-                    getContext().getString(R.string.prefs_chart), Context.MODE_PRIVATE);
-            sp.edit().putFloat(getContext().getString(R.string.key_last_line_width), widthPx).apply();
+                    getContext().getString(R.string.prefs_chart),
+                    Context.MODE_PRIVATE
+            );
+            sp.edit()
+                   .putFloat(
+                            getContext().getString(R.string.key_last_line_width),
+                            widthPx
+                    )
+                   .apply();
         } catch (Exception e) {
-            // Ignore
         }
         initPaints(getContext());
         invalidate();
     }
 
-    /**
-     * Set last price line dashed style.
-     * Saves ONLY dashed boolean key.
-     */
     public void setLastLineDashed(boolean dashed) {
         this.lastLineDashed = dashed;
         try {
             SharedPreferences sp = getContext().getSharedPreferences(
-                    getContext().getString(R.string.prefs_chart), Context.MODE_PRIVATE);
-            sp.edit().putBoolean(getContext().getString(R.string.key_last_line_dash), dashed).apply();
+                    getContext().getString(R.string.prefs_chart),
+                    Context.MODE_PRIVATE
+            );
+            sp.edit()
+                   .putBoolean(
+                            getContext().getString(R.string.key_last_line_dash),
+                            dashed
+                    )
+                   .apply();
         } catch (Exception e) {
-            // Ignore
         }
         initPaints(getContext());
         invalidate();
     }
 
-    /**
-     * Set current price label text size.
-     * Saves ONLY label text size key.
-     */
     public void setCurrentPriceLabelTextSizePx(float sizePx) {
         this.lastPriceLabelTextSizePx = sizePx;
         try {
             SharedPreferences sp = getContext().getSharedPreferences(
-                    getContext().getString(R.string.prefs_chart), Context.MODE_PRIVATE);
-            sp.edit().putFloat(getContext().getString(R.string.key_last_label_text_size), sizePx).apply();
+                    getContext().getString(R.string.prefs_chart),
+                    Context.MODE_PRIVATE
+            );
+            sp.edit()
+                   .putFloat(
+                            getContext().getString(R.string.key_last_label_text_size),
+                            sizePx
+                    )
+                   .apply();
         } catch (Exception e) {
-            // Ignore
         }
         initPaints(getContext());
         invalidate();
     }
 
-    // --------------------------------------------------------------------
-    // Individual setters for future expansion.
-    // Each setter saves ONLY its own key -> set what is set, others stay auto.
-    // --------------------------------------------------------------------
-
-    /**
-     * Set grid color individually.
-     * Saves ONLY grid color key, others remain auto theme.
-     * If color equals default, removes custom key to return to auto.
-     */
     public void setGridColor(int color) {
         if (color == 0) {
-            throw new IllegalStateException(getContext().getString(R.string.err_appearance_color));
+            throw new IllegalStateException(
+                    getContext().getString(R.string.err_appearance_color)
+            );
         }
         this.gridColor = color;
         try {
             SharedPreferences sp = getContext().getSharedPreferences(
-                    getContext().getString(R.string.prefs_chart), Context.MODE_PRIVATE);
-            if (color == defGridColor) {
-                sp.edit().remove(getContext().getString(R.string.key_grid_color)).apply();
-            } else {
-                sp.edit().putInt(getContext().getString(R.string.key_grid_color), color).apply();
-            }
+                    getContext().getString(R.string.prefs_chart),
+                    Context.MODE_PRIVATE
+            );
+            sp.edit()
+                   .putInt(getContext().getString(R.string.key_grid_color), color)
+                   .apply();
         } catch (Exception e) {
-            // Ignore
         }
         initPaints(getContext());
         invalidate();
     }
 
-    /**
-     * Set price axis text color individually.
-     * Saves ONLY price text color key.
-     */
     public void setPriceTextColor(int color) {
         if (color == 0) {
-            throw new IllegalStateException(getContext().getString(R.string.err_appearance_color));
+            throw new IllegalStateException(
+                    getContext().getString(R.string.err_appearance_color)
+            );
         }
         this.priceTextColor = color;
         try {
             SharedPreferences sp = getContext().getSharedPreferences(
-                    getContext().getString(R.string.prefs_chart), Context.MODE_PRIVATE);
-            if (color == defPriceTextColor) {
-                sp.edit().remove(getContext().getString(R.string.key_price_text_color)).apply();
-            } else {
-                sp.edit().putInt(getContext().getString(R.string.key_price_text_color), color).apply();
-            }
+                    getContext().getString(R.string.prefs_chart),
+                    Context.MODE_PRIVATE
+            );
+            sp.edit()
+                   .putInt(getContext().getString(R.string.key_price_text_color), color)
+                   .apply();
         } catch (Exception e) {
-            // Ignore
         }
         initPaints(getContext());
         invalidate();
     }
 
-    /**
-     * Set current price label background and text color and size.
-     * This saves three keys, but used only when user edits whole label group.
-     * For single field edits, use setCurrentPriceLabelBackground() etc.
-     */
+    public void setCurrentPriceLabelBackground(int color) {
+        if (color == 0) {
+            throw new IllegalStateException(
+                    getContext().getString(R.string.err_label_color)
+            );
+        }
+        this.lastPriceBgColor = color;
+        try {
+            SharedPreferences sp = getContext().getSharedPreferences(
+                    getContext().getString(R.string.prefs_chart),
+                    Context.MODE_PRIVATE
+            );
+            sp.edit()
+                   .putInt(
+                            getContext().getString(R.string.key_last_price_bg_color),
+                            color
+                    )
+                   .apply();
+        } catch (Exception e) {
+        }
+        initPaints(getContext());
+        invalidate();
+    }
+
+    public void setCurrentPriceLabelTextColor(int color) {
+        if (color == 0) {
+            throw new IllegalStateException(
+                    getContext().getString(R.string.err_label_color)
+            );
+        }
+        this.lastPriceLabelTextColor = color;
+        try {
+            SharedPreferences sp = getContext().getSharedPreferences(
+                    getContext().getString(R.string.prefs_chart),
+                    Context.MODE_PRIVATE
+            );
+            sp.edit()
+                   .putInt(
+                            getContext().getString(R.string.key_last_label_text_color),
+                            color
+                    )
+                   .apply();
+        } catch (Exception e) {
+        }
+        initPaints(getContext());
+        invalidate();
+    }
+
     public void setLastPriceLabelAppearance(int bgColor, int textColor, float textSizePx) {
         if (bgColor == 0 || textColor == 0) {
-            throw new IllegalStateException(getContext().getString(R.string.err_label_color));
+            throw new IllegalStateException(
+                    getContext().getString(R.string.err_label_color)
+            );
         }
-        // Delegate to individual setters to keep logic separated
         setCurrentPriceLabelBackground(bgColor);
         setCurrentPriceLabelTextColor(textColor);
         setCurrentPriceLabelTextSizePx(textSizePx);
     }
 
-    /**
-     * Set current price label background color individually.
-     * Saves ONLY label background key.
-     */
-    public void setCurrentPriceLabelBackground(int color) {
-        if (color == 0) {
-            throw new IllegalStateException(getContext().getString(R.string.err_label_color));
-        }
-        this.lastPriceBgColor = color;
-        try {
-            SharedPreferences sp = getContext().getSharedPreferences(
-                    getContext().getString(R.string.prefs_chart), Context.MODE_PRIVATE);
-            if (color == defLastPriceBgColor) {
-                sp.edit().remove(getContext().getString(R.string.key_last_price_bg_color)).apply();
-            } else {
-                sp.edit().putInt(getContext().getString(R.string.key_last_price_bg_color), color).apply();
-            }
-        } catch (Exception e) {
-            // Ignore
-        }
-        initPaints(getContext());
-        invalidate();
-    }
-
-    /**
-     * Set current price label text color individually.
-     * Saves ONLY label text color key.
-     */
-    public void setCurrentPriceLabelTextColor(int color) {
-        if (color == 0) {
-            throw new IllegalStateException(getContext().getString(R.string.err_label_color));
-        }
-        this.lastPriceLabelTextColor = color;
-        try {
-            SharedPreferences sp = getContext().getSharedPreferences(
-                    getContext().getString(R.string.prefs_chart), Context.MODE_PRIVATE);
-            if (color == defLabelTextColor) {
-                sp.edit().remove(getContext().getString(R.string.key_last_label_text_color)).apply();
-            } else {
-                sp.edit().putInt(getContext().getString(R.string.key_last_label_text_color), color).apply();
-            }
-        } catch (Exception e) {
-            // Ignore
-        }
-        initPaints(getContext());
-        invalidate();
-    }
-
-    /**
-     * Set selected / crosshair line color individually.
-     * Saves ONLY selected line color key.
-     */
     public void setSelectedLineColor(int color) {
         if (color == 0) {
-            throw new IllegalStateException(getContext().getString(R.string.err_selected_line_color_0));
+            throw new IllegalStateException(
+                    getContext().getString(R.string.err_selected_line_color_0)
+            );
         }
         this.selectedLineColor = color;
         try {
             SharedPreferences sp = getContext().getSharedPreferences(
-                    getContext().getString(R.string.prefs_chart), Context.MODE_PRIVATE);
-            if (color == defSelectedLineColor) {
-                sp.edit().remove(getContext().getString(R.string.key_selected_line_color)).apply();
-            } else {
-                sp.edit().putInt(getContext().getString(R.string.key_selected_line_color), color).apply();
-            }
+                    getContext().getString(R.string.prefs_chart),
+                    Context.MODE_PRIVATE
+            );
+            sp.edit()
+                   .putInt(
+                            getContext().getString(R.string.key_selected_line_color),
+                            color
+                    )
+                   .apply();
         } catch (Exception e) {
-            // Ignore
         }
         initPaints(getContext());
         invalidate();
     }
 
-    /**
-     * Set selected line width individually.
-     * Saves ONLY selected line width key.
-     */
     public void setSelectedLineWidthPx(float widthPx) {
         if (widthPx <= 0f) {
             widthPx = defSelectedLineWidthPx;
@@ -1080,19 +1240,21 @@ public class MarketChartView extends View {
         this.selectedLineWidthPx = widthPx;
         try {
             SharedPreferences sp = getContext().getSharedPreferences(
-                    getContext().getString(R.string.prefs_chart), Context.MODE_PRIVATE);
-            sp.edit().putFloat(getContext().getString(R.string.key_selected_line_width), widthPx).apply();
+                    getContext().getString(R.string.prefs_chart),
+                    Context.MODE_PRIVATE
+            );
+            sp.edit()
+                   .putFloat(
+                            getContext().getString(R.string.key_selected_line_width),
+                            widthPx
+                    )
+                   .apply();
         } catch (Exception e) {
-            // Ignore
         }
         initPaints(getContext());
         invalidate();
     }
 
-    /**
-     * Set selected line alpha individually.
-     * Saves ONLY selected line alpha key.
-     */
     public void setSelectedLineAlpha(int alpha) {
         if (alpha < 0) {
             alpha = 0;
@@ -1103,40 +1265,45 @@ public class MarketChartView extends View {
         this.selectedLineAlpha = alpha;
         try {
             SharedPreferences sp = getContext().getSharedPreferences(
-                    getContext().getString(R.string.prefs_chart), Context.MODE_PRIVATE);
-            sp.edit().putInt(getContext().getString(R.string.key_selected_line_alpha), alpha).apply();
+                    getContext().getString(R.string.prefs_chart),
+                    Context.MODE_PRIVATE
+            );
+            sp.edit()
+                   .putInt(
+                            getContext().getString(R.string.key_selected_line_alpha),
+                            alpha
+                    )
+                   .apply();
         } catch (Exception e) {
-            // Ignore
         }
         initPaints(getContext());
         invalidate();
     }
 
-    /**
-     * Set selected line dashed style individually.
-     * Saves ONLY selected line dashed key.
-     */
     public void setSelectedLineDashed(boolean dashed) {
         this.selectedLineDashed = dashed;
         try {
             SharedPreferences sp = getContext().getSharedPreferences(
-                    getContext().getString(R.string.prefs_chart), Context.MODE_PRIVATE);
-            sp.edit().putBoolean(getContext().getString(R.string.key_selected_line_dash), dashed).apply();
+                    getContext().getString(R.string.prefs_chart),
+                    Context.MODE_PRIVATE
+            );
+            sp.edit()
+                   .putBoolean(
+                            getContext().getString(R.string.key_selected_line_dash),
+                            dashed
+                    )
+                   .apply();
         } catch (Exception e) {
-            // Ignore
         }
         initPaints(getContext());
         invalidate();
     }
 
-    /**
-     * Set appearance for selected / crosshair vertical line.
-     * All parameters are loaded from layout XML defaults, not hardcoded.
-     * This method delegates to individual setters to keep saving separated.
-     */
     public void setSelectedLineAppearance(int color, float widthPx, int alpha, boolean dashed) {
         if (color == 0) {
-            throw new IllegalStateException(getContext().getString(R.string.err_selected_line_color_0));
+            throw new IllegalStateException(
+                    getContext().getString(R.string.err_selected_line_color_0)
+            );
         }
         if (widthPx <= 0f) {
             widthPx = defSelectedLineWidthPx;
@@ -1147,8 +1314,6 @@ public class MarketChartView extends View {
         if (alpha > 255) {
             alpha = 255;
         }
-
-        // Use individual setters so each key is saved separately
         setSelectedLineColor(color);
         setSelectedLineWidthPx(widthPx);
         setSelectedLineAlpha(alpha);
@@ -1157,29 +1322,27 @@ public class MarketChartView extends View {
 
     public void setCandleColors(int bull, int bear) {
         if (bull == 0 || bear == 0) {
-            throw new IllegalStateException(getContext().getString(R.string.err_candle_0));
+            throw new IllegalStateException(
+                    getContext().getString(R.string.err_candle_0)
+            );
         }
         this.bullishColor = bull;
         this.bearishColor = bear;
         try {
             SharedPreferences sp = getContext().getSharedPreferences(
-                    getContext().getString(R.string.prefs_candle), Context.MODE_PRIVATE);
+                    getContext().getString(R.string.prefs_candle),
+                    Context.MODE_PRIVATE
+            );
             sp.edit()
-               .putInt(getContext().getString(R.string.key_bull), bull)
-               .putInt(getContext().getString(R.string.key_bear), bear)
-               .apply();
+                   .putInt(getContext().getString(R.string.key_bull), bull)
+                   .putInt(getContext().getString(R.string.key_bear), bear)
+                   .apply();
         } catch (Exception e) {
-            // Ignore
         }
         initPaints(getContext());
         invalidate();
     }
 
-    /**
-     * Set chart options - legacy method.
-     * Now delegates to individual setters to avoid cross-saving bug.
-     * Each option saves only its own key.
-     */
     public void setChartOptions(float bodyFraction, float wickWidth, float maWidth,
                                 boolean sGrid, boolean sVolume, int visCount) {
         setBodyFraction(bodyFraction);
@@ -1190,20 +1353,14 @@ public class MarketChartView extends View {
         setVisibleCandleCount(visCount);
     }
 
-    /**
-     * Set appearance for Last Price Line section.
-     * FIXED: Now delegates to individual setters instead of bulk save.
-     * This ensures "set cái nào chỉ lưu cái đó" and others stay auto.
-     * Called from Activity when user presses Apply in Last Price Line group.
-     */
     public void setChartAppearance(boolean sLastPrice, int lastLineColor, int lastBgColor,
                                    float txtSize, int txtColor, int gColor, int bColor,
                                    float lastW, boolean lastDash) {
         if (lastLineColor == 0 || lastBgColor == 0 || txtColor == 0 || gColor == 0) {
-            throw new IllegalStateException(getContext().getString(R.string.err_appearance_color));
+            throw new IllegalStateException(
+                    getContext().getString(R.string.err_appearance_color)
+            );
         }
-
-        // Delegate to separated setters - each saves only its own key
         setShowLastPriceLine(sLastPrice);
         setLastPriceLineColor(lastLineColor);
         setCurrentPriceLabelBackground(lastBgColor);
@@ -1217,8 +1374,12 @@ public class MarketChartView extends View {
 
     public void setChartAppearance(boolean sLastPrice, int lastLineColor, int lastBgColor,
                                    float txtSize, int txtColor, int gColor) {
-        setChartAppearance(sLastPrice, lastLineColor, lastBgColor, txtSize, txtColor, gColor,
-                bgColor, lastLineWidthPx, lastLineDashed);
+        setShowLastPriceLine(sLastPrice);
+        setLastPriceLineColor(lastLineColor);
+        setCurrentPriceLabelBackground(lastBgColor);
+        setPriceTextSizePx(txtSize);
+        setPriceTextColor(txtColor);
+        setGridColor(gColor);
     }
 
     private void clampVisibleCount() {
@@ -1230,41 +1391,42 @@ public class MarketChartView extends View {
         }
     }
 
-    /**
-     * Clear all saved settings - used by Activity reset.
-     * Uses commit() for synchronous clear to avoid race.
-     */
     public void clearSavedSettings() {
         try {
-            getContext().getSharedPreferences(getContext().getString(R.string.prefs_chart),
-                    Context.MODE_PRIVATE).edit().clear().commit();
-            getContext().getSharedPreferences(getContext().getString(R.string.prefs_candle),
-                    Context.MODE_PRIVATE).edit().clear().commit();
-            getContext().getSharedPreferences(getContext().getString(R.string.prefs_ma),
-                    Context.MODE_PRIVATE).edit().clear().commit();
-            getContext().getSharedPreferences("chart_settings",
-                    Context.MODE_PRIVATE).edit().clear().commit();
-            getContext().getSharedPreferences("chart_state_prefs",
-                    Context.MODE_PRIVATE).edit().clear().commit();
+            getContext().getSharedPreferences(
+                    getContext().getString(R.string.prefs_chart),
+                    Context.MODE_PRIVATE
+            ).edit().clear().commit();
+
+            getContext().getSharedPreferences(
+                    getContext().getString(R.string.prefs_candle),
+                    Context.MODE_PRIVATE
+            ).edit().clear().commit();
+
+            getContext().getSharedPreferences(
+                    getContext().getString(R.string.prefs_ma),
+                    Context.MODE_PRIVATE
+            ).edit().clear().commit();
+
+            getContext().getSharedPreferences(
+                    "chart_settings",
+                    Context.MODE_PRIVATE
+            ).edit().clear().commit();
+
+            getContext().getSharedPreferences(
+                    "chart_state_prefs",
+                    Context.MODE_PRIVATE
+            ).edit().clear().commit();
         } catch (Exception e) {
-            // Ignore
         }
     }
 
-    /**
-     * Reset to defaults from layout - 100% auto theme.
-     * After reset, do NOT persist theme-dependent colors.
-     * Grid, price text, selected line, label colors will be loaded from R.color
-     * with values-night qualifier, so Light/Dark switch works without invisible bug.
-     */
     public void resetToDefaultsFromLayout() {
         ensureDefaultsLoaded();
         reloadDefaultColorsFromCurrentTheme();
 
-        // Step 1: Clear all prefs synchronously - auto 100%
         clearSavedSettings();
 
-        // Step 2: Reset runtime variables to defaults from current theme
         bullishColor = defBullColor;
         bearishColor = defBearColor;
         bodyWidthFraction = defBodyFraction;
@@ -1292,68 +1454,19 @@ public class MarketChartView extends View {
         translationX = 0f;
         extraOffsetX = 0f;
 
-        // Step 3: Reset MA lines
         maLines.clear();
         for (MaLine m : defMaLines) {
-            maLines.add(new MaLine(m.period, m.color));
+            maLines.add(
+                    new MaLine(m.period, m.color)
+            );
         }
 
-        // Step 4: Persist ONLY non-theme-dependent options
-        // Theme-dependent colors (grid, price text, selected, label) are NOT saved
-        // so they will stay auto and follow Light/Dark.
-        try {
-            Context ctx = getContext();
-            SharedPreferences spChart = ctx.getSharedPreferences(
-                    ctx.getString(R.string.prefs_chart), Context.MODE_PRIVATE);
-            spChart.edit()
-               .putFloat(ctx.getString(R.string.key_body_fraction), bodyWidthFraction)
-               .putFloat(ctx.getString(R.string.key_wick_width), wickWidthPx)
-               .putFloat(ctx.getString(R.string.key_ma_width), maLineWidthPx)
-               .putBoolean(ctx.getString(R.string.key_show_grid), showGrid)
-               .putBoolean(ctx.getString(R.string.key_show_volume), showVolume)
-               .putInt(ctx.getString(R.string.key_visible_count), visibleCandleCount)
-               .putBoolean(ctx.getString(R.string.key_show_last_price), showLastPriceLine)
-               .putFloat(ctx.getString(R.string.key_last_line_width), lastLineWidthPx)
-               .putBoolean(ctx.getString(R.string.key_last_line_dash), lastLineDashed)
-               .putFloat(ctx.getString(R.string.key_price_text_size), priceTextSizePx)
-               .putFloat(ctx.getString(R.string.key_last_label_text_size), lastPriceLabelTextSizePx)
-               .putFloat(ctx.getString(R.string.key_selected_line_width), selectedLineWidthPx)
-               .putInt(ctx.getString(R.string.key_selected_line_alpha), selectedLineAlpha)
-               .putBoolean(ctx.getString(R.string.key_selected_line_dash), selectedLineDashed)
-               .commit();
-
-            SharedPreferences spCandle = ctx.getSharedPreferences(
-                    ctx.getString(R.string.prefs_candle), Context.MODE_PRIVATE);
-            spCandle.edit()
-               .putInt(ctx.getString(R.string.key_bull), bullishColor)
-               .putInt(ctx.getString(R.string.key_bear), bearishColor)
-               .commit();
-
-            // Save MA lines (not theme dependent)
-            SharedPreferences spMa = ctx.getSharedPreferences(
-                    ctx.getString(R.string.prefs_ma), Context.MODE_PRIVATE);
-            StringBuilder sb = new StringBuilder();
-            for (int i = 0; i < maLines.size(); i++) {
-                MaLine m = maLines.get(i);
-                if (i > 0) {
-                    sb.append(ctx.getString(R.string.sep_semicolon));
-                }
-                sb.append(m.period).append(ctx.getString(R.string.sep_comma)).append(m.color);
-            }
-            spMa.edit().putString(ctx.getString(R.string.key_ma), sb.toString()).commit();
-
-        } catch (Exception e) {
-            // Ignore persistence errors
-        }
-
-        // Step 5: Refresh UI
         initPaints(getContext());
         clampVisibleCount();
         clampTranslationX();
         invalidate();
         notifyMa();
 
-        // Notify that nothing is selected anymore
         if (updateListener!= null) {
             updateListener.onNothingSelected();
         }
@@ -1363,46 +1476,56 @@ public class MarketChartView extends View {
         resetToDefaultsFromLayout();
     }
 
-    // --------------------------------------------------------------------
-    // MA Persistence - separators from strings.xml
-    // --------------------------------------------------------------------
     private void saveMaLines(Context context) {
         try {
             SharedPreferences sp = context.getSharedPreferences(
-                    context.getString(R.string.prefs_ma), Context.MODE_PRIVATE);
+                    context.getString(R.string.prefs_ma),
+                    Context.MODE_PRIVATE
+            );
             StringBuilder sb = new StringBuilder();
             for (int i = 0; i < maLines.size(); i++) {
                 MaLine m = maLines.get(i);
                 if (i > 0) {
                     sb.append(context.getString(R.string.sep_semicolon));
                 }
-                sb.append(m.period).append(context.getString(R.string.sep_comma)).append(m.color);
+                sb.append(m.period)
+                       .append(context.getString(R.string.sep_comma))
+                       .append(m.color);
             }
-            sp.edit().putString(context.getString(R.string.key_ma), sb.toString()).apply();
+            sp.edit()
+                   .putString(context.getString(R.string.key_ma), sb.toString())
+                   .apply();
         } catch (Exception e) {
-            // Ignore
         }
     }
 
     private boolean loadMaLinesFromPrefs(Context context) {
         try {
             SharedPreferences sp = context.getSharedPreferences(
-                    context.getString(R.string.prefs_ma), Context.MODE_PRIVATE);
+                    context.getString(R.string.prefs_ma),
+                    Context.MODE_PRIVATE
+            );
             String s = sp.getString(context.getString(R.string.key_ma), null);
             if (s == null || s.isEmpty()) {
                 return false;
             }
-            String[] parts = s.split(context.getString(R.string.sep_semicolon_regex));
+            String[] parts = s.split(
+                    context.getString(R.string.sep_semicolon_regex)
+            );
             List<MaLine> list = new ArrayList<>();
             for (String p : parts) {
-                String[] kv = p.split(context.getString(R.string.sep_comma_regex));
+                String[] kv = p.split(
+                        context.getString(R.string.sep_comma_regex)
+                );
                 if (kv.length!= 2) {
                     continue;
                 }
                 int period = Integer.parseInt(kv[0]);
                 int color = Integer.parseInt(kv[1]);
                 if (color == 0) {
-                    throw new IllegalStateException(context.getString(R.string.err_ma_color_0));
+                    throw new IllegalStateException(
+                            context.getString(R.string.err_ma_color_0)
+                    );
                 }
                 list.add(new MaLine(period, color));
             }
@@ -1411,7 +1534,6 @@ public class MarketChartView extends View {
                 return true;
             }
         } catch (Exception e) {
-            // Ignore
         }
         return false;
     }
@@ -1423,7 +1545,9 @@ public class MarketChartView extends View {
         ensureDefaultsLoaded();
         maLines.clear();
         for (MaLine m : defMaLines) {
-            maLines.add(new MaLine(m.period, m.color));
+            maLines.add(
+                    new MaLine(m.period, m.color)
+            );
         }
     }
 
@@ -1433,11 +1557,15 @@ public class MarketChartView extends View {
 
     public void setMaLines(List<MaLine> list) {
         if (list == null) {
-            throw new IllegalStateException(getContext().getString(R.string.err_ma_empty));
+            throw new IllegalStateException(
+                    getContext().getString(R.string.err_ma_empty)
+            );
         }
         for (MaLine m : list) {
             if (m.color == 0) {
-                throw new IllegalStateException(getContext().getString(R.string.err_ma_color_0));
+                throw new IllegalStateException(
+                        getContext().getString(R.string.err_ma_color_0)
+                );
             }
         }
         this.maLines = new ArrayList<>(list);
@@ -1447,9 +1575,6 @@ public class MarketChartView extends View {
         notifyMa();
     }
 
-    // --------------------------------------------------------------------
-    // Theme Helper - resolves theme attributes to colors
-    // --------------------------------------------------------------------
     private int getThemeColor(int attr) {
         TypedValue tv = new TypedValue();
         getContext().getTheme().resolveAttribute(attr, tv, true);
@@ -1465,9 +1590,6 @@ public class MarketChartView extends View {
         }
     }
 
-    // --------------------------------------------------------------------
-    // Paint Setup - initializes all paints from current style settings
-    // --------------------------------------------------------------------
     private void initPaints(Context context) {
         if (!defaultsLoadedFromLayout && bullishPaint == null) {
             return;
@@ -1486,7 +1608,9 @@ public class MarketChartView extends View {
         try {
             themeBg = getThemeColor(android.R.attr.colorBackground);
         } catch (Exception ignored) {
-            throw new IllegalStateException(context.getString(R.string.err_theme_bg));
+            throw new IllegalStateException(
+                    context.getString(R.string.err_theme_bg)
+            );
         }
 
         if (bgColor == 0) {
@@ -1520,21 +1644,6 @@ public class MarketChartView extends View {
             selectedLineColor = defSelectedLineColor;
         }
 
-        // Auto-correct invisible colors - critical for Light/Dark switch
-        if (isColorSimilar(gridColor, themeBg)) {
-            gridColor = defGridColor;
-        }
-        if (isColorSimilar(priceTextColor, themeBg)) {
-            priceTextColor = defPriceTextColor;
-        }
-        if (isColorSimilar(selectedLineColor, themeBg)) {
-            selectedLineColor = defSelectedLineColor;
-        }
-        if (isColorSimilar(lastPriceLabelTextColor, lastPriceBgColor)) {
-            lastPriceLabelTextColor = defLabelTextColor;
-        }
-
-        // Bullish / bearish candle body
         bullishPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         bullishPaint.setColor(bullishColor);
         bullishPaint.setStyle(Paint.Style.FILL);
@@ -1543,7 +1652,6 @@ public class MarketChartView extends View {
         bearishPaint.setColor(bearishColor);
         bearishPaint.setStyle(Paint.Style.FILL);
 
-        // Volume bars with transparency
         volumeBullishPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         volumeBullishPaint.setColor(bullishColor);
         volumeBullishPaint.setAlpha(VOLUME_ALPHA);
@@ -1554,7 +1662,6 @@ public class MarketChartView extends View {
         volumeBearishPaint.setAlpha(VOLUME_ALPHA);
         volumeBearishPaint.setStyle(Paint.Style.FILL);
 
-        // Wick paints
         wickBullishPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         wickBullishPaint.setColor(bullishColor);
         wickBullishPaint.setStrokeWidth(wickWidthPx);
@@ -1563,7 +1670,6 @@ public class MarketChartView extends View {
         wickBearishPaint.setColor(bearishColor);
         wickBearishPaint.setStrokeWidth(wickWidthPx);
 
-        // Grid and axis text
         gridPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         gridPaint.setColor(gridColor);
         gridPaint.setStrokeWidth(GRID_WIDTH);
@@ -1572,14 +1678,14 @@ public class MarketChartView extends View {
         textPaint.setColor(priceTextColor);
         textPaint.setTextSize(priceTextSizePx);
 
-        // Last price line and label
         lastPriceLinePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         lastPriceLinePaint.setColor(lastPriceLineColor);
         lastPriceLinePaint.setStrokeWidth(lastLineWidthPx);
         lastPriceLinePaint.setStyle(Paint.Style.STROKE);
         if (lastLineDashed) {
-            lastPriceLinePaint.setPathEffect(new DashPathEffect(
-                    new float[]{DASH_ON, DASH_OFF}, 0f));
+            lastPriceLinePaint.setPathEffect(
+                    new DashPathEffect(new float[]{DASH_ON, DASH_OFF}, 0f)
+            );
         } else {
             lastPriceLinePaint.setPathEffect(null);
         }
@@ -1593,7 +1699,6 @@ public class MarketChartView extends View {
         lastPriceTextPaint.setTextSize(lastPriceLabelTextSizePx);
         lastPriceTextPaint.setFakeBoldText(true);
 
-        // Moving average paints
         movingAverage5Paint = new Paint(Paint.ANTI_ALIAS_FLAG);
         movingAverage5Paint.setStyle(Paint.Style.STROKE);
         movingAverage5Paint.setStrokeWidth(maLineWidthPx);
@@ -1633,39 +1738,32 @@ public class MarketChartView extends View {
                 maExtraPaints.add(p);
             }
             if (maLines.get(i).color == 0) {
-                maLines.get(i).color = defMaLines.get(i % defMaLines.size()).color;
+                maLines.get(i).color = defMaLines.get(
+                        i % defMaLines.size()
+                ).color;
             }
             p.setColor(maLines.get(i).color);
         }
 
-        // Selection highlight line - now fully configurable
         selectedLinePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         selectedLinePaint.setColor(selectedLineColor);
         selectedLinePaint.setStrokeWidth(selectedLineWidthPx);
         selectedLinePaint.setAlpha(selectedLineAlpha);
         selectedLinePaint.setStyle(Paint.Style.STROKE);
         if (selectedLineDashed) {
-            selectedLinePaint.setPathEffect(new DashPathEffect(
-                    new float[]{DASH_ON, DASH_OFF}, 0f));
+            selectedLinePaint.setPathEffect(
+                    new DashPathEffect(new float[]{DASH_ON, DASH_OFF}, 0f)
+            );
         } else {
             selectedLinePaint.setPathEffect(null);
         }
     }
 
-    // --------------------------------------------------------------------
-    // Configuration Change - reloads theme and repaints
-    // --------------------------------------------------------------------
     @Override
     protected void onConfigurationChanged(android.content.res.Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
         if (defaultsLoadedFromLayout) {
-            // Reload theme defaults first - this is source of truth for auto mode
             reloadDefaultColorsFromCurrentTheme();
-
-            // Then reload user options with auto-correct for invisible colors.
-            // If user set grid to black in Light, after switch to Dark it will be similar
-            // to dark background, so loadChartOptions will fallback to defGridColor (light gray)
-            // and keep it auto. This avoids chìm màu lưới và giá.
             loadChartOptions(getContext());
             initCandleColors(getContext());
         }
@@ -1682,15 +1780,14 @@ public class MarketChartView extends View {
         invalidate();
     }
 
-    // --------------------------------------------------------------------
-    // Gesture Handling - zoom and pan
-    // --------------------------------------------------------------------
     private void initGestures(Context context) {
         scaleGestureDetector = new ScaleGestureDetector(context,
                 new ScaleGestureDetector.SimpleOnScaleGestureListener() {
                     @Override
                     public boolean onScale(ScaleGestureDetector detector) {
-                        visibleCandleCount = (int) (visibleCandleCount / detector.getScaleFactor());
+                        visibleCandleCount = (int) (
+                                visibleCandleCount / detector.getScaleFactor()
+                        );
                         clampVisibleCount();
                         clampTranslationX();
                         invalidate();
@@ -1798,9 +1895,6 @@ public class MarketChartView extends View {
         }
     }
 
-    // --------------------------------------------------------------------
-    // Chart Loading and Live Updates
-    // --------------------------------------------------------------------
     public void loadChart(String symbol, String interval) {
         this.currentSymbol = symbol;
         this.currentInterval = interval;
@@ -1823,7 +1917,9 @@ public class MarketChartView extends View {
 
     public void setFiatMultiplier(float mult) {
         if (mult <= 0f) {
-            throw new IllegalStateException(getContext().getString(R.string.err_fiat_0));
+            throw new IllegalStateException(
+                    getContext().getString(R.string.err_fiat_0)
+            );
         }
         this.fiatMultiplier = mult;
         invalidate();
@@ -1835,7 +1931,9 @@ public class MarketChartView extends View {
 
     private long getIntervalMillis(String interval) {
         if (interval == null) {
-            throw new IllegalStateException(getContext().getString(R.string.err_interval_null));
+            throw new IllegalStateException(
+                    getContext().getString(R.string.err_interval_null)
+            );
         }
         switch (interval) {
             case "1m":
@@ -1868,7 +1966,8 @@ public class MarketChartView extends View {
                 return 30L * 24L * 60L * 60_000L;
             default:
                 throw new IllegalStateException(
-                        getContext().getString(R.string.err_unknown_interval, interval));
+                        getContext().getString(R.string.err_unknown_interval, interval)
+                );
         }
     }
 
@@ -1890,11 +1989,22 @@ public class MarketChartView extends View {
                     long hours = remain / 1000L / 60L / 60L;
                     String text;
                     if (getIntervalMillis(currentInterval) >= 24L * 60L * 60_000L) {
-                        text = String.format(Locale.US, getContext().getString(R.string.fmt_dhms),
-                                hours / 24L, hours % 24L, minutes, seconds);
+                        text = String.format(
+                                Locale.US,
+                                getContext().getString(R.string.fmt_dhms),
+                                hours / 24L,
+                                hours % 24L,
+                                minutes,
+                                seconds
+                        );
                     } else {
-                        text = String.format(Locale.US, getContext().getString(R.string.fmt_hms),
-                                hours, minutes, seconds);
+                        text = String.format(
+                                Locale.US,
+                                getContext().getString(R.string.fmt_hms),
+                                hours,
+                                minutes,
+                                seconds
+                        );
                     }
                     if (updateListener!= null) {
                         updateListener.onCountdownUpdate(text);
@@ -1936,28 +2046,34 @@ public class MarketChartView extends View {
         int last = data.size() - 1;
         List<Float> values = new ArrayList<>();
         for (int i = 0; i < maLines.size(); i++) {
-            values.add(calculateMovingAverage(last, maLines.get(i).period));
+            values.add(
+                    calculateMovingAverage(last, maLines.get(i).period)
+            );
         }
         updateListener.onMaUpdate(values);
     }
 
-    // --------------------------------------------------------------------
-    // Data Fetching - Binance API
-    // --------------------------------------------------------------------
     private void fetchCandles() {
         if (currentSymbol == null || currentInterval == null) {
-            throw new IllegalStateException(getContext().getString(R.string.err_symbol_null));
+            throw new IllegalStateException(
+                    getContext().getString(R.string.err_symbol_null)
+            );
         }
         new Thread(() -> {
             try {
-                String urlString = getContext().getString(R.string.url_klines,
-                        currentSymbol, currentInterval, FETCH_LIMIT);
+                String urlString = getContext().getString(
+                        R.string.url_klines,
+                        currentSymbol,
+                        currentInterval,
+                        FETCH_LIMIT
+                );
                 URL url = new URL(urlString);
                 HttpURLConnection connection = (HttpURLConnection) url.openConnection();
                 connection.setConnectTimeout(NETWORK_TIMEOUT);
                 connection.setReadTimeout(NETWORK_TIMEOUT);
                 BufferedReader reader = new BufferedReader(
-                        new InputStreamReader(connection.getInputStream()));
+                        new InputStreamReader(connection.getInputStream())
+                );
                 StringBuilder builder = new StringBuilder();
                 String line;
                 while ((line = reader.readLine())!= null) {
@@ -1975,7 +2091,9 @@ public class MarketChartView extends View {
                     float volume = (float) kline.getDouble(5);
                     long openTime = kline.getLong(0);
                     long closeTime = kline.getLong(6);
-                    newData.add(new Candle(open, high, low, close, volume, openTime, closeTime));
+                    newData.add(
+                            new Candle(open, high, low, close, volume, openTime, closeTime)
+                    );
                 }
                 mainHandler.post(() -> {
                     data = newData;
@@ -2019,12 +2137,17 @@ public class MarketChartView extends View {
         }
         new Thread(() -> {
             try {
-                String tickerUrl = getContext().getString(R.string.url_ticker, currentSymbol);
-                HttpURLConnection connection = (HttpURLConnection) new URL(tickerUrl).openConnection();
+                String tickerUrl = getContext().getString(
+                        R.string.url_ticker,
+                        currentSymbol
+                );
+                HttpURLConnection connection = (HttpURLConnection)
+                        new URL(tickerUrl).openConnection();
                 connection.setConnectTimeout(NETWORK_TIMEOUT);
                 connection.setReadTimeout(NETWORK_TIMEOUT);
                 BufferedReader reader = new BufferedReader(
-                        new InputStreamReader(connection.getInputStream()));
+                        new InputStreamReader(connection.getInputStream())
+                );
                 StringBuilder builder = new StringBuilder();
                 String line;
                 while ((line = reader.readLine())!= null) {
@@ -2032,13 +2155,24 @@ public class MarketChartView extends View {
                 }
                 reader.close();
                 JSONObject jsonObject = new JSONObject(builder.toString());
-                float price = (float) jsonObject.getDouble(getContext().getString(R.string.json_lastPrice));
-                float high = (float) jsonObject.getDouble(getContext().getString(R.string.json_highPrice));
-                float low = (float) jsonObject.getDouble(getContext().getString(R.string.json_lowPrice));
-                float volBtc = (float) jsonObject.getDouble(getContext().getString(R.string.json_volume));
-                float volUsdt = (float) jsonObject.getDouble(getContext().getString(R.string.json_quoteVolume));
+                float price = (float) jsonObject.getDouble(
+                        getContext().getString(R.string.json_lastPrice)
+                );
+                float high = (float) jsonObject.getDouble(
+                        getContext().getString(R.string.json_highPrice)
+                );
+                float low = (float) jsonObject.getDouble(
+                        getContext().getString(R.string.json_lowPrice)
+                );
+                float volBtc = (float) jsonObject.getDouble(
+                        getContext().getString(R.string.json_volume)
+                );
+                float volUsdt = (float) jsonObject.getDouble(
+                        getContext().getString(R.string.json_quoteVolume)
+                );
                 float changePercent = (float) jsonObject.getDouble(
-                        getContext().getString(R.string.json_priceChangePercent));
+                        getContext().getString(R.string.json_priceChangePercent)
+                );
                 mainHandler.post(() -> {
                     if (!data.isEmpty()) {
                         Candle lastCandle = data.get(data.size() - 1);
@@ -2061,20 +2195,18 @@ public class MarketChartView extends View {
                         }
                         if (updateListener!= null) {
                             updateListener.onPriceUpdate(price, high, low);
-                            updateListener.onTickerUpdate(high, low, volBtc, volUsdt, changePercent);
+                            updateListener.onTickerUpdate(
+                                    high, low, volBtc, volUsdt, changePercent
+                            );
                         }
                         notifyMa();
                     }
                 });
             } catch (Exception e) {
-                // Network error ignored, will retry on next interval
             }
         }).start();
     }
 
-    // --------------------------------------------------------------------
-    // Calculation - moving average
-    // --------------------------------------------------------------------
     private float calculateMovingAverage(int currentIndex, int period) {
         if (currentIndex < period - 1 || data.isEmpty()) {
             return 0f;
@@ -2086,9 +2218,6 @@ public class MarketChartView extends View {
         return sum / period;
     }
 
-    // --------------------------------------------------------------------
-    // Touch Handling - pan, zoom, selection
-    // --------------------------------------------------------------------
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         scaleGestureDetector.onTouchEvent(event);
@@ -2110,14 +2239,10 @@ public class MarketChartView extends View {
         return true;
     }
 
-    // --------------------------------------------------------------------
-    // Main Drawing Entry - splits canvas into 3 independent blocks
-    // --------------------------------------------------------------------
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
 
-        // Block 1: Calculate layout areas for price, volume, and time.
         int priceAxisWidth = PRICE_AXIS_WIDTH_DP;
         int timeAxisHeight = TIME_AXIS_HEIGHT;
         int volumeHeightPx = VOLUME_CHART_HEIGHT_DP;
@@ -2130,16 +2255,21 @@ public class MarketChartView extends View {
                 - VOLUME_TOP_MARGIN_PX - volumeHeightPx - timeAxisHeight;
 
         if (priceChartHeight <= 0) {
-            throw new IllegalStateException(getContext().getString(R.string.err_price_height));
+            throw new IllegalStateException(
+                    getContext().getString(R.string.err_price_height)
+            );
         }
 
         drawGrid(canvas, chartWidth, priceChartHeight, volumeHeightPx);
 
         if (data.isEmpty()) {
             String loadingText = getResources().getString(R.string.chart_loading);
-            canvas.drawText(loadingText,
+            canvas.drawText(
+                    loadingText,
                     chartWidth / 2f - LOADING_TEXT_OFFSET,
-                    fullHeight / 2f, textPaint);
+                    fullHeight / 2f,
+                    textPaint
+            );
             return;
         }
 
@@ -2203,10 +2333,6 @@ public class MarketChartView extends View {
         return startIndex;
     }
 
-    // --------------------------------------------------------------------
-    // Drawing Blocks
-    // --------------------------------------------------------------------
-
     private void drawGrid(Canvas canvas, int chartWidth, int priceChartHeight, int volumeHeightPx) {
         if (!showGrid) {
             canvas.drawLine(chartWidth, 0f, chartWidth, getHeight(), gridPaint);
@@ -2246,13 +2372,17 @@ public class MarketChartView extends View {
             float x = i * info.candleWidth + info.candleWidth / 2f + extraOffsetX;
 
             float highY = TOP_PADDING_PX + info.priceChartHeight
-                    - ((candle.high * fiatMultiplier - info.displayMin) / priceRange * info.priceChartHeight);
+                    - ((candle.high * fiatMultiplier - info.displayMin)
+                    / priceRange * info.priceChartHeight);
             float lowY = TOP_PADDING_PX + info.priceChartHeight
-                    - ((candle.low * fiatMultiplier - info.displayMin) / priceRange * info.priceChartHeight);
+                    - ((candle.low * fiatMultiplier - info.displayMin)
+                    / priceRange * info.priceChartHeight);
             float openY = TOP_PADDING_PX + info.priceChartHeight
-                    - ((candle.open * fiatMultiplier - info.displayMin) / priceRange * info.priceChartHeight);
+                    - ((candle.open * fiatMultiplier - info.displayMin)
+                    / priceRange * info.priceChartHeight);
             float closeY = TOP_PADDING_PX + info.priceChartHeight
-                    - ((candle.close * fiatMultiplier - info.displayMin) / priceRange * info.priceChartHeight);
+                    - ((candle.close * fiatMultiplier - info.displayMin)
+                    / priceRange * info.priceChartHeight);
 
             boolean isBullish = candle.close >= candle.open;
             Paint currentWickPaint = isBullish? wickBullishPaint : wickBearishPaint;
@@ -2266,7 +2396,13 @@ public class MarketChartView extends View {
             if (Math.abs(bottom - top) < minH) {
                 bottom = top + minH;
             }
-            canvas.drawRect(x - bodyWidth / 2f, top, x + bodyWidth / 2f, bottom, bodyPaint);
+            canvas.drawRect(
+                    x - bodyWidth / 2f,
+                    top,
+                    x + bodyWidth / 2f,
+                    bottom,
+                    bodyPaint
+            );
         }
     }
 
@@ -2288,7 +2424,8 @@ public class MarketChartView extends View {
                 paint = movingAverage20Paint;
             } else {
                 int extraIdx = maIndex - 3;
-                paint = (extraIdx < maExtraPaints.size())? maExtraPaints.get(extraIdx) : movingAverage20Paint;
+                paint = (extraIdx < maExtraPaints.size())?
+                        maExtraPaints.get(extraIdx) : movingAverage20Paint;
             }
             paint.setColor(maLine.color);
 
@@ -2306,7 +2443,8 @@ public class MarketChartView extends View {
                 }
                 float x = i * info.candleWidth + info.candleWidth / 2f + extraOffsetX;
                 float y = TOP_PADDING_PX + info.priceChartHeight
-                        - ((movingAverage * fiatMultiplier - info.displayMin) / priceRange * info.priceChartHeight);
+                        - ((movingAverage * fiatMultiplier - info.displayMin)
+                        / priceRange * info.priceChartHeight);
                 if (!isFirstPoint) {
                     canvas.drawLine(previousX, previousY, x, y, paint);
                 }
@@ -2318,11 +2456,17 @@ public class MarketChartView extends View {
     }
 
     private void drawSelectedLine(Canvas canvas, DrawInfo info) {
-        if (selectedIndex >= info.startIndex && selectedIndex < info.startIndex + info.count) {
+        if (selectedIndex >= info.startIndex &&
+                selectedIndex < info.startIndex + info.count) {
             float selectedX = (selectedIndex - info.startIndex) * info.candleWidth
                     + info.candleWidth / 2f + extraOffsetX;
-            canvas.drawLine(selectedX, TOP_PADDING_PX, selectedX,
-                    TOP_PADDING_PX + info.priceChartHeight, selectedLinePaint);
+            canvas.drawLine(
+                    selectedX,
+                    TOP_PADDING_PX,
+                    selectedX,
+                    TOP_PADDING_PX + info.priceChartHeight,
+                    selectedLinePaint
+            );
         }
     }
 
@@ -2336,19 +2480,37 @@ public class MarketChartView extends View {
         }
 
         float lastPriceY = TOP_PADDING_PX + info.priceChartHeight
-                - ((lastPrice * fiatMultiplier - info.displayMin) / priceRange * info.priceChartHeight);
-        canvas.drawLine(0f, lastPriceY, info.chartWidth, lastPriceY, lastPriceLinePaint);
+                - ((lastPrice * fiatMultiplier - info.displayMin)
+                / priceRange * info.priceChartHeight);
+        canvas.drawLine(
+                0f,
+                lastPriceY,
+                info.chartWidth,
+                lastPriceY,
+                lastPriceLinePaint
+        );
 
         boolean isBigFiat = fiatMultiplier > BIG_FIAT_THRESHOLD;
-        String fmt = isBigFiat? getContext().getString(R.string.fmt_price_0) :
+        String fmt = isBigFiat?
+                getContext().getString(R.string.fmt_price_0) :
                 getContext().getString(R.string.fmt_price_2);
 
         float labelH = PRICE_TEXT_OFFSET + TEXT_SIZE;
         float top = lastPriceY - labelH;
         float bottom = lastPriceY + labelH;
-        canvas.drawRect(info.chartWidth, top, info.fullWidth, bottom, lastPriceBgPaint);
+        canvas.drawRect(
+                info.chartWidth,
+                top,
+                info.fullWidth,
+                bottom,
+                lastPriceBgPaint
+        );
 
-        String label = String.format(Locale.US, fmt, lastPrice * fiatMultiplier);
+        String label = String.format(
+                Locale.US,
+                fmt,
+                lastPrice * fiatMultiplier
+        );
         float tx = info.chartWidth + PRICE_TEXT_MARGIN / 2f;
         float ty = lastPriceY + TEXT_SIZE / 3f;
         canvas.drawText(label, tx, ty, lastPriceTextPaint);
@@ -2356,10 +2518,12 @@ public class MarketChartView extends View {
 
     private void drawPriceAxis(Canvas canvas, DrawInfo info) {
         boolean isBigFiatAxis = fiatMultiplier > BIG_FIAT_THRESHOLD;
-        String axisFmt = isBigFiatAxis? getContext().getString(R.string.fmt_price_0) :
+        String axisFmt = isBigFiatAxis?
+                getContext().getString(R.string.fmt_price_0) :
                 getContext().getString(R.string.fmt_price_2);
         for (int i = 0; i <= 4; i++) {
-            float price = info.displayMax - (info.displayMax - info.displayMin) * i / 4f;
+            float price = info.displayMax
+                    - (info.displayMax - info.displayMin) * i / 4f;
             float y = TOP_PADDING_PX + info.priceChartHeight * i / 4f + PRICE_TEXT_OFFSET;
             String priceText = String.format(Locale.US, axisFmt, price);
             float x = info.chartWidth + PRICE_TEXT_MARGIN;
@@ -2394,24 +2558,36 @@ public class MarketChartView extends View {
                 }
                 Candle candle = data.get(dataIndex);
                 float x = i * info.candleWidth + info.candleWidth / 2f + extraOffsetX;
-                float volumeBarHeight = info.volumeHeightPx * (candle.volume / maxVolume);
+                float volumeBarHeight = info.volumeHeightPx
+                        * (candle.volume / maxVolume);
                 float barTop = volumeBottom - volumeBarHeight;
                 if (barTop < volumeTop) {
                     barTop = volumeTop;
                 }
-                Paint volumePaint = (candle.close >= candle.open)? volumeBullishPaint : volumeBearishPaint;
-                canvas.drawRect(x - bodyWidth / 2f, barTop, x + bodyWidth / 2f, volumeBottom, volumePaint);
+                Paint volumePaint = (candle.close >= candle.open)?
+                        volumeBullishPaint : volumeBearishPaint;
+                canvas.drawRect(
+                        x - bodyWidth / 2f,
+                        barTop,
+                        x + bodyWidth / 2f,
+                        volumeBottom,
+                        volumePaint
+                );
             }
         }
 
-        float timeBaseline = timeTop + (info.timeAxisHeight / 2f) + (TEXT_SIZE / 3f);
+        float timeBaseline = timeTop
+                + (info.timeAxisHeight / 2f)
+                + (TEXT_SIZE / 3f);
         for (int i = 0; i < info.count; i += Math.max(1, info.count / 4)) {
             int dataIndex = info.startIndex + i;
             if (dataIndex >= data.size()) {
                 break;
             }
             float x = i * info.candleWidth + extraOffsetX;
-            String timeText = timeFormat.format(new Date(data.get(dataIndex).openTime));
+            String timeText = timeFormat.format(
+                    new Date(data.get(dataIndex).openTime)
+            );
             canvas.drawText(timeText, x, timeBaseline, textPaint);
         }
     }
