@@ -682,6 +682,8 @@
 <string name="err_view_tag_missing" translatable="false">View tag missing color</string>
 
 
+<!-- Selected Line - needed by MarketChartView.java -->
+<string name="err_selected_line_color_0">Selected line color is invalid</string>
 <string name="key_selected_line_color">selected_line_color</string>
 <string name="key_selected_line_width">selected_line_width</string>
 <string name="key_selected_line_alpha">selected_line_alpha</string>
