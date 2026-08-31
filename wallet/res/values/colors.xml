@@ -98,6 +98,7 @@
     <color name="palette_pink">#FFFFA0C0</color>
     <color name="palette_sky">#FF80C0FF</color>
 
-    <color name="palette_grid">#E6E6E6</color>
+    <color name="palette_chart_grid_custom">#E6E6E6</color>
+    <color name="palette_price_text_custom">#000000</color>
 
 </resources>
