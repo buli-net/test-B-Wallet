@@ -1811,9 +1811,10 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
             int vPad = (int) getResources().getDimension(R.dimen.default_price_text_margin);
             tv.setPadding(0, vPad, 0, vPad);
 
-            boolean isSelected = realLoad[i].equalsIgnoreCase(currentInterval);
+            
+         /*   boolean isSelected = realLoad[i].equalsIgnoreCase(currentInterval);
 
-          /*  GradientDrawable bg = new GradientDrawable();
+            GradientDrawable bg = new GradientDrawable();
             bg.setCornerRadius(0f);
 
             if (isSelected &&!realLoad[i].isEmpty()) {
@@ -1831,7 +1832,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
             tv.setBackground(bg);
             */
     
-
+             boolean isSelected = realLoad[i].equals(currentInterval);
              if (isSelected &&!realLoad[i].isEmpty()) {
                 tv.setBackgroundResource(R.drawable.bg_time_selected);
                 tv.setTextColor(getThemeColor(android.R.attr.colorBackground));
