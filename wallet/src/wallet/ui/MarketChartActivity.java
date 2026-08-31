@@ -1817,8 +1817,8 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
             bg.setCornerRadius(0f);
 
             if (isSelected &&!realLoad[i].isEmpty()) {
-                bg.setColor(getResources().getColor(android.R.color.white, getTheme()));
-                tv.setTextColor(getResources().getColor(android.R.color.black, getTheme()));
+                bg.setColor(getResources().getColor(android.R.color.transparent, getTheme())); 
+                tv.setBackgroundResource(R.drawable.bg_time_selected); // - use xml with Time button
             } else {
                 bg.setColor(getResources().getColor(R.color.chart_bg, getTheme()));
                 bg.setStroke(
