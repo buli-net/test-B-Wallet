@@ -25,9 +25,13 @@
 
     <!-- Chart market -->
 
-    <!-- Market chart - Core -->
+    <!-- Market chart - Core 
     <color name="chart_bg">#FF1A1E24</color>
     <color name="chart_grid">#1FFFFFFF</color>
+    -->
+    <color name="chart_grid">#33FFFFFF</color>
+    <color name="chart_bg">#FF121212</color>
+    
     <color name="chart_text">#FF9AA0A6</color>
     <color name="chart_wick">#FF9AA0A6</color>
     <color name="chart_last_price_line">#FFFFC107</color>
