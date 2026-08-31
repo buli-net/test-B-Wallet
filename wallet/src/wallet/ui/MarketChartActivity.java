@@ -19,6 +19,7 @@ package wallet.ui;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.Typeface;
@@ -148,24 +149,49 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
     private float currentMarketPriceFiat = 0f;
 
     // ------------------------------------------------------------------------
-    // Helper: create a color view with a border from resources
+    // Helper: unified color picker drawable - size/corner/border from dimens
     // ------------------------------------------------------------------------
     private GradientDrawable createColorViewDrawable(int color) {
+        return createUnifiedColorDrawable(this, color);
+    }
+
+    /**
+     * Create unified color drawable for all pickers.
+     * Reads size/corner/border from dimens.xml for easy tuning.
+     */
+    public static GradientDrawable createUnifiedColorDrawable(Context ctx, int color) {
         GradientDrawable drawable = new GradientDrawable();
 
-        float cornerRadius = getResources().getDimension(R.dimen.default_popup_padding);
+        float cornerRadius;
+        float borderWidth;
+        int borderColor;
+
+        try {
+            cornerRadius = ctx.getResources().getDimension(R.dimen.color_picker_corner_radius);
+        } catch (Exception e) {
+            cornerRadius = ctx.getResources().getDimension(R.dimen.default_popup_padding);
+        }
+
+        try {
+            borderWidth = ctx.getResources().getDimension(R.dimen.color_picker_border_width);
+        } catch (Exception e) {
+            borderWidth = ctx.getResources().getDimension(R.dimen.default_grid_width);
+        }
+
+        try {
+            borderColor = ctx.getResources().getColor(R.color.color_picker_border, ctx.getTheme());
+        } catch (Exception e) {
+            borderColor = ctx.getResources().getColor(R.color.chart_grid, ctx.getTheme());
+        }
+
+        drawable.setShape(GradientDrawable.RECTANGLE);
         drawable.setCornerRadius(cornerRadius);
         drawable.setColor(color);
 
-        float density = getResources().getDisplayMetrics().density;
-        int borderColor = getResources().getColor(R.color.chart_grid, getTheme());
-        int borderWidth = (int) getResources().getDimension(R.dimen.default_grid_width);
-
-        if (borderWidth < 1) {
-            borderWidth = (int) (1 * density);
+        if (borderWidth < 1f) {
+            borderWidth = 1f * ctx.getResources().getDisplayMetrics().density;
         }
-
-        drawable.setStroke(borderWidth, borderColor);
+        drawable.setStroke((int) borderWidth, borderColor);
 
         return drawable;
     }
@@ -181,10 +207,8 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
 
         try {
             Field[] fields = R.color.class.getFields();
-
             for (Field f : fields) {
                 String name = f.getName();
-
                 if (name.startsWith(prefix)) {
                     int resId = f.getInt(null);
                     int c = getResources().getColor(resId, getTheme());
@@ -203,7 +227,6 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         for (int i = 0; i < colors.size(); i++) {
             arr[i] = colors.get(i);
         }
-
         return arr;
     }
 
@@ -1281,7 +1304,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
             });
         }
 
-        // 6. Selected / Crosshair vertical line - NEW
+        // 6. Selected / Crosshair vertical line
         View headerSelected = content.findViewById(R.id.headerSelected);
         TextView arrowSelected = content.findViewById(R.id.arrowSelected);
         View containerSelected = content.findViewById(R.id.containerSelected);
@@ -1499,7 +1522,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
     }
 
     // ------------------------------------------------------------------------
-    // MA Popup Adapter for RecyclerView
+    // MA Popup Adapter for RecyclerView - unified style
     // ------------------------------------------------------------------------
     static class MaPopupAdapter extends RecyclerView.Adapter<MaPopupAdapter.Holder> {
         List<MarketChartView.MaLine> list;
@@ -1535,10 +1558,8 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
             MarketChartView.MaLine line = list.get(pos);
             h.et.setText(String.valueOf(line.period));
 
-            GradientDrawable gd = new GradientDrawable();
-            gd.setCornerRadius(0f);
-            gd.setColor(line.color);
-            h.color.setBackground(gd);
+            // Unified drawable - same corner and border as all other pickers
+            h.color.setBackground(createUnifiedColorDrawable(h.itemView.getContext(), line.color));
 
             h.et.setOnFocusChangeListener((v, hasFocus) -> {
                 if (!hasFocus) {
@@ -1570,10 +1591,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
                 int next = colors[(idx + 1) % colors.length];
                 line.color = next;
 
-                GradientDrawable ngd = new GradientDrawable();
-                ngd.setCornerRadius(0f);
-                ngd.setColor(next);
-                h.color.setBackground(ngd);
+                h.color.setBackground(createUnifiedColorDrawable(v.getContext(), next));
             });
 
             h.del.setOnClickListener(v -> {
