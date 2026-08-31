@@ -113,6 +113,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
     // ------------------------------------------------------------------------
     private static final String PREFS_CHART_STATE = "chart_state_prefs";
     private static final String KEY_INTERVAL = "interval";
+    private static final String PREFS_CHART_SETTINGS = "chart_settings";
 
     private String currentSymbol = "BTCUSDT";
     private String currentInterval = "15m";
@@ -317,7 +318,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
     }
 
     // ------------------------------------------------------------------------
-    // Helper: read color from view tag
+    // Helper: read color from view tag - FIXED: theme-aware
     // ------------------------------------------------------------------------
     private int getColorFromTag(View v) {
         if (v == null || v.getTag() == null) {
@@ -327,7 +328,8 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         Object tag = v.getTag();
 
         if (tag instanceof Integer) {
-            return ContextCompat.getColor(this, (Integer) tag);
+            // Fixed: use theme-aware getColor
+            return getResources().getColor((Integer) tag, getTheme());
         } else {
             String s = tag.toString().trim();
 
@@ -341,14 +343,16 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
                 );
 
                 if (resId!= 0) {
-                    return ContextCompat.getColor(this, resId);
+                    // Fixed: theme-aware
+                    return getResources().getColor(resId, getTheme());
                 }
 
                 throw new IllegalStateException("Color resource not found for tag: " + s);
             } else {
                 try {
                     int resId = Integer.parseInt(s);
-                    return ContextCompat.getColor(this, resId);
+                    // Fixed: theme-aware
+                    return getResources().getColor(resId, getTheme());
                 } catch (Exception e) {
                     return Color.parseColor(s);
                 }
@@ -818,7 +822,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
 
         state.curLabelTextColorFinal[0] = marketChartView.getLastPriceLabelTextColor()!= -1
                ? marketChartView.getLastPriceLabelTextColor()
-                : ContextCompat.getColor(this, R.color.last_label_text);
+                : getResources().getColor(R.color.last_label_text, getTheme());
 
         state.curSelectedColor[0] = marketChartView.getSelectedLineColor()!= 0
                ? marketChartView.getSelectedLineColor()
@@ -1499,15 +1503,20 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
     }
 
     // ------------------------------------------------------------------------
-    // Reset confirmation dialog
+    // Reset confirmation dialog - FIXED: clear prefs and reload theme-aware defaults
     // ------------------------------------------------------------------------
     private void showResetConfirm(final Dialog settingsDialog) {
         new AlertDialog.Builder(this)
                .setTitle(getString(R.string.chart_reset_confirm_title))
                .setMessage(getString(R.string.chart_reset_confirm_message))
                .setPositiveButton(getString(R.string.chart_reset), (d, which) -> {
+                    // Fixed: clear all saved chart colors so theme switch gets correct defaults
+                    getSharedPreferences(PREFS_CHART_SETTINGS, MODE_PRIVATE).edit().clear().apply();
+                    getSharedPreferences(PREFS_CHART_STATE, MODE_PRIVATE).edit().remove(KEY_INTERVAL).apply();
+
                     if (marketChartView!= null) {
-                        marketChartView.resetToDefaultsFromLayout();
+                        // Reload defaults from XML with current theme
+                        loadDefaultsFromLayoutAndApply();
                     }
                     resetToDefaultInterval();
                     settingsDialog.dismiss();
@@ -1822,13 +1831,13 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
             bg.setCornerRadius(0f);
 
             if (isSelected &&!realLoad[i].isEmpty()) {
-                bg.setColor(res.getColor(android.R.color.white, null));
-                tv.setTextColor(res.getColor(android.R.color.black, null));
+                bg.setColor(getResources().getColor(android.R.color.white, getTheme()));
+                tv.setTextColor(getResources().getColor(android.R.color.black, getTheme()));
             } else {
                 bg.setColor(getResources().getColor(R.color.chart_bg, getTheme()));
                 bg.setStroke(
                         (int) getResources().getDimension(R.dimen.default_grid_width),
-                        res.getColor(R.color.chart_grid, null)
+                        getResources().getColor(R.color.chart_grid, getTheme())
                 );
                 tv.setTextColor(getThemeColor(android.R.attr.textColorSecondary));
             }
@@ -1898,7 +1907,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         tvTime.setSingleLine(true);
         tvTime.setPadding(padH, padV, padH, padV);
         tvTime.setTextColor(getThemeColor(android.R.attr.textColorSecondary));
-        tvTime.setBackgroundColor(res.getColor(android.R.color.transparent, null));
+        tvTime.setBackgroundColor(res.getColor(android.R.color.transparent, getTheme()));
 
         LinearLayout.LayoutParams lpTime = new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.WRAP_CONTENT,
@@ -1926,7 +1935,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
                 tv.setBackgroundResource(R.drawable.bg_time_selected);
             } else {
                 tv.setTextColor(getThemeColor(android.R.attr.textColorSecondary));
-                tv.setBackgroundColor(res.getColor(android.R.color.transparent, null));
+                tv.setBackgroundColor(res.getColor(android.R.color.transparent, getTheme()));
             }
 
             LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
@@ -1971,7 +1980,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         if (isOuter) {
             tvMore.setText(R.string.more);
             tvMore.setTextColor(getThemeColor(android.R.attr.textColorSecondary));
-            tvMore.setBackgroundColor(res.getColor(android.R.color.transparent, null));
+            tvMore.setBackgroundColor(res.getColor(android.R.color.transparent, getTheme()));
         } else {
             tvMore.setText(getLabelResForInterval(currentInterval));
             tvMore.setTextColor(getThemeColor(android.R.attr.colorBackground));
@@ -2000,7 +2009,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
             bg.setCornerRadius(0f);
             bg.setStroke(
                     (int) getResources().getDimension(R.dimen.default_grid_width),
-                    res.getColor(R.color.chart_grid, null)
+                    getResources().getColor(R.color.chart_grid, getTheme())
             );
 
             popupCandleDetail.setBackground(bg);
@@ -2058,11 +2067,11 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
                     if (lastDisplayPrice == 0f) {
                         color = getThemeColor(android.R.attr.textColorPrimary);
                     } else if (priceInFiat > lastDisplayPrice) {
-                        color = res.getColor(R.color.palette_green, null);
+                        color = res.getColor(R.color.palette_green, getTheme());
                     } else if (priceInFiat < lastDisplayPrice) {
-                        color = res.getColor(R.color.palette_red, null);
+                        color = res.getColor(R.color.palette_red, getTheme());
                     } else {
-                        color = res.getColor(R.color.chart_last_price_line, null);
+                        color = res.getColor(R.color.chart_last_price_line, getTheme());
                     }
 
                     textCurrentPrice.setTextColor(color);
@@ -2081,8 +2090,8 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
                     if (textChange24h!= null) {
                         textChange24h.setText(String.format(Locale.US, "%.2f%%", changePercent));
                         int c = changePercent >= 0
-                               ? res.getColor(R.color.palette_green, null)
-                                : res.getColor(R.color.palette_red, null);
+                               ? res.getColor(R.color.palette_green, getTheme())
+                                : res.getColor(R.color.palette_red, getTheme());
                         textChange24h.setTextColor(c);
                     }
 
@@ -2252,7 +2261,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
                             bg.setCornerRadius(0f);
                             bg.setStroke(
                                     (int) getResources().getDimension(R.dimen.default_grid_width),
-                                    res.getColor(R.color.chart_grid, null)
+                                    getResources().getColor(R.color.chart_grid, getTheme())
                             );
 
                             popupCandleDetail.setBackground(bg);
