@@ -9,12 +9,12 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:paddingBottom="8dp"
         android:text="@string/chart_settings_chart_options"
         android:textSize="14sp"
-        android:textStyle="bold"
-        android:paddingBottom="8dp" />
+        android:textStyle="bold" />
 
-    <!-- Body Width - layout con riêng -->
+    <!-- Body Width -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -36,7 +36,7 @@
             android:progress="40" />
     </LinearLayout>
 
-    <!-- Wick Width - layout con riêng -->
+    <!-- Wick Width -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -58,7 +58,7 @@
             android:progress="2" />
     </LinearLayout>
 
-    <!-- MA Line Width - layout con riêng -->
+    <!-- MA Line Width -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -80,12 +80,12 @@
             android:progress="2" />
     </LinearLayout>
 
-    <!-- Show Grid - layout con riêng -->
+    <!-- Show Grid -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
         android:gravity="center_vertical"
+        android:orientation="horizontal"
         android:paddingVertical="4dp">
 
         <TextView
@@ -102,12 +102,12 @@
             android:checked="true" />
     </LinearLayout>
 
-    <!-- Show Volume - layout con riêng -->
+    <!-- Show Volume -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
         android:gravity="center_vertical"
+        android:orientation="horizontal"
         android:paddingVertical="4dp">
 
         <TextView
@@ -124,7 +124,7 @@
             android:checked="true" />
     </LinearLayout>
 
-    <!-- Visible Candles - layout con riêng -->
+    <!-- Visible Candles -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
