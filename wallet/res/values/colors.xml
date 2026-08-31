@@ -49,10 +49,10 @@
 
     <!-- Chart market -->
 
-    <!-- Market chart - Core - Light Theme name="chart_text">#FF000000</color> -->
+    <!-- Market chart - Core - Light Theme -->
     <color name="chart_bg">#FFEAEAF0</color>
     <color name="chart_grid">#1F000000</color>
-    <color name="chart_text">#FFFF8000</color>
+    <color name="chart_text">#FF000000</color>
     <color name="chart_wick">#FF000000</color>
     <color name="chart_last_price_line">#FFFF8000</color>
     <color name="chart_last_price_label_bg">#FF2EB5A5</color>
