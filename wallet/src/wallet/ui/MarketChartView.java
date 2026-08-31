@@ -2299,8 +2299,8 @@ public class MarketChartView extends View {
         drawCandles(canvas, info);
         drawMovingAverages(canvas, info);
         drawSelectedLine(canvas, info);
-        drawLastPriceLine(canvas, info);
         drawPriceAxis(canvas, info);
+        drawLastPriceLine(canvas, info);
         drawVolumeAndTime(canvas, info);
     }
 
