@@ -59,7 +59,7 @@
     <color name="last_label_text">#FF000000</color>
     <color name="chart_selected_line">#80FFFFFF</color>
 <!-- viền xám mờ, muốn trắng thì đổi -->
-    <color name="color_picker_border">#4DFFFFFF</color> 
+    <color name="color_picker_border">#33FFFFFF</color>
 
     <!-- Market chart - Default candle -->
     <color name="chart_bull_default">#FF26A69A</color>
