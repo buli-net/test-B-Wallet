@@ -681,7 +681,7 @@
 <string name="err_ma_periods_empty" translatable="false">MA periods empty in layout</string>
 <string name="err_view_tag_missing" translatable="false">View tag missing color</string>
 
-    <string name="prefs_chart">Chart Settings</string>
+
 <string name="key_selected_line_color">selected_line_color</string>
 <string name="key_selected_line_width">selected_line_width</string>
 <string name="key_selected_line_alpha">selected_line_alpha</string>
