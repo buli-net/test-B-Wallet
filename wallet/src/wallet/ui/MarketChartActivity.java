@@ -1830,7 +1830,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
 
             tv.setBackground(bg);
             */
-            boolean isSelected = realLoad[i].equalsIgnoreCase(currentInterval);
+    
 
              if (isSelected &&!realLoad[i].isEmpty()) {
                 tv.setBackgroundResource(R.drawable.bg_time_selected);
