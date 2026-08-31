@@ -681,13 +681,15 @@
 <string name="err_ma_periods_empty" translatable="false">MA periods empty in layout</string>
 <string name="err_view_tag_missing" translatable="false">View tag missing color</string>
 
-    <string name="prefs_chart">chart_prefs</string>
-    <string name="key_selected_line_color">selected_line_color</string>
-
+    <string name="prefs_chart">Chart Settings</string>
+<string name="key_selected_line_color">selected_line_color</string>
+<string name="key_selected_line_width">selected_line_width</string>
 <string name="key_selected_line_alpha">selected_line_alpha</string>
 <string name="key_selected_line_dash">selected_line_dash</string>
+<string name="chart_selected_line_section">Selected Line</string>
+<string name="chart_selected_line_color">Selected Line Color</string>
 <string name="chart_selected_line_width">Selected width: %d</string>
 <string name="chart_selected_line_alpha">Selected alpha: %d</string>
-<string name="err_selected_line_color_0">Selected color is 0</string>
+<string name="chart_selected_line_dashed">Dashed Line</string>
 
 </resources>
