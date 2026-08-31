@@ -2,22 +2,24 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:paddingTop="8dp"
+    android:paddingBottom="8dp">
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:paddingBottom="8dp"
         android:text="@string/chart_settings_candle"
         android:textSize="14sp"
-        android:textStyle="bold"
-        android:paddingBottom="8dp" />
+        android:textStyle="bold" />
 
-    <!-- Bullish Color - set từng layout riêng -->
+    <!-- Bullish Color -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
         android:gravity="center_vertical"
+        android:orientation="horizontal"
         android:paddingVertical="8dp">
 
         <TextView
@@ -27,27 +29,19 @@
             android:text="@string/chart_settings_bullish"
             android:textSize="13sp" />
 
-        <FrameLayout
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:background="@drawable/color_picker_border">
-
-            <View
-                android:id="@+id/viewBull"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_margin="2dp"
-                android:background="@color/chart_bull_default"
-                android:tag="@color/chart_bull_default" />
-        </FrameLayout>
+        <View
+            android:id="@+id/viewBull"
+            android:layout_width="@dimen/color_picker_size"
+            android:layout_height="@dimen/color_picker_size"
+            android:tag="@color/chart_bull_default" />
     </LinearLayout>
 
-    <!-- Bearish Color - set từng layout riêng -->
+    <!-- Bearish Color -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
         android:gravity="center_vertical"
+        android:orientation="horizontal"
         android:paddingVertical="8dp">
 
         <TextView
@@ -57,22 +51,14 @@
             android:text="@string/chart_settings_bearish"
             android:textSize="13sp" />
 
-        <FrameLayout
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:background="@drawable/color_picker_border">
-
-            <View
-                android:id="@+id/viewBear"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_margin="2dp"
-                android:background="@color/chart_bear_default"
-                android:tag="@color/chart_bear_default" />
-        </FrameLayout>
+        <View
+            android:id="@+id/viewBear"
+            android:layout_width="@dimen/color_picker_size"
+            android:layout_height="@dimen/color_picker_size"
+            android:tag="@color/chart_bear_default" />
     </LinearLayout>
 
-    <!-- Wick Width - layout con riêng, trước để ở xml cha nên thiếu -->
+    <!-- Wick Width -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -94,7 +80,7 @@
             android:progress="2" />
     </LinearLayout>
 
-    <!-- Body Width - thêm vào cho đủ, trước nằm ở options nhưng cần cho candle -->
+    <!-- Body Width -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
