@@ -19,6 +19,7 @@ package wallet.ui;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.DashPathEffect;
 import android.graphics.Paint;
 import android.os.Handler;
@@ -516,6 +517,24 @@ public class MarketChartView extends View {
         }
     }
 
+    /**
+     * Check if two colors are visually similar - FIX for inverse color bug
+     * If grid color or text color is similar to background, it will be invisible
+     */
+    private boolean isColorSimilar(int color1, int color2) {
+        if (color1 == 0 || color2 == 0) {
+            return false;
+        }
+        int r1 = Color.red(color1);
+        int g1 = Color.green(color1);
+        int b1 = Color.blue(color1);
+        int r2 = Color.red(color2);
+        int g2 = Color.green(color2);
+        int b2 = Color.blue(color2);
+        int diff = Math.abs(r1 - r2) + Math.abs(g1 - g2) + Math.abs(b1 - b2);
+        return diff < 90;
+    }
+
     // --------------------------------------------------------------------
     // Preference Loading - candle colors and chart options
     // --------------------------------------------------------------------
@@ -607,10 +626,16 @@ public class MarketChartView extends View {
             selectedLineDashed = sp.contains(context.getString(R.string.key_selected_line_dash))?
                     sp.getBoolean(context.getString(R.string.key_selected_line_dash), defSelectedDashed) : defSelectedDashed;
 
-            // Fix: if grid color equals background or transparent, fallback to theme default
+            // FIX: if grid color or price text color is similar to background, fallback to theme default
             int themeBg = getThemeColor(android.R.attr.colorBackground);
-            if (gridColor == 0 || gridColor == bgColor || gridColor == themeBg) {
+            if (gridColor == 0 || isColorSimilar(gridColor, themeBg) || isColorSimilar(gridColor, bgColor)) {
                 gridColor = defGridColor;
+            }
+            if (priceTextColor == 0 || isColorSimilar(priceTextColor, themeBg)) {
+                priceTextColor = defPriceTextColor;
+            }
+            if (selectedLineColor == 0 || isColorSimilar(selectedLineColor, themeBg)) {
+                selectedLineColor = defSelectedLineColor;
             }
 
         } catch (Exception e) {
@@ -718,10 +743,10 @@ public class MarketChartView extends View {
             SharedPreferences sp = getContext().getSharedPreferences(
                     getContext().getString(R.string.prefs_chart), Context.MODE_PRIVATE);
             sp.edit()
-          .putInt(getContext().getString(R.string.key_last_price_bg_color), bgColor)
-          .putInt(getContext().getString(R.string.key_last_label_text_color), textColor)
-          .putFloat(getContext().getString(R.string.key_last_label_text_size), textSizePx)
-          .apply();
+                   .putInt(getContext().getString(R.string.key_last_price_bg_color), bgColor)
+                   .putInt(getContext().getString(R.string.key_last_label_text_color), textColor)
+                   .putFloat(getContext().getString(R.string.key_last_label_text_size), textSizePx)
+                   .apply();
         } catch (Exception e) {
             // Ignore
         }
@@ -756,11 +781,11 @@ public class MarketChartView extends View {
             SharedPreferences sp = getContext().getSharedPreferences(
                     getContext().getString(R.string.prefs_chart), Context.MODE_PRIVATE);
             sp.edit()
-          .putInt(getContext().getString(R.string.key_selected_line_color), color)
-          .putFloat(getContext().getString(R.string.key_selected_line_width), widthPx)
-          .putInt(getContext().getString(R.string.key_selected_line_alpha), alpha)
-          .putBoolean(getContext().getString(R.string.key_selected_line_dash), dashed)
-          .apply();
+                   .putInt(getContext().getString(R.string.key_selected_line_color), color)
+                   .putFloat(getContext().getString(R.string.key_selected_line_width), widthPx)
+                   .putInt(getContext().getString(R.string.key_selected_line_alpha), alpha)
+                   .putBoolean(getContext().getString(R.string.key_selected_line_dash), dashed)
+                   .apply();
         } catch (Exception e) {
             // Ignore persistence errors
         }
@@ -779,9 +804,9 @@ public class MarketChartView extends View {
             SharedPreferences sp = getContext().getSharedPreferences(
                     getContext().getString(R.string.prefs_candle), Context.MODE_PRIVATE);
             sp.edit()
-          .putInt(getContext().getString(R.string.key_bull), bull)
-          .putInt(getContext().getString(R.string.key_bear), bear)
-          .apply();
+                   .putInt(getContext().getString(R.string.key_bull), bull)
+                   .putInt(getContext().getString(R.string.key_bear), bear)
+                   .apply();
         } catch (Exception e) {
             // Ignore
         }
@@ -802,13 +827,13 @@ public class MarketChartView extends View {
             SharedPreferences sp = getContext().getSharedPreferences(
                     getContext().getString(R.string.prefs_chart), Context.MODE_PRIVATE);
             sp.edit()
-          .putFloat(getContext().getString(R.string.key_body_fraction), bodyFraction)
-          .putFloat(getContext().getString(R.string.key_wick_width), wickWidth)
-          .putFloat(getContext().getString(R.string.key_ma_width), maWidth)
-          .putBoolean(getContext().getString(R.string.key_show_grid), sGrid)
-          .putBoolean(getContext().getString(R.string.key_show_volume), sVolume)
-          .putInt(getContext().getString(R.string.key_visible_count), this.visibleCandleCount)
-          .apply();
+                   .putFloat(getContext().getString(R.string.key_body_fraction), bodyFraction)
+                   .putFloat(getContext().getString(R.string.key_wick_width), wickWidth)
+                   .putFloat(getContext().getString(R.string.key_ma_width), maWidth)
+                   .putBoolean(getContext().getString(R.string.key_show_grid), sGrid)
+                   .putBoolean(getContext().getString(R.string.key_show_volume), sVolume)
+                   .putInt(getContext().getString(R.string.key_visible_count), this.visibleCandleCount)
+                   .apply();
         } catch (Exception e) {
             // Ignore
         }
@@ -1118,8 +1143,15 @@ public class MarketChartView extends View {
             selectedLineColor = defSelectedLineColor;
         }
 
-        if (gridColor == themeBg || gridColor == bgColor) {
+        // FIX: if color is similar to background, it will be invisible
+        if (isColorSimilar(gridColor, themeBg) || isColorSimilar(gridColor, bgColor)) {
             gridColor = defGridColor;
+        }
+        if (isColorSimilar(priceTextColor, themeBg)) {
+            priceTextColor = defPriceTextColor;
+        }
+        if (isColorSimilar(selectedLineColor, themeBg)) {
+            selectedLineColor = defSelectedLineColor;
         }
 
         // Bullish / bearish candle body
@@ -1248,6 +1280,30 @@ public class MarketChartView extends View {
         super.onConfigurationChanged(newConfig);
         if (defaultsLoadedFromLayout) {
             reloadDefaultColorsFromCurrentTheme();
+
+            // FIX: clear saved colors that are similar to new theme background
+            try {
+                Context ctx = getContext();
+                SharedPreferences sp = ctx.getSharedPreferences(
+                        ctx.getString(R.string.prefs_chart), Context.MODE_PRIVATE);
+                int themeBg = getThemeColor(android.R.attr.colorBackground);
+                int savedGrid = sp.getInt(ctx.getString(R.string.key_grid_color), defGridColor);
+                int savedPrice = sp.getInt(ctx.getString(R.string.key_price_text_color), defPriceTextColor);
+                int savedSelected = sp.getInt(ctx.getString(R.string.key_selected_line_color), defSelectedLineColor);
+
+                if (isColorSimilar(savedGrid, themeBg) ||
+                        isColorSimilar(savedPrice, themeBg) ||
+                        isColorSimilar(savedSelected, themeBg)) {
+                    sp.edit()
+                           .remove(ctx.getString(R.string.key_grid_color))
+                           .remove(ctx.getString(R.string.key_price_text_color))
+                           .remove(ctx.getString(R.string.key_selected_line_color))
+                           .commit();
+                }
+            } catch (Exception e) {
+                // Ignore
+            }
+
             loadChartOptions(getContext());
             initCandleColors(getContext());
         }
@@ -1258,8 +1314,27 @@ public class MarketChartView extends View {
     public void refreshTheme() {
         if (defaultsLoadedFromLayout) {
             reloadDefaultColorsFromCurrentTheme();
-            loadChartOptions(getContext());
-            initCandleColors(getContext());
+
+            // FIX: Force use theme default colors after reset
+            gridColor = defGridColor;
+            priceTextColor = defPriceTextColor;
+            selectedLineColor = defSelectedLineColor;
+            lastPriceLabelTextColor = defLabelTextColor;
+            lastPriceLineColor = defLastPriceLineColor;
+            lastPriceBgColor = defLastPriceBgColor;
+
+            try {
+                Context ctx = getContext();
+                SharedPreferences sp = ctx.getSharedPreferences(
+                        ctx.getString(R.string.prefs_chart), Context.MODE_PRIVATE);
+                sp.edit()
+                       .putInt(ctx.getString(R.string.key_grid_color), gridColor)
+                       .putInt(ctx.getString(R.string.key_price_text_color), priceTextColor)
+                       .putInt(ctx.getString(R.string.key_selected_line_color), selectedLineColor)
+                       .commit();
+            } catch (Exception e) {
+                // Ignore
+            }
         }
         initPaints(getContext());
         invalidate();
