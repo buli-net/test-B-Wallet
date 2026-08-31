@@ -30,7 +30,7 @@
 <color name="chart_grid">#33FFFFFF</color> <!-- bạn đã có -->
 <color name="chart_text">#FFE0E0E0</color> <!-- phải sáng, bạn đang để #FF121212 là đen -->
 <color name="chart_wick">#FF9AA0A6</color>
-<color name="chart_last_price_line">#FFFC107C</color>
+<color name="chart_last_price_line">#FF2EB5A5</color>
 <color name="chart_last_price_label_bg">#FF2EB5A5</color>
 <color name="last_label_text">#FFFFFFFF</color>
 <color name="chart_selected_line">#80FFFFFF</color> <!-- bạn đã có -->
