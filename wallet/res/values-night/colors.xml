@@ -25,12 +25,12 @@
 
     <!-- Chart market -->
 
-    <!-- Market chart - Core 
-    <color name="chart_bg">#FF1A1E24</color>
-    <color name="chart_grid">#1FFFFFFF</color>
-    -->
+    <!-- Market chart - Core -->
     <color name="chart_grid">#33FFFFFF</color>
     <color name="chart_bg">#FF121212</color>
+
+    <!-- Dark: nền tối -> select phải là trắng mờ -->
+    <color name="chart_selected_line">#80FFFFFF</color>
     
     <color name="chart_text">#FF9AA0A6</color>
     <color name="chart_wick">#FF9AA0A6</color>
