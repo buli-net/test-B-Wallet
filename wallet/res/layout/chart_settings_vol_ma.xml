@@ -9,13 +9,14 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:gravity="center_vertical"
-        android:paddingVertical="8dp">
+        android:paddingVertical="@dimen/setting_item_padding_vertical">
 
         <TextView
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="@string/label_vol_show" />
+            android:text="@string/label_vol_show"
+            android:textSize="@dimen/setting_label_text_size" />
 
         <Switch
             android:id="@+id/swVolMa"
@@ -28,26 +29,28 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:gravity="center_vertical"
-        android:paddingVertical="8dp">
+        android:paddingVertical="@dimen/setting_item_padding_vertical">
 
         <TextView
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="@string/label_vol_ma1" />
+            android:text="@string/label_vol_ma1"
+            android:textSize="@dimen/setting_label_text_size" />
 
         <SeekBar
             android:id="@+id/sbVolMa1Period"
-            android:layout_width="150dp"
+            android:layout_width="@dimen/seekbar_width"
             android:layout_height="wrap_content"
             android:max="60"
             android:progress="5" />
 
         <TextView
             android:id="@+id/tvVolMa1Period"
-            android:layout_width="32dp"
+            android:layout_width="@dimen/setting_value_width"
             android:layout_height="wrap_content"
-            android:gravity="end" />
+            android:gravity="end"
+            android:textSize="@dimen/setting_value_text_size" />
     </LinearLayout>
 
     <LinearLayout
@@ -55,26 +58,28 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:gravity="center_vertical"
-        android:paddingVertical="8dp">
+        android:paddingVertical="@dimen/setting_item_padding_vertical">
 
         <TextView
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="@string/label_vol_ma2" />
+            android:text="@string/label_vol_ma2"
+            android:textSize="@dimen/setting_label_text_size" />
 
         <SeekBar
             android:id="@+id/sbVolMa2Period"
-            android:layout_width="150dp"
+            android:layout_width="@dimen/seekbar_width"
             android:layout_height="wrap_content"
             android:max="60"
             android:progress="10" />
 
         <TextView
             android:id="@+id/tvVolMa2Period"
-            android:layout_width="32dp"
+            android:layout_width="@dimen/setting_value_width"
             android:layout_height="wrap_content"
-            android:gravity="end" />
+            android:gravity="end"
+            android:textSize="@dimen/setting_value_text_size" />
     </LinearLayout>
 
     <LinearLayout
@@ -82,20 +87,29 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:gravity="center_vertical"
-        android:paddingVertical="8dp">
+        android:paddingVertical="@dimen/setting_item_padding_vertical">
 
         <TextView
+            android:id="@+id/lbVolMaW"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="@string/label_vol_ma_width" />
+            android:text="@string/label_vol_ma_width"
+            android:textSize="@dimen/setting_label_text_size" />
 
         <SeekBar
             android:id="@+id/sbVolMaW"
-            android:layout_width="150dp"
+            android:layout_width="@dimen/seekbar_width"
             android:layout_height="wrap_content"
             android:max="10"
             android:progress="2" />
+
+        <TextView
+            android:id="@+id/tvVolMaW"
+            android:layout_width="@dimen/setting_value_width"
+            android:layout_height="wrap_content"
+            android:gravity="end"
+            android:textSize="@dimen/setting_value_text_size" />
     </LinearLayout>
 
     <LinearLayout
@@ -103,18 +117,19 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:gravity="center_vertical"
-        android:paddingVertical="8dp">
+        android:paddingVertical="@dimen/setting_item_padding_vertical">
 
         <TextView
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="@string/label_vol_ma1_color" />
+            android:text="@string/label_vol_ma1_color"
+            android:textSize="@dimen/setting_label_text_size" />
 
         <View
             android:id="@+id/viewVolMa1Color"
-            android:layout_width="28dp"
-            android:layout_height="28dp"
+            android:layout_width="@dimen/color_picker_size"
+            android:layout_height="@dimen/color_picker_size"
             android:background="@drawable/color_picker_border" />
     </LinearLayout>
 
@@ -123,18 +138,19 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:gravity="center_vertical"
-        android:paddingVertical="8dp">
+        android:paddingVertical="@dimen/setting_item_padding_vertical">
 
         <TextView
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="@string/label_vol_ma2_color" />
+            android:text="@string/label_vol_ma2_color"
+            android:textSize="@dimen/setting_label_text_size" />
 
         <View
             android:id="@+id/viewVolMa2Color"
-            android:layout_width="28dp"
-            android:layout_height="28dp"
+            android:layout_width="@dimen/color_picker_size"
+            android:layout_height="@dimen/color_picker_size"
             android:background="@drawable/color_picker_border" />
     </LinearLayout>
 
