@@ -19,4 +19,8 @@
     <integer name="big_fiat_threshold">100</integer>
     <integer name="network_timeout">8000</integer>
 
+    <!-- Vol-Ma -->
+    <integer name="default_vol_ma1_period">5</integer>
+    <integer name="default_vol_ma2_period">10</integer>
+
 </resources>
