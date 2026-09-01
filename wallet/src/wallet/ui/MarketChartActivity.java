@@ -958,7 +958,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
 
         if (btnAddMa!= null) {
             btnAddMa.setOnClickListener(v -> {
-                if (state.tempList.size() >= 28) { // limit add MA
+                if (state.tempList.size() >= 10) { // limit add MA
                     Toast.makeText(v.getContext(),
                             getString(R.string.max_ma_reached),
                             Toast.LENGTH_SHORT).show();
