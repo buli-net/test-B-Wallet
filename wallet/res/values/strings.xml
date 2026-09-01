@@ -691,4 +691,21 @@
     <string name="err_view_tag_missing" translatable="false">View tag missing color</string>
     <string name="err_selected_line_color_0">Selected line color is invalid</string>
 
+    <!-- Volume MA prefs - each key separated, like other features -->
+<string name="key_vol_show_ma">vol_show_ma</string>
+<string name="key_vol_ma1_period">vol_ma1_period</string>
+<string name="key_vol_ma2_period">vol_ma2_period</string>
+<string name="key_vol_ma1_color">vol_ma1_color</string>
+<string name="key_vol_ma2_color">vol_ma2_color</string>
+<string name="key_vol_ma_width">vol_ma_width</string>
+
+<!-- UI text - no hardcoded in Java -->
+<string name="header_vol_ma">Volume MA (Binance)</string>
+<string name="label_vol_show_ma">Show Vol MA</string>
+<string name="label_vol_ma1_period">MA1 Period</string>
+<string name="label_vol_ma2_period">MA2 Period</string>
+<string name="label_vol_ma1_color">MA1 Color</string>
+<string name="label_vol_ma2_color">MA2 Color</string>
+<string name="label_vol_ma_width">Line Width</string>
+
 </resources>
