@@ -2,19 +2,20 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical"
-    android:padding="8dp">
+    android:orientation="vertical">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingVertical="8dp">
 
         <TextView
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="@string/label_vol_show_ma" />
+            android:text="@string/label_vol_show" />
 
         <Switch
             android:id="@+id/swVolMa"
@@ -25,45 +26,63 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingVertical="8dp">
 
         <TextView
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="@string/label_vol_ma1_period" />
+            android:text="@string/label_vol_ma1" />
 
         <SeekBar
             android:id="@+id/sbVolMa1Period"
-            android:layout_width="120dp"
+            android:layout_width="150dp"
             android:layout_height="wrap_content"
             android:max="60"
             android:progress="5" />
+
+        <TextView
+            android:id="@+id/tvVolMa1Period"
+            android:layout_width="32dp"
+            android:layout_height="wrap_content"
+            android:gravity="end" />
     </LinearLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingVertical="8dp">
 
         <TextView
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="@string/label_vol_ma2_period" />
+            android:text="@string/label_vol_ma2" />
 
         <SeekBar
             android:id="@+id/sbVolMa2Period"
-            android:layout_width="120dp"
+            android:layout_width="150dp"
             android:layout_height="wrap_content"
             android:max="60"
             android:progress="10" />
+
+        <TextView
+            android:id="@+id/tvVolMa2Period"
+            android:layout_width="32dp"
+            android:layout_height="wrap_content"
+            android:gravity="end" />
     </LinearLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingVertical="8dp">
 
         <TextView
             android:layout_width="0dp"
@@ -73,7 +92,7 @@
 
         <SeekBar
             android:id="@+id/sbVolMaW"
-            android:layout_width="120dp"
+            android:layout_width="150dp"
             android:layout_height="wrap_content"
             android:max="10"
             android:progress="2" />
@@ -82,7 +101,9 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingVertical="8dp">
 
         <TextView
             android:layout_width="0dp"
@@ -92,14 +113,17 @@
 
         <View
             android:id="@+id/viewVolMa1Color"
-            android:layout_width="24dp"
-            android:layout_height="24dp" />
+            android:layout_width="28dp"
+            android:layout_height="28dp"
+            android:background="@drawable/bg_color_circle" />
     </LinearLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingVertical="8dp">
 
         <TextView
             android:layout_width="0dp"
@@ -109,8 +133,9 @@
 
         <View
             android:id="@+id/viewVolMa2Color"
-            android:layout_width="24dp"
-            android:layout_height="24dp" />
+            android:layout_width="28dp"
+            android:layout_height="28dp"
+            android:background="@drawable/bg_color_circle" />
     </LinearLayout>
 
 </LinearLayout>
