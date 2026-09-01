@@ -559,7 +559,7 @@
     <string name="add_ma">+ ADD MA</string>
     <string name="apply">APPLY</string>
     <string name="delete">X</string>
-    <string name="max_ma_reached">Max 28 MA</string>
+    <string name="max_ma_reached">Max 10 MA</string>
     <string name="chart_settings_title">Chart Settings</string>
     <string name="chart_settings_candle">Candle Settings</string>
     <string name="chart_settings_bullish">Bullish Color</string>
