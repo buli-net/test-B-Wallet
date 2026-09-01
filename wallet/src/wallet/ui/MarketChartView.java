@@ -602,9 +602,9 @@ public class MarketChartView extends View {
                   .getColor(R.color.chart_last_price_label_bg, ctx.getTheme());
             try {
                 defBullColor = ctx.getResources()
-                      .getColor(R.color.chart_bull, ctx.getTheme());
+                      .getColor(R.color.chart_bull_default, ctx.getTheme());
                 defBearColor = ctx.getResources()
-                      .getColor(R.color.chart_bear, ctx.getTheme());
+                      .getColor(R.color.chart_bear_default , ctx.getTheme());
             } catch (Exception ignored) {
             }
         } catch (Exception e) {
