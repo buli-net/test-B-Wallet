@@ -21,7 +21,6 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.content.res.TypedArray;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.drawable.GradientDrawable;
@@ -45,6 +44,7 @@ import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.core.content.ContextCompat;
 import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.LifecycleRegistry;
@@ -57,6 +57,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import org.bitcoinj.base.Coin;
 import org.bitcoinj.base.utils.Fiat;
 
+import java.lang.reflect.Field;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Currency;
@@ -75,10 +76,7 @@ import wallet.exchangerate.ExchangeRatesRepository;
  * Activity that displays a market chart with various settings and indicators.
  * This version uses a fully XML-based chart settings popup with expandable sections.
  * All fiat symbols are loaded from arrays.xml, no hardcoded map.
- * FIX: After reset, do not persist theme-dependent colors to avoid invisible grid after theme switch.
- * Added: Volume MA section - separate module, XML-driven, no hardcoded values.
- * FIX 2: Candle Wick/Body realtime preview, single source in Candle Settings only.
- * FIX 3: White color bug - 0xFFFFFFFF = -1 was treated as unset, fixed with contains() check like other pickers
+ * FIXED: Unified color picker size / corner / border
  */
 public class MarketChartActivity extends Activity implements ViewModelStoreOwner, LifecycleOwner {
 
@@ -116,7 +114,6 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
     // ------------------------------------------------------------------------
     private static final String PREFS_CHART_STATE = "chart_state_prefs";
     private static final String KEY_INTERVAL = "interval";
-    private static final String PREFS_CHART_SETTINGS = "chart_settings";
 
     private String currentSymbol = "BTCUSDT";
     private String currentInterval = "15m";
@@ -153,50 +150,111 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
     private float currentMarketPriceFiat = 0f;
 
     // ------------------------------------------------------------------------
-    // Helper: unified color picker drawable - size/corner/border from dimens
+    // Helper: create a color view with a border from resources - UNIFIED
     // ------------------------------------------------------------------------
     private GradientDrawable createColorViewDrawable(int color) {
         return createUnifiedColorDrawable(this, color);
     }
 
-    /**
-     * Create unified color drawable for all pickers.
-     * Reads size/corner/border from dimens.xml for easy tuning.
-     */
+    // Unified static helper - used also inside adapter
     public static GradientDrawable createUnifiedColorDrawable(Context ctx, int color) {
         GradientDrawable drawable = new GradientDrawable();
-        float cornerRadius = ctx.getResources().getDimension(R.dimen.color_picker_corner_radius);
-        float borderWidth = ctx.getResources().getDimension(R.dimen.color_picker_border_width);
-        int borderColor = ctx.getResources().getColor(R.color.color_picker_border, ctx.getTheme());
+
+        float cornerRadius;
+        float borderWidth;
+        int borderColor;
+
+        try {
+            cornerRadius = ctx.getResources().getDimension(R.dimen.color_picker_corner_radius);
+        } catch (Exception e) {
+            cornerRadius = ctx.getResources().getDimension(R.dimen.default_popup_padding);
+        }
+
+        try {
+            borderWidth = ctx.getResources().getDimension(R.dimen.color_picker_border_width);
+        } catch (Exception e) {
+            borderWidth = ctx.getResources().getDimension(R.dimen.default_grid_width);
+        }
+
+        try {
+            borderColor = ctx.getResources().getColor(R.color.color_picker_border, ctx.getTheme());
+        } catch (Exception e) {
+            borderColor = ContextCompat.getColor(ctx, R.color.chart_grid);
+        }
+
         drawable.setShape(GradientDrawable.RECTANGLE);
         drawable.setCornerRadius(cornerRadius);
         drawable.setColor(color);
+
+        if (borderWidth < 1f) {
+            borderWidth = 1f * ctx.getResources().getDisplayMetrics().density;
+        }
         drawable.setStroke((int) borderWidth, borderColor);
+
         return drawable;
     }
 
     private int[] loadPaletteFromColorsXml() {
-        int arrayResId = getResources().getIdentifier("chart_color_palette", "array", getPackageName());
-        if (arrayResId == 0) {
-            arrayResId = R.array.chart_color_palette;
-        }
-        TypedArray ta = getResources().obtainTypedArray(arrayResId);
-        List<Integer> colors = new ArrayList<>();
-        for (int i = 0; i < ta.length(); i++) {
-            int color = ta.getColor(i, 0);
-            if (color!= 0) {
-                colors.add(color);
+        // FIX: Load from chart_palettes.xml array, not from R.color reflection
+        // This array is the single source of truth for all colors including grid/text
+        try {
+            int arrayResId = getResources().getIdentifier("chart_color_palette", "array", getPackageName());
+            if (arrayResId == 0) {
+                arrayResId = R.array.chart_color_palette;
             }
+
+            android.content.res.TypedArray ta = getResources().obtainTypedArray(arrayResId);
+            List<Integer> colors = new ArrayList<>();
+            for (int i = 0; i < ta.length(); i++) {
+                int color = ta.getColor(i, 0);
+                if (color!= 0) {
+                    colors.add(color);
+                }
+            }
+            ta.recycle();
+
+            if (colors.isEmpty()) {
+                throw new IllegalStateException(getString(R.string.err_palette_not_found, "chart_color_palette"));
+            }
+
+            int[] arr = new int[colors.size()];
+            for (int i = 0; i < colors.size(); i++) {
+                arr[i] = colors.get(i);
+            }
+            return arr;
+
+        } catch (Exception e) {
+            // Fallback to old reflection method if array not found
+            String prefix = getString(R.string.palette_prefix);
+            if (prefix == null || prefix.trim().isEmpty()) {
+                throw new IllegalStateException(getString(R.string.err_palette_prefix_missing));
+            }
+
+            List<Integer> colors = new ArrayList<>();
+            try {
+                Field[] fields = R.color.class.getFields();
+                for (Field f : fields) {
+                    String name = f.getName();
+                    if (name.startsWith(prefix)) {
+                        int resId = f.getInt(null);
+                        int c = getResources().getColor(resId, getTheme());
+                        colors.add(c);
+                    }
+                }
+            } catch (Exception ex) {
+                throw new IllegalStateException(getString(R.string.err_palette_load_failed, prefix), ex);
+            }
+
+            if (colors.isEmpty()) {
+                throw new IllegalStateException(getString(R.string.err_palette_not_found, prefix));
+            }
+
+            int[] arr = new int[colors.size()];
+            for (int i = 0; i < colors.size(); i++) {
+                arr[i] = colors.get(i);
+            }
+            return arr;
         }
-        ta.recycle();
-        if (colors.isEmpty()) {
-            throw new IllegalStateException("chart_color_palette is empty");
-        }
-        int[] arr = new int[colors.size()];
-        for (int i = 0; i < colors.size(); i++) {
-            arr[i] = colors.get(i);
-        }
-        return arr;
     }
 
     // ------------------------------------------------------------------------
@@ -224,15 +282,6 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         int[] curSelectedColor = new int[1];
         int[] curSelectedAlpha = new int[1];
 
-        // FIX: Track whether user actually picked grid / price text colors in this session
-        // Do not treat auto theme colors as custom
-        boolean[] gridPicked = new boolean[1];
-        boolean[] pricePicked = new boolean[1];
-
-        // FIX 3: Track label bg/text pick like grid/price - to allow white (-1) as valid
-        boolean[] labelBgPicked = new boolean[1];
-        boolean[] labelTextPicked = new boolean[1];
-
         float[] finalTxtSize = new float[1];
         float[] finalLabelSize = new float[1];
 
@@ -253,23 +302,6 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         Switch swDash;
         Switch swSelectedDash;
         RecyclerView recycler;
-
-        // Volume MA state - separate module, no clumping with price MA
-        int[] curVolMa1Color = new int[1];
-        int[] curVolMa2Color = new int[1];
-        float[] curVolMaW = new float[1];
-        int[] curVolMa1Period = new int[1];
-        int[] curVolMa2Period = new int[1];
-        boolean[] curShowVolMa = new boolean[1];
-
-        SeekBar sbVolMaW;
-        SeekBar sbVolMa1Period;
-        SeekBar sbVolMa2Period;
-        TextView tvVolMa1Period;
-        TextView tvVolMa2Period;
-        Switch swVolMa;
-        View viewVolMa1Color;
-        View viewVolMa2Color;
     }
 
     // ------------------------------------------------------------------------
@@ -312,20 +344,50 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
     }
 
     // ------------------------------------------------------------------------
-    // Helper: read color from view tag - theme-aware - NO STRING FALLBACK
+    // Helper: read color from view tag - theme-aware
     // ------------------------------------------------------------------------
     private int getColorFromTag(View v) {
         if (v == null) {
             throw new IllegalStateException("View tag missing color");
         }
+
         Object tag = v.getTag();
         if (tag == null) {
             throw new IllegalStateException("View tag missing color");
         }
+
         if (tag instanceof Integer) {
-            return getResources().getColor((Integer) tag, getTheme());
+            try {
+                return getResources().getColor((Integer) tag, getTheme());
+            } catch (Exception e) {
+                return (Integer) tag;
+            }
         }
-        throw new IllegalStateException("Color tag must be Integer resource id");
+
+        String s = tag.toString().trim();
+        if (s.isEmpty()) {
+            throw new IllegalStateException("Color tag empty");
+        }
+
+        if (s.startsWith("#")) {
+            return Color.parseColor(s);
+        }
+
+        if (s.startsWith("@color/")) {
+            String colorName = s.replace("@color/", "");
+            int resId = getResources().getIdentifier(colorName, "color", getPackageName());
+            if (resId!= 0) {
+                return getResources().getColor(resId, getTheme());
+            }
+            throw new IllegalStateException("Color resource not found for tag: " + s);
+        }
+
+        try {
+            int resId = Integer.parseInt(s);
+            return getResources().getColor(resId, getTheme());
+        } catch (NumberFormatException e) {
+            return Color.parseColor(s);
+        }
     }
 
     // ------------------------------------------------------------------------
@@ -340,8 +402,6 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         View lastPriceRoot = inflater.inflate(R.layout.chart_settings_last_price, null);
         View labelRoot = inflater.inflate(R.layout.chart_settings_label, null);
         View selectedRoot = inflater.inflate(R.layout.chart_settings_selected, null);
-        // Volume MA layout - separate XML, no hardcode
-        View volMaRoot = inflater.inflate(R.layout.chart_settings_vol_ma, null);
 
         // ---- Read dimensions from dimens.xml ----
         int defTopPadding = (int) getResources().getDimension(R.dimen.default_top_padding);
@@ -373,10 +433,6 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         View defBear = candleRoot.findViewById(R.id.viewBear);
         SeekBar defBody = candleRoot.findViewById(R.id.sbBody);
         SeekBar defWick = candleRoot.findViewById(R.id.sbWick);
-        if (optionsRoot.findViewById(R.id.sbBody)!= null || optionsRoot.findViewById(R.id.sbWick)!= null) {
-            throw new IllegalStateException("Duplicate Wick/Body in chart_settings_options.xml");
-        }
-
         SeekBar defMaW = optionsRoot.findViewById(R.id.sbMaW);
         SeekBar defVis = optionsRoot.findViewById(R.id.sbVis);
         Switch defGrid = optionsRoot.findViewById(R.id.swGrid);
@@ -406,14 +462,6 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         SeekBar defSelAlpha = selectedRoot.findViewById(R.id.sbSelectedAlpha);
         Switch defSelDash = selectedRoot.findViewById(R.id.swSelectedDash);
         View defSelColor = selectedRoot.findViewById(R.id.viewSelectedColor);
-
-        // Volume MA defaults - loaded from its own XML, not hardcoded
-        SeekBar defVolMa1 = volMaRoot.findViewById(R.id.sbVolMa1Period);
-        SeekBar defVolMa2 = volMaRoot.findViewById(R.id.sbVolMa2Period);
-        SeekBar defVolMaW = volMaRoot.findViewById(R.id.sbVolMaW);
-        Switch defVolMaShow = volMaRoot.findViewById(R.id.swVolMa);
-        View defVolMa1Color = volMaRoot.findViewById(R.id.viewVolMa1Color);
-        View defVolMa2Color = volMaRoot.findViewById(R.id.viewVolMa2Color);
 
         TextView tvPeriods = maRoot.findViewById(R.id.tvDefMaPeriods);
         TextView tvColors = maRoot.findViewById(R.id.tvDefMaColors);
@@ -746,7 +794,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
     }
 
     // ------------------------------------------------------------------------
-    // Chart Settings Popup - now includes Volume MA section
+    // Chart Settings Popup - XML-only
     // ------------------------------------------------------------------------
     private void showChartSettingsPopup() {
         if (marketChartView == null) {
@@ -760,8 +808,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         state.curBull[0] = marketChartView.getBullishColor();
         state.curBear[0] = marketChartView.getBearishColor();
 
-        // FIX: Init bullIdx / bearIdx to -1 to avoid auto reset to second color when not found in palette
-        state.bullIdx[0] = -1;
+        state.bullIdx[0] = 0;
         for (int i = 0; i < state.candlePalette.length; i++) {
             if (state.candlePalette[i] == state.curBull[0]) {
                 state.bullIdx[0] = i;
@@ -769,7 +816,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
             }
         }
 
-        state.bearIdx[0] = -1;
+        state.bearIdx[0] = 0;
         for (int i = 0; i < state.candlePalette.length; i++) {
             if (state.candlePalette[i] == state.curBear[0]) {
                 state.bearIdx[0] = i;
@@ -789,67 +836,15 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
                 : getResources().getDimension(R.dimen.default_selected_width);
 
         state.curLastColor[0] = marketChartView.getLastPriceLineColor();
-
-        // FIX: Do NOT load grid/price colors from PREFS_CHART_SETTINGS with fallback to current color.
-        // That turns auto theme color into a persisted custom color and breaks theme switching.
-        // Load directly from MarketChartView which returns theme-auto when no custom is set.
         state.curGridColor[0] = marketChartView.getGridColor();
         state.curPriceTxtColor[0] = marketChartView.getPriceTextColor();
-        state.gridPicked[0] = false;
-        state.pricePicked[0] = false;
-
-        // FIX 3: White bug - use contains() like other pickers, allow -1 = white as valid color
-        // Other pickers use gridPicked/pricePicked to know if user picked, do same for label
-        SharedPreferences chartPrefs = getSharedPreferences(PREFS_CHART_SETTINGS, MODE_PRIVATE);
-
-        state.labelBgPicked[0] = false;
-        state.labelTextPicked[0] = false;
-
-        // Label Bg - allow white (-1) as valid, only 0 means unset
-        if (chartPrefs.contains("label_bg")) {
-            state.curLabelBg[0] = chartPrefs.getInt("label_bg", 0);
-            state.labelBgPicked[0] = true;
-        } else if (chartPrefs.contains("current_price_label_bg")) {
-            state.curLabelBg[0] = chartPrefs.getInt("current_price_label_bg", 0);
-            state.labelBgPicked[0] = true;
-        } else {
-            int v = marketChartView.getLastPriceBgColor();
-            if (v == 0) {
-                // 0 = truly unset
-                v = getResources().getColor(R.color.chart_last_price_line, getTheme());
-            }
-            // v can be -1 = white, keep it
-            state.curLabelBg[0] = v;
-        }
-
-        // Label Text - allow white (-1) as valid
-        if (chartPrefs.contains("label_text_color")) {
-            state.curLabelTextColorFinal[0] = chartPrefs.getInt("label_text_color", 0);
-            state.labelTextPicked[0] = true;
-        } else if (chartPrefs.contains("current_price_label_text")) {
-            state.curLabelTextColorFinal[0] = chartPrefs.getInt("current_price_label_text", 0);
-            state.labelTextPicked[0] = true;
-        } else {
-            int v = marketChartView.getLastPriceLabelTextColor();
-            if (v == 0) {
-                v = getResources().getColor(R.color.last_label_text, getTheme());
-            }
-            state.curLabelTextColorFinal[0] = v;
-        }
-
+        state.curLabelBg[0] = marketChartView.getLastPriceBgColor();
+        state.curLabelTextColorFinal[0] = marketChartView.getLastPriceLabelTextColor();
         state.curSelectedColor[0] = marketChartView.getSelectedLineColor()!= 0
                ? marketChartView.getSelectedLineColor()
                 : getResources().getColor(R.color.chart_selected_line, getTheme());
 
         state.curSelectedAlpha[0] = marketChartView.getSelectedLineAlpha();
-
-        // Volume MA current values - loaded from MarketChartView, no hardcoded fallback in Java
-        state.curShowVolMa[0] = marketChartView.isShowVolMa();
-        state.curVolMa1Color[0] = marketChartView.getVolMa1Color();
-        state.curVolMa2Color[0] = marketChartView.getVolMa2Color();
-        state.curVolMaW[0] = marketChartView.getVolMaWidthPx();
-        state.curVolMa1Period[0] = marketChartView.getVolMa1Period();
-        state.curVolMa2Period[0] = marketChartView.getVolMa2Period();
 
         state.finalTxtSize[0] = state.curTxtSize[0];
         state.finalLabelSize[0] = state.curLabelSize[0];
@@ -874,22 +869,12 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
             dialog.getWindow().setGravity(Gravity.CENTER);
         }
 
-        // 1. Candle settings - FIXED: Realtime preview, old strings %1$d / %1$s
+        // 1. Candle settings
         View headerCandle = content.findViewById(R.id.headerCandle);
         TextView arrowCandle = content.findViewById(R.id.arrowCandle);
         View containerCandle = content.findViewById(R.id.containerCandle);
         View viewBull = content.findViewById(R.id.viewBull);
         View viewBear = content.findViewById(R.id.viewBear);
-        SeekBar sbBodyCandle = null;
-        SeekBar sbWickCandle = null;
-        TextView lbBodyCandle = null;
-        TextView lbWickCandle = null;
-        if (containerCandle!= null) {
-            sbBodyCandle = containerCandle.findViewById(R.id.sbBody);
-            sbWickCandle = containerCandle.findViewById(R.id.sbWick);
-            lbBodyCandle = containerCandle.findViewById(R.id.lbBody);
-            lbWickCandle = containerCandle.findViewById(R.id.lbWick);
-        }
 
         if (viewBull!= null) {
             viewBull.setBackground(createColorViewDrawable(state.curBull[0]));
@@ -898,11 +883,6 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
                 int next = state.candlePalette[state.bullIdx[0]];
                 state.curBull[0] = next;
                 v.setBackground(createColorViewDrawable(next));
-                // Realtime color preview
-                if (marketChartView!= null) {
-                    marketChartView.setCandleColors(state.curBull[0], state.curBear[0]);
-                    marketChartView.invalidate();
-                }
             });
         }
 
@@ -913,73 +893,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
                 int next = state.candlePalette[state.bearIdx[0]];
                 state.curBear[0] = next;
                 v.setBackground(createColorViewDrawable(next));
-                // Realtime color preview
-                if (marketChartView!= null) {
-                    marketChartView.setCandleColors(state.curBull[0], state.curBear[0]);
-                    marketChartView.invalidate();
-                }
             });
-        }
-
-        // FIX: Candle Wick/Body realtime, old strings
-        if (sbBodyCandle!= null) {
-            sbBodyCandle.setProgress((int) ((marketChartView.getBodyWidthFraction() - BODY_BASE_FRACTION) * 100));
-        }
-        if (sbWickCandle!= null) {
-            sbWickCandle.setProgress((int) marketChartView.getWickWidthPx());
-        }
-        if (lbBodyCandle!= null && sbBodyCandle!= null) {
-            float fraction = BODY_BASE_FRACTION + sbBodyCandle.getProgress() / 100f;
-            lbBodyCandle.setText(getString(R.string.chart_body_width, String.format(Locale.US, "%.2f", fraction)));
-        }
-        if (lbWickCandle!= null && sbWickCandle!= null) {
-            int p = Math.max(1, sbWickCandle.getProgress());
-            lbWickCandle.setText(getString(R.string.chart_wick_width, p));
-        }
-        if (sbBodyCandle!= null) {
-            final TextView finalLbBodyCandle = lbBodyCandle;
-            sbBodyCandle.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-                @Override
-                public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                    float fraction = BODY_BASE_FRACTION + progress / 100f;
-                    if (finalLbBodyCandle!= null) {
-                        finalLbBodyCandle.setText(getString(R.string.chart_body_width, String.format(Locale.US, "%.2f", fraction)));
-                    }
-                    // Realtime apply
-                    if (marketChartView!= null) {
-                        marketChartView.setBodyFraction(fraction);
-                        marketChartView.invalidate();
-                    }
-                }
-                @Override public void onStartTrackingTouch(SeekBar seekBar) {}
-                @Override public void onStopTrackingTouch(SeekBar seekBar) {}
-            });
-        }
-        if (sbWickCandle!= null) {
-            final TextView finalLbWickCandle = lbWickCandle;
-            sbWickCandle.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-                @Override
-                public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                    int p = Math.max(1, progress);
-                    if (finalLbWickCandle!= null) {
-                        finalLbWickCandle.setText(getString(R.string.chart_wick_width, p));
-                    }
-                    // Realtime apply
-                    if (marketChartView!= null) {
-                        marketChartView.setWickWidthPx(p);
-                        marketChartView.invalidate();
-                    }
-                }
-                @Override public void onStartTrackingTouch(SeekBar seekBar) {}
-                @Override public void onStopTrackingTouch(SeekBar seekBar) {}
-            });
-        }
-        // Assign to state so Apply still works
-        if (sbBodyCandle!= null) {
-            state.sbBody = sbBodyCandle;
-        }
-        if (sbWickCandle!= null) {
-            state.sbWick = sbWickCandle;
         }
 
         if (headerCandle!= null && containerCandle!= null) {
@@ -1016,7 +930,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
 
         if (btnAddMa!= null) {
             btnAddMa.setOnClickListener(v -> {
-                if (state.tempList.size() >= 10) { // limit add MA
+                if (state.tempList.size() >= 10) {
                     Toast.makeText(v.getContext(),
                             getString(R.string.max_ma_reached),
                             Toast.LENGTH_SHORT).show();
@@ -1048,156 +962,20 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
             });
         }
 
-        // 2.5 Volume MA settings - separate module, XML-driven
-        View headerVolMa = content.findViewById(R.id.headerVolMa);
-        TextView arrowVolMa = content.findViewById(R.id.arrowVolMa);
-        View containerVolMa = content.findViewById(R.id.containerVolMa);
-
-        if (headerVolMa!= null && containerVolMa!= null) {
-            state.swVolMa = containerVolMa.findViewById(R.id.swVolMa);
-            state.sbVolMaW = containerVolMa.findViewById(R.id.sbVolMaW);
-            state.sbVolMa1Period = containerVolMa.findViewById(R.id.sbVolMa1Period);
-            state.sbVolMa2Period = containerVolMa.findViewById(R.id.sbVolMa2Period);
-            state.tvVolMa1Period = containerVolMa.findViewById(R.id.tvVolMa1Period);
-            state.tvVolMa2Period = containerVolMa.findViewById(R.id.tvVolMa2Period);
-            state.viewVolMa1Color = containerVolMa.findViewById(R.id.viewVolMa1Color);
-            state.viewVolMa2Color = containerVolMa.findViewById(R.id.viewVolMa2Color);
-
-            TextView lbVolMaW = containerVolMa.findViewById(R.id.lbVolMaW);
-
-            if (state.swVolMa!= null) {
-                state.swVolMa.setChecked(state.curShowVolMa[0]);
-            }
-            if (state.sbVolMaW!= null) {
-                state.sbVolMaW.setProgress((int) state.curVolMaW[0]);
-            }
-            if (state.sbVolMa1Period!= null) {
-                state.sbVolMa1Period.setMax(60);
-                state.sbVolMa1Period.setProgress(state.curVolMa1Period[0]);
-            }
-            if (state.sbVolMa2Period!= null) {
-                state.sbVolMa2Period.setMax(60);
-                state.sbVolMa2Period.setProgress(state.curVolMa2Period[0]);
-            }
-            if (state.tvVolMa1Period!= null) {
-                state.tvVolMa1Period.setText(String.valueOf(state.curVolMa1Period[0]));
-            }
-            if (state.tvVolMa2Period!= null) {
-                state.tvVolMa2Period.setText(String.valueOf(state.curVolMa2Period[0]));
-            }
-            if (lbVolMaW!= null && state.sbVolMaW!= null) {
-                lbVolMaW.setText(getString(R.string.chart_last_line_width, Math.max(1, state.sbVolMaW.getProgress())));
-            }
-
-            // Color pickers for Volume MA - cycle through palette
-            if (state.viewVolMa1Color!= null) {
-                state.viewVolMa1Color.setBackground(createColorViewDrawable(state.curVolMa1Color[0]));
-                state.viewVolMa1Color.setOnClickListener(v -> {
-                    int idx = -1;
-                    for (int i = 0; i < state.candlePalette.length; i++) {
-                        if (state.candlePalette[i] == state.curVolMa1Color[0]) {
-                            idx = i;
-                            break;
-                        }
-                    }
-                    int next = state.candlePalette[(idx + 1) % state.candlePalette.length];
-                    state.curVolMa1Color[0] = next;
-                    v.setBackground(createColorViewDrawable(next));
-                });
-            }
-            if (state.viewVolMa2Color!= null) {
-                state.viewVolMa2Color.setBackground(createColorViewDrawable(state.curVolMa2Color[0]));
-                state.viewVolMa2Color.setOnClickListener(v -> {
-                    int idx = -1;
-                    for (int i = 0; i < state.candlePalette.length; i++) {
-                        if (state.candlePalette[i] == state.curVolMa2Color[0]) {
-                            idx = i;
-                            break;
-                        }
-                    }
-                    int next = state.candlePalette[(idx + 1) % state.candlePalette.length];
-                    state.curVolMa2Color[0] = next;
-                    v.setBackground(createColorViewDrawable(next));
-                });
-            }
-
-            // SeekBar listeners - update label, no hardcode
-            if (state.sbVolMa1Period!= null) {
-                state.sbVolMa1Period.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-                    @Override
-                    public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                        int p = Math.max(1, progress);
-                        state.curVolMa1Period[0] = p;
-                        if (state.tvVolMa1Period!= null) {
-                            state.tvVolMa1Period.setText(String.valueOf(p));
-                        }
-                    }
-                    @Override public void onStartTrackingTouch(SeekBar seekBar) {}
-                    @Override public void onStopTrackingTouch(SeekBar seekBar) {}
-                });
-            }
-            if (state.sbVolMa2Period!= null) {
-                state.sbVolMa2Period.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-                    @Override
-                    public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                        int p = Math.max(1, progress);
-                        state.curVolMa2Period[0] = p;
-                        if (state.tvVolMa2Period!= null) {
-                            state.tvVolMa2Period.setText(String.valueOf(p));
-                        }
-                    }
-                    @Override public void onStartTrackingTouch(SeekBar seekBar) {}
-                    @Override public void onStopTrackingTouch(SeekBar seekBar) {}
-                });
-            }
-            if (state.sbVolMaW!= null && lbVolMaW!= null) {
-                state.sbVolMaW.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-                    @Override
-                    public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                        state.curVolMaW[0] = Math.max(1, progress);
-                        lbVolMaW.setText(getString(R.string.chart_last_line_width, Math.max(1, progress)));
-                    }
-                    @Override public void onStartTrackingTouch(SeekBar seekBar) {}
-                    @Override public void onStopTrackingTouch(SeekBar seekBar) {}
-                });
-            }
-
-            final boolean[] volMaExpanded = {false};
-            containerVolMa.setVisibility(View.GONE);
-            if (arrowVolMa!= null) {
-                arrowVolMa.setText(getString(R.string.arrow_collapsed));
-            }
-            headerVolMa.setOnClickListener(v -> {
-                volMaExpanded[0] =!volMaExpanded[0];
-                containerVolMa.setVisibility(volMaExpanded[0]? View.VISIBLE : View.GONE);
-                if (arrowVolMa!= null) {
-                    arrowVolMa.setText(getString(volMaExpanded[0]
-                           ? R.string.arrow_expanded
-                            : R.string.arrow_collapsed));
-                }
-            });
-        }
-
-        // 3. Chart options - MUST NOT contain Wick/Body, enforce error if duplicate
+        // 3. Chart options
         View headerOptions = content.findViewById(R.id.headerOptions);
         TextView arrowOptions = content.findViewById(R.id.arrowOptions);
         View containerOptions = content.findViewById(R.id.containerOptions);
 
-        // Enforce: if options XML still has sbBody/sbWick, throw immediately
-        if (containerOptions!= null) {
-            if (containerOptions.findViewById(R.id.sbBody)!= null
-                    || containerOptions.findViewById(R.id.sbWick)!= null
-                    || containerOptions.findViewById(R.id.lbBody)!= null
-                    || containerOptions.findViewById(R.id.lbWick)!= null) {
-                throw new IllegalStateException("Duplicate Wick/Body in chart_settings_options.xml - must be only in chart_settings_candle.xml");
-            }
-        }
-
+        state.sbBody = containerOptions.findViewById(R.id.sbBody);
+        state.sbWick = containerOptions.findViewById(R.id.sbWick);
         state.sbMaW = containerOptions.findViewById(R.id.sbMaW);
         state.sbVis = containerOptions.findViewById(R.id.sbVis);
         state.swGrid = containerOptions.findViewById(R.id.swGrid);
         state.swVol = containerOptions.findViewById(R.id.swVol);
 
+        TextView lbBody = containerOptions.findViewById(R.id.lbBody);
+        TextView lbWick = containerOptions.findViewById(R.id.lbWick);
         TextView lbMaW = containerOptions.findViewById(R.id.lbMaW);
         TextView lbVis = containerOptions.findViewById(R.id.lbVis);
 
@@ -1209,6 +987,14 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
                 state.sbVis.setMin(minVisPopup);
             }
+        }
+
+        if (state.sbBody!= null) {
+            state.sbBody.setProgress((int) ((marketChartView.getBodyWidthFraction() - BODY_BASE_FRACTION) * 100));
+        }
+
+        if (state.sbWick!= null) {
+            state.sbWick.setProgress((int) marketChartView.getWickWidthPx());
         }
 
         if (state.sbMaW!= null) {
@@ -1227,6 +1013,16 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
             state.swVol.setChecked(marketChartView.isShowVolume());
         }
 
+        if (lbBody!= null && state.sbBody!= null) {
+            float fraction = BODY_BASE_FRACTION + state.sbBody.getProgress() / 100f;
+            lbBody.setText(getString(R.string.chart_body_width, String.format(Locale.US, "%.2f", fraction)));
+        }
+
+        if (lbWick!= null && state.sbWick!= null) {
+            int p = Math.max(1, state.sbWick.getProgress());
+            lbWick.setText(getString(R.string.chart_wick_width, p));
+        }
+
         if (lbMaW!= null && state.sbMaW!= null) {
             int p = Math.max(1, state.sbMaW.getProgress());
             lbMaW.setText(getString(R.string.chart_ma_line_width, p));
@@ -1236,17 +1032,36 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
             lbVis.setText(getString(R.string.chart_visible_candles, state.sbVis.getProgress()));
         }
 
+        if (state.sbBody!= null && lbBody!= null) {
+            state.sbBody.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+                @Override
+                public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                    float fraction = BODY_BASE_FRACTION + progress / 100f;
+                    lbBody.setText(getString(R.string.chart_body_width, String.format(Locale.US, "%.2f", fraction)));
+                }
+                @Override public void onStartTrackingTouch(SeekBar seekBar) {}
+                @Override public void onStopTrackingTouch(SeekBar seekBar) {}
+            });
+        }
+
+        if (state.sbWick!= null && lbWick!= null) {
+            state.sbWick.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+                @Override
+                public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                    int p = Math.max(1, progress);
+                    lbWick.setText(getString(R.string.chart_wick_width, p));
+                }
+                @Override public void onStartTrackingTouch(SeekBar seekBar) {}
+                @Override public void onStopTrackingTouch(SeekBar seekBar) {}
+            });
+        }
+
         if (state.sbMaW!= null && lbMaW!= null) {
             state.sbMaW.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
                 @Override
                 public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                     int p = Math.max(1, progress);
                     lbMaW.setText(getString(R.string.chart_ma_line_width, p));
-                    // Realtime
-                    if (marketChartView!= null) {
-                        marketChartView.setMaLineWidthPx(p);
-                        marketChartView.invalidate();
-                    }
                 }
                 @Override public void onStartTrackingTouch(SeekBar seekBar) {}
                 @Override public void onStopTrackingTouch(SeekBar seekBar) {}
@@ -1258,32 +1073,9 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
                 @Override
                 public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                     lbVis.setText(getString(R.string.chart_visible_candles, progress));
-                    // Realtime
-                    if (marketChartView!= null) {
-                        marketChartView.setVisibleCandleCount(progress);
-                        marketChartView.invalidate();
-                    }
                 }
                 @Override public void onStartTrackingTouch(SeekBar seekBar) {}
                 @Override public void onStopTrackingTouch(SeekBar seekBar) {}
-            });
-        }
-
-        if (state.swGrid!= null) {
-            state.swGrid.setOnCheckedChangeListener((buttonView, isChecked) -> {
-                if (marketChartView!= null) {
-                    marketChartView.setShowGrid(isChecked);
-                    marketChartView.invalidate();
-                }
-            });
-        }
-
-        if (state.swVol!= null) {
-            state.swVol.setOnCheckedChangeListener((buttonView, isChecked) -> {
-                if (marketChartView!= null) {
-                    marketChartView.setShowVolume(isChecked);
-                    marketChartView.invalidate();
-                }
             });
         }
 
@@ -1354,10 +1146,6 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
                     int p = Math.max(8, progress);
                     state.finalTxtSize[0] = p;
                     lbTxtSize.setText(getString(R.string.chart_price_text_size, p));
-                    if (marketChartView!= null) {
-                        marketChartView.setPriceTextSizePx(p);
-                        marketChartView.invalidate();
-                    }
                 }
                 @Override public void onStartTrackingTouch(SeekBar seekBar) {}
                 @Override public void onStopTrackingTouch(SeekBar seekBar) {}
@@ -1371,10 +1159,6 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
                     int p = Math.max(1, progress);
                     state.curLastW[0] = p;
                     lbLastW.setText(getString(R.string.chart_last_line_width, p));
-                    if (marketChartView!= null) {
-                        marketChartView.setLastLineWidthPx(p);
-                        marketChartView.invalidate();
-                    }
                 }
                 @Override public void onStartTrackingTouch(SeekBar seekBar) {}
                 @Override public void onStopTrackingTouch(SeekBar seekBar) {}
@@ -1394,10 +1178,6 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
                 int next = state.candlePalette[(idx + 1) % state.candlePalette.length];
                 state.curLastColor[0] = next;
                 v.setBackground(createColorViewDrawable(next));
-                if (marketChartView!= null) {
-                    marketChartView.setLastPriceLineColor(next);
-                    marketChartView.invalidate();
-                }
             });
         }
 
@@ -1413,13 +1193,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
                 }
                 int next = state.candlePalette[(idx + 1) % state.candlePalette.length];
                 state.curGridColor[0] = next;
-                // FIX: Mark as user-picked, this will be persisted as custom
-                state.gridPicked[0] = true;
                 v.setBackground(createColorViewDrawable(next));
-                if (marketChartView!= null) {
-                    marketChartView.setGridColor(next);
-                    marketChartView.invalidate();
-                }
             });
         }
 
@@ -1435,13 +1209,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
                 }
                 int next = state.candlePalette[(idx + 1) % state.candlePalette.length];
                 state.curPriceTxtColor[0] = next;
-                // FIX: Mark as user-picked, this will be persisted as custom
-                state.pricePicked[0] = true;
                 v.setBackground(createColorViewDrawable(next));
-                if (marketChartView!= null) {
-                    marketChartView.setPriceTextColor(next);
-                    marketChartView.invalidate();
-                }
             });
         }
 
@@ -1462,7 +1230,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
             });
         }
 
-        // 5. Current price label - FIXED like other pickers, white = -1 valid
+        // 5. Current price label
         View headerLabel = content.findViewById(R.id.headerLabel);
         TextView arrowLabel = content.findViewById(R.id.arrowLabel);
         View containerLabel = content.findViewById(R.id.containerLabel);
@@ -1489,10 +1257,6 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
                     int p = Math.max(8, progress);
                     state.finalLabelSize[0] = p;
                     lbLabelSize.setText(getString(R.string.chart_last_price_label_text_size, p));
-                    if (marketChartView!= null) {
-                        marketChartView.setCurrentPriceLabelTextSizePx(p);
-                        marketChartView.invalidate();
-                    }
                 }
                 @Override public void onStartTrackingTouch(SeekBar seekBar) {}
                 @Override public void onStopTrackingTouch(SeekBar seekBar) {}
@@ -1502,7 +1266,6 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         if (viewLabelBg!= null) {
             viewLabelBg.setBackground(createColorViewDrawable(state.curLabelBg[0]));
             viewLabelBg.setOnClickListener(v -> {
-                // Same as viewLastColor / viewGridColor - idx -1 to allow cycle from first
                 int idx = -1;
                 for (int i = 0; i < state.candlePalette.length; i++) {
                     if (state.candlePalette[i] == state.curLabelBg[0]) {
@@ -1512,18 +1275,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
                 }
                 int next = state.candlePalette[(idx + 1) % state.candlePalette.length];
                 state.curLabelBg[0] = next;
-                state.labelBgPicked[0] = true;
                 v.setBackground(createColorViewDrawable(next));
-                // Persist immediately like gridPicked - white -1 is valid
-                getSharedPreferences(PREFS_CHART_SETTINGS, MODE_PRIVATE)
-                       .edit()
-                       .putInt("label_bg", next)
-                       .putInt("current_price_label_bg", next)
-                       .commit();
-                if (marketChartView!= null) {
-                    marketChartView.setCurrentPriceLabelBackground(next);
-                    marketChartView.invalidate();
-                }
             });
         }
 
@@ -1539,17 +1291,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
                 }
                 int next = state.candlePalette[(idx + 1) % state.candlePalette.length];
                 state.curLabelTextColorFinal[0] = next;
-                state.labelTextPicked[0] = true;
                 v.setBackground(createColorViewDrawable(next));
-                getSharedPreferences(PREFS_CHART_SETTINGS, MODE_PRIVATE)
-                       .edit()
-                       .putInt("label_text_color", next)
-                       .putInt("current_price_label_text", next)
-                       .commit();
-                if (marketChartView!= null) {
-                    marketChartView.setCurrentPriceLabelTextColor(next);
-                    marketChartView.invalidate();
-                }
             });
         }
 
@@ -1609,10 +1351,6 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
                         int p = Math.max(1, progress);
                         state.curSelectedW[0] = p;
                         lbSelectedW.setText(getString(R.string.chart_selected_line_width, p));
-                        if (marketChartView!= null) {
-                            marketChartView.setSelectedLineWidthPx(p);
-                            marketChartView.invalidate();
-                        }
                     }
                     @Override public void onStartTrackingTouch(SeekBar seekBar) {}
                     @Override public void onStopTrackingTouch(SeekBar seekBar) {}
@@ -1625,10 +1363,6 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
                     public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                         state.curSelectedAlpha[0] = progress;
                         lbSelectedAlpha.setText(getString(R.string.chart_selected_line_alpha, progress));
-                        if (marketChartView!= null) {
-                            marketChartView.setSelectedLineAlpha(progress);
-                            marketChartView.invalidate();
-                        }
                     }
                     @Override public void onStartTrackingTouch(SeekBar seekBar) {}
                     @Override public void onStopTrackingTouch(SeekBar seekBar) {}
@@ -1648,10 +1382,6 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
                     int next = state.candlePalette[(idx + 1) % state.candlePalette.length];
                     state.curSelectedColor[0] = next;
                     v.setBackground(createColorViewDrawable(next));
-                    if (marketChartView!= null) {
-                        marketChartView.setSelectedLineColor(next);
-                        marketChartView.invalidate();
-                    }
                 });
             }
 
@@ -1725,7 +1455,6 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
             // Ignore parse errors
         }
 
-        // Wick/Body now only from Candle section (old strings still used)
         float bodyFraction = BODY_BASE_FRACTION;
         float wickW = 2f;
         if (state.sbBody!= null) {
@@ -1743,31 +1472,14 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         marketChartView.setCandleColors(state.curBull[0], state.curBear[0]);
         marketChartView.setChartOptions(bodyFraction, wickW, maW, showG, showV, visCount);
 
-        // FIX: Only persist grid / price text colors when user explicitly picked them
-        int gridColorToApply;
-        int priceTextColorToApply;
-        int bgColorForApply = 0; // 0 = auto theme, do not lock background
-
-        if (state.gridPicked[0]) {
-            gridColorToApply = state.curGridColor[0];
-        } else {
-            gridColorToApply = marketChartView.getGridColor();
-        }
-
-        if (state.pricePicked[0]) {
-            priceTextColorToApply = state.curPriceTxtColor[0];
-        } else {
-            priceTextColorToApply = marketChartView.getPriceTextColor();
-        }
-
         marketChartView.setChartAppearance(
                 showLast,
                 state.curLastColor[0],
                 state.curLabelBg[0],
                 state.finalTxtSize[0],
-                priceTextColorToApply,
-                gridColorToApply,
-                bgColorForApply,
+                state.curPriceTxtColor[0],
+                state.curGridColor[0],
+                0,
                 state.curLastW[0],
                 state.swDash.isChecked()
         );
@@ -1788,45 +1500,6 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
             );
         }
 
-        // Apply Volume MA appearance - separate keys, using string resources
-        if (state.swVolMa!= null) {
-            marketChartView.setVolMaAppearance(
-                    state.swVolMa.isChecked(),
-                    state.curVolMa1Color[0],
-                    state.curVolMa2Color[0],
-                    state.curVolMaW[0] > 0? state.curVolMaW[0] : getResources().getDimension(R.dimen.default_vol_ma_width),
-                    state.curVolMa1Period[0] > 0? state.curVolMa1Period[0] : getResources().getInteger(R.integer.default_vol_ma1_period),
-                    state.curVolMa2Period[0] > 0? state.curVolMa2Period[0] : getResources().getInteger(R.integer.default_vol_ma2_period)
-            );
-        }
-
-        // FIX: Persist colors ONLY if user explicitly picked - now includes label bg/text like grid
-        SharedPreferences.Editor editor = getSharedPreferences(PREFS_CHART_SETTINGS, MODE_PRIVATE).edit();
-        boolean hasChange = false;
-
-        if (state.gridPicked[0]) {
-            editor.putInt("grid_color", state.curGridColor[0]);
-            hasChange = true;
-        }
-        if (state.pricePicked[0]) {
-            editor.putInt("price_text_color", state.curPriceTxtColor[0]);
-            hasChange = true;
-        }
-        if (state.labelBgPicked[0]) {
-            editor.putInt("label_bg", state.curLabelBg[0]);
-            editor.putInt("current_price_label_bg", state.curLabelBg[0]);
-            hasChange = true;
-        }
-        if (state.labelTextPicked[0]) {
-            editor.putInt("label_text_color", state.curLabelTextColorFinal[0]);
-            editor.putInt("current_price_label_text", state.curLabelTextColorFinal[0]);
-            hasChange = true;
-        }
-
-        if (hasChange) {
-            editor.commit();
-        }
-
         marketChartView.setMaLines(state.tempList);
 
         dialog.dismiss();
@@ -1834,14 +1507,14 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
     }
 
     // ------------------------------------------------------------------------
-    // Reset confirmation dialog - FIXED for theme switch bug
+    // Reset confirmation dialog - NO persistence of theme-dependent colors
     // ------------------------------------------------------------------------
     private void showResetConfirm(final Dialog settingsDialog) {
         new AlertDialog.Builder(this)
                .setTitle(getString(R.string.chart_reset_confirm_title))
                .setMessage(getString(R.string.chart_reset_confirm_message))
                .setPositiveButton(getString(R.string.chart_reset), (d, which) -> {
-                    getSharedPreferences(PREFS_CHART_SETTINGS, MODE_PRIVATE).edit().clear().commit();
+                    getSharedPreferences("chart_settings", MODE_PRIVATE).edit().clear().commit();
                     getSharedPreferences(PREFS_CHART_STATE, MODE_PRIVATE).edit().clear().commit();
                     getSharedPreferences(getString(R.string.prefs_chart), Context.MODE_PRIVATE).edit().clear().commit();
                     getSharedPreferences(getString(R.string.prefs_candle), Context.MODE_PRIVATE).edit().clear().commit();
@@ -1985,38 +1658,68 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         if (entry == null) {
             return 0d;
         }
-        long rateFiat = entry.getRateFiat();
-        long rateCoin = entry.getRateCoin();
-        if (rateCoin == 0) {
+
+        try {
+            long rateFiat = entry.getRateFiat();
+            long rateCoin = entry.getRateCoin();
+
+            if (rateCoin == 0) {
+                return 0d;
+            }
+
+            int fractionDigits;
+            try {
+                Currency currency = Currency.getInstance(fiatCode);
+                fractionDigits = currency.getDefaultFractionDigits();
+                if (fractionDigits < 0 || fractionDigits == 0) {
+                    fractionDigits = 2;
+                }
+            } catch (Exception e) {
+                fractionDigits = 2;
+            }
+
+            double fiatMajor = rateFiat / Math.pow(10, fractionDigits);
+            double coinMajor = (double) rateCoin / Coin.COIN.value;
+
+            if (coinMajor == 0d) {
+                return 0d;
+            }
+
+            return fiatMajor / coinMajor;
+        } catch (Exception e) {
             return 0d;
         }
-        Currency currency = Currency.getInstance(fiatCode);
-        int fractionDigits = currency.getDefaultFractionDigits();
-        double fiatMajor = rateFiat / Math.pow(10, fractionDigits);
-        double coinMajor = (double) rateCoin / Coin.COIN.value;
-        if (coinMajor == 0d) {
-            return 0d;
-        }
-        return fiatMajor / coinMajor;
     }
 
     // ------------------------------------------------------------------------
-    // Currency symbol helper - 100% from arrays.xml, no hardcoded map - NO FALLBACK
+    // Currency symbol helper - 100% from arrays.xml, no hardcoded map
     // ------------------------------------------------------------------------
     private String getCurrencySymbol(String fiatCode) {
-        String[] codes = getResources().getStringArray(R.array.fiat_codes);
-        String[] symbols = getResources().getStringArray(R.array.fiat_symbols);
-        int len = Math.min(codes.length, symbols.length);
-        for (int i = 0; i < len; i++) {
-            if (codes[i].equalsIgnoreCase(fiatCode)) {
-                return symbols[i];
+        try {
+            String[] codes = getResources().getStringArray(R.array.fiat_codes);
+            String[] symbols = getResources().getStringArray(R.array.fiat_symbols);
+            int len = Math.min(codes.length, symbols.length);
+            for (int i = 0; i < len; i++) {
+                if (codes[i].equalsIgnoreCase(fiatCode)) {
+                    return symbols[i];
+                }
             }
+            Currency currency = Currency.getInstance(fiatCode);
+            String sym = currency.getSymbol(Locale.US);
+            if (sym.equals(fiatCode)) {
+                sym = currency.getSymbol();
+            }
+            if (sym.equals(fiatCode) || sym.length() > 6) {
+                return fiatCode + " ";
+            }
+            return sym;
+        } catch (Exception e) {
+            return fiatCode + " ";
         }
-        throw new IllegalStateException("Fiat symbol not found: " + fiatCode);
     }
 
     // ------------------------------------------------------------------------
-    // Theme color helper - NO FALLBACK
+    // Theme color helper
     // ------------------------------------------------------------------------
     private int getThemeColor(int attr) {
         TypedValue tv = new TypedValue();
@@ -2024,8 +1727,13 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         if (tv.type >= TypedValue.TYPE_FIRST_COLOR_INT
                 && tv.type <= TypedValue.TYPE_LAST_COLOR_INT) {
             return tv.data;
+        } else {
+            try {
+                return getResources().getColor(tv.resourceId, getTheme());
+            } catch (Exception e) {
+                return tv.data;
+            }
         }
-        return getResources().getColor(tv.resourceId, getTheme());
     }
 
     // ------------------------------------------------------------------------
@@ -2473,23 +2181,24 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
                                 SpannableStringBuilder sb = new SpannableStringBuilder();
 
                                 for (int i = 0; i < lines.size(); i++) {
-                                    if (i >= maValues.size()) {
-                                        break;
-                                    }
+                                    if (i >= maValues.size()) break;
+
                                     float value = maValues.get(i);
-                                    if (value == 0f) {
-                                        continue;
-                                    }
+                                    if (value == 0f) continue;
+
                                     double fiatVal = value * finalUsdToFiat;
+
                                     String label = String.format(
                                             Locale.US,
                                             "MA%d: %,.2f",
                                             lines.get(i).period,
                                             fiatVal
                                     );
+
                                     if (sb.length() > 0) {
                                         sb.append(getString(R.string.bullet_separator));
                                     }
+
                                     int start = sb.length();
                                     sb.append(label);
                                     sb.setSpan(
@@ -2499,6 +2208,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
                                             Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
                                     );
                                 }
+
                                 textMaLabel.setText(sb);
                             }
                         }
@@ -2512,6 +2222,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
                     if (textCountdown!= null) {
                         textCountdown.setText(getString(R.string.chart_close_in, countdown));
                     }
+
                     if (marketChartView!= null) {
                         marketChartView.setCountdown(countdown);
                     }
@@ -2521,9 +2232,8 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
             @Override
             public void onCandleSelected(final MarketChartView.Candle candle) {
                 runOnUiThread(() -> {
-                    if (popupCandleDetail == null || candle == null) {
-                        return;
-                    }
+                    if (popupCandleDetail == null || candle == null) return;
+
                     new Thread(() -> {
                         double fiatPerBtc = getFiatPerBtc(currentFiatCode);
                         double basePerBtc = getFiatPerBtc("USD");
@@ -2546,7 +2256,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
                             bg.setCornerRadius(0f);
                             bg.setStroke(
                                     (int) getResources().getDimension(R.dimen.default_grid_width),
-                                    getResources().getColor(R.color.chart_grid, getTheme())
+                                    res.getColor(R.color.chart_grid, null)
                             );
 
                             popupCandleDetail.setBackground(bg);
