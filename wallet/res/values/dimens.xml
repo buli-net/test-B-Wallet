@@ -64,5 +64,7 @@
     <dimen name="color_picker_size">24dp</dimen>
 <dimen name="color_picker_corner_radius">2dp</dimen>
 <dimen name="color_picker_border_width">1dp</dimen>
-    
+
+<!-- Vol - ma -->
+    <dimen name="default_vol_ma_width">2dp</dimen>
 </resources>
