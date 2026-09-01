@@ -57,7 +57,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import org.bitcoinj.base.Coin;
 import org.bitcoinj.base.utils.Fiat;
 
-import java.lang.reflect.Field;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Currency;
@@ -166,102 +165,38 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
      */
     public static GradientDrawable createUnifiedColorDrawable(Context ctx, int color) {
         GradientDrawable drawable = new GradientDrawable();
-
-        float cornerRadius;
-        float borderWidth;
-        int borderColor;
-
-        try {
-            cornerRadius = ctx.getResources().getDimension(R.dimen.color_picker_corner_radius);
-        } catch (Exception e) {
-            cornerRadius = ctx.getResources().getDimension(R.dimen.default_popup_padding);
-        }
-
-        try {
-            borderWidth = ctx.getResources().getDimension(R.dimen.color_picker_border_width);
-        } catch (Exception e) {
-            borderWidth = ctx.getResources().getDimension(R.dimen.default_grid_width);
-        }
-
-        try {
-            borderColor = ctx.getResources().getColor(R.color.color_picker_border, ctx.getTheme());
-        } catch (Exception e) {
-            borderColor = ctx.getResources().getColor(R.color.chart_grid, ctx.getTheme());
-        }
-
+        float cornerRadius = ctx.getResources().getDimension(R.dimen.color_picker_corner_radius);
+        float borderWidth = ctx.getResources().getDimension(R.dimen.color_picker_border_width);
+        int borderColor = ctx.getResources().getColor(R.color.color_picker_border, ctx.getTheme());
         drawable.setShape(GradientDrawable.RECTANGLE);
         drawable.setCornerRadius(cornerRadius);
         drawable.setColor(color);
-
-        if (borderWidth < 1f) {
-            borderWidth = 1f * ctx.getResources().getDisplayMetrics().density;
-        }
         drawable.setStroke((int) borderWidth, borderColor);
-
         return drawable;
     }
 
     private int[] loadPaletteFromColorsXml() {
-        // FIX: Load from chart_palettes.xml array, not from R.color reflection
-        // This array is the single source of truth for all colors including grid/text
-        try {
-            int arrayResId = getResources().getIdentifier("chart_color_palette", "array", getPackageName());
-            if (arrayResId == 0) {
-                arrayResId = R.array.chart_color_palette;
-            }
-
-            TypedArray ta = getResources().obtainTypedArray(arrayResId);
-            List<Integer> colors = new ArrayList<>();
-            for (int i = 0; i < ta.length(); i++) {
-                int color = ta.getColor(i, 0);
-                if (color!= 0) {
-                    colors.add(color);
-                }
-            }
-            ta.recycle();
-
-            if (colors.isEmpty()) {
-                throw new IllegalStateException(getString(R.string.err_palette_not_found, "chart_color_palette"));
-            }
-
-            int[] arr = new int[colors.size()];
-            for (int i = 0; i < colors.size(); i++) {
-                arr[i] = colors.get(i);
-            }
-            return arr;
-
-        } catch (Exception e) {
-            // Fallback to old reflection method if array not found
-            String prefix = getString(R.string.palette_prefix);
-            if (prefix == null || prefix.trim().isEmpty()) {
-                throw new IllegalStateException(getString(R.string.err_palette_prefix_missing));
-            }
-
-            List<Integer> colors = new ArrayList<>();
-            try {
-                Field[] fields = R.color.class.getFields();
-                for (Field f : fields) {
-                    String name = f.getName();
-                    if (name.startsWith(prefix)) {
-                        int resId = f.getInt(null);
-                        int c = getResources().getColor(resId, getTheme());
-                        colors.add(c);
-                    }
-                }
-            } catch (Exception ex) {
-                throw new IllegalStateException(getString(R.string.err_palette_load_failed, prefix), ex);
-            }
-
-            if (colors.isEmpty()) {
-                throw new IllegalStateException(getString(R.string.err_palette_not_found, prefix));
-            }
-
-            int[] arr = new int[colors.size()];
-            for (int i = 0; i < colors.size(); i++) {
-                arr[i] = colors.get(i);
-            }
-            return arr;
+        int arrayResId = getResources().getIdentifier("chart_color_palette", "array", getPackageName());
+        if (arrayResId == 0) {
+            arrayResId = R.array.chart_color_palette;
         }
+        TypedArray ta = getResources().obtainTypedArray(arrayResId);
+        List<Integer> colors = new ArrayList<>();
+        for (int i = 0; i < ta.length(); i++) {
+            int color = ta.getColor(i, 0);
+            if (color!= 0) {
+                colors.add(color);
+            }
+        }
+        ta.recycle();
+        if (colors.isEmpty()) {
+            throw new IllegalStateException("chart_color_palette is empty");
+        }
+        int[] arr = new int[colors.size()];
+        for (int i = 0; i < colors.size(); i++) {
+            arr[i] = colors.get(i);
+        }
+        return arr;
     }
 
     // ------------------------------------------------------------------------
@@ -377,50 +312,20 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
     }
 
     // ------------------------------------------------------------------------
-    // Helper: read color from view tag - theme-aware
+    // Helper: read color from view tag - theme-aware - NO STRING FALLBACK
     // ------------------------------------------------------------------------
     private int getColorFromTag(View v) {
         if (v == null) {
             throw new IllegalStateException("View tag missing color");
         }
-
         Object tag = v.getTag();
         if (tag == null) {
             throw new IllegalStateException("View tag missing color");
         }
-
         if (tag instanceof Integer) {
-            try {
-                return getResources().getColor((Integer) tag, getTheme());
-            } catch (Exception e) {
-                return (Integer) tag;
-            }
+            return getResources().getColor((Integer) tag, getTheme());
         }
-
-        String s = tag.toString().trim();
-        if (s.isEmpty()) {
-            throw new IllegalStateException("Color tag empty");
-        }
-
-        if (s.startsWith("#")) {
-            return Color.parseColor(s);
-        }
-
-        if (s.startsWith("@color/")) {
-            String colorName = s.replace("@color/", "");
-            int resId = getResources().getIdentifier(colorName, "color", getPackageName());
-            if (resId!= 0) {
-                return getResources().getColor(resId, getTheme());
-            }
-            throw new IllegalStateException("Color resource not found for tag: " + s);
-        }
-
-        try {
-            int resId = Integer.parseInt(s);
-            return getResources().getColor(resId, getTheme());
-        } catch (NumberFormatException e) {
-            return Color.parseColor(s);
-        }
+        throw new IllegalStateException("Color tag must be Integer resource id");
     }
 
     // ------------------------------------------------------------------------
@@ -466,22 +371,10 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
 
         View defBull = candleRoot.findViewById(R.id.viewBull);
         View defBear = candleRoot.findViewById(R.id.viewBear);
-        SeekBar defWickFromCandle = candleRoot.findViewById(R.id.sbWick);
-        SeekBar defBodyFromCandle = candleRoot.findViewById(R.id.sbBody);
-
-        SeekBar defBody = optionsRoot.findViewById(R.id.sbBody);
-        SeekBar defWick = optionsRoot.findViewById(R.id.sbWick);
-
-        // Enforce single source: Wick/Body must be in Candle layout only
-        if (defBody!= null || defWick!= null) {
-            throw new IllegalStateException("Duplicate Wick/Body in chart_settings_options.xml - must be only in chart_settings_candle.xml");
-        }
-
-        if (defWick == null) {
-            defWick = defWickFromCandle;
-        }
-        if (defBody == null) {
-            defBody = defBodyFromCandle;
+        SeekBar defBody = candleRoot.findViewById(R.id.sbBody);
+        SeekBar defWick = candleRoot.findViewById(R.id.sbWick);
+        if (optionsRoot.findViewById(R.id.sbBody)!= null || optionsRoot.findViewById(R.id.sbWick)!= null) {
+            throw new IllegalStateException("Duplicate Wick/Body in chart_settings_options.xml");
         }
 
         SeekBar defMaW = optionsRoot.findViewById(R.id.sbMaW);
@@ -2092,68 +1985,38 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         if (entry == null) {
             return 0d;
         }
-
-        try {
-            long rateFiat = entry.getRateFiat();
-            long rateCoin = entry.getRateCoin();
-
-            if (rateCoin == 0) {
-                return 0d;
-            }
-
-            int fractionDigits;
-            try {
-                Currency currency = Currency.getInstance(fiatCode);
-                fractionDigits = currency.getDefaultFractionDigits();
-                if (fractionDigits < 0 || fractionDigits == 0) {
-                    fractionDigits = 2;
-                }
-            } catch (Exception e) {
-                fractionDigits = 2;
-            }
-
-            double fiatMajor = rateFiat / Math.pow(10, fractionDigits);
-            double coinMajor = (double) rateCoin / Coin.COIN.value;
-
-            if (coinMajor == 0d) {
-                return 0d;
-            }
-
-            return fiatMajor / coinMajor;
-        } catch (Exception e) {
+        long rateFiat = entry.getRateFiat();
+        long rateCoin = entry.getRateCoin();
+        if (rateCoin == 0) {
             return 0d;
         }
+        Currency currency = Currency.getInstance(fiatCode);
+        int fractionDigits = currency.getDefaultFractionDigits();
+        double fiatMajor = rateFiat / Math.pow(10, fractionDigits);
+        double coinMajor = (double) rateCoin / Coin.COIN.value;
+        if (coinMajor == 0d) {
+            return 0d;
+        }
+        return fiatMajor / coinMajor;
     }
 
     // ------------------------------------------------------------------------
-    // Currency symbol helper - 100% from arrays.xml, no hardcoded map
+    // Currency symbol helper - 100% from arrays.xml, no hardcoded map - NO FALLBACK
     // ------------------------------------------------------------------------
     private String getCurrencySymbol(String fiatCode) {
-        try {
-            String[] codes = getResources().getStringArray(R.array.fiat_codes);
-            String[] symbols = getResources().getStringArray(R.array.fiat_symbols);
-            int len = Math.min(codes.length, symbols.length);
-            for (int i = 0; i < len; i++) {
-                if (codes[i].equalsIgnoreCase(fiatCode)) {
-                    return symbols[i];
-                }
+        String[] codes = getResources().getStringArray(R.array.fiat_codes);
+        String[] symbols = getResources().getStringArray(R.array.fiat_symbols);
+        int len = Math.min(codes.length, symbols.length);
+        for (int i = 0; i < len; i++) {
+            if (codes[i].equalsIgnoreCase(fiatCode)) {
+                return symbols[i];
             }
-            Currency currency = Currency.getInstance(fiatCode);
-            String sym = currency.getSymbol(Locale.US);
-            if (sym.equals(fiatCode)) {
-                sym = currency.getSymbol();
-            }
-            if (sym.equals(fiatCode) || sym.length() > 6) {
-                return fiatCode + " ";
-            }
-            return sym;
-        } catch (Exception e) {
-            return fiatCode + " ";
         }
+        throw new IllegalStateException("Fiat symbol not found: " + fiatCode);
     }
 
     // ------------------------------------------------------------------------
-    // Theme color helper
+    // Theme color helper - NO FALLBACK
     // ------------------------------------------------------------------------
     private int getThemeColor(int attr) {
         TypedValue tv = new TypedValue();
@@ -2161,13 +2024,8 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         if (tv.type >= TypedValue.TYPE_FIRST_COLOR_INT
                 && tv.type <= TypedValue.TYPE_LAST_COLOR_INT) {
             return tv.data;
-        } else {
-            try {
-                return getResources().getColor(tv.resourceId, getTheme());
-            } catch (Exception e) {
-                return tv.data;
-            }
         }
+        return getResources().getColor(tv.resourceId, getTheme());
     }
 
     // ------------------------------------------------------------------------
