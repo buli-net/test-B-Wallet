@@ -287,6 +287,11 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         int[] curSelectedColor = new int[1];
         int[] curSelectedAlpha = new int[1];
 
+        // FIX: Track whether user actually picked grid / price text colors in this session
+        // Do not treat auto theme colors as custom
+        boolean[] gridPicked = new boolean[1];
+        boolean[] pricePicked = new boolean[1];
+
         float[] finalTxtSize = new float[1];
         float[] finalLabelSize = new float[1];
 
@@ -874,19 +879,13 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
 
         state.curLastColor[0] = marketChartView.getLastPriceLineColor();
 
-        // Load saved Grid and Price Text colors if exists, otherwise use current chart colors
-        SharedPreferences chartSettingsPrefs = getSharedPreferences(PREFS_CHART_SETTINGS, MODE_PRIVATE);
-
-        int defaultGrid = marketChartView.getGridColor()!= -1
-               ? marketChartView.getGridColor()
-                : getResources().getColor(R.color.chart_grid, getTheme());
-
-        int defaultPriceText = marketChartView.getPriceTextColor()!= -1
-               ? marketChartView.getPriceTextColor()
-                : getThemeColor(android.R.attr.textColorSecondary);
-
-        state.curGridColor[0] = chartSettingsPrefs.getInt("grid_color", defaultGrid);
-        state.curPriceTxtColor[0] = chartSettingsPrefs.getInt("price_text_color", defaultPriceText);
+        // FIX: Do NOT load grid/price colors from PREFS_CHART_SETTINGS with fallback to current color.
+        // That turns auto theme color into a persisted custom color and breaks theme switching.
+        // Load directly from MarketChartView which returns theme-auto when no custom is set.
+        state.curGridColor[0] = marketChartView.getGridColor();
+        state.curPriceTxtColor[0] = marketChartView.getPriceTextColor();
+        state.gridPicked[0] = false;
+        state.pricePicked[0] = false;
 
         state.curLabelBg[0] = marketChartView.getLastPriceBgColor()!= -1
                ? marketChartView.getLastPriceBgColor()
@@ -1387,6 +1386,8 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
                 }
                 int next = state.candlePalette[(idx + 1) % state.candlePalette.length];
                 state.curGridColor[0] = next;
+                // FIX: Mark as user-picked, this will be persisted as custom
+                state.gridPicked[0] = true;
                 v.setBackground(createColorViewDrawable(next));
             });
         }
@@ -1403,6 +1404,8 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
                 }
                 int next = state.candlePalette[(idx + 1) % state.candlePalette.length];
                 state.curPriceTxtColor[0] = next;
+                // FIX: Mark as user-picked, this will be persisted as custom
+                state.pricePicked[0] = true;
                 v.setBackground(createColorViewDrawable(next));
             });
         }
@@ -1660,15 +1663,34 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         marketChartView.setCandleColors(state.curBull[0], state.curBear[0]);
         marketChartView.setChartOptions(bodyFraction, wickW, maW, showG, showV, visCount);
 
-        int bgColorForApply = 0; // FIX: 0 = auto theme, khong lock background -> khong bi mat grid khi doi theme
+        // FIX: Only persist grid / price text colors when user explicitly picked them
+        // This keeps auto theme behavior: light -> dark will auto switch, not stay black
+        int gridColorToApply;
+        int priceTextColorToApply;
+        int bgColorForApply = 0; // 0 = auto theme, do not lock background
+
+        if (state.gridPicked[0]) {
+            gridColorToApply = state.curGridColor[0];
+        } else {
+            // Keep current auto/custom state in MarketChartView, do not force theme color
+            // Passing -1 or 0 tells MarketChartView to keep auto (depends on implementation)
+            // Here we read current from view to avoid overriding, but we will NOT persist it
+            gridColorToApply = marketChartView.getGridColor();
+        }
+
+        if (state.pricePicked[0]) {
+            priceTextColorToApply = state.curPriceTxtColor[0];
+        } else {
+            priceTextColorToApply = marketChartView.getPriceTextColor();
+        }
 
         marketChartView.setChartAppearance(
                 showLast,
                 state.curLastColor[0],
                 state.curLabelBg[0],
                 state.finalTxtSize[0],
-                state.curPriceTxtColor[0],
-                state.curGridColor[0],
+                priceTextColorToApply,
+                gridColorToApply,
                 bgColorForApply,
                 state.curLastW[0],
                 state.swDash.isChecked()
@@ -1702,12 +1724,21 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
             );
         }
 
-        // FIX: Persist Grid Color and Price Text Color to prevent reset to gray/black
-        getSharedPreferences(PREFS_CHART_SETTINGS, MODE_PRIVATE)
-               .edit()
-               .putInt("grid_color", state.curGridColor[0])
-               .putInt("price_text_color", state.curPriceTxtColor[0])
-               .commit();
+        // FIX: Persist Grid Color and Price Text Color ONLY if user set them
+        // Prevents saving auto black/white and then invisible after theme switch
+        if (state.gridPicked[0] || state.pricePicked[0]) {
+            SharedPreferences.Editor editor = getSharedPreferences(PREFS_CHART_SETTINGS, MODE_PRIVATE).edit();
+            if (state.gridPicked[0]) {
+                editor.putInt("grid_color", state.curGridColor[0]);
+            }
+            if (state.pricePicked[0]) {
+                editor.putInt("price_text_color", state.curPriceTxtColor[0]);
+            }
+            editor.commit();
+        }
+
+        // Also ensure MarketChartView's own persistence only happens when picked
+        // (setChartAppearance already handled via gridColorToApply / priceTextColorToApply)
 
         marketChartView.setMaLines(state.tempList);
 
