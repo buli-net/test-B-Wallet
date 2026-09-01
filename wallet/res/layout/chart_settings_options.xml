@@ -14,28 +14,6 @@
         android:textSize="14sp"
         android:textStyle="bold" />
 
-    <!-- MA Line Width -->
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:paddingVertical="4dp">
-
-        <TextView
-            android:id="@+id/lbMaW"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/chart_ma_line_width"
-            android:textSize="12sp" />
-
-        <SeekBar
-            android:id="@+id/sbMaW"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:max="20"
-            android:progress="2" />
-    </LinearLayout>
-
     <!-- Show Grid -->
     <LinearLayout
         android:layout_width="match_parent"
