@@ -862,6 +862,8 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         state.curBull[0] = marketChartView.getBullishColor();
         state.curBear[0] = marketChartView.getBearishColor();
 
+        // FIX: Init bullIdx / bearIdx to -1 to avoid auto reset to second color when not found in palette
+        state.bullIdx[0] = -1;
         for (int i = 0; i < state.candlePalette.length; i++) {
             if (state.candlePalette[i] == state.curBull[0]) {
                 state.bullIdx[0] = i;
@@ -869,6 +871,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
             }
         }
 
+        state.bearIdx[0] = -1;
         for (int i = 0; i < state.candlePalette.length; i++) {
             if (state.candlePalette[i] == state.curBear[0]) {
                 state.bearIdx[0] = i;
@@ -898,7 +901,6 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         state.pricePicked[0] = false;
 
         // FIX: Current Price Label - handle both 0 and -1 as unset, do not treat 0 as valid persisted color
-        // This prevents the small view from showing theme default and then resetting on click
         int initialLabelBg = marketChartView.getLastPriceBgColor();
         if (initialLabelBg == 0 || initialLabelBg == -1) {
             initialLabelBg = getResources().getColor(R.color.chart_last_price_line, getTheme());
@@ -1164,7 +1166,6 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
             }
 
             // Color pickers for Volume MA - cycle through palette
-            // FIX: Use idx = -1 to prevent reset to second color when not found
             if (state.viewVolMa1Color!= null) {
                 state.viewVolMa1Color.setBackground(createColorViewDrawable(state.curVolMa1Color[0]));
                 state.viewVolMa1Color.setOnClickListener(v -> {
@@ -1459,7 +1460,6 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         if (viewLastColor!= null) {
             viewLastColor.setBackground(createColorViewDrawable(state.curLastColor[0]));
             viewLastColor.setOnClickListener(v -> {
-                // FIX: Use -1 so if not found, next is palette[0], not palette[1]
                 int idx = -1;
                 for (int i = 0; i < state.candlePalette.length; i++) {
                     if (state.candlePalette[i] == state.curLastColor[0]) {
@@ -1579,7 +1579,6 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
             viewLabelBg.setBackground(createColorViewDrawable(state.curLabelBg[0]));
             viewLabelBg.setOnClickListener(v -> {
                 // FIX: Do not start idx at 0, use -1 to correctly cycle from palette[0]
-                // This was causing the small view to appear to reset to second color
                 int idx = -1;
                 for (int i = 0; i < state.candlePalette.length; i++) {
                     if (state.candlePalette[i] == state.curLabelBg[0]) {
@@ -1600,7 +1599,6 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         if (viewLabelTextColor!= null) {
             viewLabelTextColor.setBackground(createColorViewDrawable(state.curLabelTextColorFinal[0]));
             viewLabelTextColor.setOnClickListener(v -> {
-                // FIX: Same as above, prevent auto reset in small view
                 int idx = -1;
                 for (int i = 0; i < state.candlePalette.length; i++) {
                     if (state.candlePalette[i] == state.curLabelTextColorFinal[0]) {
@@ -1629,7 +1627,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
                 containerLabel.setVisibility(labelExpanded[0]? View.VISIBLE : View.GONE);
                 if (arrowLabel!= null) {
                     arrowLabel.setText(getString(labelExpanded[0]
-                      ? R.string.arrow_expanded
+                     ? R.string.arrow_expanded
                             : R.string.arrow_collapsed));
                 }
             });
@@ -1730,7 +1728,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
                 containerSelected.setVisibility(selectedExpanded[0]? View.VISIBLE : View.GONE);
                 if (arrowSelected!= null) {
                     arrowSelected.setText(getString(selectedExpanded[0]
-                      ? R.string.arrow_expanded
+                     ? R.string.arrow_expanded
                             : R.string.arrow_collapsed));
                 }
             });
