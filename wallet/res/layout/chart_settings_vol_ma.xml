@@ -115,7 +115,7 @@
             android:id="@+id/viewVolMa1Color"
             android:layout_width="28dp"
             android:layout_height="28dp"
-            android:background="@drawable/bg_color_circle" />
+            android:background="@drawable/color_picker_border" />
     </LinearLayout>
 
     <LinearLayout
@@ -135,7 +135,7 @@
             android:id="@+id/viewVolMa2Color"
             android:layout_width="28dp"
             android:layout_height="28dp"
-            android:background="@drawable/bg_color_circle" />
+            android:background="@drawable/color_picker_border" />
     </LinearLayout>
 
 </LinearLayout>
