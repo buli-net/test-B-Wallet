@@ -627,6 +627,11 @@
     <string name="json_priceChangePercent" translatable="false">priceChangePercent</string>
 
     <!-- ===== PREFS KEYS - No translate ===== -->
+    <string name="key_selected_line_color_user_set">selected_line_color_user_set</string>
+    <string name="key_selected_width_user_set">selected_width_user_set</string>
+    <string name="key_selected_alpha_user_set">selected_alpha_user_set</string>
+    <string name="key_selected_dashed_user_set">selected_dashed_user_set</string>
+    
     <string name="prefs_ma" translatable="false">ma_prefs</string>
     <string name="key_ma" translatable="false">ma_lines</string>
     <string name="prefs_candle" translatable="false">candle_prefs</string>
