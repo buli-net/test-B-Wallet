@@ -81,6 +81,74 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
 
     private static final float BODY_BASE_FRACTION = 0.3f;
 
+    // ===== CORE / FORMAT / URL / JSON - No translate - Inlined as Java constants =====
+    private static final String FIAT_USD = "USD";
+    private static final String SUFFIX_USDT = "USDT";
+    private static final String SUFFIX_BUSD = "BUSD";
+    private static final String TIME_FORMAT = "MM-dd HH:mm";
+    private static final String FULL_TIME_FORMAT = "yyyy-MM-dd HH:mm:ss";
+    private static final String URL_KLINES = "https://api.binance.com/api/v3/klines?symbol=%1$s&interval=%2$s&limit=%3$d";
+    private static final String URL_TICKER = "https://api.binance.com/api/v3/ticker/24hr?symbol=%1$s";
+    private static final String FMT_HMS = "%02d:%02d:%02d";
+    private static final String FMT_DHMS = "%02d:%02d:%02d:%02d";
+    private static final String FMT_PRICE_0 = "%,.0f";
+    private static final String FMT_PRICE_2 = "%,.2f";
+    private static final String FMT_PRICE_8F = "%.8f";
+    private static final String FMT_BTC = "%s BTC";
+    private static final String FMT_BTC_FIAT = "%s BTC ≈ %s%,.2f";
+    private static final String FMT_BTC_FIAT_FRIENDLY = "%s BTC ≈ %s";
+    private static final String JSON_LAST_PRICE = "lastPrice";
+    private static final String JSON_HIGH_PRICE = "highPrice";
+    private static final String JSON_LOW_PRICE = "lowPrice";
+    private static final String JSON_VOLUME = "volume";
+    private static final String JSON_QUOTE_VOLUME = "quoteVolume";
+    private static final String JSON_PRICE_CHANGE_PERCENT = "priceChangePercent";
+
+    // ===== PREFS KEYS - No translate - Inlined as Java constants =====
+    private static final String PREFS_MA = "ma_prefs";
+    private static final String KEY_MA = "ma_lines";
+    private static final String PREFS_CANDLE = "candle_prefs";
+    private static final String KEY_BULL = "bull_color";
+    private static final String KEY_BEAR = "bear_color";
+    private static final String PREFS_CHART = "chart_options_prefs";
+    private static final String KEY_BODY_FRACTION = "body_fraction";
+    private static final String KEY_WICK_WIDTH = "wick_width";
+    private static final String KEY_MA_WIDTH = "ma_width";
+    private static final String KEY_SHOW_GRID = "show_grid";
+    private static final String KEY_SHOW_VOLUME = "show_volume";
+    private static final String KEY_VISIBLE_COUNT = "visible_count";
+    private static final String KEY_SHOW_LAST_PRICE = "show_last_price";
+    private static final String KEY_LAST_PRICE_LINE_COLOR = "last_price_line_color";
+    private static final String KEY_LAST_PRICE_BG_COLOR = "last_price_bg_color";
+    private static final String KEY_PRICE_TEXT_SIZE = "price_text_size";
+    private static final String KEY_PRICE_TEXT_COLOR = "price_text_color";
+    private static final String KEY_GRID_COLOR = "grid_color";
+    private static final String KEY_BG_COLOR = "bg_color";
+    private static final String KEY_LAST_LINE_WIDTH = "last_line_width";
+    private static final String KEY_LAST_LINE_DASH = "last_line_dash";
+    private static final String KEY_LAST_LABEL_TEXT_SIZE = "last_label_text_size";
+    private static final String KEY_LAST_LABEL_TEXT_COLOR = "last_label_text_color";
+    private static final String KEY_SELECTED_LINE_COLOR = "selected_line_color";
+    private static final String KEY_SELECTED_LINE_WIDTH = "selected_line_width";
+    private static final String KEY_SELECTED_LINE_ALPHA = "selected_line_alpha";
+    private static final String KEY_SELECTED_LINE_DASH = "selected_line_dash";
+    private static final String PREFS_CHART_STATE = "chart_state_prefs";
+    private static final String KEY_INTERVAL = "interval";
+    private static final String PREFS_WALLET = "wallet_preferences";
+    private static final String KEY_SYMBOL = "symbol";
+    private static final String PREFIX_COLOR_RES = "@color/";
+    private static final String TYPE_COLOR = "color";
+    private static final String SEP_SEMICOLON = ";";
+    private static final String SEP_COMMA = ",";
+    private static final String SEP_SEMICOLON_REGEX = ";";
+    private static final String SEP_COMMA_REGEX = ",";
+    private static final String PALETTE_PREFIX = "palette_";
+    private static final String BULLET_SEPARATOR = " • ";
+    private static final String ARROW_COLLAPSED = "▼";
+    private static final String ARROW_EXPANDED = "▲";
+
+    private static final String PREFS_CHART_SETTINGS = "chart_settings";
+
     private MarketChartView marketChartView;
     private TextView textCurrentPrice;
     private TextView textFiat;
@@ -102,21 +170,17 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
     private TextView popupVolume;
     private View btnChartSettings;
 
-    private static final String PREFS_CHART_STATE = "chart_state_prefs";
-    private static final String KEY_INTERVAL = "interval";
-    private static final String PREFS_CHART_SETTINGS = "chart_settings";
-
     private String currentSymbol = "BTCUSDT";
     private String currentInterval = "15m";
 
     private final SimpleDateFormat fullTimeFormat =
-            new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US);
+            new SimpleDateFormat(FULL_TIME_FORMAT, Locale.US);
 
     private ExchangeRateDao exchangeRateDao;
     private Configuration config;
     private SharedPreferences prefs;
     private SharedPreferences.OnSharedPreferenceChangeListener prefsListener;
-    private String currentFiatCode = "USD";
+    private String currentFiatCode = FIAT_USD;
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
     private float lastDisplayPrice = 0f;
 
@@ -199,7 +263,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
             return arr;
 
         } catch (Exception e) {
-            String prefix = getString(R.string.palette_prefix);
+            String prefix = PALETTE_PREFIX;
             if (prefix == null || prefix.trim().isEmpty()) {
                 throw new IllegalStateException(getString(R.string.err_palette_prefix_missing));
             }
@@ -355,9 +419,9 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
             return Color.parseColor(s);
         }
 
-        if (s.startsWith("@color/")) {
-            String colorName = s.replace("@color/", "");
-            int resId = getResources().getIdentifier(colorName, "color", getPackageName());
+        if (s.startsWith(PREFIX_COLOR_RES)) {
+            String colorName = s.replace(PREFIX_COLOR_RES, "");
+            int resId = getResources().getIdentifier(colorName, TYPE_COLOR, getPackageName());
             if (resId!= 0) {
                 return getResources().getColor(resId, getTheme());
             }
@@ -548,8 +612,8 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         }
 
         List<MarketChartView.MaLine> defMa = new ArrayList<>();
-        String[] pArr = tvPeriods.getText().toString().split(",");
-        String[] cArr = tvColors.getText().toString().split(",");
+        String[] pArr = tvPeriods.getText().toString().split(SEP_COMMA);
+        String[] cArr = tvColors.getText().toString().split(SEP_COMMA);
 
         if (pArr.length == 0 || pArr[0].trim().isEmpty()) {
             throw new IllegalStateException(getString(R.string.err_ma_periods_empty));
@@ -645,18 +709,18 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
             btnChartSettings.setOnClickListener(v -> showChartSettingsPopup());
         }
 
-        if (getIntent()!= null && getIntent().hasExtra("symbol")) {
-            currentSymbol = getIntent().getStringExtra("symbol");
+        if (getIntent()!= null && getIntent().hasExtra(KEY_SYMBOL)) {
+            currentSymbol = getIntent().getStringExtra(KEY_SYMBOL);
         }
 
         WalletApplication application = (WalletApplication) getApplication();
         config = application.getConfiguration();
-        prefs = application.getSharedPreferences("wallet_preferences", MODE_PRIVATE);
+        prefs = application.getSharedPreferences(PREFS_WALLET, MODE_PRIVATE);
         exchangeRateDao = ExchangeRatesRepository.get(application).exchangeRateDao();
 
         currentFiatCode = config.getExchangeCurrencyCode();
         if (currentFiatCode == null) {
-            currentFiatCode = "USD";
+            currentFiatCode = FIAT_USD;
         }
 
         prefsListener = (sharedPreferences, key) -> {
@@ -769,13 +833,13 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
 
         try {
             double btcBalance = currentBalance.toBtc().doubleValue();
-            String btcStr = String.format(Locale.US, "%.8f", btcBalance);
+            String btcStr = String.format(Locale.US, FMT_PRICE_8F, btcBalance);
 
             if (currentMarketPriceFiat > 0) {
                 double fiatVal = btcBalance * currentMarketPriceFiat;
                 String symbol = getCurrencySymbol(currentFiatCode);
                 textWalletBalance.setText(
-                        String.format(Locale.US, "%s BTC ≈ %s%,.2f", btcStr, symbol, fiatVal)
+                        String.format(Locale.US, FMT_BTC_FIAT, btcStr, symbol, fiatVal)
                 );
             } else {
                 boolean showLocal = getResources().getBoolean(R.bool.show_local_balance)
@@ -784,9 +848,9 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
                 if (showLocal && currentExchangeRate!= null) {
                     Fiat fiatValue = currentExchangeRate.exchangeRate().coinToFiat(currentBalance);
                     String fiatStr = fiatValue.toFriendlyString();
-                    textWalletBalance.setText(String.format("%s BTC ≈ %s", btcStr, fiatStr));
+                    textWalletBalance.setText(String.format(Locale.US, FMT_BTC_FIAT_FRIENDLY, btcStr, fiatStr));
                 } else {
-                    textWalletBalance.setText(String.format("%s BTC", btcStr));
+                    textWalletBalance.setText(String.format(Locale.US, FMT_BTC, btcStr));
                 }
             }
 
@@ -1057,13 +1121,13 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
             final boolean[] candleExpanded = {false};
             containerCandle.setVisibility(View.GONE);
             if (arrowCandle!= null) {
-                arrowCandle.setText(getString(R.string.arrow_collapsed));
+                arrowCandle.setText(ARROW_COLLAPSED);
             }
             headerCandle.setOnClickListener(v -> {
                 candleExpanded[0] =!candleExpanded[0];
                 containerCandle.setVisibility(candleExpanded[0]? View.VISIBLE : View.GONE);
                 if (arrowCandle!= null) {
-                    arrowCandle.setText(getString(candleExpanded[0]? R.string.arrow_expanded : R.string.arrow_collapsed));
+                    arrowCandle.setText(candleExpanded[0]? ARROW_EXPANDED : ARROW_COLLAPSED);
                 }
             });
         }
@@ -1129,13 +1193,13 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
             final boolean[] maExpanded = {false};
             containerMa.setVisibility(View.GONE);
             if (arrowMa!= null) {
-                arrowMa.setText(getString(R.string.arrow_collapsed));
+                arrowMa.setText(ARROW_COLLAPSED);
             }
             headerMa.setOnClickListener(v -> {
                 maExpanded[0] =!maExpanded[0];
                 containerMa.setVisibility(maExpanded[0]? View.VISIBLE : View.GONE);
                 if (arrowMa!= null) {
-                    arrowMa.setText(getString(maExpanded[0]? R.string.arrow_expanded : R.string.arrow_collapsed));
+                    arrowMa.setText(maExpanded[0]? ARROW_EXPANDED : ARROW_COLLAPSED);
                 }
             });
         }
@@ -1268,13 +1332,13 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
             final boolean[] volMaExpanded = {false};
             containerVolMa.setVisibility(View.GONE);
             if (arrowVolMa!= null) {
-                arrowVolMa.setText(getString(R.string.arrow_collapsed));
+                arrowVolMa.setText(ARROW_COLLAPSED);
             }
             headerVolMa.setOnClickListener(v -> {
                 volMaExpanded[0] =!volMaExpanded[0];
                 containerVolMa.setVisibility(volMaExpanded[0]? View.VISIBLE : View.GONE);
                 if (arrowVolMa!= null) {
-                    arrowVolMa.setText(getString(volMaExpanded[0]? R.string.arrow_expanded : R.string.arrow_collapsed));
+                    arrowVolMa.setText(volMaExpanded[0]? ARROW_EXPANDED : ARROW_COLLAPSED);
                 }
             });
         }
@@ -1324,13 +1388,13 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
             final boolean[] gridExpanded = {false};
             containerGrid.setVisibility(View.GONE);
             if (arrowGrid!= null) {
-                arrowGrid.setText(getString(R.string.arrow_collapsed));
+                arrowGrid.setText(ARROW_COLLAPSED);
             }
             headerGrid.setOnClickListener(v -> {
                 gridExpanded[0] =!gridExpanded[0];
                 containerGrid.setVisibility(gridExpanded[0]? View.VISIBLE : View.GONE);
                 if (arrowGrid!= null) {
-                    arrowGrid.setText(getString(gridExpanded[0]? R.string.arrow_expanded : R.string.arrow_collapsed));
+                    arrowGrid.setText(gridExpanded[0]? ARROW_EXPANDED : ARROW_COLLAPSED);
                 }
             });
         }
@@ -1457,13 +1521,13 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
             final boolean[] lastPriceExpanded = {false};
             containerLastPrice.setVisibility(View.GONE);
             if (arrowLastPrice!= null) {
-                arrowLastPrice.setText(getString(R.string.arrow_collapsed));
+                arrowLastPrice.setText(ARROW_COLLAPSED);
             }
             headerLastPrice.setOnClickListener(v -> {
                 lastPriceExpanded[0] =!lastPriceExpanded[0];
                 containerLastPrice.setVisibility(lastPriceExpanded[0]? View.VISIBLE : View.GONE);
                 if (arrowLastPrice!= null) {
-                    arrowLastPrice.setText(getString(lastPriceExpanded[0]? R.string.arrow_expanded : R.string.arrow_collapsed));
+                    arrowLastPrice.setText(lastPriceExpanded[0]? ARROW_EXPANDED : ARROW_COLLAPSED);
                 }
             });
         }
@@ -1561,13 +1625,13 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
             final boolean[] labelExpanded = {false};
             containerLabel.setVisibility(View.GONE);
             if (arrowLabel!= null) {
-                arrowLabel.setText(getString(R.string.arrow_collapsed));
+                arrowLabel.setText(ARROW_COLLAPSED);
             }
             headerLabel.setOnClickListener(v -> {
                 labelExpanded[0] =!labelExpanded[0];
                 containerLabel.setVisibility(labelExpanded[0]? View.VISIBLE : View.GONE);
                 if (arrowLabel!= null) {
-                    arrowLabel.setText(getString(labelExpanded[0]? R.string.arrow_expanded : R.string.arrow_collapsed));
+                    arrowLabel.setText(labelExpanded[0]? ARROW_EXPANDED : ARROW_COLLAPSED);
                 }
             });
         }
@@ -1660,13 +1724,13 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
             final boolean[] selectedExpanded = {false};
             containerSelected.setVisibility(View.GONE);
             if (arrowSelected!= null) {
-                arrowSelected.setText(getString(R.string.arrow_collapsed));
+                arrowSelected.setText(ARROW_COLLAPSED);
             }
             headerSelected.setOnClickListener(v -> {
                 selectedExpanded[0] =!selectedExpanded[0];
                 containerSelected.setVisibility(selectedExpanded[0]? View.VISIBLE : View.GONE);
                 if (arrowSelected!= null) {
-                    arrowSelected.setText(getString(selectedExpanded[0]? R.string.arrow_expanded : R.string.arrow_collapsed));
+                    arrowSelected.setText(selectedExpanded[0]? ARROW_EXPANDED : ARROW_COLLAPSED);
                 }
             });
         }
@@ -1790,11 +1854,11 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         boolean hasChange = false;
 
         if (state.gridPicked[0]) {
-            editor.putInt("grid_color", state.curGridColor[0]);
+            editor.putInt(KEY_GRID_COLOR, state.curGridColor[0]);
             hasChange = true;
         }
         if (state.pricePicked[0]) {
-            editor.putInt("price_text_color", state.curPriceTxtColor[0]);
+            editor.putInt(KEY_PRICE_TEXT_COLOR, state.curPriceTxtColor[0]);
             hasChange = true;
         }
         if (state.labelBgPicked[0]) {
@@ -1825,9 +1889,9 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
                .setPositiveButton(getString(R.string.chart_reset), (d, which) -> {
                     getSharedPreferences(PREFS_CHART_SETTINGS, MODE_PRIVATE).edit().clear().commit();
                     getSharedPreferences(PREFS_CHART_STATE, MODE_PRIVATE).edit().clear().commit();
-                    getSharedPreferences(getString(R.string.prefs_chart), Context.MODE_PRIVATE).edit().clear().commit();
-                    getSharedPreferences(getString(R.string.prefs_candle), Context.MODE_PRIVATE).edit().clear().commit();
-                    getSharedPreferences(getString(R.string.prefs_ma), Context.MODE_PRIVATE).edit().clear().commit();
+                    getSharedPreferences(PREFS_CHART, Context.MODE_PRIVATE).edit().clear().commit();
+                    getSharedPreferences(PREFS_CANDLE, Context.MODE_PRIVATE).edit().clear().commit();
+                    getSharedPreferences(PREFS_MA, Context.MODE_PRIVATE).edit().clear().commit();
 
                     if (marketChartView!= null) {
                         marketChartView.resetToDefaultsFromLayout();
@@ -1935,7 +1999,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
     private void loadFiatRate() {
         new Thread(() -> {
             double fiatPerBtc = getFiatPerBtc(currentFiatCode);
-            double basePerBtc = getFiatPerBtc("USD");
+            double basePerBtc = getFiatPerBtc(FIAT_USD);
 
             if (fiatPerBtc == 0d || basePerBtc == 0d) {
                 return;
@@ -2321,7 +2385,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
             public void onPriceUpdate(final float price, float high24h, float low24h) {
                 runOnUiThread(() -> new Thread(() -> {
                     double fiatPerBtc = getFiatPerBtc(currentFiatCode);
-                    double basePerBtc = getFiatPerBtc("USD");
+                    double basePerBtc = getFiatPerBtc(FIAT_USD);
 
                     if (fiatPerBtc == 0d || basePerBtc == 0d) {
                         final double priceInFiat = price;
@@ -2381,7 +2445,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
 
                     new Thread(() -> {
                         double fiatPerBtc = getFiatPerBtc(currentFiatCode);
-                        double basePerBtc = getFiatPerBtc("USD");
+                        double basePerBtc = getFiatPerBtc(FIAT_USD);
 
                         if (fiatPerBtc == 0d || basePerBtc == 0d) {
                             return;
@@ -2394,9 +2458,9 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
 
                         String baseAsset = currentSymbol;
 
-                        if (baseAsset.endsWith("USDT")) {
+                        if (baseAsset.endsWith(SUFFIX_USDT)) {
                             baseAsset = baseAsset.substring(0, baseAsset.length() - 4);
-                        } else if (baseAsset.endsWith("BUSD")) {
+                        } else if (baseAsset.endsWith(SUFFIX_BUSD)) {
                             baseAsset = baseAsset.substring(0, baseAsset.length() - 4);
                         } else if (baseAsset.length() > 3) {
                             baseAsset = baseAsset.substring(0, 3);
@@ -2462,7 +2526,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
             public void onMaUpdate(final List<Float> maValues) {
                 runOnUiThread(() -> new Thread(() -> {
                     double fiatPerBtc = getFiatPerBtc(currentFiatCode);
-                    double basePerBtc = getFiatPerBtc("USD");
+                    double basePerBtc = getFiatPerBtc(FIAT_USD);
                     double usdToFiat = 1d;
 
                     if (fiatPerBtc!= 0d && basePerBtc!= 0d) {
@@ -2495,7 +2559,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
                                             fiatVal
                                     );
                                     if (sb.length() > 0) {
-                                        sb.append(getString(R.string.bullet_separator));
+                                        sb.append(BULLET_SEPARATOR);
                                     }
                                     int start = sb.length();
                                     sb.append(label);
@@ -2533,7 +2597,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
                     }
                     new Thread(() -> {
                         double fiatPerBtc = getFiatPerBtc(currentFiatCode);
-                        double basePerBtc = getFiatPerBtc("USD");
+                        double basePerBtc = getFiatPerBtc(FIAT_USD);
                         double usdToFiat = 1d;
 
                         if (fiatPerBtc!= 0d && basePerBtc!= 0d) {
