@@ -95,9 +95,12 @@
         android:layout_marginTop="8dp" />
 
     <SeekBar
-        android:id="@+id/sbVis"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="4dp" />
+    android:id="@+id/sbVis"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:max="300"
+    android:progress="80"
+    android:layout_marginTop="4dp" />
+        
 
 </LinearLayout>
