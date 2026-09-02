@@ -318,9 +318,9 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         currentInterval = defaultInterval;
 
         getSharedPreferences(PREFS_CHART_STATE, MODE_PRIVATE)
-             .edit()
-             .remove(KEY_INTERVAL)
-             .commit();
+           .edit()
+           .remove(KEY_INTERVAL)
+           .commit();
 
         if (marketChartView!= null) {
             marketChartView.loadChart(currentSymbol, currentInterval);
@@ -411,46 +411,14 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
 
         View defBull = candleRoot.findViewById(R.id.viewBull);
         View defBear = candleRoot.findViewById(R.id.viewBear);
-        SeekBar defWickFromCandle = candleRoot.findViewById(R.id.sbWick);
-        SeekBar defBodyFromCandle = candleRoot.findViewById(R.id.sbBody);
-        SeekBar defVisFromCandle = candleRoot.findViewById(R.id.sbVis);
-
-        SeekBar defBody = gridRoot.findViewById(R.id.sbBody);
-        SeekBar defWick = gridRoot.findViewById(R.id.sbWick);
-        if (defBody!= null || defWick!= null) {
-            throw new IllegalStateException("Duplicate Wick/Body in chart_settings_grid.xml - must be only in chart_settings_candle.xml");
-        }
-        if (defWick == null) {
-            defWick = defWickFromCandle;
-        }
-        if (defBody == null) {
-            defBody = defBodyFromCandle;
-        }
-
-        SeekBar defVis = gridRoot.findViewById(R.id.sbVis);
-        if (defVis!= null) {
-            throw new IllegalStateException("Duplicate Visible in chart_settings_grid.xml - must be only in chart_settings_candle.xml");
-        }
-        if (defVis == null) {
-            defVis = defVisFromCandle;
-        }
+        SeekBar defWick = candleRoot.findViewById(R.id.sbWick);
+        SeekBar defBody = candleRoot.findViewById(R.id.sbBody);
+        SeekBar defVis = candleRoot.findViewById(R.id.sbVis);
 
         SeekBar defMaW = maRoot.findViewById(R.id.sbMaW);
-        if (gridRoot.findViewById(R.id.sbMaW)!= null || gridRoot.findViewById(R.id.lbMaW)!= null) {
-            throw new IllegalStateException("Duplicate MA width in chart_settings_grid.xml - must be only in chart_settings_ma.xml");
-        }
-
         Switch defGrid = gridRoot.findViewById(R.id.swGrid);
         Switch defVol = volMaRoot.findViewById(R.id.swVol);
-        if (gridRoot.findViewById(R.id.swVol)!= null) {
-            throw new IllegalStateException("Duplicate Show Volume in chart_settings_grid.xml - must be only in chart_settings_vol_ma.xml");
-        }
-
-        // Grid Color now lives in Grid Settings only
         View defGridColor = gridRoot.findViewById(R.id.viewGridColor);
-        if (lastPriceRoot.findViewById(R.id.viewGridColor)!= null) {
-            throw new IllegalStateException("Duplicate Grid Color in chart_settings_last_price.xml - must be only in chart_settings_grid.xml");
-        }
 
         if (defVis!= null) {
             defVis.setMax(maxVis);
@@ -831,10 +799,10 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         state.curTxtSize[0] = marketChartView.getPriceTextSizePx() > 0? marketChartView.getPriceTextSizePx() : 18f;
         state.curLastW[0] = marketChartView.getLastLineWidthPx() > 0? marketChartView.getLastLineWidthPx() : 2f;
         state.curLabelSize[0] = marketChartView.getLastPriceLabelTextSizePx() > 0
-             ? marketChartView.getLastPriceLabelTextSizePx()
+           ? marketChartView.getLastPriceLabelTextSizePx()
                 : 19f;
         state.curSelectedW[0] = marketChartView.getSelectedLineWidthPx() > 0
-             ? marketChartView.getSelectedLineWidthPx()
+           ? marketChartView.getSelectedLineWidthPx()
                 : getResources().getDimension(R.dimen.default_selected_width);
 
         state.curLastColor[0] = marketChartView.getLastPriceLineColor();
@@ -878,7 +846,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         }
 
         state.curSelectedColor[0] = marketChartView.getSelectedLineColor()!= 0
-             ? marketChartView.getSelectedLineColor()
+           ? marketChartView.getSelectedLineColor()
                 : getResources().getColor(R.color.chart_selected_line, getTheme());
 
         state.curSelectedAlpha[0] = marketChartView.getSelectedLineAlpha();
@@ -913,7 +881,6 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
             dialog.getWindow().setGravity(Gravity.CENTER);
         }
 
-        // 1. Candle settings - FIX: auto fill values from chart, XML owns style only
         View headerCandle = content.findViewById(R.id.headerCandle);
         TextView arrowCandle = content.findViewById(R.id.arrowCandle);
         View containerCandle = content.findViewById(R.id.containerCandle);
@@ -934,7 +901,6 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
             lbVisCandle = containerCandle.findViewById(R.id.lbVis);
         }
 
-        // FIX: Must set initial color drawable - otherwise transparent
         if (viewBull!= null) {
             viewBull.setBackground(createColorViewDrawable(state.curBull[0]));
             viewBull.setOnClickListener(v -> {
@@ -963,7 +929,6 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
             });
         }
 
-        // FIX: Must set initial progress and label - XML cannot know current chart value
         if (sbBodyCandle!= null) {
             int progBody = (int) ((marketChartView.getBodyWidthFraction() - BODY_BASE_FRACTION) * 100f);
             if (progBody < 0) progBody = 0;
@@ -1050,7 +1015,6 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         }
 
         if (headerCandle!= null && containerCandle!= null) {
-            // Arrow text is mandatory interaction indicator, keep it
             final boolean[] candleExpanded = {containerCandle.getVisibility() == View.VISIBLE};
             if (arrowCandle!= null) {
                 arrowCandle.setText(getString(candleExpanded[0]? R.string.arrow_expanded : R.string.arrow_collapsed));
@@ -1064,7 +1028,6 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
             });
         }
 
-        // 2. MA settings
         View headerMa = content.findViewById(R.id.headerMa);
         TextView arrowMa = content.findViewById(R.id.arrowMa);
         View containerMa = content.findViewById(R.id.containerMa);
@@ -1134,7 +1097,6 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
             });
         }
 
-        // 2.5 Volume MA - FIXED: use separate tvVolMaW for value, lbVolMaW is static label
         View headerVolMa = content.findViewById(R.id.headerVolMa);
         TextView arrowVolMa = content.findViewById(R.id.arrowVolMa);
         View containerVolMa = content.findViewById(R.id.containerVolMa);
@@ -1269,7 +1231,6 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
             });
         }
 
-        // 3. Grid Settings
         View headerGrid = content.findViewById(R.id.headerGrid);
         TextView arrowGrid = content.findViewById(R.id.arrowGrid);
         View containerGrid = content.findViewById(R.id.containerGrid);
@@ -1324,7 +1285,6 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
             });
         }
 
-        // 4. Last price line
         View headerLastPrice = content.findViewById(R.id.headerLastPrice);
         TextView arrowLastPrice = content.findViewById(R.id.arrowLastPrice);
         View containerLastPrice = content.findViewById(R.id.containerLastPrice);
@@ -1454,7 +1414,6 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
             });
         }
 
-        // 5. Current price label
         View headerLabel = content.findViewById(R.id.headerLabel);
         TextView arrowLabel = content.findViewById(R.id.arrowLabel);
         View containerLabel = content.findViewById(R.id.containerLabel);
@@ -1509,10 +1468,10 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
                 state.labelBgPicked[0] = true;
                 v.setBackground(createColorViewDrawable(next));
                 getSharedPreferences(PREFS_CHART_SETTINGS, MODE_PRIVATE)
-                     .edit()
-                     .putInt("label_bg", next)
-                     .putInt("current_price_label_bg", next)
-                     .commit();
+                   .edit()
+                   .putInt("label_bg", next)
+                   .putInt("current_price_label_bg", next)
+                   .commit();
                 if (marketChartView!= null) {
                     marketChartView.setCurrentPriceLabelBackground(next);
                     marketChartView.invalidate();
@@ -1534,10 +1493,10 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
                 state.labelTextPicked[0] = true;
                 v.setBackground(createColorViewDrawable(next));
                 getSharedPreferences(PREFS_CHART_SETTINGS, MODE_PRIVATE)
-                     .edit()
-                     .putInt("label_text_color", next)
-                     .putInt("current_price_label_text", next)
-                     .commit();
+                   .edit()
+                   .putInt("label_text_color", next)
+                   .putInt("current_price_label_text", next)
+                   .commit();
                 if (marketChartView!= null) {
                     marketChartView.setCurrentPriceLabelTextColor(next);
                     marketChartView.invalidate();
@@ -1559,7 +1518,6 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
             });
         }
 
-        // 6. Selected / Crosshair
         View headerSelected = content.findViewById(R.id.headerSelected);
         TextView arrowSelected = content.findViewById(R.id.arrowSelected);
         View containerSelected = content.findViewById(R.id.containerSelected);
@@ -1719,7 +1677,6 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         boolean showV = state.swVol!= null? state.swVol.isChecked() : true;
         boolean showLast = state.swLast!= null? state.swLast.isChecked() : true;
 
-        // FIX: set individually, do not commit old theme colors
         marketChartView.setCandleColors(state.curBull[0], state.curBear[0]);
         marketChartView.setBodyFraction(bodyFraction);
         marketChartView.setWickWidthPx(wickW);
@@ -1803,9 +1760,9 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
 
     private void showResetConfirm(final Dialog settingsDialog) {
         new AlertDialog.Builder(this)
-             .setTitle(getString(R.string.chart_reset_confirm_title))
-             .setMessage(getString(R.string.chart_reset_confirm_message))
-             .setPositiveButton(getString(R.string.chart_reset), (d, which) -> {
+           .setTitle(getString(R.string.chart_reset_confirm_title))
+           .setMessage(getString(R.string.chart_reset_confirm_message))
+           .setPositiveButton(getString(R.string.chart_reset), (d, which) -> {
                     getSharedPreferences(PREFS_CHART_SETTINGS, MODE_PRIVATE).edit().clear().commit();
                     getSharedPreferences(PREFS_CHART_STATE, MODE_PRIVATE).edit().clear().commit();
                     getSharedPreferences(getString(R.string.prefs_chart), Context.MODE_PRIVATE).edit().clear().commit();
@@ -1831,8 +1788,8 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
                         marketChartView.invalidate();
                     }
                 })
-             .setNegativeButton(getString(R.string.close), null)
-             .show();
+           .setNegativeButton(getString(R.string.close), null)
+           .show();
     }
 
     static class MaPopupAdapter extends RecyclerView.Adapter<MaPopupAdapter.Holder> {
@@ -1860,7 +1817,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         @Override
         public Holder onCreateViewHolder(ViewGroup p, int t) {
             View v = LayoutInflater.from(p.getContext())
-                 .inflate(R.layout.item_ma_popup, p, false);
+               .inflate(R.layout.item_ma_popup, p, false);
             return new Holder(v);
         }
 
@@ -2094,9 +2051,9 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         }
 
         final AlertDialog dialog = new AlertDialog.Builder(this)
-             .setView(root)
-             .setNegativeButton(R.string.close, (d, w) -> d.dismiss())
-             .create();
+           .setView(root)
+           .setNegativeButton(R.string.close, (d, w) -> d.dismiss())
+           .create();
 
         for (int i = 0; i < realLoad.length; i++) {
             TextView tv = new TextView(this);
@@ -2132,9 +2089,9 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
                 }
                 currentInterval = load;
                 getSharedPreferences(PREFS_CHART_STATE, MODE_PRIVATE)
-                     .edit()
-                     .putString(KEY_INTERVAL, currentInterval)
-                     .commit();
+                   .edit()
+                   .putString(KEY_INTERVAL, currentInterval)
+                   .commit();
                 if (marketChartView!= null) {
                     marketChartView.loadChart(currentSymbol, currentInterval);
                 }
@@ -2222,9 +2179,9 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
             tv.setOnClickListener(v -> {
                 currentInterval = load;
                 getSharedPreferences(PREFS_CHART_STATE, MODE_PRIVATE)
-                     .edit()
-                     .putString(KEY_INTERVAL, currentInterval)
-                     .commit();
+                   .edit()
+                   .putString(KEY_INTERVAL, currentInterval)
+                   .commit();
                 if (marketChartView!= null) {
                     marketChartView.loadChart(currentSymbol, currentInterval);
                 }
@@ -2357,7 +2314,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
                     if (textChange24h!= null) {
                         textChange24h.setText(String.format(Locale.US, "%.2f%%", changePercent));
                         int c = changePercent >= 0
-                             ? res.getColor(R.color.palette_green, getTheme())
+                           ? res.getColor(R.color.palette_green, getTheme())
                                 : res.getColor(R.color.palette_red, getTheme());
                         textChange24h.setTextColor(c);
                     }
