@@ -909,7 +909,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         SeekBar sbWickCandle = null;
         TextView lbBodyCandle = null;
         TextView lbWickCandle = null;
-        // Thêm biến cho Visible
+        // Di chuyển Visible từ Options lên Candle - giống Body và Wick
         SeekBar sbVisCandle = null;
         TextView lbVisCandle = null;
         if (containerCandle!= null) {
@@ -917,7 +917,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
             sbWickCandle = containerCandle.findViewById(R.id.sbWick);
             lbBodyCandle = containerCandle.findViewById(R.id.lbBody);
             lbWickCandle = containerCandle.findViewById(R.id.lbWick);
-            // Lấy sbVis và lbVis từ containerCandle
+            // Lấy sbVis và lbVis từ containerCandle như cách đã làm với Body và Wick
             sbVisCandle = containerCandle.findViewById(R.id.sbVis);
             lbVisCandle = containerCandle.findViewById(R.id.lbVis);
         }
@@ -1007,22 +1007,21 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
             state.sbWick = sbWickCandle;
         }
 
-        // Xử lý Visible (đã di chuyển từ Chart Options lên đây)
-        if (sbVisCandle != null && lbVisCandle != null) {
-            int minVisPopup = getResources().getInteger(R.integer.min_visible_candle_count);
-            int maxVisPopup = getResources().getInteger(R.integer.max_visible_candle_count);
-            sbVisCandle.setMax(maxVisPopup);
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-                sbVisCandle.setMin(minVisPopup);
-            }
+        // Xử lý Visible - như cách Body và Wick đã làm
+        if (sbVisCandle != null) {
             sbVisCandle.setProgress(marketChartView.getVisibleCandleCountValue());
+        }
+        if (lbVisCandle != null && sbVisCandle != null) {
             lbVisCandle.setText(getString(R.string.chart_visible_candles, sbVisCandle.getProgress()));
-
+        }
+        if (sbVisCandle != null) {
             final TextView finalLbVisCandle = lbVisCandle;
             sbVisCandle.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
                 @Override
                 public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                    finalLbVisCandle.setText(getString(R.string.chart_visible_candles, progress));
+                    if (finalLbVisCandle != null) {
+                        finalLbVisCandle.setText(getString(R.string.chart_visible_candles, progress));
+                    }
                     if (marketChartView != null) {
                         marketChartView.setVisibleCandleCount(progress);
                         marketChartView.invalidate();
@@ -1032,7 +1031,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
                 @Override public void onStopTrackingTouch(SeekBar seekBar) {}
             });
         }
-        // Gán vào state (có thể null nếu không có trong containerCandle)
+        // Gán vào state như cách đã làm với sbBody và sbWick
         state.sbVis = sbVisCandle;
 
         if (headerCandle!= null && containerCandle!= null) {
@@ -1262,7 +1261,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
             });
         }
 
-        // 3. Chart options - chỉ giữ Grid, đã xóa sbVis và lbVis
+        // 3. Chart options - Đã xóa sbVis và lbVis (đã chuyển lên Candle)
         View headerOptions = content.findViewById(R.id.headerOptions);
         TextView arrowOptions = content.findViewById(R.id.arrowOptions);
         View containerOptions = content.findViewById(R.id.containerOptions);
@@ -1711,7 +1710,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
             wickW = Math.max(1, state.sbWick.getProgress());
         }
         float maW = state.sbMaW!= null? Math.max(1, state.sbMaW.getProgress()) : 2f;
-        int visCount = state.sbVis!= null? state.sbVis.getProgress() : 100;
+        int visCount = state.sbVis != null ? state.sbVis.getProgress() : 100;
         boolean showG = state.swGrid!= null? state.swGrid.isChecked() : true;
         boolean showV = state.swVol!= null? state.swVol.isChecked() : true;
         boolean showLast = state.swLast!= null? state.swLast.isChecked() : true;
