@@ -1,11 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:paddingTop="4dp"
+    android:paddingBottom="4dp">
 
-    <!-- Show grid -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingBottom="8dp"
+        android:text="@string/chart_settings_chart_options"
+        android:textSize="14sp"
+        android:textStyle="bold" />
+
+    <!-- Show Grid - only option left here besides Visible -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -18,13 +27,35 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="@string/chart_show_grid"
-            android:textSize="12sp" />
+            android:textSize="13sp" />
 
         <Switch
             android:id="@+id/swGrid"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:checked="true" />
+    </LinearLayout>
+
+    <!-- Visible Candles -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingVertical="4dp">
+
+        <TextView
+            android:id="@+id/lbVis"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/chart_visible_candles"
+            android:textSize="12sp" />
+
+        <SeekBar
+            android:id="@+id/sbVis"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:max="160"
+            android:progress="70" />
     </LinearLayout>
 
 </LinearLayout>
