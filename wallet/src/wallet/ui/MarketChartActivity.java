@@ -425,11 +425,13 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
             defBody = defBodyFromCandle;
         }
 
-        // FIX 3: Visible moved to Candle - single source enforcement
-        SeekBar defVis = defVisFromCandle;
-        SeekBar defVisDup = optionsRoot.findViewById(R.id.sbVis);
-        if (defVisDup!= null) {
+        // FIX 3: Single source enforcement for Visible - moved from chart_options to candle
+        SeekBar defVis = optionsRoot.findViewById(R.id.sbVis);
+        if (defVis!= null) {
             throw new IllegalStateException("Duplicate Visible in chart_settings_options.xml - must be only in chart_settings_candle.xml");
+        }
+        if (defVis == null) {
+            defVis = defVisFromCandle;
         }
 
         // FIX 4: MA width now lives in MA layout only - clean move
@@ -961,15 +963,6 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         if (sbWickCandle!= null) {
             sbWickCandle.setProgress((int) marketChartView.getWickWidthPx());
         }
-        if (sbVisCandle!= null) {
-            int minVisPopup = getResources().getInteger(R.integer.min_visible_candle_count);
-            int maxVisPopup = getResources().getInteger(R.integer.max_visible_candle_count);
-            sbVisCandle.setMax(maxVisPopup);
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-                sbVisCandle.setMin(minVisPopup);
-            }
-            sbVisCandle.setProgress(marketChartView.getVisibleCandleCountValue());
-        }
         if (lbBodyCandle!= null && sbBodyCandle!= null) {
             float fraction = BODY_BASE_FRACTION + sbBodyCandle.getProgress() / 100f;
             lbBodyCandle.setText(getString(R.string.chart_body_width, String.format(Locale.US, "%.2f", fraction)));
@@ -977,9 +970,6 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         if (lbWickCandle!= null && sbWickCandle!= null) {
             int p = Math.max(1, sbWickCandle.getProgress());
             lbWickCandle.setText(getString(R.string.chart_wick_width, p));
-        }
-        if (lbVisCandle!= null && sbVisCandle!= null) {
-            lbVisCandle.setText(getString(R.string.chart_visible_candles, sbVisCandle.getProgress()));
         }
         if (sbBodyCandle!= null) {
             final TextView finalLbBodyCandle = lbBodyCandle;
@@ -1017,6 +1007,21 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
                 @Override public void onStopTrackingTouch(SeekBar seekBar) {}
             });
         }
+
+        // Visible: moved from Chart Options to Candle Settings - same pattern as Body/Wick
+        int minVisPopup = getResources().getInteger(R.integer.min_visible_candle_count);
+        int maxVisPopup = getResources().getInteger(R.integer.max_visible_candle_count);
+
+        if (sbVisCandle!= null) {
+            sbVisCandle.setMax(maxVisPopup);
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                sbVisCandle.setMin(minVisPopup);
+            }
+            sbVisCandle.setProgress(marketChartView.getVisibleCandleCountValue());
+        }
+        if (lbVisCandle!= null && sbVisCandle!= null) {
+            lbVisCandle.setText(getString(R.string.chart_visible_candles, sbVisCandle.getProgress()));
+        }
         if (sbVisCandle!= null) {
             final TextView finalLbVisCandle = lbVisCandle;
             sbVisCandle.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
@@ -1034,6 +1039,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
                 @Override public void onStopTrackingTouch(SeekBar seekBar) {}
             });
         }
+
         if (sbBodyCandle!= null) {
             state.sbBody = sbBodyCandle;
         }
@@ -1271,7 +1277,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
             });
         }
 
-        // 3. Chart options - MA width and Show Volume removed completely, only Grid
+        // 3. Chart options - Visible moved to Candle, MA width and Show Volume removed completely, only Grid remains
         View headerOptions = content.findViewById(R.id.headerOptions);
         TextView arrowOptions = content.findViewById(R.id.arrowOptions);
         View containerOptions = content.findViewById(R.id.containerOptions);
