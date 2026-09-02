@@ -709,4 +709,7 @@
     <string name="label_vol_ma_width">Line Width</string>
     <string name="label_vol_ma1_color">MA1 Color</string>
     <string name="label_vol_ma2_color">MA2 Color</string>
+
+    <string name="vol_label">Vol: %.2f </string>
+    <string name="vol_ma_format">MA(%1$d): %2$.2f </string>
 </resources>
