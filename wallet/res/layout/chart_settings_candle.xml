@@ -1,68 +1,76 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:paddingTop="8dp"
+    android:paddingBottom="8dp">
 
-    <!-- Bullish color -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingBottom="8dp"
+        android:text="@string/chart_settings_candle"
+        android:textSize="14sp"
+        android:textStyle="bold" />
+
+    <!-- Bullish Color -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center_vertical"
         android:orientation="horizontal"
-        android:paddingVertical="4dp">
+        android:paddingVertical="8dp">
 
         <TextView
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="@string/chart_settings_bullish"
-            android:textSize="12sp" />
+            android:textSize="13sp" />
 
         <View
             android:id="@+id/viewBull"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:background="@drawable/color_picker_border"
-            android:tag="#26A69A" />
+            android:layout_width="@dimen/color_picker_size"
+            android:layout_height="@dimen/color_picker_size"
+            android:tag="@color/chart_bull_default" />
     </LinearLayout>
 
-    <!-- Bearish color -->
+    <!-- Bearish Color -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center_vertical"
         android:orientation="horizontal"
-        android:paddingVertical="4dp">
+        android:paddingVertical="8dp">
 
         <TextView
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="@string/chart_settings_bearish"
-            android:textSize="12sp" />
+            android:textSize="13sp" />
 
         <View
             android:id="@+id/viewBear"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:background="@drawable/color_picker_border"
-            android:tag="#EF5350" />
+            android:layout_width="@dimen/color_picker_size"
+            android:layout_height="@dimen/color_picker_size"
+            android:tag="@color/chart_bear_default" />
     </LinearLayout>
 
-    <!-- Wick width -->
+    <!-- Wick Width -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:paddingVertical="4dp">
+        android:paddingTop="8dp">
 
         <TextView
             android:id="@+id/lbWick"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="12sp" />
+            android:text="@string/chart_wick_width"
+            android:textSize="13sp" />
 
         <SeekBar
             android:id="@+id/sbWick"
@@ -72,46 +80,26 @@
             android:progress="2" />
     </LinearLayout>
 
-    <!-- Body width -->
+    <!-- Body Width -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:paddingVertical="4dp">
+        android:paddingTop="8dp">
 
         <TextView
             android:id="@+id/lbBody"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="12sp" />
+            android:text="@string/chart_body_width"
+            android:textSize="13sp" />
 
         <SeekBar
             android:id="@+id/sbBody"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:max="100"
-            android:progress="20" />
-    </LinearLayout>
-
-    <!-- Visible candles -->
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:paddingVertical="4dp">
-
-        <TextView
-            android:id="@+id/lbVis"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textSize="12sp" />
-
-        <SeekBar
-            android:id="@+id/sbVis"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:max="200"
-            android:progress="100" />
+            android:max="70"
+            android:progress="50" />
     </LinearLayout>
 
 </LinearLayout>
