@@ -2,22 +2,38 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:paddingTop="4dp"
+    android:paddingBottom="4dp">
 
-    <!-- FIX 5: Show Volume moved from Chart Options to Volume MA - master toggle -->
+    <!-- ===================== -->
+    <!-- BLOCK: Header Vol MA -->
+    <!-- ===================== -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingBottom="8dp"
+        android:text="@string/chart_settings_vol_ma"
+        android:textSize="14sp"
+        android:textStyle="bold" />
+
+    <!-- ===================== -->
+    <!-- BLOCK: Show Volume - Master Toggle -->
+    <!-- FIX 5: Moved from options.xml to here -->
+    <!-- ===================== -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
         android:gravity="center_vertical"
-        android:paddingVertical="@dimen/vol_setting_padding_vertical">
+        android:orientation="horizontal"
+        android:paddingVertical="4dp">
 
         <TextView
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="@string/chart_show_volume"
-            android:textSize="@dimen/vol_label_text_size" />
+            android:textSize="13sp" />
 
         <Switch
             android:id="@+id/swVol"
@@ -26,19 +42,22 @@
             android:checked="true" />
     </LinearLayout>
 
+    <!-- ===================== -->
+    <!-- BLOCK: Show Vol MA -->
+    <!-- ===================== -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
         android:gravity="center_vertical"
-        android:paddingVertical="@dimen/vol_setting_padding_vertical">
+        android:orientation="horizontal"
+        android:paddingVertical="4dp">
 
         <TextView
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="@string/label_vol_show"
-            android:textSize="@dimen/vol_label_text_size" />
+            android:text="@string/chart_show_vol_ma"
+            android:textSize="13sp" />
 
         <Switch
             android:id="@+id/swVolMa"
@@ -46,104 +65,66 @@
             android:layout_height="wrap_content" />
     </LinearLayout>
 
+    <!-- ===================== -->
+    <!-- BLOCK: Vol MA1 Period -->
+    <!-- ===================== -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center_vertical"
-        android:paddingVertical="@dimen/vol_setting_padding_vertical">
-
-        <TextView
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="@string/label_vol_ma1"
-            android:textSize="@dimen/vol_label_text_size" />
-
-        <SeekBar
-            android:id="@+id/sbVolMa1Period"
-            android:layout_width="@dimen/vol_seekbar_width"
-            android:layout_height="wrap_content"
-            android:max="60"
-            android:progress="5" />
+        android:orientation="vertical"
+        android:paddingVertical="4dp">
 
         <TextView
             android:id="@+id/tvVolMa1Period"
-            android:layout_width="@dimen/vol_value_width"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:gravity="end" />
+            android:textSize="12sp" />
+
+        <SeekBar
+            android:id="@+id/sbVolMa1Period"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:max="60" />
     </LinearLayout>
 
+    <!-- ===================== -->
+    <!-- BLOCK: Vol MA2 Period -->
+    <!-- ===================== -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center_vertical"
-        android:paddingVertical="@dimen/vol_setting_padding_vertical">
-
-        <TextView
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="@string/label_vol_ma2"
-            android:textSize="@dimen/vol_label_text_size" />
-
-        <SeekBar
-            android:id="@+id/sbVolMa2Period"
-            android:layout_width="@dimen/vol_seekbar_width"
-            android:layout_height="wrap_content"
-            android:max="60"
-            android:progress="10" />
+        android:orientation="vertical"
+        android:paddingVertical="4dp">
 
         <TextView
             android:id="@+id/tvVolMa2Period"
-            android:layout_width="@dimen/vol_value_width"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:gravity="end" />
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center_vertical"
-        android:paddingVertical="@dimen/vol_setting_padding_vertical">
-
-        <TextView
-            android:id="@+id/lbVolMaW"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="@string/label_vol_ma_width"
-            android:textSize="@dimen/vol_label_text_size" />
+            android:textSize="12sp" />
 
         <SeekBar
-            android:id="@+id/sbVolMaW"
-            android:layout_width="@dimen/vol_seekbar_width"
+            android:id="@+id/sbVolMa2Period"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:max="10"
-            android:progress="2" />
-
-        <TextView
-            android:id="@+id/tvVolMaW"
-            android:layout_width="@dimen/vol_value_width"
-            android:layout_height="wrap_content"
-            android:gravity="end" />
+            android:max="60" />
     </LinearLayout>
 
+    <!-- ===================== -->
+    <!-- BLOCK: Vol MA1 Color -->
+    <!-- ===================== -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
         android:gravity="center_vertical"
-        android:paddingVertical="@dimen/vol_setting_padding_vertical">
+        android:orientation="horizontal"
+        android:paddingVertical="4dp">
 
         <TextView
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="@string/label_vol_ma1_color"
-            android:textSize="@dimen/vol_label_text_size" />
+            android:text="@string/vol_ma1_color"
+            android:textSize="12sp" />
 
         <View
             android:id="@+id/viewVolMa1Color"
@@ -152,25 +133,50 @@
             android:background="@drawable/color_picker_border" />
     </LinearLayout>
 
+    <!-- ===================== -->
+    <!-- BLOCK: Vol MA2 Color -->
+    <!-- ===================== -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
         android:gravity="center_vertical"
-        android:paddingVertical="@dimen/vol_setting_padding_vertical">
+        android:orientation="horizontal"
+        android:paddingVertical="4dp">
 
         <TextView
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="@string/label_vol_ma2_color"
-            android:textSize="@dimen/vol_label_text_size" />
+            android:text="@string/vol_ma2_color"
+            android:textSize="12sp" />
 
         <View
             android:id="@+id/viewVolMa2Color"
             android:layout_width="@dimen/color_picker_size"
             android:layout_height="@dimen/color_picker_size"
             android:background="@drawable/color_picker_border" />
+    </LinearLayout>
+
+    <!-- ===================== -->
+    <!-- BLOCK: Vol MA Width -->
+    <!-- ===================== -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingVertical="4dp">
+
+        <TextView
+            android:id="@+id/lbVolMaW"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="12sp" />
+
+        <SeekBar
+            android:id="@+id/sbVolMaW"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:max="10" />
     </LinearLayout>
 
 </LinearLayout>
