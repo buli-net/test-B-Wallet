@@ -1,12 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout 
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical">
 
-    <!-- ===================== -->
-    <!-- BLOCK: Bullish Color -->
-    <!-- ===================== -->
+    <!-- Bullish color picker -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -18,7 +17,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="@string/bullish_color"
+            android:text="@string/chart_settings_bullish"
             android:textSize="@dimen/vol_label_text_size" />
 
         <View
@@ -28,9 +27,7 @@
             android:background="@drawable/color_picker_border" />
     </LinearLayout>
 
-    <!-- ===================== -->
-    <!-- BLOCK: Bearish Color -->
-    <!-- ===================== -->
+    <!-- Bearish color picker -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -42,7 +39,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="@string/bearish_color"
+            android:text="@string/chart_settings_bearish"
             android:textSize="@dimen/vol_label_text_size" />
 
         <View
@@ -52,10 +49,7 @@
             android:background="@drawable/color_picker_border" />
     </LinearLayout>
 
-    <!-- ===================== -->
-    <!-- BLOCK: Wick Width -->
-    <!-- FIX 2: Single source - only here -->
-    <!-- ===================== -->
+    <!-- Wick width -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -66,7 +60,6 @@
             android:id="@+id/lbWick"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/chart_wick_width"
             android:textSize="12sp" />
 
         <SeekBar
@@ -77,10 +70,7 @@
             android:progress="2" />
     </LinearLayout>
 
-    <!-- ===================== -->
-    <!-- BLOCK: Body Width -->
-    <!-- FIX 2: Single source - only here -->
-    <!-- ===================== -->
+    <!-- Body width -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -91,7 +81,6 @@
             android:id="@+id/lbBody"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/chart_body_width"
             android:textSize="12sp" />
 
         <SeekBar
@@ -102,10 +91,7 @@
             android:progress="20" />
     </LinearLayout>
 
-    <!-- ===================== -->
-    <!-- BLOCK: Visible Candles -->
-    <!-- FIX 6: Clean move from chart_settings_options.xml to here -->
-    <!-- ===================== -->
+    <!-- Visible candles -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -116,7 +102,6 @@
             android:id="@+id/lbVis"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/chart_visible_candles"
             android:textSize="12sp" />
 
         <SeekBar
