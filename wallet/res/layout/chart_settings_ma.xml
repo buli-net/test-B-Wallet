@@ -1,13 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
     android:paddingTop="4dp"
     android:paddingBottom="4dp">
 
-    <!-- Header MA -->
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -16,7 +14,7 @@
         android:textSize="14sp"
         android:textStyle="bold" />
 
-    <!-- Default periods - hidden -->
+    <!-- DEFAULT MA - from layout, no hardcode in Java -->
     <TextView
         android:id="@+id/tvDefMaPeriods"
         android:layout_width="wrap_content"
@@ -24,7 +22,6 @@
         android:text="7,25,99"
         android:visibility="gone" />
 
-    <!-- Default colors - hidden -->
     <TextView
         android:id="@+id/tvDefMaColors"
         android:layout_width="wrap_content"
@@ -32,14 +29,12 @@
         android:text="#FFC107,#2196F3,#E91E63"
         android:visibility="gone" />
 
-    <!-- MA list -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recycler_ma_popup"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:nestedScrollingEnabled="false" />
 
-    <!-- Add MA button -->
     <Button
         android:id="@+id/btn_add_ma"
         android:layout_width="match_parent"
@@ -48,13 +43,13 @@
         android:text="@string/add_ma"
         android:textAllCaps="false" />
 
-    <!-- MA line width -->
+    <!-- MA Line Width - DỜI TỪ chart_options SANG ĐÂY -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="12dp"
         android:orientation="vertical"
-        android:paddingVertical="4dp">
+        android:paddingVertical="4dp"
+        android:layout_marginTop="12dp">
 
         <TextView
             android:id="@+id/lbMaW"
