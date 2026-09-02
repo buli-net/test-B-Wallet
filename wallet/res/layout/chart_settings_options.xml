@@ -14,7 +14,7 @@
         android:textSize="14sp"
         android:textStyle="bold" />
 
-    <!-- Show Grid - only option left here besides Visible -->
+    <!-- Show Grid -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -34,6 +34,28 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:checked="true" />
+    </LinearLayout>
+
+    <!-- Grid Color - DỜI LÊN ĐÂY -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingVertical="4dp">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/chart_grid_color"
+            android:textSize="13sp" />
+
+        <View
+            android:id="@+id/viewGridColor"
+            android:layout_width="@dimen/color_picker_size"
+            android:layout_height="@dimen/color_picker_size"
+            android:tag="@color/chart_grid" />
     </LinearLayout>
 
 </LinearLayout>
