@@ -6,6 +6,9 @@
     android:paddingTop="4dp"
     android:paddingBottom="4dp">
 
+    <!-- ===================== -->
+    <!-- BLOCK: Header MA -->
+    <!-- ===================== -->
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -14,7 +17,10 @@
         android:textSize="14sp"
         android:textStyle="bold" />
 
-    <!-- DEFAULT MA - from layout, no hardcode in Java -->
+    <!-- ===================== -->
+    <!-- BLOCK: Default MA Periods (Hidden) -->
+    <!-- No hardcode in Java, lấy từ layout -->
+    <!-- ===================== -->
     <TextView
         android:id="@+id/tvDefMaPeriods"
         android:layout_width="wrap_content"
@@ -22,6 +28,9 @@
         android:text="7,25,99"
         android:visibility="gone" />
 
+    <!-- ===================== -->
+    <!-- BLOCK: Default MA Colors (Hidden) -->
+    <!-- ===================== -->
     <TextView
         android:id="@+id/tvDefMaColors"
         android:layout_width="wrap_content"
@@ -29,12 +38,18 @@
         android:text="#FFC107,#2196F3,#E91E63"
         android:visibility="gone" />
 
+    <!-- ===================== -->
+    <!-- BLOCK: MA List Recycler -->
+    <!-- ===================== -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recycler_ma_popup"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:nestedScrollingEnabled="false" />
 
+    <!-- ===================== -->
+    <!-- BLOCK: Add MA Button -->
+    <!-- ===================== -->
     <Button
         android:id="@+id/btn_add_ma"
         android:layout_width="match_parent"
@@ -43,7 +58,10 @@
         android:text="@string/add_ma"
         android:textAllCaps="false" />
 
-    <!-- MA Line Width - DỜI TỪ chart_options SANG ĐÂY -->
+    <!-- ===================== -->
+    <!-- BLOCK: MA Line Width -->
+    <!-- FIX 4: DỜI TỪ chart_options SANG ĐÂY - Single source -->
+    <!-- ===================== -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
