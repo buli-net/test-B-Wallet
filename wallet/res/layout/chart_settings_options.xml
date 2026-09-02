@@ -14,7 +14,7 @@
         android:textSize="14sp"
         android:textStyle="bold" />
 
-    <!-- Show Grid -->
+    <!-- Show Grid - only option left here besides Visible -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -31,28 +31,6 @@
 
         <Switch
             android:id="@+id/swGrid"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:checked="true" />
-    </LinearLayout>
-
-    <!-- Show Volume -->
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center_vertical"
-        android:orientation="horizontal"
-        android:paddingVertical="4dp">
-
-        <TextView
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="@string/chart_show_volume"
-            android:textSize="13sp" />
-
-        <Switch
-            android:id="@+id/swVol"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:checked="true" />
