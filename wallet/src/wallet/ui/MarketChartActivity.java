@@ -1018,10 +1018,11 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
             sbVisCandle.setProgress(marketChartView.getVisibleCandleCountValue());
             lbVisCandle.setText(getString(R.string.chart_visible_candles, sbVisCandle.getProgress()));
 
+            final TextView finalLbVisCandle = lbVisCandle;
             sbVisCandle.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
                 @Override
                 public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                    lbVisCandle.setText(getString(R.string.chart_visible_candles, progress));
+                    finalLbVisCandle.setText(getString(R.string.chart_visible_candles, progress));
                     if (marketChartView != null) {
                         marketChartView.setVisibleCandleCount(progress);
                         marketChartView.invalidate();
