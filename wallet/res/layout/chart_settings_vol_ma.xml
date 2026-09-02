@@ -1,26 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout 
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
     android:paddingTop="4dp"
     android:paddingBottom="4dp">
 
-    <!-- ===================== -->
-    <!-- BLOCK: Header Vol MA -->
-    <!-- ===================== -->
+    <!-- Section title -->
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:paddingBottom="8dp"
-        android:text="@string/chart_settings_vol_ma"
+        android:text="@string/chart_vol_ma_section"
         android:textSize="14sp"
         android:textStyle="bold" />
 
-    <!-- ===================== -->
-    <!-- BLOCK: Show Volume - Master Toggle -->
-    <!-- FIX 5: Moved from options.xml to here -->
-    <!-- ===================== -->
+    <!-- Show volume switch -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -42,9 +38,7 @@
             android:checked="true" />
     </LinearLayout>
 
-    <!-- ===================== -->
-    <!-- BLOCK: Show Vol MA -->
-    <!-- ===================== -->
+    <!-- Show Vol MA switch -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -56,7 +50,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="@string/chart_show_vol_ma"
+            android:text="@string/label_vol_show"
             android:textSize="13sp" />
 
         <Switch
@@ -65,9 +59,7 @@
             android:layout_height="wrap_content" />
     </LinearLayout>
 
-    <!-- ===================== -->
-    <!-- BLOCK: Vol MA1 Period -->
-    <!-- ===================== -->
+    <!-- Vol MA1 period -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -87,9 +79,7 @@
             android:max="60" />
     </LinearLayout>
 
-    <!-- ===================== -->
-    <!-- BLOCK: Vol MA2 Period -->
-    <!-- ===================== -->
+    <!-- Vol MA2 period -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -109,9 +99,7 @@
             android:max="60" />
     </LinearLayout>
 
-    <!-- ===================== -->
-    <!-- BLOCK: Vol MA1 Color -->
-    <!-- ===================== -->
+    <!-- Vol MA1 color -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -123,7 +111,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="@string/vol_ma1_color"
+            android:text="@string/label_vol_ma1_color"
             android:textSize="12sp" />
 
         <View
@@ -133,9 +121,7 @@
             android:background="@drawable/color_picker_border" />
     </LinearLayout>
 
-    <!-- ===================== -->
-    <!-- BLOCK: Vol MA2 Color -->
-    <!-- ===================== -->
+    <!-- Vol MA2 color -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -147,7 +133,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="@string/vol_ma2_color"
+            android:text="@string/label_vol_ma2_color"
             android:textSize="12sp" />
 
         <View
@@ -157,9 +143,7 @@
             android:background="@drawable/color_picker_border" />
     </LinearLayout>
 
-    <!-- ===================== -->
-    <!-- BLOCK: Vol MA Width -->
-    <!-- ===================== -->
+    <!-- Vol MA width -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
