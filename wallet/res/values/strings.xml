@@ -603,18 +603,6 @@
     <string name="balance_loading">Loading…</string>
     <string name="balance_error">Error</string>
 
-    <!-- -->
-    <string name="arrow_collapsed" translatable="false">▼</string>
-    <string name="arrow_expanded" translatable="false">▲</string>
-
-    
-    <!-- Volume MA prefs - each key separated, like other features -->
-    <string name="key_vol_show_ma">vol_show_ma</string>
-    <string name="key_vol_ma1_period">vol_ma1_period</string>
-    <string name="key_vol_ma2_period">vol_ma2_period</string>
-    <string name="key_vol_ma1_color">vol_ma1_color</string>
-    <string name="key_vol_ma2_color">vol_ma2_color</string>
-    <string name="key_vol_ma_width">vol_ma_width</string>
 
     <string name="chart_vol_ma_section">Volume MA</string>
     <string name="label_vol_show">Show Vol MA</string>
