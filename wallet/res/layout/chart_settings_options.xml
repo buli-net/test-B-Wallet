@@ -14,7 +14,7 @@
         android:textSize="14sp"
         android:textStyle="bold" />
 
-    <!-- Show Grid - only option left here besides Visible -->
+    <!-- Show Grid - only option left -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -34,28 +34,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:checked="true" />
-    </LinearLayout>
-
-    <!-- Visible Candles -->
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:paddingVertical="4dp">
-
-        <TextView
-            android:id="@+id/lbVis"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/chart_visible_candles"
-            android:textSize="12sp" />
-
-        <SeekBar
-            android:id="@+id/sbVis"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:max="160"
-            android:progress="70" />
     </LinearLayout>
 
 </LinearLayout>
