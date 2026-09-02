@@ -48,67 +48,16 @@ import wallet.R;
 
 /**
  * Custom View that renders a financial market chart with candlesticks,
+ * moving averages, volume bars, and interactive gestures (zoom/pan).
+ * Data is fetched from Binance API.
+ * All dimensions are loaded from dimens.xml, no hardcoded values.
+ * Volume MA (VOL MA5/MA10) is a separate module, keys from strings.xml.
+ * FIX 3: White color bug - 0xFFFFFFFF = -1 was treated as unset, fixed with contains()
+ * FIX 4: Make label bg/text same as bullish/bearish - contains() + commit() hard, no remove when == def
+ * FIX THEME: If theme changes, auto-committed old theme colors are removed so new theme defaults are used.
+ * FIX VISIBLE: setDefaultsFromLayout now cleans old auto colors when Activity is recreated due to theme change.
  */
 public class MarketChartView extends View {
-
-    // ===== CORE / PREFS KEYS - No translate - Inlined as Java constants (fix cannot find symbol) =====
-    private static final String FIAT_USD = "USD";
-    private static final String TIME_FORMAT = "MM-dd HH:mm";
-    private static final String URL_KLINES = "https://api.binance.com/api/v3/klines?symbol=%1$s&interval=%2$s&limit=%3$d";
-    private static final String URL_TICKER = "https://api.binance.com/api/v3/ticker/24hr?symbol=%1$s";
-    private static final String FMT_HMS = "%02d:%02d:%02d";
-    private static final String FMT_DHMS = "%02d:%02d:%02d:%02d";
-    private static final String FMT_PRICE_0 = "%,.0f";
-    private static final String FMT_PRICE_2 = "%,.2f";
-    private static final String JSON_LAST_PRICE = "lastPrice";
-    private static final String JSON_HIGH_PRICE = "highPrice";
-    private static final String JSON_LOW_PRICE = "lowPrice";
-    private static final String JSON_VOLUME = "volume";
-    private static final String JSON_QUOTE_VOLUME = "quoteVolume";
-    private static final String JSON_PRICE_CHANGE_PERCENT = "priceChangePercent";
-
-    private static final String PREFS_CHART = "chart_options_prefs";
-    private static final String PREFS_CANDLE = "candle_prefs";
-    private static final String PREFS_MA = "ma_prefs";
-    private static final String PREFS_CHART_STATE = "chart_state_prefs";
-    private static final String PREFS_CHART_SETTINGS = "chart_settings";
-
-    private static final String KEY_MA = "ma_lines";
-    private static final String KEY_BULL = "bull_color";
-    private static final String KEY_BEAR = "bear_color";
-    private static final String KEY_BODY_FRACTION = "body_fraction";
-    private static final String KEY_WICK_WIDTH = "wick_width";
-    private static final String KEY_MA_WIDTH = "ma_width";
-    private static final String KEY_SHOW_GRID = "show_grid";
-    private static final String KEY_SHOW_VOLUME = "show_volume";
-    private static final String KEY_VISIBLE_COUNT = "visible_count";
-    private static final String KEY_SHOW_LAST_PRICE = "show_last_price";
-    private static final String KEY_LAST_PRICE_LINE_COLOR = "last_price_line_color";
-    private static final String KEY_LAST_PRICE_BG_COLOR = "last_price_bg_color";
-    private static final String KEY_PRICE_TEXT_SIZE = "price_text_size";
-    private static final String KEY_PRICE_TEXT_COLOR = "price_text_color";
-    private static final String KEY_GRID_COLOR = "grid_color";
-    private static final String KEY_BG_COLOR = "bg_color";
-    private static final String KEY_LAST_LINE_WIDTH = "last_line_width";
-    private static final String KEY_LAST_LINE_DASH = "last_line_dash";
-    private static final String KEY_LAST_LABEL_TEXT_SIZE = "last_label_text_size";
-    private static final String KEY_LAST_LABEL_TEXT_COLOR = "last_label_text_color";
-    private static final String KEY_SELECTED_LINE_COLOR = "selected_line_color";
-    private static final String KEY_SELECTED_LINE_WIDTH = "selected_line_width";
-    private static final String KEY_SELECTED_LINE_ALPHA = "selected_line_alpha";
-    private static final String KEY_SELECTED_LINE_DASH = "selected_line_dash";
-
-    private static final String KEY_VOL_SHOW_MA = "vol_show_ma";
-    private static final String KEY_VOL_MA1_PERIOD = "vol_ma1_period";
-    private static final String KEY_VOL_MA2_PERIOD = "vol_ma2_period";
-    private static final String KEY_VOL_MA1_COLOR = "vol_ma1_color";
-    private static final String KEY_VOL_MA2_COLOR = "vol_ma2_color";
-    private static final String KEY_VOL_MA_WIDTH = "vol_ma_width";
-
-    private static final String SEP_SEMICOLON = ";";
-    private static final String SEP_COMMA = ",";
-    private static final String SEP_SEMICOLON_REGEX = ";";
-    private static final String SEP_COMMA_REGEX = ",";
 
     // --------------------------------------------------------------------
     // Nested Data Models
@@ -358,9 +307,9 @@ public class MarketChartView extends View {
     // --------------------------------------------------------------------
     public MarketChartView(Context context, AttributeSet attrs) {
         super(context, attrs);
-        fiatCode = FIAT_USD;
+        fiatCode = context.getString(R.string.fiat_usd);
         timeFormat = new SimpleDateFormat(
-                TIME_FORMAT,
+                context.getString(R.string.time_format),
                 Locale.US
         );
         loadViewDimensions(context);
@@ -374,62 +323,62 @@ public class MarketChartView extends View {
     // --------------------------------------------------------------------
     private void loadViewDimensions(Context context) {
         TOP_PADDING_PX = (int) context.getResources()
-          .getDimension(R.dimen.default_top_padding);
+            .getDimension(R.dimen.default_top_padding);
         BOTTOM_PADDING_PX = (int) context.getResources()
-          .getDimension(R.dimen.default_bottom_padding);
+            .getDimension(R.dimen.default_bottom_padding);
         VOLUME_CHART_HEIGHT_DP = (int) context.getResources()
-          .getDimension(R.dimen.default_volume_height);
+            .getDimension(R.dimen.default_volume_height);
         VOLUME_TOP_MARGIN_PX = (int) context.getResources()
-          .getDimension(R.dimen.default_volume_top_margin);
+            .getDimension(R.dimen.default_volume_top_margin);
         PRICE_AXIS_WIDTH_DP = (int) context.getResources()
-          .getDimension(R.dimen.default_price_axis_width);
+            .getDimension(R.dimen.default_price_axis_width);
         TIME_AXIS_HEIGHT = (int) context.getResources()
-          .getDimension(R.dimen.default_time_axis_height);
+            .getDimension(R.dimen.default_time_axis_height);
         PRICE_TEXT_MARGIN = (int) context.getResources()
-          .getDimension(R.dimen.default_price_text_margin);
+            .getDimension(R.dimen.default_price_text_margin);
         PRICE_TEXT_OFFSET = (int) context.getResources()
-          .getDimension(R.dimen.default_price_text_offset);
+            .getDimension(R.dimen.default_price_text_offset);
         GRID_WIDTH = context.getResources()
-          .getDimension(R.dimen.default_grid_width);
+            .getDimension(R.dimen.default_grid_width);
         BODY_MIN_WIDTH = (int) context.getResources()
-          .getDimension(R.dimen.default_body_min_width);
+            .getDimension(R.dimen.default_body_min_width);
         BODY_MAX_WIDTH = (int) context.getResources()
-          .getDimension(R.dimen.default_body_max_width);
+            .getDimension(R.dimen.default_body_max_width);
         TEXT_SIZE = (int) context.getResources()
-          .getDimension(R.dimen.default_text_size);
+            .getDimension(R.dimen.default_text_size);
         SELECTED_WIDTH = context.getResources()
-          .getDimension(R.dimen.default_selected_width);
+            .getDimension(R.dimen.default_selected_width);
         DASH_ON = context.getResources()
-          .getDimension(R.dimen.dash_on);
+            .getDimension(R.dimen.dash_on);
         DASH_OFF = context.getResources()
-          .getDimension(R.dimen.dash_off);
+            .getDimension(R.dimen.dash_off);
         TIME_TEXT_OFFSET = (int) context.getResources()
-          .getDimension(R.dimen.time_text_offset);
+            .getDimension(R.dimen.time_text_offset);
         LOADING_TEXT_OFFSET = (int) context.getResources()
-          .getDimension(R.dimen.loading_text_offset);
+            .getDimension(R.dimen.loading_text_offset);
 
         try {
             CANDLE_MIN_HEIGHT = (int) context.getResources()
-              .getDimension(R.dimen.default_candle_min_height);
+                .getDimension(R.dimen.default_candle_min_height);
         } catch (Exception e) {
             CANDLE_MIN_HEIGHT = (int) context.getResources()
-              .getDimension(R.dimen.default_candle_min_width);
+                .getDimension(R.dimen.default_candle_min_width);
         }
 
         try {
             FETCH_LIMIT = context.getResources()
-              .getInteger(R.integer.default_fetch_limit);
+                .getInteger(R.integer.default_fetch_limit);
         } catch (Exception e) {
             FETCH_LIMIT = context.getResources()
-              .getInteger(R.integer.default_visible_candle_count);
+                .getInteger(R.integer.default_visible_candle_count);
         }
         try {
             MIN_VISIBLE_CANDLE_COUNT = context.getResources()
-              .getInteger(R.integer.min_visible_candle_count);
+                .getInteger(R.integer.min_visible_candle_count);
             MAX_VISIBLE_CANDLE_COUNT = context.getResources()
-              .getInteger(R.integer.max_visible_candle_count);
+                .getInteger(R.integer.max_visible_candle_count);
             DEFAULT_VISIBLE_CANDLE_COUNT = context.getResources()
-              .getInteger(R.integer.default_visible_candle_count);
+                .getInteger(R.integer.default_visible_candle_count);
         } catch (Exception e) {
             MIN_VISIBLE_CANDLE_COUNT = 20;
             MAX_VISIBLE_CANDLE_COUNT = 160;
@@ -437,36 +386,36 @@ public class MarketChartView extends View {
         }
         try {
             VOLUME_ALPHA = context.getResources()
-              .getInteger(R.integer.volume_alpha);
+                .getInteger(R.integer.volume_alpha);
             SELECTED_ALPHA = context.getResources()
-              .getInteger(R.integer.selected_alpha);
+                .getInteger(R.integer.selected_alpha);
         } catch (Exception e) {
             VOLUME_ALPHA = 100;
             SELECTED_ALPHA = 100;
         }
         try {
             BIG_FIAT_THRESHOLD = context.getResources()
-              .getInteger(R.integer.big_fiat_threshold);
+                .getInteger(R.integer.big_fiat_threshold);
             NETWORK_TIMEOUT = context.getResources()
-              .getInteger(R.integer.network_timeout);
+                .getInteger(R.integer.network_timeout);
         } catch (Exception e) {
             BIG_FIAT_THRESHOLD = 10000;
             NETWORK_TIMEOUT = 10000;
         }
         try {
             LIVE_REFRESH_INTERVAL_MS = context.getResources()
-              .getInteger(R.integer.live_refresh_interval);
+                .getInteger(R.integer.live_refresh_interval);
             COUNTDOWN_INTERVAL_MS = context.getResources()
-              .getInteger(R.integer.countdown_interval);
+                .getInteger(R.integer.countdown_interval);
         } catch (Exception e) {
             LIVE_REFRESH_INTERVAL_MS = 3000L;
             COUNTDOWN_INTERVAL_MS = 1000L;
         }
         try {
             MIN_SCROLL_FRACTION = context.getResources()
-              .getFraction(R.fraction.min_scroll_fraction, 1, 1);
+                .getFraction(R.fraction.min_scroll_fraction, 1, 1);
             PRICE_PADDING_FRACTION = context.getResources()
-              .getFraction(R.fraction.price_padding_fraction, 1, 1);
+                .getFraction(R.fraction.price_padding_fraction, 1, 1);
         } catch (Exception e) {
             MIN_SCROLL_FRACTION = 0.5f;
             PRICE_PADDING_FRACTION = 0.05f;
@@ -537,32 +486,15 @@ public class MarketChartView extends View {
         }
 
         if (maDefaults == null || maDefaults.isEmpty()) {
-            return;
+            throw new IllegalStateException(
+                    getContext().getString(R.string.err_ma_empty)
+            );
         }
-
-        if (bullColor == 0 || bearColor == 0) {
-            bullColor = getContext().getResources().getColor(R.color.chart_bull_default, getContext().getTheme());
-        }
-        if (bearColor == 0) {
-            bearColor = getContext().getResources().getColor(R.color.chart_bear_default, getContext().getTheme());
-        }
-        if (lastColor == 0) {
-            lastColor = getContext().getResources().getColor(R.color.chart_last_price_line, getContext().getTheme());
-        }
-        if (gridColor == 0) {
-            gridColor = getContext().getResources().getColor(R.color.chart_grid, getContext().getTheme());
-        }
-        if (txtColor == 0) {
-            txtColor = getContext().getResources().getColor(R.color.chart_text, getContext().getTheme());
-        }
-        if (labelBg == 0) {
-            labelBg = getContext().getResources().getColor(R.color.chart_last_price_label_bg, getContext().getTheme());
-        }
-        if (labelTextColor == 0) {
-            labelTextColor = getContext().getResources().getColor(R.color.last_label_text, getContext().getTheme());
-        }
-        if (selectedColor == 0) {
-            selectedColor = getContext().getResources().getColor(R.color.chart_selected_line, getContext().getTheme());
+        if (bullColor == 0 || bearColor == 0 || lastColor == 0 || gridColor == 0 ||
+                txtColor == 0 || labelBg == 0 || labelTextColor == 0 || selectedColor == 0) {
+            throw new IllegalStateException(
+                    getContext().getString(R.string.err_color_0)
+            );
         }
 
         this.defBodyFraction = bodyFrac;
@@ -625,7 +557,7 @@ public class MarketChartView extends View {
 
         try {
             fallbackSelectedColor = getContext().getResources()
-              .getColor(R.color.chart_selected_line, getContext().getTheme());
+                .getColor(R.color.chart_selected_line, getContext().getTheme());
         } catch (Exception e) {
             fallbackSelectedColor = gridColor;
         }
@@ -659,7 +591,9 @@ public class MarketChartView extends View {
 
     private void ensureDefaultsLoaded() {
         if (!defaultsLoadedFromLayout) {
-            return;
+            throw new IllegalStateException(
+                    getContext().getString(R.string.err_defaults_not_loaded)
+            );
         }
     }
 
@@ -667,22 +601,22 @@ public class MarketChartView extends View {
         try {
             Context ctx = getContext();
             defGridColor = ctx.getResources()
-              .getColor(R.color.chart_grid, ctx.getTheme());
+                .getColor(R.color.chart_grid, ctx.getTheme());
             defPriceTextColor = ctx.getResources()
-              .getColor(R.color.chart_text, ctx.getTheme());
+                .getColor(R.color.chart_text, ctx.getTheme());
             defSelectedLineColor = ctx.getResources()
-              .getColor(R.color.chart_selected_line, ctx.getTheme());
+                .getColor(R.color.chart_selected_line, ctx.getTheme());
             defLabelTextColor = ctx.getResources()
-              .getColor(R.color.last_label_text, ctx.getTheme());
+                .getColor(R.color.last_label_text, ctx.getTheme());
             defLastPriceLineColor = ctx.getResources()
-              .getColor(R.color.chart_last_price_line, ctx.getTheme());
+                .getColor(R.color.chart_last_price_line, ctx.getTheme());
             defLastPriceBgColor = ctx.getResources()
-              .getColor(R.color.chart_last_price_label_bg, ctx.getTheme());
+                .getColor(R.color.chart_last_price_label_bg, ctx.getTheme());
             try {
                 defBullColor = ctx.getResources()
-                  .getColor(R.color.chart_bull_default, ctx.getTheme());
+                    .getColor(R.color.chart_bull_default, ctx.getTheme());
                 defBearColor = ctx.getResources()
-                  .getColor(R.color.chart_bear_default, ctx.getTheme());
+                    .getColor(R.color.chart_bear_default, ctx.getTheme());
             } catch (Exception ignored) {
             }
         } catch (Exception e) {
@@ -697,59 +631,59 @@ public class MarketChartView extends View {
         try {
             Context ctx = getContext();
             SharedPreferences spChart = ctx.getSharedPreferences(
-                    PREFS_CHART, Context.MODE_PRIVATE);
+                    ctx.getString(R.string.prefs_chart), Context.MODE_PRIVATE);
             SharedPreferences.Editor edChart = spChart.edit();
             boolean changedChart = false;
 
-            if (spChart.contains(KEY_GRID_COLOR) &&
-                spChart.getInt(KEY_GRID_COLOR, 0) == oldGrid) {
-                edChart.remove(KEY_GRID_COLOR);
+            if (spChart.contains(ctx.getString(R.string.key_grid_color)) &&
+                spChart.getInt(ctx.getString(R.string.key_grid_color), 0) == oldGrid) {
+                edChart.remove(ctx.getString(R.string.key_grid_color));
                 changedChart = true;
             }
-            if (spChart.contains(KEY_PRICE_TEXT_COLOR) &&
-                spChart.getInt(KEY_PRICE_TEXT_COLOR, 0) == oldPriceText) {
-                edChart.remove(KEY_PRICE_TEXT_COLOR);
+            if (spChart.contains(ctx.getString(R.string.key_price_text_color)) &&
+                spChart.getInt(ctx.getString(R.string.key_price_text_color), 0) == oldPriceText) {
+                edChart.remove(ctx.getString(R.string.key_price_text_color));
                 changedChart = true;
             }
-            if (spChart.contains(KEY_LAST_PRICE_LINE_COLOR) &&
-                spChart.getInt(KEY_LAST_PRICE_LINE_COLOR, 0) == oldLastLine) {
-                edChart.remove(KEY_LAST_PRICE_LINE_COLOR);
+            if (spChart.contains(ctx.getString(R.string.key_last_price_line_color)) &&
+                spChart.getInt(ctx.getString(R.string.key_last_price_line_color), 0) == oldLastLine) {
+                edChart.remove(ctx.getString(R.string.key_last_price_line_color));
                 changedChart = true;
             }
-            if (spChart.contains(KEY_LAST_PRICE_BG_COLOR) &&
-                spChart.getInt(KEY_LAST_PRICE_BG_COLOR, 0) == oldLastBg) {
-                edChart.remove(KEY_LAST_PRICE_BG_COLOR);
+            if (spChart.contains(ctx.getString(R.string.key_last_price_bg_color)) &&
+                spChart.getInt(ctx.getString(R.string.key_last_price_bg_color), 0) == oldLastBg) {
+                edChart.remove(ctx.getString(R.string.key_last_price_bg_color));
                 changedChart = true;
             }
-            if (spChart.contains(KEY_LAST_LABEL_TEXT_COLOR) &&
-                spChart.getInt(KEY_LAST_LABEL_TEXT_COLOR, 0) == oldLabelText) {
-                edChart.remove(KEY_LAST_LABEL_TEXT_COLOR);
+            if (spChart.contains(ctx.getString(R.string.key_last_label_text_color)) &&
+                spChart.getInt(ctx.getString(R.string.key_last_label_text_color), 0) == oldLabelText) {
+                edChart.remove(ctx.getString(R.string.key_last_label_text_color));
                 changedChart = true;
             }
-            if (spChart.contains(KEY_SELECTED_LINE_COLOR) &&
-                spChart.getInt(KEY_SELECTED_LINE_COLOR, 0) == oldSelected) {
-                edChart.remove(KEY_SELECTED_LINE_COLOR);
+            if (spChart.contains(ctx.getString(R.string.key_selected_line_color)) &&
+                spChart.getInt(ctx.getString(R.string.key_selected_line_color), 0) == oldSelected) {
+                edChart.remove(ctx.getString(R.string.key_selected_line_color));
                 changedChart = true;
             }
             if (changedChart) edChart.commit();
 
             SharedPreferences spCandle = ctx.getSharedPreferences(
-                    PREFS_CANDLE, Context.MODE_PRIVATE);
+                    ctx.getString(R.string.prefs_candle), Context.MODE_PRIVATE);
             SharedPreferences.Editor edCandle = spCandle.edit();
             boolean changedCandle = false;
-            if (spCandle.contains(KEY_BULL) &&
-                spCandle.getInt(KEY_BULL, 0) == oldBull) {
-                edCandle.remove(KEY_BULL);
+            if (spCandle.contains(ctx.getString(R.string.key_bull)) &&
+                spCandle.getInt(ctx.getString(R.string.key_bull), 0) == oldBull) {
+                edCandle.remove(ctx.getString(R.string.key_bull));
                 changedCandle = true;
             }
-            if (spCandle.contains(KEY_BEAR) &&
-                spCandle.getInt(KEY_BEAR, 0) == oldBear) {
-                edCandle.remove(KEY_BEAR);
+            if (spCandle.contains(ctx.getString(R.string.key_bear)) &&
+                spCandle.getInt(ctx.getString(R.string.key_bear), 0) == oldBear) {
+                edCandle.remove(ctx.getString(R.string.key_bear));
                 changedCandle = true;
             }
             if (changedCandle) edCandle.commit();
 
-            SharedPreferences sp2 = ctx.getSharedPreferences(PREFS_CHART_SETTINGS, Context.MODE_PRIVATE);
+            SharedPreferences sp2 = ctx.getSharedPreferences("chart_settings", Context.MODE_PRIVATE);
             SharedPreferences.Editor ed2 = sp2.edit();
             boolean changed2 = false;
             if (sp2.contains("label_bg") && sp2.getInt("label_bg", 0) == oldLastBg) {
@@ -780,21 +714,20 @@ public class MarketChartView extends View {
         ensureDefaultsLoaded();
         try {
             SharedPreferences sp = context.getSharedPreferences(
-                    PREFS_CANDLE,
+                    context.getString(R.string.prefs_candle),
                     Context.MODE_PRIVATE
             );
-            bullishColor = sp.contains(KEY_BULL)?
-                    sp.getInt(KEY_BULL, defBullColor) :
+            bullishColor = sp.contains(context.getString(R.string.key_bull))?
+                    sp.getInt(context.getString(R.string.key_bull), defBullColor) :
                     defBullColor;
-            bearishColor = sp.contains(KEY_BEAR)?
-                    sp.getInt(KEY_BEAR, defBearColor) :
+            bearishColor = sp.contains(context.getString(R.string.key_bear))?
+                    sp.getInt(context.getString(R.string.key_bear), defBearColor) :
                     defBearColor;
 
-            if (bullishColor == 0) {
-                bullishColor = defBullColor;
-            }
-            if (bearishColor == 0) {
-                bearishColor = defBearColor;
+            if (bullishColor == 0 || bearishColor == 0) {
+                throw new IllegalStateException(
+                        context.getString(R.string.err_candle_0)
+                );
             }
         } catch (Exception e) {
             bullishColor = defBullColor;
@@ -841,153 +774,153 @@ public class MarketChartView extends View {
         ensureDefaultsLoaded();
         try {
             SharedPreferences sp = context.getSharedPreferences(
-                    PREFS_CHART,
+                    context.getString(R.string.prefs_chart),
                     Context.MODE_PRIVATE
             );
 
-            bodyWidthFraction = sp.contains(KEY_BODY_FRACTION)?
-                    getFloatCompat(sp, KEY_BODY_FRACTION, defBodyFraction) :
+            bodyWidthFraction = sp.contains(context.getString(R.string.key_body_fraction))?
+                    getFloatCompat(sp, context.getString(R.string.key_body_fraction), defBodyFraction) :
                     defBodyFraction;
 
-            wickWidthPx = sp.contains(KEY_WICK_WIDTH)?
-                    getFloatCompat(sp, KEY_WICK_WIDTH, defWickWidthPx) :
+            wickWidthPx = sp.contains(context.getString(R.string.key_wick_width))?
+                    getFloatCompat(sp, context.getString(R.string.key_wick_width), defWickWidthPx) :
                     defWickWidthPx;
 
-            maLineWidthPx = sp.contains(KEY_MA_WIDTH)?
-                    getFloatCompat(sp, KEY_MA_WIDTH, defMaWidthPx) :
+            maLineWidthPx = sp.contains(context.getString(R.string.key_ma_width))?
+                    getFloatCompat(sp, context.getString(R.string.key_ma_width), defMaWidthPx) :
                     defMaWidthPx;
 
-            showGrid = sp.contains(KEY_SHOW_GRID)?
-                    sp.getBoolean(KEY_SHOW_GRID, defShowGrid) :
+            showGrid = sp.contains(context.getString(R.string.key_show_grid))?
+                    sp.getBoolean(context.getString(R.string.key_show_grid), defShowGrid) :
                     defShowGrid;
-            showVolume = sp.contains(KEY_SHOW_VOLUME)?
-                    sp.getBoolean(KEY_SHOW_VOLUME, defShowVolume) :
+            showVolume = sp.contains(context.getString(R.string.key_show_volume))?
+                    sp.getBoolean(context.getString(R.string.key_show_volume), defShowVolume) :
                     defShowVolume;
-            visibleCandleCount = sp.contains(KEY_VISIBLE_COUNT)?
-                    sp.getInt(KEY_VISIBLE_COUNT, defVisibleCount) :
+            visibleCandleCount = sp.contains(context.getString(R.string.key_visible_count))?
+                    sp.getInt(context.getString(R.string.key_visible_count), defVisibleCount) :
                     defVisibleCount;
-            showLastPriceLine = sp.contains(KEY_SHOW_LAST_PRICE)?
-                    sp.getBoolean(KEY_SHOW_LAST_PRICE, defShowLastPrice) :
+            showLastPriceLine = sp.contains(context.getString(R.string.key_show_last_price))?
+                    sp.getBoolean(context.getString(R.string.key_show_last_price), defShowLastPrice) :
                     defShowLastPrice;
 
-            if (sp.contains(KEY_LAST_PRICE_LINE_COLOR)) {
+            if (sp.contains(context.getString(R.string.key_last_price_line_color))) {
                 lastPriceLineColor = sp.getInt(
-                        KEY_LAST_PRICE_LINE_COLOR,
+                        context.getString(R.string.key_last_price_line_color),
                         defLastPriceLineColor
                 );
             } else {
                 lastPriceLineColor = defLastPriceLineColor;
             }
 
-            if (sp.contains(KEY_LAST_PRICE_BG_COLOR)) {
+            if (sp.contains(context.getString(R.string.key_last_price_bg_color))) {
                 lastPriceBgColor = sp.getInt(
-                        KEY_LAST_PRICE_BG_COLOR,
+                        context.getString(R.string.key_last_price_bg_color),
                         defLastPriceBgColor
                 );
             } else {
                 lastPriceBgColor = defLastPriceBgColor;
             }
 
-            priceTextSizePx = sp.contains(KEY_PRICE_TEXT_SIZE)?
-                    getFloatCompat(sp, KEY_PRICE_TEXT_SIZE, defPriceTextSizePx) :
+            priceTextSizePx = sp.contains(context.getString(R.string.key_price_text_size))?
+                    getFloatCompat(sp, context.getString(R.string.key_price_text_size), defPriceTextSizePx) :
                     defPriceTextSizePx;
 
-            if (sp.contains(KEY_PRICE_TEXT_COLOR)) {
+            if (sp.contains(context.getString(R.string.key_price_text_color))) {
                 priceTextColor = sp.getInt(
-                        KEY_PRICE_TEXT_COLOR,
+                        context.getString(R.string.key_price_text_color),
                         defPriceTextColor
                 );
             } else {
                 priceTextColor = defPriceTextColor;
             }
 
-            if (sp.contains(KEY_GRID_COLOR)) {
-                gridColor = sp.getInt(KEY_GRID_COLOR, defGridColor);
+            if (sp.contains(context.getString(R.string.key_grid_color))) {
+                gridColor = sp.getInt(context.getString(R.string.key_grid_color), defGridColor);
             } else {
                 gridColor = defGridColor;
             }
 
             // 0 = auto theme, only explicit setBgColor saves non-zero
-            bgColor = sp.contains(KEY_BG_COLOR)?
-                    sp.getInt(KEY_BG_COLOR, 0) :
+            bgColor = sp.contains(context.getString(R.string.key_bg_color))?
+                    sp.getInt(context.getString(R.string.key_bg_color), 0) :
                     0;
 
-            lastLineWidthPx = sp.contains(KEY_LAST_LINE_WIDTH)?
-                    getFloatCompat(sp, KEY_LAST_LINE_WIDTH, defLastLineWidthPx) :
+            lastLineWidthPx = sp.contains(context.getString(R.string.key_last_line_width))?
+                    getFloatCompat(sp, context.getString(R.string.key_last_line_width), defLastLineWidthPx) :
                     defLastLineWidthPx;
 
-            lastLineDashed = sp.contains(KEY_LAST_LINE_DASH)?
-                    sp.getBoolean(KEY_LAST_LINE_DASH, defLastDashed) :
+            lastLineDashed = sp.contains(context.getString(R.string.key_last_line_dash))?
+                    sp.getBoolean(context.getString(R.string.key_last_line_dash), defLastDashed) :
                     defLastDashed;
 
-            lastPriceLabelTextSizePx = sp.contains(KEY_LAST_LABEL_TEXT_SIZE)?
-                    getFloatCompat(sp, KEY_LAST_LABEL_TEXT_SIZE, defLabelTextSizePx) :
+            lastPriceLabelTextSizePx = sp.contains(context.getString(R.string.key_last_label_text_size))?
+                    getFloatCompat(sp, context.getString(R.string.key_last_label_text_size), defLabelTextSizePx) :
                     defLabelTextSizePx;
 
-            if (sp.contains(KEY_LAST_LABEL_TEXT_COLOR)) {
+            if (sp.contains(context.getString(R.string.key_last_label_text_color))) {
                 lastPriceLabelTextColor = sp.getInt(
-                        KEY_LAST_LABEL_TEXT_COLOR,
+                        context.getString(R.string.key_last_label_text_color),
                         defLabelTextColor
                 );
             } else {
                 lastPriceLabelTextColor = defLabelTextColor;
             }
 
-            if (sp.contains(KEY_SELECTED_LINE_COLOR)) {
+            if (sp.contains(context.getString(R.string.key_selected_line_color))) {
                 selectedLineColor = sp.getInt(
-                        KEY_SELECTED_LINE_COLOR,
+                        context.getString(R.string.key_selected_line_color),
                         defSelectedLineColor
                 );
             } else {
                 selectedLineColor = defSelectedLineColor;
             }
 
-            selectedLineWidthPx = sp.contains(KEY_SELECTED_LINE_WIDTH)?
-                    getFloatCompat(sp, KEY_SELECTED_LINE_WIDTH, defSelectedLineWidthPx) :
+            selectedLineWidthPx = sp.contains(context.getString(R.string.key_selected_line_width))?
+                    getFloatCompat(sp, context.getString(R.string.key_selected_line_width), defSelectedLineWidthPx) :
                     defSelectedLineWidthPx;
 
-            selectedLineAlpha = sp.contains(KEY_SELECTED_LINE_ALPHA)?
-                    getIntCompat(sp, KEY_SELECTED_LINE_ALPHA, defSelectedAlpha) :
+            selectedLineAlpha = sp.contains(context.getString(R.string.key_selected_line_alpha))?
+                    getIntCompat(sp, context.getString(R.string.key_selected_line_alpha), defSelectedAlpha) :
                     defSelectedAlpha;
 
             selectedLineDashed = sp.contains(
-                    KEY_SELECTED_LINE_DASH
+                    context.getString(R.string.key_selected_line_dash)
             )?
                     sp.getBoolean(
-                            KEY_SELECTED_LINE_DASH,
+                            context.getString(R.string.key_selected_line_dash),
                             defSelectedDashed
                     ) :
                     defSelectedDashed;
 
-            // Volume MA - separate keys, loaded from constants, no hardcode
-            showVolMa = sp.contains(KEY_VOL_SHOW_MA)?
-                    sp.getBoolean(KEY_VOL_SHOW_MA, true) :
+            // Volume MA - separate keys, loaded from strings.xml, no hardcode
+            showVolMa = sp.contains(context.getString(R.string.key_vol_show_ma))?
+                    sp.getBoolean(context.getString(R.string.key_vol_show_ma), true) :
                     true;
 
-            volMa1Period = sp.contains(KEY_VOL_MA1_PERIOD)?
-                    sp.getInt(KEY_VOL_MA1_PERIOD, volMa1Period) :
+            volMa1Period = sp.contains(context.getString(R.string.key_vol_ma1_period))?
+                    sp.getInt(context.getString(R.string.key_vol_ma1_period), volMa1Period) :
                     volMa1Period;
 
-            volMa2Period = sp.contains(KEY_VOL_MA2_PERIOD)?
-                    sp.getInt(KEY_VOL_MA2_PERIOD, volMa2Period) :
+            volMa2Period = sp.contains(context.getString(R.string.key_vol_ma2_period))?
+                    sp.getInt(context.getString(R.string.key_vol_ma2_period), volMa2Period) :
                     volMa2Period;
 
-            if (sp.contains(KEY_VOL_MA1_COLOR)) {
-                volMa1Color = sp.getInt(KEY_VOL_MA1_COLOR, volMa1Color);
+            if (sp.contains(context.getString(R.string.key_vol_ma1_color))) {
+                volMa1Color = sp.getInt(context.getString(R.string.key_vol_ma1_color), volMa1Color);
             }
 
-            if (sp.contains(KEY_VOL_MA2_COLOR)) {
-                volMa2Color = sp.getInt(KEY_VOL_MA2_COLOR, volMa2Color);
+            if (sp.contains(context.getString(R.string.key_vol_ma2_color))) {
+                volMa2Color = sp.getInt(context.getString(R.string.key_vol_ma2_color), volMa2Color);
             }
 
-            volMaWidthPx = sp.contains(KEY_VOL_MA_WIDTH)?
-                    getFloatCompat(sp, KEY_VOL_MA_WIDTH, volMaWidthPx) :
+            volMaWidthPx = sp.contains(context.getString(R.string.key_vol_ma_width))?
+                    getFloatCompat(sp, context.getString(R.string.key_vol_ma_width), volMaWidthPx) :
                     volMaWidthPx;
 
             // Also check chart_settings prefs for label colors - allow white (-1)
             // Same as bullish/bearish - contains() is the only check
             SharedPreferences sp2 = context.getSharedPreferences(
-                    PREFS_CHART_SETTINGS,
+                    "chart_settings",
                     Context.MODE_PRIVATE
             );
             if (sp2.contains("label_bg")) {
@@ -1159,7 +1092,7 @@ public class MarketChartView extends View {
     }
 
     // --------------------------------------------------------------------
-    // Separated setters - each saves ONLY its own key using constants
+    // Separated setters - each saves ONLY its own key using strings.xml
     // Same as setCandleColors - commit() hard, no remove when == def
     // --------------------------------------------------------------------
 
@@ -1167,12 +1100,12 @@ public class MarketChartView extends View {
         this.bodyWidthFraction = fraction;
         try {
             SharedPreferences sp = getContext().getSharedPreferences(
-                    PREFS_CHART,
+                    getContext().getString(R.string.prefs_chart),
                     Context.MODE_PRIVATE
             );
             sp.edit()
-              .putFloat(KEY_BODY_FRACTION, fraction)
-              .commit();
+                .putFloat(getContext().getString(R.string.key_body_fraction), fraction)
+                .commit();
         } catch (Exception e) {
         }
         initPaints(getContext());
@@ -1183,12 +1116,12 @@ public class MarketChartView extends View {
         this.wickWidthPx = widthPx;
         try {
             SharedPreferences sp = getContext().getSharedPreferences(
-                    PREFS_CHART,
+                    getContext().getString(R.string.prefs_chart),
                     Context.MODE_PRIVATE
             );
             sp.edit()
-              .putFloat(KEY_WICK_WIDTH, widthPx)
-              .commit();
+                .putFloat(getContext().getString(R.string.key_wick_width), widthPx)
+                .commit();
         } catch (Exception e) {
         }
         initPaints(getContext());
@@ -1199,12 +1132,12 @@ public class MarketChartView extends View {
         this.maLineWidthPx = widthPx;
         try {
             SharedPreferences sp = getContext().getSharedPreferences(
-                    PREFS_CHART,
+                    getContext().getString(R.string.prefs_chart),
                     Context.MODE_PRIVATE
             );
             sp.edit()
-              .putFloat(KEY_MA_WIDTH, widthPx)
-              .commit();
+                .putFloat(getContext().getString(R.string.key_ma_width), widthPx)
+                .commit();
         } catch (Exception e) {
         }
         initPaints(getContext());
@@ -1215,12 +1148,12 @@ public class MarketChartView extends View {
         this.showGrid = show;
         try {
             SharedPreferences sp = getContext().getSharedPreferences(
-                    PREFS_CHART,
+                    getContext().getString(R.string.prefs_chart),
                     Context.MODE_PRIVATE
             );
             sp.edit()
-              .putBoolean(KEY_SHOW_GRID, show)
-              .commit();
+                .putBoolean(getContext().getString(R.string.key_show_grid), show)
+                .commit();
         } catch (Exception e) {
         }
         invalidate();
@@ -1230,12 +1163,12 @@ public class MarketChartView extends View {
         this.showVolume = show;
         try {
             SharedPreferences sp = getContext().getSharedPreferences(
-                    PREFS_CHART,
+                    getContext().getString(R.string.prefs_chart),
                     Context.MODE_PRIVATE
             );
             sp.edit()
-              .putBoolean(KEY_SHOW_VOLUME, show)
-              .commit();
+                .putBoolean(getContext().getString(R.string.key_show_volume), show)
+                .commit();
         } catch (Exception e) {
         }
         invalidate();
@@ -1246,12 +1179,12 @@ public class MarketChartView extends View {
         clampVisibleCount();
         try {
             SharedPreferences sp = getContext().getSharedPreferences(
-                    PREFS_CHART,
+                    getContext().getString(R.string.prefs_chart),
                     Context.MODE_PRIVATE
             );
             sp.edit()
-              .putInt(KEY_VISIBLE_COUNT, this.visibleCandleCount)
-              .commit();
+                .putInt(getContext().getString(R.string.key_visible_count), this.visibleCandleCount)
+                .commit();
         } catch (Exception e) {
         }
         clampTranslationX();
@@ -1262,12 +1195,12 @@ public class MarketChartView extends View {
         this.showLastPriceLine = show;
         try {
             SharedPreferences sp = getContext().getSharedPreferences(
-                    PREFS_CHART,
+                    getContext().getString(R.string.prefs_chart),
                     Context.MODE_PRIVATE
             );
             sp.edit()
-              .putBoolean(KEY_SHOW_LAST_PRICE, show)
-              .commit();
+                .putBoolean(getContext().getString(R.string.key_show_last_price), show)
+                .commit();
         } catch (Exception e) {
         }
         invalidate();
@@ -1275,18 +1208,20 @@ public class MarketChartView extends View {
 
     public void setLastPriceLineColor(int color) {
         if (color == 0) {
-            return;
+            throw new IllegalStateException(
+                    getContext().getString(R.string.err_appearance_color)
+            );
         }
         // Same as setCandleColors - put hard, commit, no remove
         this.lastPriceLineColor = color;
         try {
             SharedPreferences sp = getContext().getSharedPreferences(
-                    PREFS_CHART,
+                    getContext().getString(R.string.prefs_chart),
                     Context.MODE_PRIVATE
             );
             sp.edit()
-              .putInt(KEY_LAST_PRICE_LINE_COLOR, color)
-              .commit();
+                .putInt(getContext().getString(R.string.key_last_price_line_color), color)
+                .commit();
         } catch (Exception e) {
         }
         initPaints(getContext());
@@ -1297,17 +1232,17 @@ public class MarketChartView extends View {
         this.bgColor = color;
         try {
             SharedPreferences sp = getContext().getSharedPreferences(
-                    PREFS_CHART,
+                    getContext().getString(R.string.prefs_chart),
                     Context.MODE_PRIVATE
             );
             if (color == 0) {
                 sp.edit()
-                  .remove(KEY_BG_COLOR)
-                  .commit();
+                    .remove(getContext().getString(R.string.key_bg_color))
+                    .commit();
             } else {
                 sp.edit()
-                  .putInt(KEY_BG_COLOR, color)
-                  .commit();
+                    .putInt(getContext().getString(R.string.key_bg_color), color)
+                    .commit();
             }
         } catch (Exception e) {
         }
@@ -1319,12 +1254,12 @@ public class MarketChartView extends View {
         this.priceTextSizePx = sizePx;
         try {
             SharedPreferences sp = getContext().getSharedPreferences(
-                    PREFS_CHART,
+                    getContext().getString(R.string.prefs_chart),
                     Context.MODE_PRIVATE
             );
             sp.edit()
-              .putFloat(KEY_PRICE_TEXT_SIZE, sizePx)
-              .commit();
+                .putFloat(getContext().getString(R.string.key_price_text_size), sizePx)
+                .commit();
         } catch (Exception e) {
         }
         initPaints(getContext());
@@ -1335,12 +1270,12 @@ public class MarketChartView extends View {
         this.lastLineWidthPx = widthPx;
         try {
             SharedPreferences sp = getContext().getSharedPreferences(
-                    PREFS_CHART,
+                    getContext().getString(R.string.prefs_chart),
                     Context.MODE_PRIVATE
             );
             sp.edit()
-              .putFloat(KEY_LAST_LINE_WIDTH, widthPx)
-              .commit();
+                .putFloat(getContext().getString(R.string.key_last_line_width), widthPx)
+                .commit();
         } catch (Exception e) {
         }
         initPaints(getContext());
@@ -1351,12 +1286,12 @@ public class MarketChartView extends View {
         this.lastLineDashed = dashed;
         try {
             SharedPreferences sp = getContext().getSharedPreferences(
-                    PREFS_CHART,
+                    getContext().getString(R.string.prefs_chart),
                     Context.MODE_PRIVATE
             );
             sp.edit()
-              .putBoolean(KEY_LAST_LINE_DASH, dashed)
-              .commit();
+                .putBoolean(getContext().getString(R.string.key_last_line_dash), dashed)
+                .commit();
         } catch (Exception e) {
         }
         initPaints(getContext());
@@ -1367,12 +1302,12 @@ public class MarketChartView extends View {
         this.lastPriceLabelTextSizePx = sizePx;
         try {
             SharedPreferences sp = getContext().getSharedPreferences(
-                    PREFS_CHART,
+                    getContext().getString(R.string.prefs_chart),
                     Context.MODE_PRIVATE
             );
             sp.edit()
-              .putFloat(KEY_LAST_LABEL_TEXT_SIZE, sizePx)
-              .commit();
+                .putFloat(getContext().getString(R.string.key_last_label_text_size), sizePx)
+                .commit();
         } catch (Exception e) {
         }
         initPaints(getContext());
@@ -1381,18 +1316,20 @@ public class MarketChartView extends View {
 
     public void setGridColor(int color) {
         if (color == 0) {
-            return;
+            throw new IllegalStateException(
+                    getContext().getString(R.string.err_appearance_color)
+            );
         }
         // Same as bullish - no if def, commit hard
         this.gridColor = color;
         try {
             SharedPreferences sp = getContext().getSharedPreferences(
-                    PREFS_CHART,
+                    getContext().getString(R.string.prefs_chart),
                     Context.MODE_PRIVATE
             );
             sp.edit()
-              .putInt(KEY_GRID_COLOR, color)
-              .commit();
+                .putInt(getContext().getString(R.string.key_grid_color), color)
+                .commit();
         } catch (Exception e) {
         }
         initPaints(getContext());
@@ -1401,18 +1338,20 @@ public class MarketChartView extends View {
 
     public void setPriceTextColor(int color) {
         if (color == 0) {
-            return;
+            throw new IllegalStateException(
+                    getContext().getString(R.string.err_appearance_color)
+            );
         }
         // Same as bearish - commit hard, white -1 valid
         this.priceTextColor = color;
         try {
             SharedPreferences sp = getContext().getSharedPreferences(
-                    PREFS_CHART,
+                    getContext().getString(R.string.prefs_chart),
                     Context.MODE_PRIVATE
             );
             sp.edit()
-              .putInt(KEY_PRICE_TEXT_COLOR, color)
-              .commit();
+                .putInt(getContext().getString(R.string.key_price_text_color), color)
+                .commit();
         } catch (Exception e) {
         }
         initPaints(getContext());
@@ -1421,28 +1360,30 @@ public class MarketChartView extends View {
 
     public void setCurrentPriceLabelBackground(int color) {
         if (color == 0) {
-            return;
+            throw new IllegalStateException(
+                    getContext().getString(R.string.err_label_color)
+            );
         }
         // Same as setCandleColors - white -1 is valid, commit hard
         this.lastPriceBgColor = color;
         try {
             SharedPreferences sp = getContext().getSharedPreferences(
-                    PREFS_CHART,
+                    getContext().getString(R.string.prefs_chart),
                     Context.MODE_PRIVATE
             );
             sp.edit()
-              .putInt(KEY_LAST_PRICE_BG_COLOR, color)
-              .commit();
+                .putInt(getContext().getString(R.string.key_last_price_bg_color), color)
+                .commit();
 
             // Also save to chart_settings for Activity compatibility - allow white -1
             SharedPreferences sp2 = getContext().getSharedPreferences(
-                    PREFS_CHART_SETTINGS,
+                    "chart_settings",
                     Context.MODE_PRIVATE
             );
             sp2.edit()
-              .putInt("label_bg", color)
-              .putInt("current_price_label_bg", color)
-              .commit();
+                .putInt("label_bg", color)
+                .putInt("current_price_label_bg", color)
+                .commit();
 
         } catch (Exception e) {
         }
@@ -1452,27 +1393,29 @@ public class MarketChartView extends View {
 
     public void setCurrentPriceLabelTextColor(int color) {
         if (color == 0) {
-            return;
+            throw new IllegalStateException(
+                    getContext().getString(R.string.err_label_color)
+            );
         }
         // Same as setCandleColors - white -1 valid
         this.lastPriceLabelTextColor = color;
         try {
             SharedPreferences sp = getContext().getSharedPreferences(
-                    PREFS_CHART,
+                    getContext().getString(R.string.prefs_chart),
                     Context.MODE_PRIVATE
             );
             sp.edit()
-              .putInt(KEY_LAST_LABEL_TEXT_COLOR, color)
-              .commit();
+                .putInt(getContext().getString(R.string.key_last_label_text_color), color)
+                .commit();
 
             SharedPreferences sp2 = getContext().getSharedPreferences(
-                    PREFS_CHART_SETTINGS,
+                    "chart_settings",
                     Context.MODE_PRIVATE
             );
             sp2.edit()
-              .putInt("label_text_color", color)
-              .putInt("current_price_label_text", color)
-              .commit();
+                .putInt("label_text_color", color)
+                .putInt("current_price_label_text", color)
+                .commit();
 
         } catch (Exception e) {
         }
@@ -1482,7 +1425,9 @@ public class MarketChartView extends View {
 
     public void setLastPriceLabelAppearance(int bgColor, int textColor, float textSizePx) {
         if (bgColor == 0 || textColor == 0) {
-            return;
+            throw new IllegalStateException(
+                    getContext().getString(R.string.err_label_color)
+            );
         }
         setCurrentPriceLabelBackground(bgColor);
         setCurrentPriceLabelTextColor(textColor);
@@ -1491,18 +1436,20 @@ public class MarketChartView extends View {
 
     public void setSelectedLineColor(int color) {
         if (color == 0) {
-            return;
+            throw new IllegalStateException(
+                    getContext().getString(R.string.err_selected_line_color_0)
+            );
         }
         // Same as bullish - commit hard
         this.selectedLineColor = color;
         try {
             SharedPreferences sp = getContext().getSharedPreferences(
-                    PREFS_CHART,
+                    getContext().getString(R.string.prefs_chart),
                     Context.MODE_PRIVATE
             );
             sp.edit()
-              .putInt(KEY_SELECTED_LINE_COLOR, color)
-              .commit();
+                .putInt(getContext().getString(R.string.key_selected_line_color), color)
+                .commit();
         } catch (Exception e) {
         }
         initPaints(getContext());
@@ -1516,12 +1463,12 @@ public class MarketChartView extends View {
         this.selectedLineWidthPx = widthPx;
         try {
             SharedPreferences sp = getContext().getSharedPreferences(
-                    PREFS_CHART,
+                    getContext().getString(R.string.prefs_chart),
                     Context.MODE_PRIVATE
             );
             sp.edit()
-              .putFloat(KEY_SELECTED_LINE_WIDTH, widthPx)
-              .commit();
+                .putFloat(getContext().getString(R.string.key_selected_line_width), widthPx)
+                .commit();
         } catch (Exception e) {
         }
         initPaints(getContext());
@@ -1538,12 +1485,12 @@ public class MarketChartView extends View {
         this.selectedLineAlpha = alpha;
         try {
             SharedPreferences sp = getContext().getSharedPreferences(
-                    PREFS_CHART,
+                    getContext().getString(R.string.prefs_chart),
                     Context.MODE_PRIVATE
             );
             sp.edit()
-              .putInt(KEY_SELECTED_LINE_ALPHA, alpha)
-              .commit();
+                .putInt(getContext().getString(R.string.key_selected_line_alpha), alpha)
+                .commit();
         } catch (Exception e) {
         }
         initPaints(getContext());
@@ -1554,12 +1501,12 @@ public class MarketChartView extends View {
         this.selectedLineDashed = dashed;
         try {
             SharedPreferences sp = getContext().getSharedPreferences(
-                    PREFS_CHART,
+                    getContext().getString(R.string.prefs_chart),
                     Context.MODE_PRIVATE
             );
             sp.edit()
-              .putBoolean(KEY_SELECTED_LINE_DASH, dashed)
-              .commit();
+                .putBoolean(getContext().getString(R.string.key_selected_line_dash), dashed)
+                .commit();
         } catch (Exception e) {
         }
         initPaints(getContext());
@@ -1568,7 +1515,9 @@ public class MarketChartView extends View {
 
     public void setSelectedLineAppearance(int color, float widthPx, int alpha, boolean dashed) {
         if (color == 0) {
-            return;
+            throw new IllegalStateException(
+                    getContext().getString(R.string.err_selected_line_color_0)
+            );
         }
         if (widthPx <= 0f) {
             widthPx = defSelectedLineWidthPx;
@@ -1586,7 +1535,7 @@ public class MarketChartView extends View {
     }
 
     // --------------------------------------------------------------------
-    // Volume MA setters - fully separated, no clumping, using constants
+    // Volume MA setters - fully separated, no clumping, using strings.xml
     // --------------------------------------------------------------------
 
     /**
@@ -1603,13 +1552,13 @@ public class MarketChartView extends View {
         this.volMa2Period = period2;
         try {
             SharedPreferences sp = getContext().getSharedPreferences(
-                    PREFS_CHART,
+                    getContext().getString(R.string.prefs_chart),
                     Context.MODE_PRIVATE
             );
             sp.edit()
-              .putInt(KEY_VOL_MA1_PERIOD, period1)
-              .putInt(KEY_VOL_MA2_PERIOD, period2)
-              .commit();
+                .putInt(getContext().getString(R.string.key_vol_ma1_period), period1)
+                .putInt(getContext().getString(R.string.key_vol_ma2_period), period2)
+                .commit();
         } catch (Exception e) {
         }
         calculateVolumeMas();
@@ -1623,12 +1572,12 @@ public class MarketChartView extends View {
         this.showVolMa = show;
         try {
             SharedPreferences sp = getContext().getSharedPreferences(
-                    PREFS_CHART,
+                    getContext().getString(R.string.prefs_chart),
                     Context.MODE_PRIVATE
             );
             sp.edit()
-              .putBoolean(KEY_VOL_SHOW_MA, show)
-              .commit();
+                .putBoolean(getContext().getString(R.string.key_vol_show_ma), show)
+                .commit();
         } catch (Exception e) {
         }
         invalidate();
@@ -1645,12 +1594,12 @@ public class MarketChartView extends View {
         this.volMa1Color = color;
         try {
             SharedPreferences sp = getContext().getSharedPreferences(
-                    PREFS_CHART,
+                    getContext().getString(R.string.prefs_chart),
                     Context.MODE_PRIVATE
             );
             sp.edit()
-              .putInt(KEY_VOL_MA1_COLOR, color)
-              .commit();
+                .putInt(getContext().getString(R.string.key_vol_ma1_color), color)
+                .commit();
         } catch (Exception e) {
         }
         initPaints(getContext());
@@ -1668,12 +1617,12 @@ public class MarketChartView extends View {
         this.volMa2Color = color;
         try {
             SharedPreferences sp = getContext().getSharedPreferences(
-                    PREFS_CHART,
+                    getContext().getString(R.string.prefs_chart),
                     Context.MODE_PRIVATE
             );
             sp.edit()
-              .putInt(KEY_VOL_MA2_COLOR, color)
-              .commit();
+                .putInt(getContext().getString(R.string.key_vol_ma2_color), color)
+                .commit();
         } catch (Exception e) {
         }
         initPaints(getContext());
@@ -1690,12 +1639,12 @@ public class MarketChartView extends View {
         this.volMaWidthPx = widthPx;
         try {
             SharedPreferences sp = getContext().getSharedPreferences(
-                    PREFS_CHART,
+                    getContext().getString(R.string.prefs_chart),
                     Context.MODE_PRIVATE
             );
             sp.edit()
-              .putFloat(KEY_VOL_MA_WIDTH, widthPx)
-              .commit();
+                .putFloat(getContext().getString(R.string.key_vol_ma_width), widthPx)
+                .commit();
         } catch (Exception e) {
         }
         initPaints(getContext());
@@ -1720,20 +1669,22 @@ public class MarketChartView extends View {
 
     public void setCandleColors(int bull, int bear) {
         if (bull == 0 || bear == 0) {
-            return;
+            throw new IllegalStateException(
+                    getContext().getString(R.string.err_candle_0)
+            );
         }
         // Same - commit hard, no remove when == def, white -1 valid
         this.bullishColor = bull;
         this.bearishColor = bear;
         try {
             SharedPreferences sp = getContext().getSharedPreferences(
-                    PREFS_CANDLE,
+                    getContext().getString(R.string.prefs_candle),
                     Context.MODE_PRIVATE
             );
             sp.edit()
-              .putInt(KEY_BULL, bull)
-              .putInt(KEY_BEAR, bear)
-              .commit();
+                .putInt(getContext().getString(R.string.key_bull), bull)
+                .putInt(getContext().getString(R.string.key_bear), bear)
+                .commit();
         } catch (Exception e) {
         }
         initPaints(getContext());
@@ -1781,12 +1732,12 @@ public class MarketChartView extends View {
         } else {
             try {
                 SharedPreferences sp = getContext().getSharedPreferences(
-                        PREFS_CHART,
+                        getContext().getString(R.string.prefs_chart),
                         Context.MODE_PRIVATE
                 );
                 sp.edit()
-                  .remove(KEY_BG_COLOR)
-                  .commit();
+                    .remove(getContext().getString(R.string.key_bg_color))
+                    .commit();
                 bgColor = 0;
                 initPaints(getContext());
                 invalidate();
@@ -1827,27 +1778,27 @@ public class MarketChartView extends View {
     public void clearSavedSettings() {
         try {
             getContext().getSharedPreferences(
-                    PREFS_CHART,
+                    getContext().getString(R.string.prefs_chart),
                     Context.MODE_PRIVATE
             ).edit().clear().commit();
 
             getContext().getSharedPreferences(
-                    PREFS_CANDLE,
+                    getContext().getString(R.string.prefs_candle),
                     Context.MODE_PRIVATE
             ).edit().clear().commit();
 
             getContext().getSharedPreferences(
-                    PREFS_MA,
+                    getContext().getString(R.string.prefs_ma),
                     Context.MODE_PRIVATE
             ).edit().clear().commit();
 
             getContext().getSharedPreferences(
-                    PREFS_CHART_SETTINGS,
+                    "chart_settings",
                     Context.MODE_PRIVATE
             ).edit().clear().commit();
 
             getContext().getSharedPreferences(
-                    PREFS_CHART_STATE,
+                    "chart_state_prefs",
                     Context.MODE_PRIVATE
             ).edit().clear().commit();
         } catch (Exception e) {
@@ -1936,22 +1887,22 @@ public class MarketChartView extends View {
     private void saveMaLines(Context context) {
         try {
             SharedPreferences sp = context.getSharedPreferences(
-                    PREFS_MA,
+                    context.getString(R.string.prefs_ma),
                     Context.MODE_PRIVATE
             );
             StringBuilder sb = new StringBuilder();
             for (int i = 0; i < maLines.size(); i++) {
                 MaLine m = maLines.get(i);
                 if (i > 0) {
-                    sb.append(SEP_SEMICOLON);
+                    sb.append(context.getString(R.string.sep_semicolon));
                 }
                 sb.append(m.period)
-                  .append(SEP_COMMA)
-                  .append(m.color);
+                    .append(context.getString(R.string.sep_comma))
+                    .append(m.color);
             }
             sp.edit()
-              .putString(KEY_MA, sb.toString())
-              .commit();
+                .putString(context.getString(R.string.key_ma), sb.toString())
+                .commit();
         } catch (Exception e) {
         }
     }
@@ -1959,20 +1910,20 @@ public class MarketChartView extends View {
     private boolean loadMaLinesFromPrefs(Context context) {
         try {
             SharedPreferences sp = context.getSharedPreferences(
-                    PREFS_MA,
+                    context.getString(R.string.prefs_ma),
                     Context.MODE_PRIVATE
             );
-            String s = sp.getString(KEY_MA, null);
+            String s = sp.getString(context.getString(R.string.key_ma), null);
             if (s == null || s.isEmpty()) {
                 return false;
             }
             String[] parts = s.split(
-                    SEP_SEMICOLON_REGEX
+                    context.getString(R.string.sep_semicolon_regex)
             );
             List<MaLine> list = new ArrayList<>();
             for (String p : parts) {
                 String[] kv = p.split(
-                        SEP_COMMA_REGEX
+                        context.getString(R.string.sep_comma_regex)
                 );
                 if (kv.length!= 2) {
                     continue;
@@ -1980,7 +1931,9 @@ public class MarketChartView extends View {
                 int period = Integer.parseInt(kv[0]);
                 int color = Integer.parseInt(kv[1]);
                 if (color == 0) {
-                    continue;
+                    throw new IllegalStateException(
+                            context.getString(R.string.err_ma_color_0)
+                    );
                 }
                 list.add(new MaLine(period, color));
             }
@@ -2011,12 +1964,16 @@ public class MarketChartView extends View {
     }
 
     public void setMaLines(List<MaLine> list) {
-        if (list == null || list.isEmpty()) {
-            return;
+        if (list == null) {
+            throw new IllegalStateException(
+                    getContext().getString(R.string.err_ma_empty)
+            );
         }
         for (MaLine m : list) {
             if (m.color == 0) {
-                return;
+                throw new IllegalStateException(
+                        getContext().getString(R.string.err_ma_color_0)
+                );
             }
         }
         this.maLines = new ArrayList<>(list);
@@ -2059,9 +2016,9 @@ public class MarketChartView extends View {
         try {
             themeBg = getThemeColor(android.R.attr.colorBackground);
         } catch (Exception ignored) {
-            themeBg = Color.BLACK;
-            setBackgroundColor(themeBg);
-            return;
+            throw new IllegalStateException(
+                    context.getString(R.string.err_theme_bg)
+            );
         }
 
         // bgColor==0 => auto theme, like just after reset
@@ -2235,13 +2192,13 @@ public class MarketChartView extends View {
             // Only override if user hasn't set custom vol colors in prefs
             try {
                 SharedPreferences sp = context.getSharedPreferences(
-                        PREFS_CHART,
+                        context.getString(R.string.prefs_chart),
                         Context.MODE_PRIVATE
                 );
-                if (!sp.contains(KEY_VOL_MA1_COLOR)) {
+                if (!sp.contains(context.getString(R.string.key_vol_ma1_color))) {
                     volMa1Color = maLines.get(0).color;
                 }
-                if (!sp.contains(KEY_VOL_MA2_COLOR)) {
+                if (!sp.contains(context.getString(R.string.key_vol_ma2_color))) {
                     volMa2Color = maLines.get(1).color;
                 }
             } catch (Exception e) {
@@ -2427,9 +2384,6 @@ public class MarketChartView extends View {
     }
 
     public void loadChart(String symbol, String interval) {
-        if (symbol == null || interval == null) {
-            return;
-        }
         this.currentSymbol = symbol;
         this.currentInterval = interval;
         this.selectedIndex = -1;
@@ -2451,7 +2405,9 @@ public class MarketChartView extends View {
 
     public void setFiatMultiplier(float mult) {
         if (mult <= 0f) {
-            return;
+            throw new IllegalStateException(
+                    getContext().getString(R.string.err_fiat_0)
+            );
         }
         this.fiatMultiplier = mult;
         invalidate();
@@ -2463,7 +2419,9 @@ public class MarketChartView extends View {
 
     private long getIntervalMillis(String interval) {
         if (interval == null) {
-            return 60_000L;
+            throw new IllegalStateException(
+                    getContext().getString(R.string.err_interval_null)
+            );
         }
         switch (interval) {
             case "1m":
@@ -2495,7 +2453,9 @@ public class MarketChartView extends View {
             case "1M":
                 return 30L * 24L * 60L * 60_000L;
             default:
-                return 60_000L;
+                throw new IllegalStateException(
+                        getContext().getString(R.string.err_unknown_interval, interval)
+                );
         }
     }
 
@@ -2519,7 +2479,7 @@ public class MarketChartView extends View {
                     if (getIntervalMillis(currentInterval) >= 24L * 60L * 60_000L) {
                         text = String.format(
                                 Locale.US,
-                                FMT_DHMS,
+                                getContext().getString(R.string.fmt_dhms),
                                 hours / 24L,
                                 hours % 24L,
                                 minutes,
@@ -2528,7 +2488,7 @@ public class MarketChartView extends View {
                     } else {
                         text = String.format(
                                 Locale.US,
-                                FMT_HMS,
+                                getContext().getString(R.string.fmt_hms),
                                 hours,
                                 minutes,
                                 seconds
@@ -2583,13 +2543,14 @@ public class MarketChartView extends View {
 
     private void fetchCandles() {
         if (currentSymbol == null || currentInterval == null) {
-            return;
+            throw new IllegalStateException(
+                    getContext().getString(R.string.err_symbol_null)
+            );
         }
         new Thread(() -> {
             try {
-                String urlString = String.format(
-                        Locale.US,
-                        URL_KLINES,
+                String urlString = getContext().getString(
+                        R.string.url_klines,
                         currentSymbol,
                         currentInterval,
                         FETCH_LIMIT
@@ -2665,9 +2626,8 @@ public class MarketChartView extends View {
         }
         new Thread(() -> {
             try {
-                String tickerUrl = String.format(
-                        Locale.US,
-                        URL_TICKER,
+                String tickerUrl = getContext().getString(
+                        R.string.url_ticker,
                         currentSymbol
                 );
                 HttpURLConnection connection = (HttpURLConnection)
@@ -2685,22 +2645,22 @@ public class MarketChartView extends View {
                 reader.close();
                 JSONObject jsonObject = new JSONObject(builder.toString());
                 float price = (float) jsonObject.getDouble(
-                        JSON_LAST_PRICE
+                        getContext().getString(R.string.json_lastPrice)
                 );
                 float high = (float) jsonObject.getDouble(
-                        JSON_HIGH_PRICE
+                        getContext().getString(R.string.json_highPrice)
                 );
                 float low = (float) jsonObject.getDouble(
-                        JSON_LOW_PRICE
+                        getContext().getString(R.string.json_lowPrice)
                 );
                 float volBtc = (float) jsonObject.getDouble(
-                        JSON_VOLUME
+                        getContext().getString(R.string.json_volume)
                 );
                 float volUsdt = (float) jsonObject.getDouble(
-                        JSON_QUOTE_VOLUME
+                        getContext().getString(R.string.json_quoteVolume)
                 );
                 float changePercent = (float) jsonObject.getDouble(
-                        JSON_PRICE_CHANGE_PERCENT
+                        getContext().getString(R.string.json_priceChangePercent)
                 );
                 mainHandler.post(() -> {
                     if (!data.isEmpty()) {
@@ -2815,7 +2775,9 @@ public class MarketChartView extends View {
                 - VOLUME_TOP_MARGIN_PX - volumeHeightPx - timeAxisHeight;
 
         if (priceChartHeight <= 0) {
-            return;
+            throw new IllegalStateException(
+                    getContext().getString(R.string.err_price_height)
+            );
         }
 
         drawGrid(canvas, chartWidth, priceChartHeight, volumeHeightPx);
@@ -3049,7 +3011,9 @@ public class MarketChartView extends View {
         );
 
         boolean isBigFiat = fiatMultiplier > BIG_FIAT_THRESHOLD;
-        String fmt = isBigFiat? FMT_PRICE_0 : FMT_PRICE_2;
+        String fmt = isBigFiat?
+                getContext().getString(R.string.fmt_price_0) :
+                getContext().getString(R.string.fmt_price_2);
 
         float labelH = PRICE_TEXT_OFFSET + TEXT_SIZE;
         float top = lastPriceY - labelH;
@@ -3074,7 +3038,9 @@ public class MarketChartView extends View {
 
     private void drawPriceAxis(Canvas canvas, DrawInfo info) {
         boolean isBigFiatAxis = fiatMultiplier > BIG_FIAT_THRESHOLD;
-        String axisFmt = isBigFiatAxis? FMT_PRICE_0 : FMT_PRICE_2;
+        String axisFmt = isBigFiatAxis?
+                getContext().getString(R.string.fmt_price_0) :
+                getContext().getString(R.string.fmt_price_2);
         for (int i = 0; i <= 4; i++) {
             float price = info.displayMax
                     - (info.displayMax - info.displayMin) * i / 4f;
