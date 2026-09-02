@@ -23,4 +23,6 @@
     <integer name="default_vol_ma1_period">5</integer>
     <integer name="default_vol_ma2_period">10</integer>
 
+    <integer name="chart_body_scale">100</integer>
+
 </resources>
