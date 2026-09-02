@@ -181,14 +181,14 @@
                 android:background="@color/chart_grid" />
         </LinearLayout>
 
-        <!-- Chart Options -->
+        <!-- Grid Settings - renamed from Chart Options, contains Show Grid + Grid Color -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
             <LinearLayout
-                android:id="@+id/headerOptions"
+                android:id="@+id/headerGrid"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
@@ -202,12 +202,12 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="@string/chart_settings_chart_options"
+                    android:text="@string/grid_settings_title"
                     android:textSize="14sp"
                     android:textStyle="bold" />
 
                 <TextView
-                    android:id="@+id/arrowOptions"
+                    android:id="@+id/arrowGrid"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/arrow_collapsed"
@@ -216,7 +216,7 @@
             </LinearLayout>
 
             <LinearLayout
-                android:id="@+id/containerOptions"
+                android:id="@+id/containerGrid"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
@@ -224,7 +224,7 @@
                 android:paddingEnd="8dp"
                 android:visibility="gone">
 
-                <include layout="@layout/chart_settings_options" />
+                <include layout="@layout/chart_settings_grid" />
             </LinearLayout>
 
             <View
@@ -393,7 +393,7 @@
                 android:background="@color/chart_grid" />
         </LinearLayout>
 
-        <!-- Apply và Reset -->
+        <!-- Apply and Reset -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
