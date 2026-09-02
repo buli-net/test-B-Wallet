@@ -4,6 +4,9 @@
     android:layout_height="wrap_content"
     android:orientation="vertical">
 
+    <!-- ===================== -->
+    <!-- BLOCK: Bullish Color -->
+    <!-- ===================== -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -25,6 +28,9 @@
             android:background="@drawable/color_picker_border" />
     </LinearLayout>
 
+    <!-- ===================== -->
+    <!-- BLOCK: Bearish Color -->
+    <!-- ===================== -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -46,6 +52,10 @@
             android:background="@drawable/color_picker_border" />
     </LinearLayout>
 
+    <!-- ===================== -->
+    <!-- BLOCK: Wick Width -->
+    <!-- FIX 2: Single source - only here -->
+    <!-- ===================== -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -67,6 +77,10 @@
             android:progress="2" />
     </LinearLayout>
 
+    <!-- ===================== -->
+    <!-- BLOCK: Body Width -->
+    <!-- FIX 2: Single source - only here -->
+    <!-- ===================== -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -88,6 +102,10 @@
             android:progress="20" />
     </LinearLayout>
 
+    <!-- ===================== -->
+    <!-- BLOCK: Visible Candles -->
+    <!-- FIX 6: Clean move from chart_settings_options.xml to here -->
+    <!-- ===================== -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
