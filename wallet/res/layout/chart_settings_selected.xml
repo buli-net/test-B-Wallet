@@ -1,94 +1,77 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:paddingTop="@dimen/default_top_padding"
+    android:paddingBottom="@dimen/default_bottom_padding">
 
-    <!-- Selected width -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:paddingVertical="4dp">
-
-        <TextView
-            android:id="@+id/lbSelectedW"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textSize="12sp" />
-
-        <SeekBar
-            android:id="@+id/sbSelectedW"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:max="10"
-            android:progress="2" />
-    </LinearLayout>
-
-    <!-- Selected alpha -->
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:paddingVertical="4dp">
-
-        <TextView
-            android:id="@+id/lbSelectedAlpha"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textSize="12sp" />
-
-        <SeekBar
-            android:id="@+id/sbSelectedAlpha"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:max="255"
-            android:progress="100" />
-    </LinearLayout>
-
-    <!-- Selected color -->
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center_vertical"
         android:orientation="horizontal"
-        android:paddingVertical="4dp">
+        android:gravity="center_vertical"
+        android:paddingVertical="8dp">
 
         <TextView
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="@string/chart_selected_line_color"
-            android:textSize="12sp" />
+            android:text="@string/chart_selected_line_color" />
 
         <View
             android:id="@+id/viewSelectedColor"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:background="@drawable/color_picker_border"
-            android:tag="#00BCD4" />
+            android:layout_width="@dimen/color_picker_size"
+            android:layout_height="@dimen/color_picker_size"
+            android:tag="@color/chart_selected_line" />
     </LinearLayout>
 
-    <!-- Selected dashed -->
+    <TextView
+        android:id="@+id/lbSelectedW"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="@string/chart_selected_line_width" />
+
+    <SeekBar
+        android:id="@+id/sbSelectedW"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:max="20"
+        android:progress="2" />
+
+    <TextView
+        android:id="@+id/lbSelectedAlpha"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="@string/chart_selected_line_alpha" />
+
+    <SeekBar
+        android:id="@+id/sbSelectedAlpha"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:max="255"
+        android:progress="100" />
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:gravity="center_vertical"
+        android:layout_marginTop="8dp"
         android:orientation="horizontal"
-        android:paddingVertical="4dp">
+        android:gravity="center_vertical"
+        android:paddingVertical="8dp">
 
         <TextView
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="@string/chart_selected_line_dashed"
-            android:textSize="12sp" />
+            android:text="@string/chart_selected_line_dashed" />
 
         <Switch
             android:id="@+id/swSelectedDash"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:checked="false" />
     </LinearLayout>
-
 </LinearLayout>
