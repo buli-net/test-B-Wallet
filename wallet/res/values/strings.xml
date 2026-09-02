@@ -566,8 +566,7 @@
     <string name="chart_settings_bearish">Bearish Color</string>
     <string name="chart_settings_ma">MA Settings</string>
     <string name="chart_settings_apply">Apply</string>
-    <string name="chart_settings_chart_options">Chart Options</string>
-    <string name="chart_show_grid">Show Grid</string>
+    
     <string name="chart_show_volume">Show Volume</string>
     <string name="chart_settings_current_price">Current Price Bar</string>
     <string name="chart_show_current_price_bar">Show Current Price Bar</string>
@@ -577,7 +576,7 @@
     <string name="chart_last_price_section">Last Price Line</string>
     <string name="chart_show_last_price">Show Last Price Line</string>
     <string name="chart_last_price_color">Last Price Color</string>
-    <string name="chart_grid_color">Grid Color</string>
+    
     <string name="chart_price_text_color">Price Text Color</string>
     <string name="chart_last_line_dashed">Dashed Last Line</string>
     <string name="chart_last_price_label_section">Current Price Label</string>
