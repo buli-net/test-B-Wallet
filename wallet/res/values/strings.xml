@@ -594,6 +594,10 @@
     <string name="chart_selected_line_alpha">Selected alpha: %d</string>
     <string name="chart_selected_line_dashed">Dashed Line</string>
 
+    <string name="grid_settings_title">Grid Settings</string>
+    <string name="grid_show_title">Show Grid</string>
+    <string name="grid_color_title">Grid Color</string>
+
     <!-- ===== BALANCE ===== -->
     <string name="balance_loading_wallet">Loading wallet…</string>
     <string name="balance_syncing">Syncing…</string>
