@@ -909,7 +909,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         SeekBar sbWickCandle = null;
         TextView lbBodyCandle = null;
         TextView lbWickCandle = null;
-        // FIX: moved Visible to Candle - add variables
+        // Thêm biến cho Visible
         SeekBar sbVisCandle = null;
         TextView lbVisCandle = null;
         if (containerCandle!= null) {
@@ -917,7 +917,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
             sbWickCandle = containerCandle.findViewById(R.id.sbWick);
             lbBodyCandle = containerCandle.findViewById(R.id.lbBody);
             lbWickCandle = containerCandle.findViewById(R.id.lbWick);
-            // FIX: moved Visible to Candle - get sbVis and lbVis from containerCandle
+            // Lấy sbVis và lbVis từ containerCandle
             sbVisCandle = containerCandle.findViewById(R.id.sbVis);
             lbVisCandle = containerCandle.findViewById(R.id.lbVis);
         }
@@ -1007,7 +1007,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
             state.sbWick = sbWickCandle;
         }
 
-        // FIX: moved Visible to Candle - handle sbVisCandle and lbVisCandle
+        // Xử lý Visible (đã di chuyển từ Chart Options lên đây)
         if (sbVisCandle != null && lbVisCandle != null) {
             int minVisPopup = getResources().getInteger(R.integer.min_visible_candle_count);
             int maxVisPopup = getResources().getInteger(R.integer.max_visible_candle_count);
@@ -1032,7 +1032,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
                 @Override public void onStopTrackingTouch(SeekBar seekBar) {}
             });
         }
-        // FIX: moved Visible to Candle - assign sbVis to state
+        // Gán vào state (có thể null nếu không có trong containerCandle)
         state.sbVis = sbVisCandle;
 
         if (headerCandle!= null && containerCandle!= null) {
@@ -1262,7 +1262,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
             });
         }
 
-        // 3. Chart options - MA width and Show Volume removed completely, only Grid (Visible moved to Candle)
+        // 3. Chart options - chỉ giữ Grid, đã xóa sbVis và lbVis
         View headerOptions = content.findViewById(R.id.headerOptions);
         TextView arrowOptions = content.findViewById(R.id.arrowOptions);
         View containerOptions = content.findViewById(R.id.containerOptions);
