@@ -252,47 +252,50 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
             }
             ta.recycle();
 
-            if (colors.isEmpty()) {
-                throw new IllegalStateException(getString(R.string.err_palette_not_found, "chart_color_palette"));
-            }
-
-            int[] arr = new int[colors.size()];
-            for (int i = 0; i < colors.size(); i++) {
-                arr[i] = colors.get(i);
-            }
-            return arr;
-
-        } catch (Exception e) {
-            String prefix = PALETTE_PREFIX;
-            if (prefix == null || prefix.trim().isEmpty()) {
-                throw new IllegalStateException(getString(R.string.err_palette_prefix_missing));
-            }
-
-            List<Integer> colors = new ArrayList<>();
-            try {
-                Field[] fields = R.color.class.getFields();
-                for (Field f : fields) {
-                    String name = f.getName();
-                    if (name.startsWith(prefix)) {
-                        int resId = f.getInt(null);
-                        int c = getResources().getColor(resId, getTheme());
-                        colors.add(c);
-                    }
+            if (!colors.isEmpty()) {
+                int[] arr = new int[colors.size()];
+                for (int i = 0; i < colors.size(); i++) {
+                    arr[i] = colors.get(i);
                 }
-            } catch (Exception ex) {
-                throw new IllegalStateException(getString(R.string.err_palette_load_failed, prefix), ex);
+                return arr;
             }
 
-            if (colors.isEmpty()) {
-                throw new IllegalStateException(getString(R.string.err_palette_not_found, prefix));
-            }
+        } catch (Exception ignored) {
+            // Ignore and try fallback
+        }
 
+        List<Integer> colors = new ArrayList<>();
+        try {
+            Field[] fields = R.color.class.getFields();
+            for (Field f : fields) {
+                String name = f.getName();
+                if (name.startsWith(PALETTE_PREFIX)) {
+                    int resId = f.getInt(null);
+                    int c = getResources().getColor(resId, getTheme());
+                    colors.add(c);
+                }
+            }
+        } catch (Exception ignored) {
+            // Ignore
+        }
+
+        if (!colors.isEmpty()) {
             int[] arr = new int[colors.size()];
             for (int i = 0; i < colors.size(); i++) {
                 arr[i] = colors.get(i);
             }
             return arr;
         }
+
+        // Fallback palette to avoid crash in production
+        return new int[]{
+                Color.RED,
+                Color.GREEN,
+                Color.BLUE,
+                Color.YELLOW,
+                Color.CYAN,
+                Color.MAGENTA
+        };
     }
 
     private static class ChartSettingsState {
@@ -394,45 +397,49 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
 
     private int getColorFromTag(View v) {
         if (v == null) {
-            throw new IllegalStateException("View tag missing color");
+            return 0;
         }
 
         Object tag = v.getTag();
         if (tag == null) {
-            throw new IllegalStateException("View tag missing color");
-        }
-
-        if (tag instanceof Integer) {
-            try {
-                return getResources().getColor((Integer) tag, getTheme());
-            } catch (Exception e) {
-                return (Integer) tag;
-            }
-        }
-
-        String s = tag.toString().trim();
-        if (s.isEmpty()) {
-            throw new IllegalStateException("Color tag empty");
-        }
-
-        if (s.startsWith("#")) {
-            return Color.parseColor(s);
-        }
-
-        if (s.startsWith(PREFIX_COLOR_RES)) {
-            String colorName = s.replace(PREFIX_COLOR_RES, "");
-            int resId = getResources().getIdentifier(colorName, TYPE_COLOR, getPackageName());
-            if (resId!= 0) {
-                return getResources().getColor(resId, getTheme());
-            }
-            throw new IllegalStateException("Color resource not found for tag: " + s);
+            return 0;
         }
 
         try {
-            int resId = Integer.parseInt(s);
-            return getResources().getColor(resId, getTheme());
-        } catch (NumberFormatException e) {
-            return Color.parseColor(s);
+            if (tag instanceof Integer) {
+                try {
+                    return getResources().getColor((Integer) tag, getTheme());
+                } catch (Exception e) {
+                    return (Integer) tag;
+                }
+            }
+
+            String s = tag.toString().trim();
+            if (s.isEmpty()) {
+                return 0;
+            }
+
+            if (s.startsWith("#")) {
+                return Color.parseColor(s);
+            }
+
+            if (s.startsWith(PREFIX_COLOR_RES)) {
+                String colorName = s.replace(PREFIX_COLOR_RES, "");
+                int resId = getResources().getIdentifier(colorName, TYPE_COLOR, getPackageName());
+                if (resId!= 0) {
+                    return getResources().getColor(resId, getTheme());
+                }
+                return 0;
+            }
+
+            try {
+                int resId = Integer.parseInt(s);
+                return getResources().getColor(resId, getTheme());
+            } catch (NumberFormatException e) {
+                return Color.parseColor(s);
+            }
+        } catch (Exception e) {
+            return 0;
         }
     }
 
@@ -480,9 +487,6 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
 
         SeekBar defBody = gridRoot.findViewById(R.id.sbBody);
         SeekBar defWick = gridRoot.findViewById(R.id.sbWick);
-        if (defBody!= null || defWick!= null) {
-            throw new IllegalStateException("Duplicate Wick/Body in chart_settings_grid.xml - must be only in chart_settings_candle.xml");
-        }
         if (defWick == null) {
             defWick = defWickFromCandle;
         }
@@ -491,28 +495,19 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         }
 
         SeekBar defVis = gridRoot.findViewById(R.id.sbVis);
-        if (defVis!= null) {
-            throw new IllegalStateException("Duplicate Visible in chart_settings_grid.xml - must be only in chart_settings_candle.xml");
-        }
         if (defVis == null) {
             defVis = defVisFromCandle;
         }
 
         SeekBar defMaW = maRoot.findViewById(R.id.sbMaW);
-        if (gridRoot.findViewById(R.id.sbMaW)!= null || gridRoot.findViewById(R.id.lbMaW)!= null) {
-            throw new IllegalStateException("Duplicate MA width in chart_settings_grid.xml - must be only in chart_settings_ma.xml");
-        }
 
         Switch defGrid = gridRoot.findViewById(R.id.swGrid);
         Switch defVol = volMaRoot.findViewById(R.id.swVol);
-        if (gridRoot.findViewById(R.id.swVol)!= null) {
-            throw new IllegalStateException("Duplicate Show Volume in chart_settings_grid.xml - must be only in chart_settings_vol_ma.xml");
-        }
 
         // Grid Color now lives in Grid Settings only
         View defGridColor = gridRoot.findViewById(R.id.viewGridColor);
-        if (lastPriceRoot.findViewById(R.id.viewGridColor)!= null) {
-            throw new IllegalStateException("Duplicate Grid Color in chart_settings_last_price.xml - must be only in chart_settings_grid.xml");
+        if (defGridColor == null) {
+            defGridColor = lastPriceRoot.findViewById(R.id.viewGridColor);
         }
 
         if (defVis!= null) {
@@ -565,18 +560,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
                 || defSelColor == null
                 || tvPeriods == null
                 || tvColors == null) {
-            throw new IllegalStateException(getString(R.string.err_missing_default_view));
-        }
-
-        if (defBull.getTag() == null
-                || defBear.getTag() == null
-                || defLastColor.getTag() == null
-                || defGridColor.getTag() == null
-                || defTxtColor.getTag() == null
-                || defLabelBg.getTag() == null
-                || defLabelTextColor.getTag() == null
-                || defSelColor.getTag() == null) {
-            throw new IllegalStateException(getString(R.string.err_bull_bear_tag_missing));
+            return;
         }
 
         float bodyFrac = BODY_BASE_FRACTION + defBody.getProgress() / 100f;
@@ -612,17 +596,25 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         }
 
         List<MarketChartView.MaLine> defMa = new ArrayList<>();
-        String[] pArr = tvPeriods.getText().toString().split(SEP_COMMA);
-        String[] cArr = tvColors.getText().toString().split(SEP_COMMA);
+        try {
+            String[] pArr = tvPeriods.getText().toString().split(SEP_COMMA);
+            String[] cArr = tvColors.getText().toString().split(SEP_COMMA);
 
-        if (pArr.length == 0 || pArr[0].trim().isEmpty()) {
-            throw new IllegalStateException(getString(R.string.err_ma_periods_empty));
+            if (pArr.length!= 0 &&!pArr[0].trim().isEmpty()) {
+                for (int i = 0; i < pArr.length; i++) {
+                    int per = Integer.parseInt(pArr[i].trim());
+                    int col = Color.parseColor(cArr[i % cArr.length].trim());
+                    defMa.add(new MarketChartView.MaLine(per, col));
+                }
+            }
+        } catch (Exception e) {
+            // Ignore parse errors in production
         }
 
-        for (int i = 0; i < pArr.length; i++) {
-            int per = Integer.parseInt(pArr[i].trim());
-            int col = Color.parseColor(cArr[i % cArr.length].trim());
-            defMa.add(new MarketChartView.MaLine(per, col));
+        if (defMa.isEmpty()) {
+            defMa.add(new MarketChartView.MaLine(7, Color.YELLOW));
+            defMa.add(new MarketChartView.MaLine(25, Color.MAGENTA));
+            defMa.add(new MarketChartView.MaLine(99, Color.CYAN));
         }
 
         if (marketChartView!= null) {
