@@ -1,5 +1,3 @@
-
-}
 /*
  * Copyright (c) 2024
  *
@@ -82,6 +80,7 @@ import wallet.exchangerate.ExchangeRatesRepository;
  * Added: Volume MA section - separate module, XML-driven, no hardcoded values.
  * FIX 2: Candle Wick/Body realtime preview, single source in Candle Settings only.
  * FIX 3: White color bug - 0xFFFFFFFF = -1 was treated as unset, fixed with contains() check like other pickers
+ * FIX 4: Move MA width from Chart Options to MA Settings
  */
 public class MarketChartActivity extends Activity implements ViewModelStoreOwner, LifecycleOwner {
 
@@ -486,7 +485,14 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
             defBody = defBodyFromCandle;
         }
 
-        SeekBar defMaW = optionsRoot.findViewById(R.id.sbMaW);
+        // FIX 4: MA width moved from options to MA layout
+        SeekBar defMaW = maRoot.findViewById(R.id.sbMaW);
+
+        // Enforce single source: MA width must be in MA layout only, not in options
+        if (optionsRoot.findViewById(R.id.sbMaW)!= null || optionsRoot.findViewById(R.id.lbMaW)!= null) {
+            throw new IllegalStateException("Duplicate MA width in chart_settings_options.xml - must be only in chart_settings_ma.xml");
+        }
+
         SeekBar defVis = optionsRoot.findViewById(R.id.sbVis);
         Switch defGrid = optionsRoot.findViewById(R.id.swGrid);
         Switch defVol = optionsRoot.findViewById(R.id.swVol);
@@ -1060,8 +1066,14 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
                         marketChartView.invalidate();
                     }
                 }
-                @Override public void onStartTrackingTouch(SeekBar seekBar) {}
-                @Override public void onStopTrackingTouch(SeekBar seekBar) {}
+
+                @Override
+                public void onStartTrackingTouch(SeekBar seekBar) {
+                }
+
+                @Override
+                public void onStopTrackingTouch(SeekBar seekBar) {
+                }
             });
         }
         if (sbWickCandle!= null) {
@@ -1079,8 +1091,14 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
                         marketChartView.invalidate();
                     }
                 }
-                @Override public void onStartTrackingTouch(SeekBar seekBar) {}
-                @Override public void onStopTrackingTouch(SeekBar seekBar) {}
+
+                @Override
+                public void onStartTrackingTouch(SeekBar seekBar) {
+                }
+
+                @Override
+                public void onStopTrackingTouch(SeekBar seekBar) {
+                }
             });
         }
         // Assign to state so Apply still works
@@ -1108,7 +1126,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
             });
         }
 
-        // 2. MA settings
+        // 2. MA settings - FIX 4: MA width moved here from Chart Options
         View headerMa = content.findViewById(R.id.headerMa);
         TextView arrowMa = content.findViewById(R.id.arrowMa);
         View containerMa = content.findViewById(R.id.containerMa);
@@ -1138,6 +1156,44 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
                     state.recycler.getAdapter().notifyDataSetChanged();
                 }
             });
+        }
+
+        // FIX 4: MA width UI now inside MA Settings container
+        if (containerMa!= null) {
+            state.sbMaW = containerMa.findViewById(R.id.sbMaW);
+            TextView lbMaW = containerMa.findViewById(R.id.lbMaW);
+
+            if (state.sbMaW!= null) {
+                state.sbMaW.setProgress((int) marketChartView.getMaLineWidthPx());
+            }
+
+            if (lbMaW!= null && state.sbMaW!= null) {
+                int p = Math.max(1, state.sbMaW.getProgress());
+                lbMaW.setText(getString(R.string.chart_ma_line_width, p));
+            }
+
+            if (state.sbMaW!= null && lbMaW!= null) {
+                state.sbMaW.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+                    @Override
+                    public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                        int p = Math.max(1, progress);
+                        lbMaW.setText(getString(R.string.chart_ma_line_width, p));
+                        // Realtime preview
+                        if (marketChartView!= null) {
+                            marketChartView.setMaLineWidthPx(p);
+                            marketChartView.invalidate();
+                        }
+                    }
+
+                    @Override
+                    public void onStartTrackingTouch(SeekBar seekBar) {
+                    }
+
+                    @Override
+                    public void onStopTrackingTouch(SeekBar seekBar) {
+                    }
+                });
+            }
         }
 
         if (headerMa!= null && containerMa!= null) {
@@ -1241,8 +1297,14 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
                             state.tvVolMa1Period.setText(String.valueOf(p));
                         }
                     }
-                    @Override public void onStartTrackingTouch(SeekBar seekBar) {}
-                    @Override public void onStopTrackingTouch(SeekBar seekBar) {}
+
+                    @Override
+                    public void onStartTrackingTouch(SeekBar seekBar) {
+                    }
+
+                    @Override
+                    public void onStopTrackingTouch(SeekBar seekBar) {
+                    }
                 });
             }
             if (state.sbVolMa2Period!= null) {
@@ -1255,8 +1317,14 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
                             state.tvVolMa2Period.setText(String.valueOf(p));
                         }
                     }
-                    @Override public void onStartTrackingTouch(SeekBar seekBar) {}
-                    @Override public void onStopTrackingTouch(SeekBar seekBar) {}
+
+                    @Override
+                    public void onStartTrackingTouch(SeekBar seekBar) {
+                    }
+
+                    @Override
+                    public void onStopTrackingTouch(SeekBar seekBar) {
+                    }
                 });
             }
             if (state.sbVolMaW!= null && lbVolMaW!= null) {
@@ -1266,8 +1334,14 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
                         state.curVolMaW[0] = Math.max(1, progress);
                         lbVolMaW.setText(getString(R.string.chart_last_line_width, Math.max(1, progress)));
                     }
-                    @Override public void onStartTrackingTouch(SeekBar seekBar) {}
-                    @Override public void onStopTrackingTouch(SeekBar seekBar) {}
+
+                    @Override
+                    public void onStartTrackingTouch(SeekBar seekBar) {
+                    }
+
+                    @Override
+                    public void onStopTrackingTouch(SeekBar seekBar) {
+                    }
                 });
             }
 
@@ -1288,26 +1362,27 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         }
 
         // 3. Chart options - MUST NOT contain Wick/Body, enforce error if duplicate
+        // FIX 4: Also must NOT contain MA width anymore
         View headerOptions = content.findViewById(R.id.headerOptions);
         TextView arrowOptions = content.findViewById(R.id.arrowOptions);
         View containerOptions = content.findViewById(R.id.containerOptions);
 
-        // Enforce: if options XML still has sbBody/sbWick, throw immediately
+        // Enforce: if options XML still has sbBody/sbWick or sbMaW, throw immediately
         if (containerOptions!= null) {
             if (containerOptions.findViewById(R.id.sbBody)!= null
                     || containerOptions.findViewById(R.id.sbWick)!= null
                     || containerOptions.findViewById(R.id.lbBody)!= null
-                    || containerOptions.findViewById(R.id.lbWick)!= null) {
-                throw new IllegalStateException("Duplicate Wick/Body in chart_settings_options.xml - must be only in chart_settings_candle.xml");
+                    || containerOptions.findViewById(R.id.lbWick)!= null
+                    || containerOptions.findViewById(R.id.sbMaW)!= null
+                    || containerOptions.findViewById(R.id.lbMaW)!= null) {
+                throw new IllegalStateException("Duplicate Wick/Body or MA width in chart_settings_options.xml - must be only in chart_settings_candle.xml and chart_settings_ma.xml");
             }
         }
 
-        state.sbMaW = containerOptions.findViewById(R.id.sbMaW);
         state.sbVis = containerOptions.findViewById(R.id.sbVis);
         state.swGrid = containerOptions.findViewById(R.id.swGrid);
         state.swVol = containerOptions.findViewById(R.id.swVol);
 
-        TextView lbMaW = containerOptions.findViewById(R.id.lbMaW);
         TextView lbVis = containerOptions.findViewById(R.id.lbVis);
 
         int minVisPopup = getResources().getInteger(R.integer.min_visible_candle_count);
@@ -1318,10 +1393,6 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
                 state.sbVis.setMin(minVisPopup);
             }
-        }
-
-        if (state.sbMaW!= null) {
-            state.sbMaW.setProgress((int) marketChartView.getMaLineWidthPx());
         }
 
         if (state.sbVis!= null) {
@@ -1336,30 +1407,8 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
             state.swVol.setChecked(marketChartView.isShowVolume());
         }
 
-        if (lbMaW!= null && state.sbMaW!= null) {
-            int p = Math.max(1, state.sbMaW.getProgress());
-            lbMaW.setText(getString(R.string.chart_ma_line_width, p));
-        }
-
         if (lbVis!= null && state.sbVis!= null) {
             lbVis.setText(getString(R.string.chart_visible_candles, state.sbVis.getProgress()));
-        }
-
-        if (state.sbMaW!= null && lbMaW!= null) {
-            state.sbMaW.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-                @Override
-                public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                    int p = Math.max(1, progress);
-                    lbMaW.setText(getString(R.string.chart_ma_line_width, p));
-                    // Realtime
-                    if (marketChartView!= null) {
-                        marketChartView.setMaLineWidthPx(p);
-                        marketChartView.invalidate();
-                    }
-                }
-                @Override public void onStartTrackingTouch(SeekBar seekBar) {}
-                @Override public void onStopTrackingTouch(SeekBar seekBar) {}
-            });
         }
 
         if (state.sbVis!= null && lbVis!= null) {
@@ -1373,8 +1422,14 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
                         marketChartView.invalidate();
                     }
                 }
-                @Override public void onStartTrackingTouch(SeekBar seekBar) {}
-                @Override public void onStopTrackingTouch(SeekBar seekBar) {}
+
+                @Override
+                public void onStartTrackingTouch(SeekBar seekBar) {
+                }
+
+                @Override
+                public void onStopTrackingTouch(SeekBar seekBar) {
+                }
             });
         }
 
@@ -1468,8 +1523,14 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
                         marketChartView.invalidate();
                     }
                 }
-                @Override public void onStartTrackingTouch(SeekBar seekBar) {}
-                @Override public void onStopTrackingTouch(SeekBar seekBar) {}
+
+                @Override
+                public void onStartTrackingTouch(SeekBar seekBar) {
+                }
+
+                @Override
+                public void onStopTrackingTouch(SeekBar seekBar) {
+                }
             });
         }
 
@@ -1485,8 +1546,14 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
                         marketChartView.invalidate();
                     }
                 }
-                @Override public void onStartTrackingTouch(SeekBar seekBar) {}
-                @Override public void onStopTrackingTouch(SeekBar seekBar) {}
+
+                @Override
+                public void onStartTrackingTouch(SeekBar seekBar) {
+                }
+
+                @Override
+                public void onStopTrackingTouch(SeekBar seekBar) {
+                }
             });
         }
 
@@ -1603,8 +1670,14 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
                         marketChartView.invalidate();
                     }
                 }
-                @Override public void onStartTrackingTouch(SeekBar seekBar) {}
-                @Override public void onStopTrackingTouch(SeekBar seekBar) {}
+
+                @Override
+                public void onStartTrackingTouch(SeekBar seekBar) {
+                }
+
+                @Override
+                public void onStopTrackingTouch(SeekBar seekBar) {
+                }
             });
         }
 
@@ -1723,8 +1796,14 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
                             marketChartView.invalidate();
                         }
                     }
-                    @Override public void onStartTrackingTouch(SeekBar seekBar) {}
-                    @Override public void onStopTrackingTouch(SeekBar seekBar) {}
+
+                    @Override
+                    public void onStartTrackingTouch(SeekBar seekBar) {
+                    }
+
+                    @Override
+                    public void onStopTrackingTouch(SeekBar seekBar) {
+                    }
                 });
             }
 
@@ -1739,8 +1818,14 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
                             marketChartView.invalidate();
                         }
                     }
-                    @Override public void onStartTrackingTouch(SeekBar seekBar) {}
-                    @Override public void onStopTrackingTouch(SeekBar seekBar) {}
+
+                    @Override
+                    public void onStartTrackingTouch(SeekBar seekBar) {
+                    }
+
+                    @Override
+                    public void onStopTrackingTouch(SeekBar seekBar) {
+                    }
                 });
             }
 
@@ -1843,6 +1928,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         if (state.sbWick!= null) {
             wickW = Math.max(1, state.sbWick.getProgress());
         }
+        // FIX 4: MA width now from MA Settings, not Chart Options
         float maW = state.sbMaW!= null? Math.max(1, state.sbMaW.getProgress()) : 2f;
         int visCount = state.sbVis!= null? state.sbVis.getProgress() : 100;
         boolean showG = state.swGrid!= null? state.swGrid.isChecked() : true;
@@ -2180,22 +2266,36 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
             return R.string.more;
         }
         switch (interval) {
-            case "1m": return R.string.interval_1m;
-            case "3m": return R.string.interval_3m;
-            case "5m": return R.string.interval_5m;
-            case "15m": return R.string.interval_15m;
-            case "30m": return R.string.interval_30m;
-            case "1h": return R.string.interval_1h;
-            case "2h": return R.string.interval_2h;
-            case "4h": return R.string.interval_4h;
-            case "6h": return R.string.interval_6h;
-            case "12h": return R.string.interval_12h;
+            case "1m":
+                return R.string.interval_1m;
+            case "3m":
+                return R.string.interval_3m;
+            case "5m":
+                return R.string.interval_5m;
+            case "15m":
+                return R.string.interval_15m;
+            case "30m":
+                return R.string.interval_30m;
+            case "1h":
+                return R.string.interval_1h;
+            case "2h":
+                return R.string.interval_2h;
+            case "4h":
+                return R.string.interval_4h;
+            case "6h":
+                return R.string.interval_6h;
+            case "12h":
+                return R.string.interval_12h;
             case "1d":
-            case "1D": return R.string.interval_1d;
+            case "1D":
+                return R.string.interval_1d;
             case "1w":
-            case "1W": return R.string.interval_1w;
-            case "1M": return R.string.interval_1M;
-            default: return R.string.more;
+            case "1W":
+                return R.string.interval_1w;
+            case "1M":
+                return R.string.interval_1M;
+            default:
+                return R.string.more;
         }
     }
 
