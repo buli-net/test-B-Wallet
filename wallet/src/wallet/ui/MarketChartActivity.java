@@ -425,12 +425,12 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
             defBody = defBodyFromCandle;
         }
 
-        // FIX 3: Visible now lives in Candle Settings only - clean move from Chart Options
-        SeekBar defVisInOptions = optionsRoot.findViewById(R.id.sbVis);
-        if (defVisInOptions!= null) {
+        // FIX 3: Visible moved to Candle Settings - must be only in candle layout
+        SeekBar defVis = defVisFromCandle;
+        SeekBar defVisDup = optionsRoot.findViewById(R.id.sbVis);
+        if (defVisDup!= null) {
             throw new IllegalStateException("Duplicate Visible in chart_settings_options.xml - must be only in chart_settings_candle.xml");
         }
-        SeekBar defVis = defVisFromCandle;
 
         // FIX 4: MA width now lives in MA layout only - clean move
         SeekBar defMaW = maRoot.findViewById(R.id.sbMaW);
@@ -955,13 +955,31 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
             });
         }
 
-        // Body Width Control: Adjusts the body fraction of candles
         if (sbBodyCandle!= null) {
             sbBodyCandle.setProgress((int) ((marketChartView.getBodyWidthFraction() - BODY_BASE_FRACTION) * 100));
+        }
+        if (sbWickCandle!= null) {
+            sbWickCandle.setProgress((int) marketChartView.getWickWidthPx());
+        }
+        if (sbVisCandle!= null) {
+            int minVisPopup = getResources().getInteger(R.integer.min_visible_candle_count);
+            int maxVisPopup = getResources().getInteger(R.integer.max_visible_candle_count);
+            sbVisCandle.setMax(maxVisPopup);
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                sbVisCandle.setMin(minVisPopup);
+            }
+            sbVisCandle.setProgress(marketChartView.getVisibleCandleCountValue());
         }
         if (lbBodyCandle!= null && sbBodyCandle!= null) {
             float fraction = BODY_BASE_FRACTION + sbBodyCandle.getProgress() / 100f;
             lbBodyCandle.setText(getString(R.string.chart_body_width, String.format(Locale.US, "%.2f", fraction)));
+        }
+        if (lbWickCandle!= null && sbWickCandle!= null) {
+            int p = Math.max(1, sbWickCandle.getProgress());
+            lbWickCandle.setText(getString(R.string.chart_wick_width, p));
+        }
+        if (lbVisCandle!= null && sbVisCandle!= null) {
+            lbVisCandle.setText(getString(R.string.chart_visible_candles, sbVisCandle.getProgress()));
         }
         if (sbBodyCandle!= null) {
             final TextView finalLbBodyCandle = lbBodyCandle;
@@ -981,15 +999,6 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
                 @Override public void onStopTrackingTouch(SeekBar seekBar) {}
             });
         }
-
-        // Wick Width Control: Adjusts the width of candle wicks
-        if (sbWickCandle!= null) {
-            sbWickCandle.setProgress((int) marketChartView.getWickWidthPx());
-        }
-        if (lbWickCandle!= null && sbWickCandle!= null) {
-            int p = Math.max(1, sbWickCandle.getProgress());
-            lbWickCandle.setText(getString(R.string.chart_wick_width, p));
-        }
         if (sbWickCandle!= null) {
             final TextView finalLbWickCandle = lbWickCandle;
             sbWickCandle.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
@@ -1008,20 +1017,6 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
                 @Override public void onStopTrackingTouch(SeekBar seekBar) {}
             });
         }
-
-        // Visible Candle Count Control: Moved from Chart Options to Candle Settings - Controls number of visible candles
-        if (sbVisCandle!= null) {
-            int minVisPopup = getResources().getInteger(R.integer.min_visible_candle_count);
-            int maxVisPopup = getResources().getInteger(R.integer.max_visible_candle_count);
-            sbVisCandle.setMax(maxVisPopup);
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-                sbVisCandle.setMin(minVisPopup);
-            }
-            sbVisCandle.setProgress(marketChartView.getVisibleCandleCountValue());
-        }
-        if (lbVisCandle!= null && sbVisCandle!= null) {
-            lbVisCandle.setText(getString(R.string.chart_visible_candles, sbVisCandle.getProgress()));
-        }
         if (sbVisCandle!= null) {
             final TextView finalLbVisCandle = lbVisCandle;
             sbVisCandle.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
@@ -1039,7 +1034,6 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
                 @Override public void onStopTrackingTouch(SeekBar seekBar) {}
             });
         }
-
         if (sbBodyCandle!= null) {
             state.sbBody = sbBodyCandle;
         }
@@ -1277,12 +1271,11 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
             });
         }
 
-        // 3. Chart options - Visible moved to Candle Settings, only Grid remains
+        // 3. Chart options - MA width and Show Volume removed, only Grid
         View headerOptions = content.findViewById(R.id.headerOptions);
         TextView arrowOptions = content.findViewById(R.id.arrowOptions);
         View containerOptions = content.findViewById(R.id.containerOptions);
 
-        // Chart Options now contains only Show Grid - Visible has been moved to Candle Settings
         state.swGrid = containerOptions.findViewById(R.id.swGrid);
 
         if (state.swGrid!= null) {
