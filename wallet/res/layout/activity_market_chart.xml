@@ -53,7 +53,7 @@
                 android:id="@+id/textWalletBalance"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/default_price_text_margin"
+                android:layout_marginTop="@dimen/default_tiny_margin"
                 android:ellipsize="end"
                 android:singleLine="true"
                 android:text="@string/chart_balance_default"
@@ -64,7 +64,7 @@
                 android:id="@+id/textCountdown"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/default_price_text_margin"
+                android:layout_marginTop="@dimen/default_tiny_margin"
                 android:singleLine="true"
                 android:text="@string/chart_countdown_default"
                 android:textColor="?android:attr/textColorSecondary"
@@ -136,8 +136,8 @@
         android:id="@+id/textMaLabel"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/vol_setting_padding_vertical"
-        android:layout_marginBottom="@dimen/default_small_margin"
+        android:layout_marginTop="@dimen/default_ma_label_margin_top"
+        android:layout_marginBottom="@dimen/default_ma_label_margin_bottom"
         android:ellipsize="end"
         android:paddingStart="@dimen/default_screen_padding"
         android:paddingEnd="@dimen/default_screen_padding"
@@ -168,15 +168,15 @@
                 android:layout_height="wrap_content"
                 android:gravity="center_vertical"
                 android:orientation="horizontal"
-                android:paddingStart="@dimen/default_price_text_margin"
-                android:paddingEnd="@dimen/vol_setting_padding_vertical" />
+                android:paddingStart="@dimen/default_chip_padding_start"
+                android:paddingEnd="@dimen/default_chip_padding_end" />
 
         </HorizontalScrollView>
 
         <ImageView
             android:id="@+id/btnChartSettings"
-            android:layout_width="@dimen/default_price_axis_width"
-            android:layout_height="@dimen/default_price_axis_width"
+            android:layout_width="@dimen/default_icon_button_size"
+            android:layout_height="@dimen/default_icon_button_size"
             android:layout_marginEnd="@dimen/default_price_text_margin"
             android:background="?android:attr/selectableItemBackgroundBorderless"
             android:contentDescription="@string/chart_settings_title"
