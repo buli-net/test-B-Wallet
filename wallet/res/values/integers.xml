@@ -21,4 +21,11 @@
     <integer name="max_ma_count">10</integer>
     <integer name="max_ma_period">500</integer>
     <integer name="min_ma_period">1</integer>
+
+    <!-- Fetch & Network - thiếu trước đó -->
+    <integer name="default_fetch_limit">300</integer>
+    <integer name="default_network_timeout">10000</integer>
+    <integer name="default_live_refresh_interval">30000</integer>
+    <integer name="default_countdown_interval">1000</integer>
+    <integer name="default_big_fiat_threshold">1000</integer>
 </resources>
