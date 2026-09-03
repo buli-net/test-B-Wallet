@@ -65,6 +65,7 @@
     <!-- Vol MA default colors -->
     <color name="chart_vol_ma1_default">#FFC107</color>
     <color name="chart_vol_ma2_default">#2196F3</color>
+    <color name="chart_vol_ma3_default">#E91E63</color>
     <color name="chart_grid_color_default">#1F000000</color>
 
     <!-- Paint XP 28 màu - loader lấy theo prefix palette_ -->
