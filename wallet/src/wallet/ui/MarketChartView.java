@@ -312,8 +312,12 @@ public class MarketChartView extends View {
                .getDimension(R.dimen.default_candle_min_height);
         FETCH_LIMIT = context.getResources()
                .getInteger(R.integer.default_fetch_limit);
-        // MIN_VISIBLE_CANDLE_COUNT và MAX_VISIBLE_CANDLE_COUNT được lấy từ layout qua setDefaultsFromLayout()
-        // Không đọc từ integers.xml nữa
+        MIN_VISIBLE_CANDLE_COUNT = context.getResources()
+               .getInteger(R.integer.min_visible_candle_count);
+        MAX_VISIBLE_CANDLE_COUNT = context.getResources()
+               .getInteger(R.integer.max_visible_candle_count);
+        DEFAULT_VISIBLE_CANDLE_COUNT = context.getResources()
+               .getInteger(R.integer.default_visible_candle_count);
         VOLUME_ALPHA = context.getResources()
                .getInteger(R.integer.volume_alpha);
         SELECTED_ALPHA = context.getResources()
@@ -334,11 +338,6 @@ public class MarketChartView extends View {
         volMa1Period = context.getResources().getInteger(R.integer.default_vol_ma1_period);
         volMa2Period = context.getResources().getInteger(R.integer.default_vol_ma2_period);
         volMaWidthPx = context.getResources().getDimension(R.dimen.default_vol_ma_width);
-        
-        // Giá trị mặc định cho clamp, sẽ được ghi đè bởi setDefaultsFromLayout()
-        MIN_VISIBLE_CANDLE_COUNT = 1;
-        MAX_VISIBLE_CANDLE_COUNT = 10000;
-        DEFAULT_VISIBLE_CANDLE_COUNT = 70;
     }
 
     public void setViewDimensionsFromLayout(int topPad, int bottomPad, int volumeHeight,
