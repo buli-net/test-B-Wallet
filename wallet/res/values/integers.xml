@@ -1,28 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Fetch & live update -->
-    <integer name="default_fetch_limit">300</integer>
-    <integer name="fetch_limit">300</integer>
-    <integer name="live_refresh_interval">1000</integer>
-    <integer name="countdown_interval">1000</integer>
-
-    <!-- Visible candle count - từ SeekBar trong chart_settings_options.xml -->
+    <!-- Visible Candle - sbVis đọc từ đây qua XML -->
     <integer name="min_visible_candle_count">10</integer>
     <integer name="max_visible_candle_count">260</integer>
     <integer name="default_visible_candle_count">70</integer>
 
-    <!-- Paint alpha -->
+    <!-- Chart Body - sbBody đọc qua XML -->
+    <integer name="chart_body_scale">100</integer>
+
+    <!-- Alpha -->
     <integer name="volume_alpha">255</integer>
     <integer name="selected_alpha">120</integer>
 
-    <!-- Threshold & timeout -->
-    <integer name="big_fiat_threshold">100</integer>
-    <integer name="network_timeout">8000</integer>
+    <!-- MA Periods - et_period đọc qua tag -->
+    <integer name="default_vol_ma1_period">7</integer>
+    <integer name="default_vol_ma2_period">25</integer>
+    <integer name="default_vol_ma3_period">99</integer>
 
-    <!-- Vol-Ma -->
-    <integer name="default_vol_ma1_period">5</integer>
-    <integer name="default_vol_ma2_period">10</integer>
-
-    <integer name="chart_body_scale">100</integer>
-
+    <!-- MA Max -->
+    <integer name="max_ma_count">10</integer>
+    <integer name="max_ma_period">500</integer>
+    <integer name="min_ma_period">1</integer>
 </resources>
