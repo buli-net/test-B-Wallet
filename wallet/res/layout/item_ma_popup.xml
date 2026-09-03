@@ -25,8 +25,7 @@
         android:inputType="number"
         android:textColor="?android:attr/textColorPrimary"
         android:textColorHint="?android:attr/textColorSecondary"
-        android:textSize="@dimen/default_text_size"
-        android:tag="@integer/default_vol_ma1_period" />
+        android:textSize="@dimen/default_text_size" />
 
     <View
         android:id="@+id/view_color"
@@ -34,10 +33,7 @@
         android:layout_height="@dimen/color_picker_size"
         android:layout_marginStart="@dimen/default_popup_padding"
         android:layout_marginEnd="@dimen/default_popup_padding"
-        android:background="@drawable/color_picker_border"
-        android:tag="@color/chart_vol_ma1_default"
-        android:clickable="true"
-        android:focusable="true" />
+        android:background="@drawable/color_picker_border" />
 
     <TextView
         android:id="@+id/btn_delete"
@@ -47,72 +43,6 @@
         android:gravity="center"
         android:text="@string/delete"
         android:textColor="?android:attr/textColorPrimary"
-        android:textSize="@dimen/vol_label_text_size"
-        android:clickable="true"
-        android:focusable="true" />
-
-    <!-- Default values for Activity to read via tag - law compliance -->
-    <View
-        android:id="@+id/def_vol_value_width"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:visibility="gone"
-        android:tag="@dimen/vol_value_width" />
-
-    <View
-        android:id="@+id/def_default_button_height"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:visibility="gone"
-        android:tag="@dimen/default_button_height" />
-
-    <View
-        android:id="@+id/def_color_picker_size"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:visibility="gone"
-        android:tag="@dimen/color_picker_size" />
-
-    <View
-        android:id="@+id/def_default_popup_padding"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:visibility="gone"
-        android:tag="@dimen/default_popup_padding" />
-
-    <View
-        android:id="@+id/def_price_text_margin"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:visibility="gone"
-        android:tag="@dimen/default_price_text_margin" />
-
-    <View
-        android:id="@+id/def_vol_label_text_size"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:visibility="gone"
-        android:tag="@dimen/vol_label_text_size" />
-
-    <View
-        android:id="@+id/def_default_text_size"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:visibility="gone"
-        android:tag="@dimen/default_text_size" />
-
-    <View
-        android:id="@+id/def_period"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:visibility="gone"
-        android:tag="@integer/default_vol_ma1_period" />
-
-    <View
-        android:id="@+id/def_color"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:visibility="gone"
-        android:tag="@color/chart_vol_ma1_default" />
+        android:textSize="@dimen/vol_label_text_size" />
 
 </LinearLayout>
