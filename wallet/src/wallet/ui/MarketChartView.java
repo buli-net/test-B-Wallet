@@ -289,7 +289,7 @@ public class MarketChartView extends View {
             String name = s.replace("@dimen/", "");
             int resId = context.getResources().getIdentifier(name, "dimen", context.getPackageName());
             if (resId!= 0) {
-                return context.getResources().getDimension(resId, context.getTheme());
+                return context.getResources().getDimension(resId);
             }
         }
         try {
