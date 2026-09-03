@@ -65,8 +65,9 @@
             android:id="@+id/sbVolMa1Period"
             android:layout_width="@dimen/vol_seekbar_width"
             android:layout_height="wrap_content"
-            android:max="60"
-            android:progress="5" />
+            android:max="250"
+            android:min="1"
+            android:progress="10" />
 
         <TextView
             android:id="@+id/tvVolMa1Period"
@@ -93,8 +94,9 @@
             android:id="@+id/sbVolMa2Period"
             android:layout_width="@dimen/vol_seekbar_width"
             android:layout_height="wrap_content"
-            android:max="60"
-            android:progress="10" />
+            android:max="250"
+            android:min="1"
+            android:progress="20" />
 
         <TextView
             android:id="@+id/tvVolMa2Period"
@@ -122,7 +124,7 @@
             android:id="@+id/sbVolMaW"
             android:layout_width="@dimen/vol_seekbar_width"
             android:layout_height="wrap_content"
-            android:max="10"
+            android:max="5"
             android:progress="2" />
 
         <TextView
