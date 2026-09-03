@@ -254,7 +254,7 @@ public class MarketChartView extends View {
     private int selectedLineAlpha;
     private boolean selectedLineDashed;
 
-    // Only color uses auto theme flag, width/alpha/dashed are always saved when set
+    // Each part of Selected Line has its own user_set flag - auto according to theme if not set
     private static final String KEY_SELECTED_COLOR_USER_SET = "selected_line_color_user_set";
     private static final String KEY_SELECTED_WIDTH_USER_SET = "selected_width_user_set";
     private static final String KEY_SELECTED_ALPHA_USER_SET = "selected_alpha_user_set";
@@ -473,13 +473,9 @@ public class MarketChartView extends View {
 
     /**
      * Load defaults from layout files (chart_settings_*.xml).
-     * Fixed to match select.xml - uses old select logic not to cause chìm when changing theme.
-     * If layout does not set required values, keep existing def values.
+     * Uses old select logic: each field keeps def if view not found.
      */
     public void loadDefaultsFromSettingsView(View root) {
-        // Use old logic: only color follows theme, width/alpha/dashed always kept if user set
-        // This version is compatible with both full chart_settings.xml and select.xml
-
         View viewBull = null;
         View viewBear = null;
         View viewSelectedLine = null;
@@ -652,11 +648,13 @@ public class MarketChartView extends View {
                .getColor(R.color.chart_bull_default, ctx.getTheme());
         defBearColor = ctx.getResources()
                .getColor(R.color.chart_bear_default, ctx.getTheme());
+        // Width / Alpha / Dashed defaults are from dimens/integers, keep as is for auto
     }
 
     /**
-     * Only color uses auto theme flag, width/alpha/dashed are always saved when set.
-     * This fixes: set anything else in popup except select color -> theme change error.
+     * Fix for user action: which part user set is saved, which not set stays auto according to theme.
+     * When changing theme, saved parts are redrawn, auto parts remain auto.
+     * Selected line has 4 parts: color, width, alpha, dashed.
      */
     private void cleanupAutoIfNotUserSet() {
         try {
@@ -665,11 +663,22 @@ public class MarketChartView extends View {
                     ctx.getString(R.string.prefs_chart),
                     Context.MODE_PRIVATE
             );
+            SharedPreferences.Editor ed = sp.edit();
+
             if (!sp.getBoolean(KEY_SELECTED_COLOR_USER_SET, false)) {
-                sp.edit()
-                       .remove(ctx.getString(R.string.key_selected_line_color))
-                       .commit();
+                ed.remove(ctx.getString(R.string.key_selected_line_color));
             }
+            if (!sp.getBoolean(KEY_SELECTED_WIDTH_USER_SET, false)) {
+                ed.remove(ctx.getString(R.string.key_selected_line_width));
+            }
+            if (!sp.getBoolean(KEY_SELECTED_ALPHA_USER_SET, false)) {
+                ed.remove(ctx.getString(R.string.key_selected_line_alpha));
+            }
+            if (!sp.getBoolean(KEY_SELECTED_DASHED_USER_SET, false)) {
+                ed.remove(ctx.getString(R.string.key_selected_line_dash));
+            }
+
+            ed.commit();
         } catch (Exception e) {
         }
     }
@@ -1379,6 +1388,25 @@ public class MarketChartView extends View {
             );
             sp.edit()
                    .putFloat(getContext().getString(R.string.key_selected_line_width), widthPx)
+                   .commit();
+        } catch (Exception e) {
+        }
+        initPaints(getContext());
+        invalidate();
+    }
+
+    public void setSelectedLineWidthByUser(float widthPx) {
+        if (widthPx <= 0f) {
+            widthPx = defSelectedLineWidthPx;
+        }
+        this.selectedLineWidthPx = widthPx;
+        try {
+            SharedPreferences sp = getContext().getSharedPreferences(
+                    getContext().getString(R.string.prefs_chart),
+                    Context.MODE_PRIVATE
+            );
+            sp.edit()
+                   .putFloat(getContext().getString(R.string.key_selected_line_width), widthPx)
                    .putBoolean(KEY_SELECTED_WIDTH_USER_SET, true)
                    .commit();
         } catch (Exception e) {
@@ -1388,6 +1416,28 @@ public class MarketChartView extends View {
     }
 
     public void setSelectedLineAlpha(int alpha) {
+        if (alpha < 0) {
+            alpha = 0;
+        }
+        if (alpha > 255) {
+            alpha = 255;
+        }
+        this.selectedLineAlpha = alpha;
+        try {
+            SharedPreferences sp = getContext().getSharedPreferences(
+                    getContext().getString(R.string.prefs_chart),
+                    Context.MODE_PRIVATE
+            );
+            sp.edit()
+                   .putInt(getContext().getString(R.string.key_selected_line_alpha), alpha)
+                   .commit();
+        } catch (Exception e) {
+        }
+        initPaints(getContext());
+        invalidate();
+    }
+
+    public void setSelectedLineAlphaByUser(int alpha) {
         if (alpha < 0) {
             alpha = 0;
         }
@@ -1419,6 +1469,22 @@ public class MarketChartView extends View {
             );
             sp.edit()
                    .putBoolean(getContext().getString(R.string.key_selected_line_dash), dashed)
+                   .commit();
+        } catch (Exception e) {
+        }
+        initPaints(getContext());
+        invalidate();
+    }
+
+    public void setSelectedLineDashedByUser(boolean dashed) {
+        this.selectedLineDashed = dashed;
+        try {
+            SharedPreferences sp = getContext().getSharedPreferences(
+                    getContext().getString(R.string.prefs_chart),
+                    Context.MODE_PRIVATE
+            );
+            sp.edit()
+                   .putBoolean(getContext().getString(R.string.key_selected_line_dash), dashed)
                    .putBoolean(KEY_SELECTED_DASHED_USER_SET, true)
                    .commit();
         } catch (Exception e) {
@@ -1427,7 +1493,7 @@ public class MarketChartView extends View {
         invalidate();
     }
 
-    // Called when user did NOT touch color picker in popup - DO NOT save color
+    // Called when user did NOT touch picker - DO NOT save that part, keep auto
     public void setSelectedLineAppearance(int color, float widthPx, int alpha, boolean dashed) {
         if (widthPx <= 0f) {
             widthPx = defSelectedLineWidthPx;
@@ -1438,29 +1504,37 @@ public class MarketChartView extends View {
         if (alpha > 255) {
             alpha = 255;
         }
-        // Intentionally not saving color when user did not touch picker
-        if (widthPx > 0f) {
-            setSelectedLineWidthPx(widthPx);
-        }
+        setSelectedLineColor(color);
+        setSelectedLineWidthPx(widthPx);
         setSelectedLineAlpha(alpha);
         setSelectedLineDashed(dashed);
     }
 
-    // Called only when user touched color picker - save any color
-    public void setSelectedLineAppearanceByUser(int color, float widthPx, int alpha, boolean dashed) {
-        if (widthPx <= 0f) {
-            widthPx = defSelectedLineWidthPx;
+    // Called only when user touched picker - save only touched parts, called from Activity
+    public void setSelectedLineAppearanceByUser(int color, float widthPx, int alpha, boolean dashed,
+                                                boolean colorTouched, boolean widthTouched,
+                                                boolean alphaTouched, boolean dashedTouched) {
+        if (colorTouched) {
+            setSelectedLineColorByUser(color);
         }
-        if (alpha < 0) {
-            alpha = 0;
+        if (widthTouched) {
+            if (widthPx <= 0f) {
+                widthPx = defSelectedLineWidthPx;
+            }
+            setSelectedLineWidthByUser(widthPx);
         }
-        if (alpha > 255) {
-            alpha = 255;
+        if (alphaTouched) {
+            if (alpha < 0) {
+                alpha = 0;
+            }
+            if (alpha > 255) {
+                alpha = 255;
+            }
+            setSelectedLineAlphaByUser(alpha);
         }
-        setSelectedLineColorByUser(color);
-        setSelectedLineWidthPx(widthPx);
-        setSelectedLineAlpha(alpha);
-        setSelectedLineDashed(dashed);
+        if (dashedTouched) {
+            setSelectedLineDashedByUser(dashed);
+        }
     }
 
     public void setVolMaPeriods(int period1, int period2) {
