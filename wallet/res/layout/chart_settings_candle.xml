@@ -73,7 +73,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:max="80"
-            android:progress="10" />
+            android:progress="10"
+            android:tag="@dimen/default_wick_width" />
     </LinearLayout>
 
     <LinearLayout
@@ -118,7 +119,184 @@
             android:layout_height="wrap_content"
             android:min="@integer/min_visible_candle_count"
             android:max="@integer/max_visible_candle_count"
-            android:progress="@integer/default_visible_candle_count" />
+            android:progress="@integer/default_visible_candle_count"
+            android:tag="@integer/default_visible_candle_count" />
     </LinearLayout>
+
+    <!-- Default values for Activity to read via tag - law compliance -->
+    <View
+        android:id="@+id/def_top_padding"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:visibility="gone"
+        android:tag="@dimen/default_top_padding" />
+
+    <View
+        android:id="@+id/def_bottom_padding"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:visibility="gone"
+        android:tag="@dimen/default_bottom_padding" />
+
+    <View
+        android:id="@+id/def_volume_height"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:visibility="gone"
+        android:tag="@dimen/default_volume_height" />
+
+    <View
+        android:id="@+id/def_volume_top_margin"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:visibility="gone"
+        android:tag="@dimen/default_volume_top_margin" />
+
+    <View
+        android:id="@+id/def_price_axis_width"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:visibility="gone"
+        android:tag="@dimen/default_price_axis_width" />
+
+    <View
+        android:id="@+id/def_time_axis_height"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:visibility="gone"
+        android:tag="@dimen/default_time_axis_height" />
+
+    <View
+        android:id="@+id/def_price_text_margin"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:visibility="gone"
+        android:tag="@dimen/default_price_text_margin" />
+
+    <View
+        android:id="@+id/def_price_text_offset"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:visibility="gone"
+        android:tag="@dimen/default_price_text_offset" />
+
+    <View
+        android:id="@+id/def_grid_width"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:visibility="gone"
+        android:tag="@dimen/default_grid_width" />
+
+    <View
+        android:id="@+id/def_body_min_width"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:visibility="gone"
+        android:tag="@dimen/default_body_min_width" />
+
+    <View
+        android:id="@+id/def_body_max_width"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:visibility="gone"
+        android:tag="@dimen/default_body_max_width" />
+
+    <View
+        android:id="@+id/def_candle_min_height"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:visibility="gone"
+        android:tag="@dimen/default_candle_min_height" />
+
+    <View
+        android:id="@+id/def_dash_on"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:visibility="gone"
+        android:tag="@dimen/dash_on" />
+
+    <View
+        android:id="@+id/def_dash_off"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:visibility="gone"
+        android:tag="@dimen/dash_off" />
+
+    <View
+        android:id="@+id/def_time_text_offset"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:visibility="gone"
+        android:tag="@dimen/time_text_offset" />
+
+    <View
+        android:id="@+id/def_loading_text_offset"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:visibility="gone"
+        android:tag="@dimen/loading_text_offset" />
+
+    <View
+        android:id="@+id/def_default_text_size"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:visibility="gone"
+        android:tag="@dimen/default_text_size" />
+
+    <View
+        android:id="@+id/def_default_wick_width"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:visibility="gone"
+        android:tag="@dimen/default_wick_width" />
+
+    <View
+        android:id="@+id/def_default_body_fraction"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:visibility="gone"
+        android:tag="@fraction/chart_body_base_fraction" />
+
+    <View
+        android:id="@+id/def_min_vis"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:visibility="gone"
+        android:tag="@integer/min_visible_candle_count" />
+
+    <View
+        android:id="@+id/def_max_vis"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:visibility="gone"
+        android:tag="@integer/max_visible_candle_count" />
+
+    <View
+        android:id="@+id/def_default_vis"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:visibility="gone"
+        android:tag="@integer/default_visible_candle_count" />
+
+    <View
+        android:id="@+id/def_fetch_limit"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:visibility="gone"
+        android:tag="@integer/default_fetch_limit" />
+
+    <View
+        android:id="@+id/def_bull_color"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:visibility="gone"
+        android:tag="@color/chart_bull_default" />
+
+    <View
+        android:id="@+id/def_bear_color"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:visibility="gone"
+        android:tag="@color/chart_bear_default" />
 
 </LinearLayout>
