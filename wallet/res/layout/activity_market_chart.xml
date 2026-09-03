@@ -203,7 +203,7 @@
             android:layout_height="wrap_content"
             android:layout_margin="@dimen/vol_setting_padding_vertical"
             android:background="@color/chart_bg"
-            android:elevation="@dimen/card_elevation_selected"
+            android:elevation="8dp"
             android:orientation="vertical"
             android:padding="@dimen/default_popup_padding"
             android:visibility="gone">
