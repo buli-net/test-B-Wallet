@@ -14,7 +14,6 @@
         android:textSize="@dimen/vol_label_text_size"
         android:textStyle="bold" />
 
-    <!-- Bull/Bear Color -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -41,10 +40,10 @@
         <TextView
             android:layout_width="@dimen/vol_value_width"
             android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/default_popup_padding"
             android:gravity="center"
             android:text="@string/bear"
-            android:textSize="@dimen/vol_label_text_size"
-            android:layout_marginStart="@dimen/default_popup_padding"/>
+            android:textSize="@dimen/vol_label_text_size" />
 
         <View
             android:id="@+id/viewBear"
@@ -56,18 +55,19 @@
             android:focusable="true" />
     </LinearLayout>
 
-    <!-- Wick Width -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:paddingVertical="@dimen/vol_setting_padding_vertical">
+
         <TextView
             android:id="@+id/lbWick"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/chart_wick_width"
             android:textSize="@dimen/vol_label_text_size" />
+
         <SeekBar
             android:id="@+id/sbWick"
             android:layout_width="match_parent"
@@ -76,44 +76,49 @@
             android:progress="10" />
     </LinearLayout>
 
-    <!-- Body Width -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:paddingVertical="@dimen/vol_setting_padding_vertical">
+
         <TextView
             android:id="@+id/lbBody"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/chart_body_width"
             android:textSize="@dimen/vol_label_text_size" />
+
         <SeekBar
             android:id="@+id/sbBody"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:max="100"
-            android:progress="30" />
+            android:max="@integer/chart_body_scale"
+            android:progress="30"
+            android:tag="@fraction/chart_body_base_fraction" />
     </LinearLayout>
 
-    <!-- Visible Candle Count - FIX khớp integers.xml -->
+    <!-- QUAN TRỌNG: layout @ tới integers.xml -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:paddingVertical="@dimen/vol_setting_padding_vertical">
+
         <TextView
             android:id="@+id/lbVis"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/chart_visible_candles"
             android:textSize="@dimen/vol_label_text_size" />
+
         <SeekBar
             android:id="@+id/sbVis"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:min="10"
-            android:max="260"
-            android:progress="70" />
+            android:min="@integer/min_visible_candle_count"
+            android:max="@integer/max_visible_candle_count"
+            android:progress="@integer/default_visible_candle_count" />
     </LinearLayout>
+
 </LinearLayout>
