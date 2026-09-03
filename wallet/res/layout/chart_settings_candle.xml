@@ -1,25 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Candle Settings Section: Contains bullish/bearish colors and candle dimensions -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:padding="@dimen/default_popup_padding">
+    android:paddingTop="@dimen/vol_setting_padding_vertical"
+    android:paddingBottom="@dimen/vol_setting_padding_vertical">
 
-    <!-- Bullish Color Picker: Select color for bullish candles -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingBottom="@dimen/vol_setting_padding_vertical"
+        android:text="@string/chart_candle_settings"
+        android:textSize="@dimen/vol_label_text_size"
+        android:textStyle="bold" />
+
+    <!-- Bull/Bear Color -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
         android:gravity="center_vertical"
+        android:orientation="horizontal"
         android:paddingVertical="@dimen/vol_setting_padding_vertical">
 
         <TextView
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="@string/chart_settings_bullish"
-            android:textColor="?android:attr/textColorSecondary"
+            android:text="@string/chart_bull_color"
             android:textSize="@dimen/vol_label_text_size" />
 
         <View
@@ -27,87 +34,86 @@
             android:layout_width="@dimen/color_picker_size"
             android:layout_height="@dimen/color_picker_size"
             android:background="@drawable/color_picker_border"
-            android:tag="@color/palette_green" />
-
-    </LinearLayout>
-
-    <!-- Bearish Color Picker: Select color for bearish candles -->
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center_vertical"
-        android:paddingVertical="@dimen/vol_setting_padding_vertical">
+            android:tag="@color/chart_bull_default"
+            android:clickable="true"
+            android:focusable="true" />
 
         <TextView
-            android:layout_width="0dp"
+            android:layout_width="@dimen/vol_value_width"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="@string/chart_settings_bearish"
-            android:textColor="?android:attr/textColorSecondary"
-            android:textSize="@dimen/vol_label_text_size" />
+            android:gravity="center"
+            android:text="@string/bear"
+            android:textSize="@dimen/vol_label_text_size"
+            android:layout_marginStart="@dimen/default_popup_padding"/>
 
         <View
             android:id="@+id/viewBear"
             android:layout_width="@dimen/color_picker_size"
             android:layout_height="@dimen/color_picker_size"
             android:background="@drawable/color_picker_border"
-            android:tag="@color/palette_red" />
-
+            android:tag="@color/chart_bear_default"
+            android:clickable="true"
+            android:focusable="true" />
     </LinearLayout>
 
-    <!-- Wick Width Control: Adjusts the width of candle wicks - value set in Java -->
-    <TextView
-        android:id="@+id/lbWick"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/chart_wick_width"
-        android:textColor="?android:attr/textColorSecondary"
-        android:textSize="@dimen/vol_label_text_size"
-        android:layout_marginTop="@dimen/vol_setting_padding_vertical" />
-
-    <SeekBar
-        android:id="@+id/sbWick"
+    <!-- Wick Width -->
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:max="80"
-        android:progress="1"
-        android:layout_marginTop="@dimen/default_price_text_margin" />
+        android:orientation="vertical"
+        android:paddingVertical="@dimen/vol_setting_padding_vertical">
+        <TextView
+            android:id="@+id/lbWick"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/chart_wick_width"
+            android:textSize="@dimen/vol_label_text_size" />
+        <SeekBar
+            android:id="@+id/sbWick"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:max="80"
+            android:progress="10" />
+    </LinearLayout>
 
-    <!-- Body Width Control: Adjusts the body fraction of candles -->
-    <TextView
-        android:id="@+id/lbBody"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/chart_body_width"
-        android:textColor="?android:attr/textColorSecondary"
-        android:textSize="@dimen/vol_label_text_size"
-        android:layout_marginTop="@dimen/vol_setting_padding_vertical" />
-
-    <SeekBar
-        android:id="@+id/sbBody"
+    <!-- Body Width -->
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:max="100"
-        android:progress="50"
-        android:layout_marginTop="@dimen/default_price_text_margin" />
+        android:orientation="vertical"
+        android:paddingVertical="@dimen/vol_setting_padding_vertical">
+        <TextView
+            android:id="@+id/lbBody"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/chart_body_width"
+            android:textSize="@dimen/vol_label_text_size" />
+        <SeekBar
+            android:id="@+id/sbBody"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:max="100"
+            android:progress="30" />
+    </LinearLayout>
 
-    <!-- Visible Candle Count Control: Moved from Chart Options - Controls number of visible candles -->
-    <TextView
-        android:id="@+id/lbVis"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/chart_visible_candles"
-        android:textColor="?android:attr/textColorSecondary"
-        android:textSize="@dimen/vol_label_text_size"
-        android:layout_marginTop="@dimen/vol_setting_padding_vertical" />
-
-    <SeekBar
-        android:id="@+id/sbVis"
+    <!-- Visible Candle Count - FIX khớp integers.xml -->
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:max="250"
-        android:progress="80"
-        android:layout_marginTop="@dimen/default_price_text_margin" />
-
+        android:orientation="vertical"
+        android:paddingVertical="@dimen/vol_setting_padding_vertical">
+        <TextView
+            android:id="@+id/lbVis"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/chart_visible_candles"
+            android:textSize="@dimen/vol_label_text_size" />
+        <SeekBar
+            android:id="@+id/sbVis"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:min="10"
+            android:max="260"
+            android:progress="70" />
+    </LinearLayout>
 </LinearLayout>
