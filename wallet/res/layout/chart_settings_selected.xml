@@ -28,7 +28,16 @@
             android:tag="@color/chart_selected_line" />
     </LinearLayout>
 
+    <!-- alias cho Activity -->
+    <View
+        android:id="@+id/viewSelectedColor"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:visibility="gone"
+        android:tag="@color/chart_selected_line" />
+
     <TextView
+        android:id="@+id/lbSelectedW"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/vol_setting_padding_vertical"
@@ -42,7 +51,16 @@
         android:max="20"
         android:progress="2" />
 
+    <SeekBar
+        android:id="@+id/sbSelectedW"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:visibility="gone"
+        android:max="20"
+        android:progress="2" />
+
     <TextView
+        android:id="@+id/lbSelectedAlpha"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/vol_setting_padding_vertical"
@@ -72,9 +90,15 @@
             android:textSize="@dimen/vol_label_text_size" />
 
         <Switch
-            android:id="@+id/cbSelectedDashed"
+            android:id="@+id/swSelectedDash"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:checked="false" />
+
+        <CheckBox
+            android:id="@+id/cbSelectedDashed"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:visibility="gone" />
     </LinearLayout>
 </LinearLayout>
