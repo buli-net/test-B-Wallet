@@ -6,4 +6,6 @@
     <fraction name="chart_price_padding_fraction">10%</fraction>
     <fraction name="chart_body_fraction">30%</fraction>
     <fraction name="chart_volume_height_fraction">25%</fraction>
+    <fraction name="min_scroll_fraction">5%</fraction>
+    <fraction name="price_padding_fraction">10%</fraction>
 </resources>
