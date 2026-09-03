@@ -136,10 +136,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
     }
 
     public static GradientDrawable createUnifiedColorDrawable(Context ctx, int color) {
-        // Dùng chung file xml viền như hình: wallet/res/drawable/color_picker_border.xml
-        // File xml đó có corners radius = @dimen/color_picker_corner_radius
-        // stroke width = @dimen/color_picker_border_width và color = @color/chart_grid
-        // Ở đây ta load chính xml đó rồi đổi solid color thành màu cần hiển thị
+        // Use same border xml as all other color cells: wallet/res/drawable/color_picker_border.xml
         try {
             Drawable d = ctx.getResources().getDrawable(R.drawable.color_picker_border, ctx.getTheme());
             if (d instanceof GradientDrawable) {
@@ -150,7 +147,6 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         } catch (Exception ignored) {
         }
 
-        // Fallback nếu không load được xml (vẫn dùng đúng dimen và color như trong xml)
         GradientDrawable drawable = new GradientDrawable();
 
         float cornerRadius;
@@ -253,6 +249,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         int[] curBear = new int[1];
         int[] bullIdx = new int[1];
         int[] bearIdx = new int[1];
+        int[] selectedIdx = new int[1];
 
         float[] curWick = new float[1];
         float[] curMaW = new float[1];
@@ -868,6 +865,15 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         state.curSelectedColor[0] = marketChartView.getSelectedLineColor()!= 0
                ? marketChartView.getSelectedLineColor()
                 : getResources().getColor(R.color.chart_selected_line, getTheme());
+
+        // Init selectedIdx exactly like bullIdx / bearIdx - same logic as other color cells
+        state.selectedIdx[0] = -1;
+        for (int i = 0; i < state.candlePalette.length; i++) {
+            if (state.candlePalette[i] == state.curSelectedColor[0]) {
+                state.selectedIdx[0] = i;
+                break;
+            }
+        }
 
         state.curSelectedAlpha[0] = marketChartView.getSelectedLineAlpha();
 
@@ -1550,7 +1556,6 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         View containerSelected = content.findViewById(R.id.containerSelected);
 
         if (headerSelected!= null && containerSelected!= null) {
-            // Standardized IDs: sbSelectedWidth, sbSelectedAlpha, swSelectedDash, viewSelectedLine
             state.sbSelectedWidth = containerSelected.findViewById(R.id.sbSelectedWidth);
             state.sbSelectedAlpha = containerSelected.findViewById(R.id.sbSelectedAlpha);
             state.swSelectedDash = containerSelected.findViewById(R.id.swSelectedDash);
@@ -1559,7 +1564,6 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
             TextView lbSelectedAlpha = containerSelected.findViewById(R.id.lbSelectedAlpha);
 
             if (viewSelectedLine!= null) {
-                // Dùng chung viền xml, màu xoay vòng như các ô khác, ô nhỏ đổi màu ngay khi bấm
                 viewSelectedLine.setBackground(createColorViewDrawable(state.curSelectedColor[0]));
             }
 
@@ -1627,22 +1631,14 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
             }
 
             if (viewSelectedLine!= null) {
+                // Same as viewBull/viewBear - color rotation in one cell, common border xml
                 viewSelectedLine.setOnClickListener(v -> {
-                    // Màu xoay vòng trong 1 ô như các ô màu khác, fix idx = -1
-                    int idx = -1;
-                    for (int i = 0; i < state.candlePalette.length; i++) {
-                        if (state.candlePalette[i] == state.curSelectedColor[0]) {
-                            idx = i;
-                            break;
-                        }
-                    }
-                    int nextIdx;
-                    if (idx == -1) {
-                        nextIdx = 0;
+                    if (state.selectedIdx[0] == -1) {
+                        state.selectedIdx[0] = 0;
                     } else {
-                        nextIdx = (idx + 1) % state.candlePalette.length;
+                        state.selectedIdx[0] = (state.selectedIdx[0] + 1) % state.candlePalette.length;
                     }
-                    int next = state.candlePalette[nextIdx];
+                    int next = state.candlePalette[state.selectedIdx[0]];
                     state.curSelectedColor[0] = next;
                     state.selectedColorTouched[0] = true;
                     v.setBackground(createColorViewDrawable(next));
