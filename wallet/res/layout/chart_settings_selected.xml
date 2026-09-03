@@ -25,16 +25,11 @@
             android:layout_width="@dimen/color_picker_size"
             android:layout_height="@dimen/color_picker_size"
             android:background="@drawable/color_picker_border"
-            android:tag="@color/chart_selected_line" />
+            android:backgroundTint="@color/chart_selected_line"
+            android:tag="@color/chart_selected_line"
+            android:clickable="true"
+            android:focusable="true" />
     </LinearLayout>
-
-    <!-- alias cho Activity -->
-    <View
-        android:id="@+id/viewSelectedColor"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:visibility="gone"
-        android:tag="@color/chart_selected_line" />
 
     <TextView
         android:id="@+id/lbSelectedW"
@@ -49,15 +44,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:max="20"
-        android:progress="2" />
-
-    <SeekBar
-        android:id="@+id/sbSelectedW"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:visibility="gone"
-        android:max="20"
-        android:progress="2" />
+        android:progress="3" />
 
     <TextView
         android:id="@+id/lbSelectedAlpha"
@@ -92,13 +79,6 @@
         <Switch
             android:id="@+id/swSelectedDash"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:checked="false" />
-
-        <CheckBox
-            android:id="@+id/cbSelectedDashed"
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:visibility="gone" />
+            android:layout_height="wrap_content" />
     </LinearLayout>
 </LinearLayout>
