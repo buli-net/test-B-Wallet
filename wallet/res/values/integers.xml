@@ -6,10 +6,7 @@
     <integer name="live_refresh_interval">1000</integer>
     <integer name="countdown_interval">1000</integer>
 
-    <!-- Visible candle count - từ SeekBar trong chart_settings_options.xml -->
-    <integer name="min_visible_candle_count">20</integer>
-    <integer name="max_visible_candle_count">360</integer>
-    <integer name="default_visible_candle_count">70</integer>
+    
 
     <!-- Paint alpha -->
     <integer name="volume_alpha">255</integer>
