@@ -10,7 +10,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:paddingBottom="@dimen/vol_setting_padding_vertical"
-        android:text="@string/chart_selected_section"
+        android:text="@string/chart_selected_line_section"
         android:textSize="@dimen/vol_label_text_size"
         android:textStyle="bold" />
 
@@ -25,7 +25,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="@string/chart_selected_color"
+            android:text="@string/chart_selected_line_color"
             android:textSize="@dimen/vol_label_text_size" />
 
         <View
@@ -48,7 +48,7 @@
             android:id="@+id/lbSelectedWidth"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/chart_selected_width"
+            android:text="@string/chart_selected_line_width"
             android:textSize="@dimen/vol_label_text_size" />
 
         <SeekBar
@@ -70,7 +70,7 @@
             android:id="@+id/lbSelectedAlpha"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/chart_selected_alpha"
+            android:text="@string/chart_selected_line_alpha"
             android:textSize="@dimen/vol_label_text_size" />
 
         <SeekBar
@@ -93,7 +93,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="@string/chart_selected_dashed"
+            android:text="@string/chart_selected_line_dashed"
             android:textSize="@dimen/vol_label_text_size" />
 
         <Switch
@@ -103,7 +103,6 @@
             android:checked="false" />
     </LinearLayout>
 
-    <!-- Default values for Activity to read via tag - law: @dimen/@integer/@color -> tag -->
     <View
         android:id="@+id/def_selected_width"
         android:layout_width="0dp"
