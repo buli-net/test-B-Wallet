@@ -294,7 +294,7 @@ public class MarketChartView extends View {
         }
         try {
             int resId = Integer.parseInt(s);
-            return context.getResources().getDimension(resId, context.getTheme());
+            return context.getResources().getDimension(resId);
         } catch (NumberFormatException e) {
             throw new IllegalStateException("Invalid dimen tag: " + s);
         }
