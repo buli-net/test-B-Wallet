@@ -1146,7 +1146,8 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
                             break;
                         }
                     }
-                    int next = state.candlePalette[(idx + 1) % state.candlePalette.length];
+                    int nextIdx = (idx + 1) % state.candlePalette.length;
+                    int next = state.candlePalette[nextIdx];
                     state.curVolMa1Color[0] = next;
                     v.setBackground(createColorViewDrawable(next));
                 });
@@ -1161,7 +1162,8 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
                             break;
                         }
                     }
-                    int next = state.candlePalette[(idx + 1) % state.candlePalette.length];
+                    int nextIdx = (idx + 1) % state.candlePalette.length;
+                    int next = state.candlePalette[nextIdx];
                     state.curVolMa2Color[0] = next;
                     v.setBackground(createColorViewDrawable(next));
                 });
@@ -1263,7 +1265,8 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
                             break;
                         }
                     }
-                    int next = state.candlePalette[(idx + 1) % state.candlePalette.length];
+                    int nextIdx = (idx + 1) % state.candlePalette.length;
+                    int next = state.candlePalette[nextIdx];
                     state.curGridColor[0] = next;
                     state.gridPicked[0] = true;
                     v.setBackground(createColorViewDrawable(next));
@@ -1373,7 +1376,8 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
                         break;
                     }
                 }
-                int next = state.candlePalette[(idx + 1) % state.candlePalette.length];
+                int nextIdx = (idx + 1) % state.candlePalette.length;
+                int next = state.candlePalette[nextIdx];
                 state.curLastColor[0] = next;
                 state.lastLinePicked[0] = true;
                 v.setBackground(createColorViewDrawable(next));
@@ -1393,7 +1397,8 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
                         break;
                     }
                 }
-                int next = state.candlePalette[(idx + 1) % state.candlePalette.length];
+                int nextIdx = (idx + 1) % state.candlePalette.length;
+                int next = state.candlePalette[nextIdx];
                 state.curPriceTxtColor[0] = next;
                 state.pricePicked[0] = true;
                 v.setBackground(createColorViewDrawable(next));
@@ -1467,7 +1472,8 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
                         break;
                     }
                 }
-                int next = state.candlePalette[(idx + 1) % state.candlePalette.length];
+                int nextIdx = (idx + 1) % state.candlePalette.length;
+                int next = state.candlePalette[nextIdx];
                 state.curLabelBg[0] = next;
                 state.labelBgPicked[0] = true;
                 v.setBackground(createColorViewDrawable(next));
@@ -1492,7 +1498,8 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
                         break;
                     }
                 }
-                int next = state.candlePalette[(idx + 1) % state.candlePalette.length];
+                int nextIdx = (idx + 1) % state.candlePalette.length;
+                int next = state.candlePalette[nextIdx];
                 state.curLabelTextColorFinal[0] = next;
                 state.labelTextPicked[0] = true;
                 v.setBackground(createColorViewDrawable(next));
@@ -1536,6 +1543,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
             TextView lbSelectedAlpha = containerSelected.findViewById(R.id.lbSelectedAlpha);
 
             if (viewSelectedLine!= null) {
+                // Fix: preview must be opaque to see real color, not covered by alpha
                 viewSelectedLine.setBackground(createColorViewDrawable(state.curSelectedColor[0]));
             }
 
@@ -1604,6 +1612,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
 
             if (viewSelectedLine!= null) {
                 viewSelectedLine.setOnClickListener(v -> {
+                    // Fix: if current color not in palette, idx = -1 would show same gray, handle correctly
                     int idx = -1;
                     for (int i = 0; i < state.candlePalette.length; i++) {
                         if (state.candlePalette[i] == state.curSelectedColor[0]) {
@@ -1611,7 +1620,13 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
                             break;
                         }
                     }
-                    int next = state.candlePalette[(idx + 1) % state.candlePalette.length];
+                    int nextIdx;
+                    if (idx == -1) {
+                        nextIdx = 0;
+                    } else {
+                        nextIdx = (idx + 1) % state.candlePalette.length;
+                    }
+                    int next = state.candlePalette[nextIdx];
                     state.curSelectedColor[0] = next;
                     state.selectedColorTouched[0] = true;
                     v.setBackground(createColorViewDrawable(next));
@@ -1880,7 +1895,8 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
                         break;
                     }
                 }
-                int next = colors[(idx + 1) % colors.length];
+                int nextIdx = (idx + 1) % colors.length;
+                int next = colors[nextIdx];
                 line.color = next;
                 h.color.setBackground(createUnifiedColorDrawable(v.getContext(), next));
             });
