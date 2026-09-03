@@ -10,7 +10,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:paddingBottom="@dimen/vol_setting_padding_vertical"
-        android:text="@string/chart_candle_settings"
+        android:text="@string/chart_settings_candle"
         android:textSize="@dimen/vol_label_text_size"
         android:textStyle="bold" />
 
@@ -25,7 +25,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="@string/chart_bull_color"
+            android:text="@string/chart_settings_bullish"
             android:textSize="@dimen/vol_label_text_size" />
 
         <View
@@ -42,7 +42,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/default_popup_padding"
             android:gravity="center"
-            android:text="@string/bear"
+            android:text="@string/chart_settings_bearish"
             android:textSize="@dimen/vol_label_text_size" />
 
         <View
@@ -99,7 +99,6 @@
             android:tag="@fraction/chart_body_base_fraction" />
     </LinearLayout>
 
-    <!-- QUAN TRỌNG: layout @ tới integers.xml -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -123,7 +122,6 @@
             android:tag="@integer/default_visible_candle_count" />
     </LinearLayout>
 
-    <!-- Default values for Activity to read via tag - law compliance -->
     <View
         android:id="@+id/def_top_padding"
         android:layout_width="0dp"
@@ -298,5 +296,82 @@
         android:layout_height="0dp"
         android:visibility="gone"
         android:tag="@color/chart_bear_default" />
+
+    <View
+        android:id="@+id/def_volume_alpha"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:visibility="gone"
+        android:tag="80" />
+
+    <View
+        android:id="@+id/def_big_fiat_threshold"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:visibility="gone"
+        android:tag="10000" />
+
+    <View
+        android:id="@+id/def_network_timeout"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:visibility="gone"
+        android:tag="10000" />
+
+    <View
+        android:id="@+id/def_live_refresh_interval"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:visibility="gone"
+        android:tag="5000" />
+
+    <View
+        android:id="@+id/def_countdown_interval"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:visibility="gone"
+        android:tag="1000" />
+
+    <View
+        android:id="@+id/def_min_scroll_fraction"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:visibility="gone"
+        android:tag="0.1" />
+
+    <View
+        android:id="@+id/def_price_padding_fraction"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:visibility="gone"
+        android:tag="0.1" />
+
+    <View
+        android:id="@+id/def_candle_min_width"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:visibility="gone"
+        android:tag="@dimen/default_body_min_width" />
+
+    <View
+        android:id="@+id/def_popup_time_size"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:visibility="gone"
+        android:tag="@dimen/default_text_size" />
+
+    <View
+        android:id="@+id/def_popup_size"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:visibility="gone"
+        android:tag="@dimen/default_text_size" />
+
+    <View
+        android:id="@+id/def_body_base_fraction"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:visibility="gone"
+        android:tag="@fraction/chart_body_base_fraction" />
 
 </LinearLayout>
