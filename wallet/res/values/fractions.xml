@@ -9,6 +9,5 @@
     <fraction name="min_scroll_fraction">5%</fraction>
     <fraction name="price_padding_fraction">10%</fraction>
     
-    <fraction name="chart_body_base_fraction">30%</fraction>
 
 </resources>
