@@ -1292,6 +1292,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
                     state.curGridColor[0] = next;
                     state.gridPicked[0] = true;
                     v.setBackground(createColorViewDrawable(next));
+                    v.invalidate();//
                     if (marketChartView!= null) {
                         marketChartView.setGridColor(next);
                         marketChartView.invalidate();
