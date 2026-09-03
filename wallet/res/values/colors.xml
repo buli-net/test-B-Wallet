@@ -101,4 +101,8 @@
     <color name="palette_chart_grid_custom">#E6E6E6</color>
     <color name="palette_price_text_custom">#000000</color>
 
+    <!-- Vol MA default colors - khớp với tvDefMaColors -->
+<color name="chart_vol_ma1_default">#FFC107</color>
+<color name="chart_vol_ma2_default">#2196F3</color>
+
 </resources>
