@@ -397,12 +397,12 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
             String name = s.replace("@dimen/", "");
             int resId = getResources().getIdentifier(name, "dimen", getPackageName());
             if (resId!= 0) {
-                return context.getResources().getDimension(resId);
+                return getResources().getDimension(resId);
             }
         }
         try {
             int resId = Integer.parseInt(s);
-            return getResources().getDimension(resId, getTheme());
+            return getResources().getDimension(resId);
         } catch (NumberFormatException e) {
             throw new IllegalStateException("Invalid dimen tag: " + s);
         }
