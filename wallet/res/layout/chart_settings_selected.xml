@@ -145,7 +145,7 @@
         android:visibility="gone"
         android:tag="@dimen/color_picker_size" />
 
-    <View
+    <TextView
         android:id="@+id/lbSelectedW"
         android:layout_width="0dp"
         android:layout_height="0dp"
