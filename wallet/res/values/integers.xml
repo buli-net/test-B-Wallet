@@ -28,4 +28,10 @@
     <integer name="default_live_refresh_interval">30000</integer>
     <integer name="default_countdown_interval">1000</integer>
     <integer name="default_big_fiat_threshold">1000</integer>
+
+    <!-- Alias cho chart_settings_candle.xml - bắt buộc phải có -->
+    <integer name="big_fiat_threshold">1000</integer>
+    <integer name="network_timeout">10000</integer>
+    <integer name="live_refresh_interval">30000</integer>
+    <integer name="countdown_interval">1000</integer>
 </resources>
