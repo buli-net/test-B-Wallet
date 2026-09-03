@@ -718,4 +718,21 @@
 
     <string name="vol_label">Vol: %.2f </string>
     <string name="vol_ma_format">MA(%1$d): %2$.2f </string>
+
+
+    <!-- Market Chart Settings - fix missing default -->
+<string name="chart_settings_chart_options">Chart Options</string>
+<string name="chart_show_grid">Show Grid</string>
+<string name="chart_grid_color">Grid Color</string>
+<string name="grid_show_title">Show Grid</string>
+<string name="chart_settings_ma">MA Settings</string>
+<string name="add_ma">Add MA</string>
+<string name="chart_ma_line_width">MA Line Width</string>
+<string name="ma">MA</string>
+<string name="delete">Delete</string>
+<string name="chart_settings_title">Chart Settings</string>
+<string name="chart_settings_candle">Candle Settings</string>
+<string name="chart_settings_last_price">Last Price</string>
+<string name="chart_settings_label">Label</string>
+<string name="chart_settings_selected">Selected</string>
 </resources>
