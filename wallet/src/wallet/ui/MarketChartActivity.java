@@ -397,7 +397,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
             String name = s.replace("@dimen/", "");
             int resId = getResources().getIdentifier(name, "dimen", getPackageName());
             if (resId!= 0) {
-                return getResources().getDimension(resId, getTheme());
+                return context.getResources().getDimension(resId);
             }
         }
         try {
