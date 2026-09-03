@@ -381,7 +381,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         }
     }
 
-    private float getDimenFromTag(View v) {
+  /*  private float getDimenFromTag(View v) {
         if (v == null) {
             throw new IllegalStateException("View tag missing dimen");
         }
@@ -407,7 +407,47 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
             throw new IllegalStateException("Invalid dimen tag: " + tag);
         }
     }
+*/
 
+    private int getDimenFromTag(View v) {
+    Object o = v.getTag();
+    if (o == null) return 0;
+    String tag = o.toString().trim();
+    if (tag.isEmpty()) return 0;
+    
+    // Android trả về "20.0dip" cho @dimen/20dp
+    tag = tag.replace("dip", "dp");
+    
+    try {
+        if (tag.endsWith("dp")) {
+            float f = Float.parseFloat(tag.replace("dp","").trim());
+            return (int) (f * getResources().getDisplayMetrics().density);
+        }
+        if (tag.endsWith("sp")) {
+            float f = Float.parseFloat(tag.replace("sp","").trim());
+            return (int) (f * getResources().getDisplayMetrics().scaledDensity);
+        }
+        if (tag.endsWith("%")) {
+            float f = Float.parseFloat(tag.replace("%","").trim()) / 100f;
+            // fraction thì để nguyên 0.05 -> 0.1, không convert ra px ở đây
+            // loadDefaults sẽ nhân sau
+            return (int) (f * 1000); // giữ nguyên logic cũ của mày
+        }
+        if (tag.startsWith("#")) {
+            return android.graphics.Color.parseColor(tag);
+        }
+        // nếu tag là số nguyên
+        return Integer.parseInt(tag);
+    } catch (Exception e) {
+        // fallback nếu tag là resource id dạng Integer
+        if (o instanceof Integer) {
+            try {
+                return getResources().getDimensionPixelSize((Integer) o);
+            } catch (Exception ex) {}
+        }
+        return 0;
+    }
+}
     private int getIntegerFromTag(View v) {
         if (v == null) {
             throw new IllegalStateException("View tag missing integer");
