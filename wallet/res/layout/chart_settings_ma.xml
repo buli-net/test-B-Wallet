@@ -14,21 +14,12 @@
         android:textSize="@dimen/vol_label_text_size"
         android:textStyle="bold" />
 
-    <!-- DEFAULT MA - layout @ tới integers và colors, Java chỉ đọc text của 2 thằng này -->
+    <!-- DEFAULT MA - from layout, no hardcode in Java -->
     <TextView
         android:id="@+id/tvDefMaPeriods"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="7,25,99"
-        android:tag="@integer/default_vol_ma1_period"
-        android:visibility="gone" />
-
-    <TextView
-        android:id="@+id/tvDefMaPeriods2"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="25"
-        android:tag="@integer/default_vol_ma2_period"
         android:visibility="gone" />
 
     <TextView
@@ -36,7 +27,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="#FFC107,#2196F3,#E91E63"
-        android:tag="@color/chart_vol_ma1_default"
         android:visibility="gone" />
 
     <androidx.recyclerview.widget.RecyclerView
@@ -53,7 +43,7 @@
         android:text="@string/add_ma"
         android:textAllCaps="false" />
 
-    <!-- MA Line Width - layout @ tới dimen -->
+    <!-- MA Line Width - DỜI TỪ chart_options SANG ĐÂY -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -73,58 +63,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:max="20"
-            android:progress="2"
-            android:tag="@dimen/default_vol_ma_width" />
+            android:progress="2" />
     </LinearLayout>
-
-    <!-- Default values for Activity to read via tag - law compliance -->
-    <View
-        android:id="@+id/def_default_button_height"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:visibility="gone"
-        android:tag="@dimen/default_button_height" />
-
-    <View
-        android:id="@+id/def_vol_ma_width"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:visibility="gone"
-        android:tag="@dimen/default_vol_ma_width" />
-
-    <View
-        android:id="@+id/def_vol_setting_padding_vertical"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:visibility="gone"
-        android:tag="@dimen/vol_setting_padding_vertical" />
-
-    <View
-        android:id="@+id/def_vol_label_text_size"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:visibility="gone"
-        android:tag="@dimen/vol_label_text_size" />
-
-    <View
-        android:id="@+id/def_vol_ma1_period"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:visibility="gone"
-        android:tag="@integer/default_vol_ma1_period" />
-
-    <View
-        android:id="@+id/def_vol_ma2_period"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:visibility="gone"
-        android:tag="@integer/default_vol_ma2_period" />
-
-    <View
-        android:id="@+id/def_vol_ma1_color"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:visibility="gone"
-        android:tag="@color/chart_vol_ma1_default" />
 
 </LinearLayout>
