@@ -2,4 +2,8 @@
 <resources>
     <fraction name="chart_body_base_fraction">30%</fraction>
     <fraction name="chart_wick_ratio">15%</fraction>
+    <fraction name="chart_min_scroll_fraction">5%</fraction>
+    <fraction name="chart_price_padding_fraction">10%</fraction>
+    <fraction name="chart_body_fraction">30%</fraction>
+    <fraction name="chart_volume_height_fraction">25%</fraction>
 </resources>
