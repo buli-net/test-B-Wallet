@@ -4,44 +4,45 @@
     android:layout_height="wrap_content"
     android:orientation="horizontal"
     android:gravity="center_vertical"
-    android:paddingTop="8dp"
-    android:paddingBottom="8dp"
-    android:paddingStart="4dp"
-    android:paddingEnd="4dp">
+    android:paddingTop="@dimen/vol_setting_padding_vertical"
+    android:paddingBottom="@dimen/vol_setting_padding_vertical"
+    android:paddingStart="@dimen/default_price_text_margin"
+    android:paddingEnd="@dimen/default_price_text_margin">
 
     <TextView
-        android:layout_width="32dp"
+        android:layout_width="@dimen/vol_value_width"
         android:layout_height="wrap_content"
         android:text="@string/ma"
-        android:textSize="14sp"
+        android:textSize="@dimen/vol_label_text_size"
         android:textColor="?android:attr/textColorPrimary" />
 
     <EditText
         android:id="@+id/et_period"
         android:layout_width="0dp"
-        android:layout_height="44dp"
+        android:layout_height="@dimen/default_price_axis_width"
         android:layout_weight="1"
         android:gravity="center"
         android:inputType="number"
         android:textColor="?android:attr/textColorPrimary"
         android:textColorHint="?android:attr/textColorSecondary"
-        android:textSize="16sp" />
+        android:textSize="@dimen/default_text_size" />
 
     <View
         android:id="@+id/view_color"
         android:layout_width="@dimen/color_picker_size"
         android:layout_height="@dimen/color_picker_size"
-        android:layout_marginStart="12dp"
-        android:layout_marginEnd="12dp" />
+        android:layout_marginStart="@dimen/default_popup_padding"
+        android:layout_marginEnd="@dimen/default_popup_padding"
+        android:background="@drawable/color_picker_border" />
 
     <TextView
         android:id="@+id/btn_delete"
-        android:layout_width="44dp"
-        android:layout_height="44dp"
+        android:layout_width="@dimen/default_price_axis_width"
+        android:layout_height="@dimen/default_price_axis_width"
         android:background="?android:attr/selectableItemBackgroundBorderless"
         android:gravity="center"
         android:text="@string/delete"
         android:textColor="?android:attr/textColorPrimary"
-        android:textSize="14sp" />
+        android:textSize="@dimen/vol_label_text_size" />
 
 </LinearLayout>
