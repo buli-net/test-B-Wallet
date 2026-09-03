@@ -345,7 +345,6 @@
     <string name="notification_channel_important_name">Important alerts</string>
     <string name="appwidget_wallet_balance_title">Bitcoin balance</string>
 
-    <!-- generic buttons -->
     <string name="button_ok">OK</string>
     <string name="button_dismiss">Dismiss</string>
     <string name="button_cancel">Cancel</string>
@@ -367,134 +366,92 @@
     <string name="action_show_qr">Show QR code</string>
     <string name="action_browse">Browse</string>
 
-    <!-- generic strings -->
     <string name="time_today">today</string>
     <string name="address_unlabeled">(unlabeled)</string>
     <string name="private_key_password">PIN</string>
     <string name="private_key_bad_password">bad PIN!</string>
     <string name="qr_code">QR code</string>
 
-    <!-- generic error messages -->
     <string name="error_io">I/O error: %s</string>
     <string name="error_parse">Parse error: %s</string>
     <string name="error_http">HTTP error %1$s:\n%2$s</string>
     <string name="error_bluetooth">Bluetooth error: %1$s</string>
 
-    <!-- Paper Wallet -->
+    <string name="paper_wallet_activity_title">Create paper wallet</string>
+    <string name="paper_wallet_warning">⚠ WARNING: With this key can spend all coins.</string>
+    <string name="paper_wallet_public_label">Public Key</string>
+    <string name="paper_wallet_private_label">Private Key</string>
+    <string name="paper_wallet_hidden">••••••••••••••••••••••••</string>
+    <string name="paper_wallet_copy">Copy</string>
+    <string name="paper_wallet_copied">Copied %1$s</string>
+    <string name="paper_wallet_hide">Hide</string>
+    <string name="paper_wallet_show">Show</string>
+    <string name="paper_wallet_hide_key">Hide</string>
+    <string name="paper_wallet_show_key">Show</string>
+    <string name="paper_wallet_public_format_legacy">P2PKH</string>
+    <string name="paper_wallet_public_format_bech32">P2WPKH</string>
+    <string name="paper_wallet_public_format_hex">HEX</string>
+    <string name="paper_wallet_private_format_wif">WIF</string>
+    <string name="paper_wallet_private_format_hex">HEX</string>
+    <string name="paper_wallet_private_format_bip38">BIP38</string>
+    <string name="paper_wallet_public_type">Type: %1$s</string>
+    <string name="paper_wallet_public_format_toast">Switched to: %1$s</string>
+    <string name="paper_wallet_private_format_toast">Switched to: %1$s</string>
+    <string name="paper_wallet_generated">New paper wallet generated</string>
+    <string name="paper_wallet_encrypt_bip38">Encrypt BIP38</string>
+    <string name="paper_wallet_passphrase">Encryption passphrase</string>
+    <string name="paper_wallet_passphrase_confirm">Confirm encryption passphrase</string>
+    <string name="paper_wallet_passphrase_empty">Passphrase is empty</string>
+    <string name="paper_wallet_passphrase_mismatch">Passphrases do not match</string>
+    <string name="paper_wallet_encrypting_bip38">Encrypting BIP38...</string>
+    <string name="paper_wallet_bip38_ready">BIP38 encryption done</string>
+    <string name="paper_wallet_bip38_failed">BIP38 encryption failed: %1$s</string>
+    <string name="paper_wallet_bip38_hint">⚠ Private key is encrypted with password.</string>
+    <string name="paper_wallet_saved">Saved %1$s to Pictures/PaperWallet</string>
+    <string name="paper_wallet_save_failed">Save failed: %1$s</string>
+    <string name="paper_wallet_exported">Exported %1$s to Documents/PaperWallet</string>
+    <string name="paper_wallet_export_failed">Export failed: %1$s</string>
+    <string name="paper_wallet_share">Share paper wallet</string>
+    <string name="paper_wallet_share_failed">Share failed: %1$s</string>
+    <string name="paper_wallet_print_failed">Print failed: %1$s</string>
+    <string name="paper_wallet_print_title">Paper Wallet Print</string>
+    <string name="paper_wallet_options_refresh">Generate new</string>
+    <string name="paper_wallet_options_save">Save image</string>
+    <string name="paper_wallet_options_share">Share</string>
+    <string name="paper_wallet_options_print">Print</string>
+    <string name="paper_wallet_options_export">Export TXT</string>
 
-<!-- Title of paper wallet screen -->
-<string name="paper_wallet_activity_title">Create paper wallet</string>
-<!-- Warning text shown on top of paper wallet -->
-<string name="paper_wallet_warning">⚠ WARNING: With this key can spend all coins.</string>
+    <string name="menu_utilities">Utilities</string>
+    <string name="menu_web_browser">Web Browser</string>
 
-<!-- Labels -->
-<string name="paper_wallet_public_label">Public Key</string>
-<string name="paper_wallet_private_label">Private Key</string>
-<!-- Shown when address/key is hidden -->
-<string name="paper_wallet_hidden">••••••••••••••••••••••••</string>
+    <string name="browser_home_title">Home</string>
+    <string name="browser_history_title">History</string>
+    <string name="browser_set_home_title">Set home page</string>
+    <string name="browser_url_hint">Search or enter URL</string>
+    <string name="browser_no_history">No history</string>
+    <string name="browser_history_title_dialog">Browser History</string>
+    <string name="browser_clear_history">Clear</string>
+    <string name="browser_close">Close</string>
+    <string name="browser_set_home_title_dialog">Set home page</string>
+    <string name="browser_home_hint">https://...</string>
+    <string name="browser_save">Save</string>
+    <string name="browser_cancel">Cancel</string>
+    <string name="browser_home_saved">Home page saved</string>
+    <string name="browser_home_cleared">Home page cleared</string>
+    <string name="browser_settings_title">Settings</string>
+    <string name="browser_downloading">Downloading: %1$s</string>
+    <string name="browser_download_complete">Download complete: %1$s</string>
+    <string name="browser_download_failed">Download failed: %1$s</string>
+    <string name="browser_download_blob_failed">Blob download failed: %1$s</string>
+    <string name="browser_download_data_failed">Data URL handling failed: %1$s</string>
+    <string name="browser_download_save_failed">Failed to save file: %1$s</string>
+    <string name="browser_downloading_file">Downloading file...</string>
 
-<!-- Copy / Hide / Show -->
-<string name="paper_wallet_copy">Copy</string>
-<!-- %1$s = label of copied field -->
-<string name="paper_wallet_copied">Copied %1$s</string>
-<string name="paper_wallet_hide">Hide</string>
-<string name="paper_wallet_show">Show</string>
-<string name="paper_wallet_hide_key">Hide</string>
-<string name="paper_wallet_show_key">Show</string>
-
-<!-- Public address formats - ONLY sweepable by original wallet -->
-<!-- 1 = Legacy compressed P2PKH 1... WIF K/L... -->
-<string name="paper_wallet_public_format_legacy">P2PKH</string>
-<!-- 2 = Native SegWit Bech32 P2WPKH bc1q... - sweepable by original -->
-<string name="paper_wallet_public_format_bech32">P2WPKH</string>
-<!-- HEX view of pubkey -->
-<string name="paper_wallet_public_format_hex">HEX</string>
-
-<!-- Private key formats -->
-<string name="paper_wallet_private_format_wif">WIF</string>
-<string name="paper_wallet_private_format_hex">HEX</string>
-<string name="paper_wallet_private_format_bip38">BIP38</string>
-
-<!-- Type display -->
-<string name="paper_wallet_public_type">Type: %1$s</string>
-<!-- Toast when switching address type, %1$s = type name -->
-<string name="paper_wallet_public_format_toast">Switched to: %1$s</string>
-<!-- Toast when switching private key format -->
-<string name="paper_wallet_private_format_toast">Switched to: %1$s</string>
-
-<!-- Generation -->
-<string name="paper_wallet_generated">New paper wallet generated</string>
-
-<!-- BIP38 encryption -->
-<string name="paper_wallet_encrypt_bip38">Encrypt BIP38</string>
-<string name="paper_wallet_passphrase">Encryption passphrase</string>
-<string name="paper_wallet_passphrase_confirm">Confirm encryption passphrase</string>
-<string name="paper_wallet_passphrase_empty">Passphrase is empty</string>
-<string name="paper_wallet_passphrase_mismatch">Passphrases do not match</string>
-<string name="paper_wallet_encrypting_bip38">Encrypting BIP38...</string>
-<string name="paper_wallet_bip38_ready">BIP38 encryption done</string>
-<!-- %1$s = error message -->
-<string name="paper_wallet_bip38_failed">BIP38 encryption failed: %1$s</string>
-<string name="paper_wallet_bip38_hint">⚠ Private key is encrypted with password.</string>
-
-<!-- Save / Export / Share / Print -->
-<!-- %1$s = filename -->
-<string name="paper_wallet_saved">Saved %1$s to Pictures/PaperWallet</string>
-<string name="paper_wallet_save_failed">Save failed: %1$s</string>
-<string name="paper_wallet_exported">Exported %1$s to Documents/PaperWallet</string>
-<string name="paper_wallet_export_failed">Export failed: %1$s</string>
-<string name="paper_wallet_share">Share paper wallet</string>
-<string name="paper_wallet_share_failed">Share failed: %1$s</string>
-<string name="paper_wallet_print_failed">Print failed: %1$s</string>
-
-<!-- Print layout - paper_wallet_print.xml -->
-<string name="paper_wallet_print_title">Paper Wallet Print</string>
-
-<!-- Options menu - paper_wallet_options.xml -->
-<string name="paper_wallet_options_refresh">Generate new</string>
-<string name="paper_wallet_options_save">Save image</string>
-<string name="paper_wallet_options_share">Share</string>
-<string name="paper_wallet_options_print">Print</string>
-<string name="paper_wallet_options_export">Export TXT</string>
-
-    <!-- Menu: Utilities & Web Browser -->
-<string name="menu_utilities">Utilities</string>
-<string name="menu_web_browser">Web Browser</string>
-
-    <!-- Browser Activity -->
-
-<string name="browser_home_title">Home</string>
-<string name="browser_history_title">History</string>
-<string name="browser_set_home_title">Set home page</string>
-<string name="browser_url_hint">Search or enter URL</string>
-<string name="browser_no_history">No history</string>
-<string name="browser_history_title_dialog">Browser History</string>
-<string name="browser_clear_history">Clear</string>
-<string name="browser_close">Close</string>
-<string name="browser_set_home_title_dialog">Set home page</string>
-<string name="browser_home_hint">https://...</string>
-<string name="browser_save">Save</string>
-<string name="browser_cancel">Cancel</string>
-<string name="browser_home_saved">Home page saved</string>
-<string name="browser_home_cleared">Home page cleared</string>
-<string name="browser_settings_title">Settings</string>
-
-<string name="browser_downloading">Downloading: %1$s</string>
-<string name="browser_download_complete">Download complete: %1$s</string>
-<string name="browser_download_failed">Download failed: %1$s</string>
-<string name="browser_download_blob_failed">Blob download failed: %1$s</string>
-<string name="browser_download_data_failed">Data URL handling failed: %1$s</string>
-<string name="browser_download_save_failed">Failed to save file: %1$s</string>
-<string name="browser_downloading_file">Downloading file...</string>
-    
-    <!-- maket chart-->
-
-    <!-- ===== TITLE & MENU - Used by AndroidManifest.xml ===== -->
+    <!-- Market chart -->
     <string name="market_chart_title">Market Chart</string>
     <string name="menu_market">Market</string>
     <string name="menu_price_chart">Price Chart</string>
 
-    <!-- ===== CHART DISPLAY - Used by MarketChartView.java ===== -->
     <string name="chart_loading">Loading…</string>
     <string name="chart_close_in">Close in %1$s</string>
     <string name="chart_high_label">H: %1$s</string>
@@ -515,7 +472,6 @@
     <string name="chart_last_line_width">Last line: %1$d</string>
     <string name="chart_last_price_label_text_size">Label: %1$d</string>
 
-    <!-- ===== DEFAULT PREVIEW - Used by activity_market_chart.xml (tools:text) ===== -->
     <string name="chart_price_default">--</string>
     <string name="chart_change_default">--</string>
     <string name="chart_countdown_default">Close in: --</string>
@@ -533,7 +489,6 @@
     <string name="chart_popup_volume_default">Vol --</string>
     <string name="chart_balance_default">--</string>
 
-    <!-- ===== INTERVALS - Used by MarketChartActivity.java ===== -->
     <string name="intervals_title">Intervals</string>
     <string name="time">Time</string>
     <string name="more">More</string>
@@ -554,20 +509,17 @@
     <string name="default_interval">15m</string>
     <string name="default_symbol">BTCUSDT</string>
 
-    <!-- ===== SETTINGS UI - Used by chart_settings_*.xml ===== -->
-    <string name="ma">MA</string>
-    <string name="add_ma">+ ADD MA</string>
-    <string name="apply">APPLY</string>
-    <string name="delete">X</string>
-    <string name="max_ma_reached">Max 10 MA</string>
+    <!-- Chart Settings - deduped -->
     <string name="chart_settings_title">Chart Settings</string>
     <string name="chart_settings_candle">Candle Settings</string>
     <string name="chart_settings_bullish">Bullish Color</string>
     <string name="chart_settings_bearish">Bearish Color</string>
     <string name="chart_settings_ma">MA Settings</string>
     <string name="chart_settings_apply">Apply</string>
-    
-    <string name="chart_show_volume">Show Volume</string>
+    <string name="chart_settings_chart_options">Chart Options</string>
+    <string name="chart_show_grid">Show Grid</string>
+    <string name="chart_grid_color">Grid Color</string>
+    <string name="grid_show_title">Show Grid</string>
     <string name="chart_settings_current_price">Current Price Bar</string>
     <string name="chart_show_current_price_bar">Show Current Price Bar</string>
     <string name="chart_current_price_bar_color">Bar Color</string>
@@ -576,7 +528,6 @@
     <string name="chart_last_price_section">Last Price Line</string>
     <string name="chart_show_last_price">Show Last Price Line</string>
     <string name="chart_last_price_color">Last Price Color</string>
-    
     <string name="chart_price_text_color">Price Text Color</string>
     <string name="chart_last_line_dashed">Dashed Last Line</string>
     <string name="chart_last_price_label_section">Current Price Label</string>
@@ -592,19 +543,23 @@
     <string name="chart_selected_line_width">Selected width: %d</string>
     <string name="chart_selected_line_alpha">Selected alpha: %d</string>
     <string name="chart_selected_line_dashed">Dashed Line</string>
-
     <string name="grid_settings_title">Grid Settings</string>
     <string name="grid_color_title">Grid Color</string>
-    <string name="chart_settings_chart_options">Chart Options</string>
-    <string name="chart_show_grid">Show Grid</string>
+    <string name="chart_show_volume">Show Volume</string>
+    <string name="chart_settings_last_price">Last Price</string>
+    <string name="chart_settings_label">Label</string>
+    <string name="chart_settings_selected">Selected</string>
+    <string name="ma">MA</string>
+    <string name="add_ma">+ ADD MA</string>
+    <string name="apply">APPLY</string>
+    <string name="delete">X</string>
+    <string name="max_ma_reached">Max 10 MA</string>
 
-    <!-- ===== BALANCE ===== -->
     <string name="balance_loading_wallet">Loading wallet…</string>
     <string name="balance_syncing">Syncing…</string>
     <string name="balance_loading">Loading…</string>
     <string name="balance_error">Error</string>
 
-    <!-- ===== CORE / FORMAT / URL / JSON - No translate ===== -->
     <string name="fiat_usd" translatable="false">USD</string>
     <string name="suffix_usdt" translatable="false">USDT</string>
     <string name="suffix_busd" translatable="false">BUSD</string>
@@ -627,12 +582,10 @@
     <string name="json_quoteVolume" translatable="false">quoteVolume</string>
     <string name="json_priceChangePercent" translatable="false">priceChangePercent</string>
 
-    <!-- ===== PREFS KEYS - No translate ===== -->
     <string name="key_selected_line_color_user_set">selected_line_color_user_set</string>
     <string name="key_selected_width_user_set">selected_width_user_set</string>
     <string name="key_selected_alpha_user_set">selected_alpha_user_set</string>
     <string name="key_selected_dashed_user_set">selected_dashed_user_set</string>
-    
     <string name="prefs_ma" translatable="false">ma_prefs</string>
     <string name="key_ma" translatable="false">ma_lines</string>
     <string name="prefs_candle" translatable="false">candle_prefs</string>
@@ -675,7 +628,6 @@
     <string name="arrow_collapsed" translatable="false">▼</string>
     <string name="arrow_expanded" translatable="false">▲</string>
 
-    <!-- ===== ERRORS ===== -->
     <string name="err_missing_dimen" translatable="false">Missing dimen/integer - must define in res, no hardcoded</string>
     <string name="err_ma_empty" translatable="false">defMaLines empty - check tvDefMaPeriods in layout</string>
     <string name="err_color_0" translatable="false">Color from layout is 0 - check android:tag in chart_settings_popup.xml</string>
@@ -700,7 +652,6 @@
     <string name="err_view_tag_missing" translatable="false">View tag missing color</string>
     <string name="err_selected_line_color_0">Selected line color is invalid</string>
 
-    <!-- Volume MA prefs - each key separated, like other features -->
     <string name="key_vol_show_ma">vol_show_ma</string>
     <string name="key_vol_ma1_period">vol_ma1_period</string>
     <string name="key_vol_ma2_period">vol_ma2_period</string>
@@ -718,21 +669,4 @@
 
     <string name="vol_label">Vol: %.2f </string>
     <string name="vol_ma_format">MA(%1$d): %2$.2f </string>
-
-
-    <!-- Market Chart Settings - fix missing default -->
-<string name="chart_settings_chart_options">Chart Options</string>
-<string name="chart_show_grid">Show Grid</string>
-<string name="chart_grid_color">Grid Color</string>
-<string name="grid_show_title">Show Grid</string>
-<string name="chart_settings_ma">MA Settings</string>
-<string name="add_ma">Add MA</string>
-<string name="chart_ma_line_width">MA Line Width</string>
-<string name="ma">MA</string>
-<string name="delete">Delete</string>
-<string name="chart_settings_title">Chart Settings</string>
-<string name="chart_settings_candle">Candle Settings</string>
-<string name="chart_settings_last_price">Last Price</string>
-<string name="chart_settings_label">Label</string>
-<string name="chart_settings_selected">Selected</string>
 </resources>
