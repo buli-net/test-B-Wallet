@@ -383,7 +383,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
 
     private float getDimenFromTag(View v) {
         if (v == null) {
-            return 0;
+            throw new IllegalStateException("View tag missing dimen");
         }
         Object tag = v.getTag();
         if (tag == null) {
@@ -404,7 +404,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
             int resId = Integer.parseInt(s);
             return getResources().getDimension(resId);
         } catch (NumberFormatException e) {
-            return Float.parseFloat(tag.toString().replace("dip","").replace("dp","").replace("sp","").replace("px","").trim()) * getResources().getDisplayMetrics().density;
+            throw new IllegalStateException("Invalid dimen tag: " + tag);
         }
     }
 
