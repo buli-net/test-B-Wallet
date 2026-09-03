@@ -4,7 +4,7 @@
     android:layout_height="wrap_content"
     android:orientation="vertical">
 
-    <!-- FIX 5: Show Volume moved from Chart Options to Volume MA - master toggle -->
+    <!-- Show Volume moved from Chart Options to Volume MA - master toggle -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -43,7 +43,8 @@
         <Switch
             android:id="@+id/swVolMa"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:checked="true" />
     </LinearLayout>
 
     <LinearLayout
@@ -149,7 +150,8 @@
             android:id="@+id/viewVolMa1Color"
             android:layout_width="@dimen/color_picker_size"
             android:layout_height="@dimen/color_picker_size"
-            android:background="@drawable/color_picker_border" />
+            android:background="@drawable/color_picker_border"
+            android:tag="@color/chart_vol_ma1_default" />
     </LinearLayout>
 
     <LinearLayout
@@ -170,7 +172,8 @@
             android:id="@+id/viewVolMa2Color"
             android:layout_width="@dimen/color_picker_size"
             android:layout_height="@dimen/color_picker_size"
-            android:background="@drawable/color_picker_border" />
+            android:background="@drawable/color_picker_border"
+            android:tag="@color/chart_vol_ma2_default" />
     </LinearLayout>
 
 </LinearLayout>
