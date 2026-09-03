@@ -19,7 +19,7 @@
     <EditText
         android:id="@+id/et_period"
         android:layout_width="0dp"
-        android:layout_height="@dimen/default_price_axis_width"
+        android:layout_height="@dimen/default_button_height"
         android:layout_weight="1"
         android:gravity="center"
         android:inputType="number"
@@ -37,8 +37,8 @@
 
     <TextView
         android:id="@+id/btn_delete"
-        android:layout_width="@dimen/default_price_axis_width"
-        android:layout_height="@dimen/default_price_axis_width"
+        android:layout_width="@dimen/default_button_height"
+        android:layout_height="@dimen/default_button_height"
         android:background="?android:attr/selectableItemBackgroundBorderless"
         android:gravity="center"
         android:text="@string/delete"
