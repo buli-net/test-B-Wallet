@@ -25,7 +25,6 @@
             android:layout_width="@dimen/color_picker_size"
             android:layout_height="@dimen/color_picker_size"
             android:background="@drawable/color_picker_border"
-            android:backgroundTint="@color/chart_selected_line"
             android:tag="@color/chart_selected_line"
             android:clickable="true"
             android:focusable="true" />
