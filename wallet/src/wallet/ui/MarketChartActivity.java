@@ -383,7 +383,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
 
     private float getDimenFromTag(View v) {
         if (v == null) {
-            throw new IllegalStateException("View tag missing dimen");
+            return 0;
         }
         Object tag = v.getTag();
         if (tag == null) {
