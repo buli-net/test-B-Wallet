@@ -38,7 +38,7 @@
     <Button
         android:id="@+id/btn_add_ma"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/default_price_axis_width"
+        android:layout_height="@dimen/default_button_height"
         android:layout_marginTop="@dimen/vol_setting_padding_vertical"
         android:text="@string/add_ma"
         android:textAllCaps="false" />
