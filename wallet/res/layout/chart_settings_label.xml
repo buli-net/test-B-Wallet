@@ -83,7 +83,51 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:max="32"
-            android:progress="@dimen/default_current_price_text_size" />
+            android:progress="14"
+            android:tag="@dimen/default_current_price_text_size" />
     </LinearLayout>
+
+    <!-- Default values for Activity to read via tag - law compliance -->
+    <View
+        android:id="@+id/def_label_bg"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:visibility="gone"
+        android:tag="@color/chart_last_price_label_bg" />
+
+    <View
+        android:id="@+id/def_label_text_color"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:visibility="gone"
+        android:tag="@color/last_label_text" />
+
+    <View
+        android:id="@+id/def_label_text_size"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:visibility="gone"
+        android:tag="@dimen/default_current_price_text_size" />
+
+    <View
+        android:id="@+id/def_vol_setting_padding_vertical"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:visibility="gone"
+        android:tag="@dimen/vol_setting_padding_vertical" />
+
+    <View
+        android:id="@+id/def_vol_label_text_size"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:visibility="gone"
+        android:tag="@dimen/vol_label_text_size" />
+
+    <View
+        android:id="@+id/def_color_picker_size"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:visibility="gone"
+        android:tag="@dimen/color_picker_size" />
 
 </LinearLayout>
