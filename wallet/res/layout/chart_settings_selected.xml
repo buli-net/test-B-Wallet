@@ -56,8 +56,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:max="10"
-            android:progress="@dimen/default_selected_width"
-            android:tag="@dimen/default_grid_width" />
+            android:progress="2"
+            android:tag="@dimen/default_selected_width" />
     </LinearLayout>
 
     <LinearLayout
@@ -77,9 +77,9 @@
             android:id="@+id/sbSelectedAlpha"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:max="@integer/selected_alpha"
-            android:progress="@integer/selected_alpha"
-            android:tag="@integer/volume_alpha" />
+            android:max="255"
+            android:progress="150"
+            android:tag="@integer/selected_alpha" />
     </LinearLayout>
 
     <LinearLayout
@@ -102,5 +102,48 @@
             android:layout_height="wrap_content"
             android:checked="false" />
     </LinearLayout>
+
+    <!-- Default values for Activity to read via tag - law: @dimen/@integer/@color -> tag -->
+    <View
+        android:id="@+id/def_selected_width"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:visibility="gone"
+        android:tag="@dimen/default_selected_width" />
+
+    <View
+        android:id="@+id/def_selected_alpha"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:visibility="gone"
+        android:tag="@integer/selected_alpha" />
+
+    <View
+        android:id="@+id/def_selected_line_color"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:visibility="gone"
+        android:tag="@color/chart_selected_line" />
+
+    <View
+        android:id="@+id/def_vol_setting_padding_vertical"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:visibility="gone"
+        android:tag="@dimen/vol_setting_padding_vertical" />
+
+    <View
+        android:id="@+id/def_vol_label_text_size"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:visibility="gone"
+        android:tag="@dimen/vol_label_text_size" />
+
+    <View
+        android:id="@+id/def_color_picker_size"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:visibility="gone"
+        android:tag="@dimen/color_picker_size" />
 
 </LinearLayout>
