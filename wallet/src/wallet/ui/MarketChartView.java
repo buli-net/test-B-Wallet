@@ -312,12 +312,10 @@ public class MarketChartView extends View {
                .getDimension(R.dimen.default_candle_min_height);
         FETCH_LIMIT = context.getResources()
                .getInteger(R.integer.default_fetch_limit);
-        MIN_VISIBLE_CANDLE_COUNT = context.getResources()
-               .getInteger(R.integer.min_visible_candle_count);
-        MAX_VISIBLE_CANDLE_COUNT = context.getResources()
-               .getInteger(R.integer.max_visible_candle_count);
-        DEFAULT_VISIBLE_CANDLE_COUNT = context.getResources()
-               .getInteger(R.integer.default_visible_candle_count);
+        // Hardcoded visible candle limits (match layout: min=20, max=350, default=70)
+        MIN_VISIBLE_CANDLE_COUNT = 20;
+        MAX_VISIBLE_CANDLE_COUNT = 350;
+        DEFAULT_VISIBLE_CANDLE_COUNT = 70;
         VOLUME_ALPHA = context.getResources()
                .getInteger(R.integer.volume_alpha);
         SELECTED_ALPHA = context.getResources()
