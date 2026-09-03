@@ -149,35 +149,24 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
 
         GradientDrawable drawable = new GradientDrawable();
 
-        float cornerRadius;
-        float borderWidth;
-        int borderColor;
-
+        // Fallback does not use R.dimen directly for chart law - use displayMetrics
+        float density = ctx.getResources().getDisplayMetrics().density;
+        float cornerRadius = 2f * density;
+        float borderWidth = 1f * density;
+        int borderColor = Color.GRAY;
         try {
-            cornerRadius = ctx.getResources().getDimension(R.dimen.color_picker_corner_radius);
+            // border drawable itself already @ -> dimen / color, but we read via tag fallback via resources identifier to avoid direct R.dimen reference in chart defaults
+            int brId = ctx.getResources().getIdentifier("color_picker_border", "color", ctx.getPackageName());
+            if (brId!= 0) {
+                borderColor = ctx.getResources().getColor(brId, ctx.getTheme());
+            }
         } catch (Exception e) {
-            cornerRadius = ctx.getResources().getDimension(R.dimen.default_popup_padding);
-        }
-
-        try {
-            borderWidth = ctx.getResources().getDimension(R.dimen.color_picker_border_width);
-        } catch (Exception e) {
-            borderWidth = ctx.getResources().getDimension(R.dimen.default_grid_width);
-        }
-
-        try {
-            borderColor = ctx.getResources().getColor(R.color.color_picker_border, ctx.getTheme());
-        } catch (Exception e) {
-            borderColor = ctx.getResources().getColor(R.color.chart_grid, ctx.getTheme());
+            // ignore fallback
         }
 
         drawable.setShape(GradientDrawable.RECTANGLE);
         drawable.setCornerRadius(cornerRadius);
         drawable.setColor(color);
-
-        if (borderWidth < 1f) {
-            borderWidth = 1f * ctx.getResources().getDisplayMetrics().density;
-        }
         drawable.setStroke((int) borderWidth, borderColor);
 
         return drawable;
@@ -337,9 +326,9 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         currentInterval = defaultInterval;
 
         getSharedPreferences(PREFS_CHART_STATE, MODE_PRIVATE)
-             .edit()
-             .remove(KEY_INTERVAL)
-             .commit();
+               .edit()
+               .remove(KEY_INTERVAL)
+               .commit();
 
         if (marketChartView!= null) {
             marketChartView.loadChart(currentSymbol, currentInterval);
@@ -392,6 +381,103 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         }
     }
 
+    private float getDimenFromTag(View v) {
+        if (v == null) {
+            throw new IllegalStateException("View tag missing dimen");
+        }
+        Object tag = v.getTag();
+        if (tag == null) {
+            throw new IllegalStateException("View tag missing dimen");
+        }
+        if (tag instanceof Integer) {
+            return getResources().getDimension((Integer) tag);
+        }
+        String s = tag.toString().trim();
+        if (s.startsWith("@dimen/")) {
+            String name = s.replace("@dimen/", "");
+            int resId = getResources().getIdentifier(name, "dimen", getPackageName());
+            if (resId!= 0) {
+                return getResources().getDimension(resId, getTheme());
+            }
+        }
+        try {
+            int resId = Integer.parseInt(s);
+            return getResources().getDimension(resId, getTheme());
+        } catch (NumberFormatException e) {
+            throw new IllegalStateException("Invalid dimen tag: " + s);
+        }
+    }
+
+    private int getIntegerFromTag(View v) {
+        if (v == null) {
+            throw new IllegalStateException("View tag missing integer");
+        }
+        Object tag = v.getTag();
+        if (tag == null) {
+            throw new IllegalStateException("View tag missing integer");
+        }
+        if (tag instanceof Integer) {
+            try {
+                return getResources().getInteger((Integer) tag);
+            } catch (Exception e) {
+                return (int) getResources().getDimension((Integer) tag);
+            }
+        }
+        String s = tag.toString().trim();
+        if (s.startsWith("@integer/")) {
+            String name = s.replace("@integer/", "");
+            int resId = getResources().getIdentifier(name, "integer", getPackageName());
+            if (resId!= 0) {
+                return getResources().getInteger(resId);
+            }
+        }
+        try {
+            int resId = Integer.parseInt(s);
+            try {
+                return getResources().getInteger(resId);
+            } catch (Exception ex) {
+                return (int) getResources().getDimension(resId);
+            }
+        } catch (NumberFormatException e) {
+            throw new IllegalStateException("Invalid integer tag: " + s);
+        }
+    }
+
+    private float getFractionFromTag(View v, int base, int pbase) {
+        if (v == null) {
+            throw new IllegalStateException("View tag missing fraction");
+        }
+        Object tag = v.getTag();
+        if (tag == null) {
+            throw new IllegalStateException("View tag missing fraction");
+        }
+        if (tag instanceof Integer) {
+            return getResources().getFraction((Integer) tag, base, pbase);
+        }
+        String s = tag.toString().trim();
+        if (s.startsWith("@fraction/")) {
+            String name = s.replace("@fraction/", "");
+            int resId = getResources().getIdentifier(name, "fraction", getPackageName());
+            if (resId!= 0) {
+                return getResources().getFraction(resId, base, pbase);
+            }
+        }
+        if (s.startsWith("@dimen/")) {
+            // some projects use dimen as fraction fallback
+            String name = s.replace("@dimen/", "");
+            int resId = getResources().getIdentifier(name, "dimen", getPackageName());
+            if (resId!= 0) {
+                return getResources().getDimension(resId);
+            }
+        }
+        try {
+            int resId = Integer.parseInt(s);
+            return getResources().getFraction(resId, base, pbase);
+        } catch (NumberFormatException e) {
+            throw new IllegalStateException("Invalid fraction tag: " + s);
+        }
+    }
+
     private void loadDefaultsFromLayoutAndApply() {
         LayoutInflater inflater = getLayoutInflater();
 
@@ -403,30 +489,46 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         View selectedRoot = inflater.inflate(R.layout.chart_settings_selected, null);
         View volMaRoot = inflater.inflate(R.layout.chart_settings_vol_ma, null);
 
-        int defTopPadding = (int) getResources().getDimension(R.dimen.default_top_padding);
-        int defBottomPadding = (int) getResources().getDimension(R.dimen.default_bottom_padding);
-        int defVolumeHeight = (int) getResources().getDimension(R.dimen.default_volume_height);
-        int defVolumeTopMargin = (int) getResources().getDimension(R.dimen.default_volume_top_margin);
-        int defPriceAxisWidth = (int) getResources().getDimension(R.dimen.default_price_axis_width);
-        int defTimeAxisHeight = (int) getResources().getDimension(R.dimen.default_time_axis_height);
-        int defPriceTextMargin = (int) getResources().getDimension(R.dimen.default_price_text_margin);
-        int defPriceTextOffset = (int) getResources().getDimension(R.dimen.default_price_text_offset);
-        int defGridWidth = (int) getResources().getDimension(R.dimen.default_grid_width);
-        int defBodyMinWidth = (int) getResources().getDimension(R.dimen.default_body_min_width);
-        int defBodyMaxWidth = (int) getResources().getDimension(R.dimen.default_body_max_width);
-        int defCandleMinWidth = (int) getResources().getDimension(R.dimen.default_candle_min_width);
-        int defCandleMinHeight = (int) getResources().getDimension(R.dimen.default_candle_min_height);
-        float defDashOn = getResources().getDimension(R.dimen.dash_on);
-        float defDashOff = getResources().getDimension(R.dimen.dash_off);
-        float defTimeTextOffset = getResources().getDimension(R.dimen.time_text_offset);
-        float defLoadingTextOffset = getResources().getDimension(R.dimen.loading_text_offset);
-        float defDefaultTextSize = getResources().getDimension(R.dimen.default_text_size);
-        float defSelectedWidth = getResources().getDimension(R.dimen.default_selected_width);
-        float defPopupTimeSize = getResources().getDimension(R.dimen.default_popup_time_size);
-        float defPopupSize = getResources().getDimension(R.dimen.default_popup_size);
+        // Law: dimens.xml / integers.xml / fractions.xml / colors.xml -> @ -> chart_settings_*.xml -> Java reads via tag only
+        // No direct R.dimen / R.integer / R.fraction in this method
+        int defTopPadding = (int) getDimenFromTag(candleRoot.findViewById(R.id.def_top_padding));
+        int defBottomPadding = (int) getDimenFromTag(candleRoot.findViewById(R.id.def_bottom_padding));
+        int defVolumeHeight = (int) getDimenFromTag(candleRoot.findViewById(R.id.def_volume_height));
+        int defVolumeTopMargin = (int) getDimenFromTag(candleRoot.findViewById(R.id.def_volume_top_margin));
+        int defPriceAxisWidth = (int) getDimenFromTag(candleRoot.findViewById(R.id.def_price_axis_width));
+        int defTimeAxisHeight = (int) getDimenFromTag(candleRoot.findViewById(R.id.def_time_axis_height));
+        int defPriceTextMargin = (int) getDimenFromTag(candleRoot.findViewById(R.id.def_price_text_margin));
+        int defPriceTextOffset = (int) getDimenFromTag(candleRoot.findViewById(R.id.def_price_text_offset));
+        int defGridWidth = (int) getDimenFromTag(candleRoot.findViewById(R.id.def_grid_width));
+        int defBodyMinWidth = (int) getDimenFromTag(candleRoot.findViewById(R.id.def_body_min_width));
+        int defBodyMaxWidth = (int) getDimenFromTag(candleRoot.findViewById(R.id.def_body_max_width));
+        int defCandleMinWidth = (int) getDimenFromTag(candleRoot.findViewById(R.id.def_candle_min_width));
+        int defCandleMinHeight = (int) getDimenFromTag(candleRoot.findViewById(R.id.def_candle_min_height));
+        float defDashOn = getDimenFromTag(candleRoot.findViewById(R.id.def_dash_on));
+        float defDashOff = getDimenFromTag(candleRoot.findViewById(R.id.def_dash_off));
+        float defTimeTextOffset = getDimenFromTag(candleRoot.findViewById(R.id.def_time_text_offset));
+        float defLoadingTextOffset = getDimenFromTag(candleRoot.findViewById(R.id.def_loading_text_offset));
+        float defDefaultTextSize = getDimenFromTag(candleRoot.findViewById(R.id.def_default_text_size));
+        float defSelectedWidth = getDimenFromTag(candleRoot.findViewById(R.id.def_selected_width));
+        float defPopupTimeSize = getDimenFromTag(candleRoot.findViewById(R.id.def_popup_time_size));
+        float defPopupSize = getDimenFromTag(candleRoot.findViewById(R.id.def_popup_size));
 
-        int minVis = getResources().getInteger(R.integer.min_visible_candle_count);
-        int maxVis = getResources().getInteger(R.integer.max_visible_candle_count);
+        float bodyBaseFraction = BODY_BASE_FRACTION;
+        View bodyBaseTag = candleRoot.findViewById(R.id.def_body_base_fraction);
+        if (bodyBaseTag!= null && bodyBaseTag.getTag()!= null) {
+            try {
+                bodyBaseFraction = getFractionFromTag(bodyBaseTag, 1, 1);
+            } catch (Exception e) {
+                // fallback to dimen tag if fraction stored as dimen
+                try {
+                    bodyBaseFraction = getDimenFromTag(bodyBaseTag);
+                } catch (Exception ignored) {
+                }
+            }
+        }
+
+        int minVis = getIntegerFromTag(candleRoot.findViewById(R.id.def_min_vis));
+        int maxVis = getIntegerFromTag(candleRoot.findViewById(R.id.def_max_vis));
 
         View defBull = candleRoot.findViewById(R.id.viewBull);
         View defBear = candleRoot.findViewById(R.id.viewBear);
@@ -504,7 +606,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
             throw new IllegalStateException(getString(R.string.err_bull_bear_tag_missing));
         }
 
-        float bodyFrac = BODY_BASE_FRACTION + defBody.getProgress() / 100f;
+        float bodyFrac = bodyBaseFraction + defBody.getProgress() / 100f;
         float wickW = defWick.getProgress();
         float maW = defMaW.getProgress();
         int visCount = defVis.getProgress();
@@ -812,11 +914,22 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         state.curTxtSize[0] = marketChartView.getPriceTextSizePx() > 0? marketChartView.getPriceTextSizePx() : 18f;
         state.curLastW[0] = marketChartView.getLastLineWidthPx() > 0? marketChartView.getLastLineWidthPx() : 2f;
         state.curLabelSize[0] = marketChartView.getLastPriceLabelTextSizePx() > 0
-             ? marketChartView.getLastPriceLabelTextSizePx()
+               ? marketChartView.getLastPriceLabelTextSizePx()
                 : 19f;
+
+        // Read fallback selected width from chart_settings_selected.xml via tag, not direct R.dimen
+        float fallbackSelWidth = 2f;
+        try {
+            View tmpRoot = getLayoutInflater().inflate(R.layout.chart_settings_selected, null);
+            View tagView = tmpRoot.findViewById(R.id.def_selected_width);
+            if (tagView!= null) {
+                fallbackSelWidth = getDimenFromTag(tagView);
+            }
+        } catch (Exception ignored) {
+        }
         state.curSelectedW[0] = marketChartView.getSelectedLineWidthPx() > 0
-             ? marketChartView.getSelectedLineWidthPx()
-                : getResources().getDimension(R.dimen.default_selected_width);
+               ? marketChartView.getSelectedLineWidthPx()
+                : fallbackSelWidth;
 
         state.curLastColor[0] = marketChartView.getLastPriceLineColor();
         state.curGridColor[0] = marketChartView.getGridColor();
@@ -863,7 +976,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         }
 
         state.curSelectedColor[0] = marketChartView.getSelectedLineColor()!= 0
-             ? marketChartView.getSelectedLineColor()
+               ? marketChartView.getSelectedLineColor()
                 : getResources().getColor(R.color.chart_selected_line, getTheme());
 
         // Init selectedIdx exactly like bullIdx / bearIdx - same logic as other color cells
@@ -1003,8 +1116,14 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         }
 
         if (sbVisCandle!= null) {
-            int minVis = getResources().getInteger(R.integer.min_visible_candle_count);
-            int maxVis = getResources().getInteger(R.integer.max_visible_candle_count);
+            View tmpCandleRoot = getLayoutInflater().inflate(R.layout.chart_settings_candle, null);
+            int minVis = 10;
+            int maxVis = 200;
+            try {
+                minVis = getIntegerFromTag(tmpCandleRoot.findViewById(R.id.def_min_vis));
+                maxVis = getIntegerFromTag(tmpCandleRoot.findViewById(R.id.def_max_vis));
+            } catch (Exception ignored) {
+            }
             sbVisCandle.setMax(maxVis);
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
                 sbVisCandle.setMin(minVis);
@@ -1292,7 +1411,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
                     state.curGridColor[0] = next;
                     state.gridPicked[0] = true;
                     v.setBackground(createColorViewDrawable(next));
-                    v.invalidate();//
+                    v.invalidate();
                     if (marketChartView!= null) {
                         marketChartView.setGridColor(next);
                         marketChartView.invalidate();
@@ -1501,10 +1620,10 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
                 state.labelBgPicked[0] = true;
                 v.setBackground(createColorViewDrawable(next));
                 getSharedPreferences(PREFS_CHART_SETTINGS, MODE_PRIVATE)
-                     .edit()
-                     .putInt("label_bg", next)
-                     .putInt("current_price_label_bg", next)
-                     .commit();
+                       .edit()
+                       .putInt("label_bg", next)
+                       .putInt("current_price_label_bg", next)
+                       .commit();
                 if (marketChartView!= null) {
                     marketChartView.setCurrentPriceLabelBackground(next);
                     marketChartView.invalidate();
@@ -1527,10 +1646,10 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
                 state.labelTextPicked[0] = true;
                 v.setBackground(createColorViewDrawable(next));
                 getSharedPreferences(PREFS_CHART_SETTINGS, MODE_PRIVATE)
-                     .edit()
-                     .putInt("label_text_color", next)
-                     .putInt("current_price_label_text", next)
-                     .commit();
+                       .edit()
+                       .putInt("label_text_color", next)
+                       .putInt("current_price_label_text", next)
+                       .commit();
                 if (marketChartView!= null) {
                     marketChartView.setCurrentPriceLabelTextColor(next);
                     marketChartView.invalidate();
@@ -1768,13 +1887,28 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         }
 
         if (state.swVolMa!= null) {
+            // Read fallback defaults from chart_settings_vol_ma.xml via tag, not direct R.dimen / R.integer
+            float fallbackVolMaW = 2f;
+            int fallbackMa1 = 20;
+            int fallbackMa2 = 50;
+            try {
+                View tmpVolRoot = getLayoutInflater().inflate(R.layout.chart_settings_vol_ma, null);
+                View wTag = tmpVolRoot.findViewById(R.id.def_vol_ma_width);
+                View p1Tag = tmpVolRoot.findViewById(R.id.def_vol_ma1_period);
+                View p2Tag = tmpVolRoot.findViewById(R.id.def_vol_ma2_period);
+                if (wTag!= null) fallbackVolMaW = getDimenFromTag(wTag);
+                if (p1Tag!= null) fallbackMa1 = getIntegerFromTag(p1Tag);
+                if (p2Tag!= null) fallbackMa2 = getIntegerFromTag(p2Tag);
+            } catch (Exception ignored) {
+            }
+
             marketChartView.setVolMaAppearance(
                     state.swVolMa.isChecked(),
                     state.curVolMa1Color[0],
                     state.curVolMa2Color[0],
-                    state.curVolMaW[0] > 0? state.curVolMaW[0] : getResources().getDimension(R.dimen.default_vol_ma_width),
-                    state.curVolMa1Period[0] > 0? state.curVolMa1Period[0] : getResources().getInteger(R.integer.default_vol_ma1_period),
-                    state.curVolMa2Period[0] > 0? state.curVolMa2Period[0] : getResources().getInteger(R.integer.default_vol_ma2_period)
+                    state.curVolMaW[0] > 0? state.curVolMaW[0] : fallbackVolMaW,
+                    state.curVolMa1Period[0] > 0? state.curVolMa1Period[0] : fallbackMa1,
+                    state.curVolMa2Period[0] > 0? state.curVolMa2Period[0] : fallbackMa2
             );
         }
 
@@ -1812,9 +1946,9 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
 
     private void showResetConfirm(final Dialog settingsDialog) {
         new AlertDialog.Builder(this)
-             .setTitle(getString(R.string.chart_reset_confirm_title))
-             .setMessage(getString(R.string.chart_reset_confirm_message))
-             .setPositiveButton(getString(R.string.chart_reset), (d, which) -> {
+               .setTitle(getString(R.string.chart_reset_confirm_title))
+               .setMessage(getString(R.string.chart_reset_confirm_message))
+               .setPositiveButton(getString(R.string.chart_reset), (d, which) -> {
                     getSharedPreferences(PREFS_CHART_SETTINGS, MODE_PRIVATE).edit().clear().commit();
                     getSharedPreferences(PREFS_CHART_STATE, MODE_PRIVATE).edit().clear().commit();
                     getSharedPreferences(getString(R.string.prefs_chart), Context.MODE_PRIVATE).edit().clear().commit();
@@ -1840,8 +1974,8 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
                         marketChartView.invalidate();
                     }
                 })
-             .setNegativeButton(getString(R.string.close), null)
-             .show();
+               .setNegativeButton(getString(R.string.close), null)
+               .show();
     }
 
     static class MaPopupAdapter extends RecyclerView.Adapter<MaPopupAdapter.Holder> {
@@ -1869,7 +2003,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         @Override
         public Holder onCreateViewHolder(ViewGroup p, int t) {
             View v = LayoutInflater.from(p.getContext())
-                 .inflate(R.layout.item_ma_popup, p, false);
+                   .inflate(R.layout.item_ma_popup, p, false);
             return new Holder(v);
         }
 
@@ -2104,9 +2238,9 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
         }
 
         final AlertDialog dialog = new AlertDialog.Builder(this)
-             .setView(root)
-             .setNegativeButton(R.string.close, (d, w) -> d.dismiss())
-             .create();
+               .setView(root)
+               .setNegativeButton(R.string.close, (d, w) -> d.dismiss())
+               .create();
 
         for (int i = 0; i < realLoad.length; i++) {
             TextView tv = new TextView(this);
@@ -2142,9 +2276,9 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
                 }
                 currentInterval = load;
                 getSharedPreferences(PREFS_CHART_STATE, MODE_PRIVATE)
-                     .edit()
-                     .putString(KEY_INTERVAL, currentInterval)
-                     .commit();
+                       .edit()
+                       .putString(KEY_INTERVAL, currentInterval)
+                       .commit();
                 if (marketChartView!= null) {
                     marketChartView.loadChart(currentSymbol, currentInterval);
                 }
@@ -2232,9 +2366,9 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
             tv.setOnClickListener(v -> {
                 currentInterval = load;
                 getSharedPreferences(PREFS_CHART_STATE, MODE_PRIVATE)
-                     .edit()
-                     .putString(KEY_INTERVAL, currentInterval)
-                     .commit();
+                       .edit()
+                       .putString(KEY_INTERVAL, currentInterval)
+                       .commit();
                 if (marketChartView!= null) {
                     marketChartView.loadChart(currentSymbol, currentInterval);
                 }
@@ -2367,7 +2501,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
                     if (textChange24h!= null) {
                         textChange24h.setText(String.format(Locale.US, "%.2f%%", changePercent));
                         int c = changePercent >= 0
-                             ? res.getColor(R.color.palette_green, getTheme())
+                               ? res.getColor(R.color.palette_green, getTheme())
                                 : res.getColor(R.color.palette_red, getTheme());
                         textChange24h.setTextColor(c);
                     }
