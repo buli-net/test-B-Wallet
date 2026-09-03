@@ -3,15 +3,15 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:paddingTop="4dp"
-    android:paddingBottom="4dp">
+    android:paddingTop="@dimen/vol_setting_padding_vertical"
+    android:paddingBottom="@dimen/vol_setting_padding_vertical">
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:paddingBottom="8dp"
+        android:paddingBottom="@dimen/vol_setting_padding_vertical"
         android:text="@string/chart_last_price_label_section"
-        android:textSize="14sp"
+        android:textSize="@dimen/vol_label_text_size"
         android:textStyle="bold" />
 
     <!-- Label Bg -->
@@ -20,19 +20,20 @@
         android:layout_height="wrap_content"
         android:gravity="center_vertical"
         android:orientation="horizontal"
-        android:paddingVertical="8dp">
+        android:paddingVertical="@dimen/vol_setting_padding_vertical">
 
         <TextView
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="@string/chart_last_price_label_bg"
-            android:textSize="13sp" />
+            android:textSize="@dimen/vol_label_text_size" />
 
         <View
             android:id="@+id/viewLabelBg"
             android:layout_width="@dimen/color_picker_size"
             android:layout_height="@dimen/color_picker_size"
+            android:background="@drawable/color_picker_border"
             android:tag="@color/chart_last_price_label_bg" />
     </LinearLayout>
 
@@ -42,19 +43,20 @@
         android:layout_height="wrap_content"
         android:gravity="center_vertical"
         android:orientation="horizontal"
-        android:paddingVertical="8dp">
+        android:paddingVertical="@dimen/vol_setting_padding_vertical">
 
         <TextView
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="@string/chart_last_price_label_text_color"
-            android:textSize="13sp" />
+            android:textSize="@dimen/vol_label_text_size" />
 
         <View
             android:id="@+id/viewLabelTextColor"
             android:layout_width="@dimen/color_picker_size"
             android:layout_height="@dimen/color_picker_size"
+            android:background="@drawable/color_picker_border"
             android:tag="@color/last_label_text" />
     </LinearLayout>
 
@@ -63,14 +65,14 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:paddingVertical="4dp">
+        android:paddingVertical="@dimen/vol_setting_padding_vertical">
 
         <TextView
             android:id="@+id/lbLabelSize"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/chart_last_price_label_text_size"
-            android:textSize="12sp" />
+            android:textSize="@dimen/vol_label_text_size" />
 
         <SeekBar
             android:id="@+id/sbLabelSize"
