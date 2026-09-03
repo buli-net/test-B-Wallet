@@ -404,7 +404,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
             int resId = Integer.parseInt(s);
             return getResources().getDimension(resId);
         } catch (NumberFormatException e) {
-            throw new IllegalStateException("Invalid dimen tag: " + s);
+            return Float.parseFloat(tag.toString().replace("dip","").replace("dp","").replace("sp","").replace("px","").trim()) * getResources().getDisplayMetrics().density;
         }
     }
 
