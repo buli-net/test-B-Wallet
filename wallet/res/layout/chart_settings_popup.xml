@@ -11,16 +11,17 @@
         android:padding="@dimen/default_popup_padding"
         android:paddingTop="@dimen/default_top_padding"
         android:paddingBottom="@dimen/default_bottom_padding"
-        android:background="@color/chart_bg">
+        android:background="@color/chart_bg"
+        android:tag="@color/chart_bg">
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:paddingTop="@dimen/vol_setting_padding_vertical"
+            android:paddingBottom="@dimen/vol_setting_padding_vertical"
             android:text="@string/chart_settings_title"
             android:textSize="@dimen/vol_label_text_size"
-            android:textStyle="bold"
-            android:paddingTop="@dimen/vol_setting_padding_vertical"
-            android:paddingBottom="@dimen/vol_setting_padding_vertical" />
+            android:textStyle="bold" />
 
         <!-- Candle Settings -->
         <LinearLayout
@@ -72,7 +73,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/default_grid_width"
                 android:layout_marginVertical="@dimen/vol_setting_padding_vertical"
-                android:background="@color/chart_grid" />
+                android:background="@color/chart_grid"
+                android:tag="@color/chart_grid" />
         </LinearLayout>
 
         <!-- MA Settings -->
@@ -125,7 +127,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/default_grid_width"
                 android:layout_marginVertical="@dimen/vol_setting_padding_vertical"
-                android:background="@color/chart_grid" />
+                android:background="@color/chart_grid"
+                android:tag="@color/chart_grid" />
         </LinearLayout>
 
         <!-- Volume MA - NEW SECTION - separate, no hardcode -->
@@ -178,7 +181,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/default_grid_width"
                 android:layout_marginVertical="@dimen/vol_setting_padding_vertical"
-                android:background="@color/chart_grid" />
+                android:background="@color/chart_grid"
+                android:tag="@color/chart_grid" />
         </LinearLayout>
 
         <!-- Grid Settings - renamed from Chart Options, contains Show Grid + Grid Color -->
@@ -231,7 +235,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/default_grid_width"
                 android:layout_marginVertical="@dimen/vol_setting_padding_vertical"
-                android:background="@color/chart_grid" />
+                android:background="@color/chart_grid"
+                android:tag="@color/chart_grid" />
         </LinearLayout>
 
         <!-- Last Price Line -->
@@ -284,7 +289,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/default_grid_width"
                 android:layout_marginVertical="@dimen/vol_setting_padding_vertical"
-                android:background="@color/chart_grid" />
+                android:background="@color/chart_grid"
+                android:tag="@color/chart_grid" />
         </LinearLayout>
 
         <!-- Current Price Label -->
@@ -337,7 +343,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/default_grid_width"
                 android:layout_marginVertical="@dimen/vol_setting_padding_vertical"
-                android:background="@color/chart_grid" />
+                android:background="@color/chart_grid"
+                android:tag="@color/chart_grid" />
         </LinearLayout>
 
         <!-- Selected / Crosshair Line -->
@@ -390,7 +397,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/default_grid_width"
                 android:layout_marginVertical="@dimen/vol_setting_padding_vertical"
-                android:background="@color/chart_grid" />
+                android:background="@color/chart_grid"
+                android:tag="@color/chart_grid" />
         </LinearLayout>
 
         <!-- Apply and Reset -->
@@ -420,6 +428,56 @@
                 android:textAllCaps="false" />
 
         </LinearLayout>
+
+        <!-- Default values for Activity to read via tag - law compliance -->
+        <View
+            android:id="@+id/def_default_popup_padding"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:visibility="gone"
+            android:tag="@dimen/default_popup_padding" />
+
+        <View
+            android:id="@+id/def_default_top_padding"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:visibility="gone"
+            android:tag="@dimen/default_top_padding" />
+
+        <View
+            android:id="@+id/def_default_bottom_padding"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:visibility="gone"
+            android:tag="@dimen/default_bottom_padding" />
+
+        <View
+            android:id="@+id/def_default_grid_width"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:visibility="gone"
+            android:tag="@dimen/default_grid_width" />
+
+        <View
+            android:id="@+id/def_default_price_axis_width"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:visibility="gone"
+            android:tag="@dimen/default_price_axis_width" />
+
+        <View
+            android:id="@+id/def_chart_bg"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:visibility="gone"
+            android:tag="@color/chart_bg" />
+
+        <View
+            android:id="@+id/def_chart_grid"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:visibility="gone"
+            android:tag="@color/chart_grid" />
 
     </LinearLayout>
 
