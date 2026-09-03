@@ -106,8 +106,8 @@
         android:id="@+id/sbVis"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:max="310"
-        android:progress="70"
+        android:max="250"
+        android:progress="80"
         android:layout_marginTop="@dimen/default_price_text_margin" />
 
 </LinearLayout>
