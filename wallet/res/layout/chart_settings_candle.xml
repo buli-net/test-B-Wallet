@@ -106,9 +106,9 @@
         android:id="@+id/sbVis"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:max="350"
-        android:min="20"
-        android:progress="90"
+        android:min="@integer/min_visible_candle_count"
+        android:max="@integer/max_visible_candle_count"
+        android:progress="@integer/default_visible_candle_count"
         android:layout_marginTop="@dimen/default_price_text_margin" />
 
 </LinearLayout>
