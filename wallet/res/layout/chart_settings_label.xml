@@ -34,7 +34,9 @@
             android:layout_width="@dimen/color_picker_size"
             android:layout_height="@dimen/color_picker_size"
             android:background="@drawable/color_picker_border"
-            android:tag="@color/chart_last_price_label_bg" />
+            android:tag="@color/chart_last_price_label_bg"
+            android:clickable="true"
+            android:focusable="true" />
     </LinearLayout>
 
     <!-- Label Text Color -->
@@ -57,7 +59,9 @@
             android:layout_width="@dimen/color_picker_size"
             android:layout_height="@dimen/color_picker_size"
             android:background="@drawable/color_picker_border"
-            android:tag="@color/last_label_text" />
+            android:tag="@color/last_label_text"
+            android:clickable="true"
+            android:focusable="true" />
     </LinearLayout>
 
     <!-- Label Size -->
@@ -79,7 +83,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:max="32"
-            android:progress="19" />
+            android:progress="@dimen/default_current_price_text_size" />
     </LinearLayout>
 
 </LinearLayout>
