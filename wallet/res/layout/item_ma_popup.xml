@@ -25,7 +25,8 @@
         android:inputType="number"
         android:textColor="?android:attr/textColorPrimary"
         android:textColorHint="?android:attr/textColorSecondary"
-        android:textSize="@dimen/default_text_size" />
+        android:textSize="@dimen/default_text_size"
+        android:tag="@integer/default_vol_ma1_period" />
 
     <View
         android:id="@+id/view_color"
@@ -33,7 +34,10 @@
         android:layout_height="@dimen/color_picker_size"
         android:layout_marginStart="@dimen/default_popup_padding"
         android:layout_marginEnd="@dimen/default_popup_padding"
-        android:background="@drawable/color_picker_border" />
+        android:background="@drawable/color_picker_border"
+        android:tag="@color/chart_vol_ma1_default"
+        android:clickable="true"
+        android:focusable="true" />
 
     <TextView
         android:id="@+id/btn_delete"
@@ -43,6 +47,8 @@
         android:gravity="center"
         android:text="@string/delete"
         android:textColor="?android:attr/textColorPrimary"
-        android:textSize="@dimen/vol_label_text_size" />
+        android:textSize="@dimen/vol_label_text_size"
+        android:clickable="true"
+        android:focusable="true" />
 
 </LinearLayout>
