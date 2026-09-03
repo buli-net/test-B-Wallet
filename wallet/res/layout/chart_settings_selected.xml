@@ -3,22 +3,14 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:paddingTop="@dimen/vol_setting_padding_vertical"
-    android:paddingBottom="@dimen/vol_setting_padding_vertical">
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:paddingBottom="@dimen/vol_setting_padding_vertical"
-        android:text="@string/chart_selected_line_section"
-        android:textSize="@dimen/vol_label_text_size"
-        android:textStyle="bold" />
+    android:paddingTop="@dimen/default_top_padding"
+    android:paddingBottom="@dimen/default_bottom_padding">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:gravity="center_vertical"
         android:orientation="horizontal"
+        android:gravity="center_vertical"
         android:paddingVertical="@dimen/vol_setting_padding_vertical">
 
         <TextView
@@ -38,55 +30,42 @@
             android:focusable="true" />
     </LinearLayout>
 
-    <LinearLayout
+    <TextView
+        android:id="@+id/lbSelectedW"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/vol_setting_padding_vertical"
+        android:text="@string/chart_selected_line_width"
+        android:textSize="@dimen/vol_label_text_size" />
+
+    <SeekBar
+        android:id="@+id/sbSelectedWidth"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:paddingVertical="@dimen/vol_setting_padding_vertical">
+        android:max="20"
+        android:progress="3" />
 
-        <TextView
-            android:id="@+id/lbSelectedWidth"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/chart_selected_line_width"
-            android:textSize="@dimen/vol_label_text_size" />
+    <TextView
+        android:id="@+id/lbSelectedAlpha"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/vol_setting_padding_vertical"
+        android:text="@string/chart_selected_line_alpha"
+        android:textSize="@dimen/vol_label_text_size" />
 
-        <SeekBar
-            android:id="@+id/sbSelectedWidth"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:max="10"
-            android:progress="2"
-            android:tag="@dimen/default_selected_width" />
-    </LinearLayout>
-
-    <LinearLayout
+    <SeekBar
+        android:id="@+id/sbSelectedAlpha"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:paddingVertical="@dimen/vol_setting_padding_vertical">
-
-        <TextView
-            android:id="@+id/lbSelectedAlpha"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/chart_selected_line_alpha"
-            android:textSize="@dimen/vol_label_text_size" />
-
-        <SeekBar
-            android:id="@+id/sbSelectedAlpha"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:max="255"
-            android:progress="150"
-            android:tag="@integer/selected_alpha" />
-    </LinearLayout>
+        android:max="255"
+        android:progress="100" />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:gravity="center_vertical"
+        android:layout_marginTop="@dimen/vol_setting_padding_vertical"
         android:orientation="horizontal"
+        android:gravity="center_vertical"
         android:paddingVertical="@dimen/vol_setting_padding_vertical">
 
         <TextView
@@ -99,56 +78,6 @@
         <Switch
             android:id="@+id/swSelectedDash"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:checked="false" />
+            android:layout_height="wrap_content" />
     </LinearLayout>
-
-    <View
-        android:id="@+id/def_selected_width"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:visibility="gone"
-        android:tag="@dimen/default_selected_width" />
-
-    <View
-        android:id="@+id/def_selected_alpha"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:visibility="gone"
-        android:tag="@integer/selected_alpha" />
-
-    <View
-        android:id="@+id/def_selected_line_color"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:visibility="gone"
-        android:tag="@color/chart_selected_line" />
-
-    <View
-        android:id="@+id/def_vol_setting_padding_vertical"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:visibility="gone"
-        android:tag="@dimen/vol_setting_padding_vertical" />
-
-    <View
-        android:id="@+id/def_vol_label_text_size"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:visibility="gone"
-        android:tag="@dimen/vol_label_text_size" />
-
-    <View
-        android:id="@+id/def_color_picker_size"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:visibility="gone"
-        android:tag="@dimen/color_picker_size" />
-
-    <TextView
-        android:id="@+id/lbSelectedW"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:visibility="gone" />
-
 </LinearLayout>
