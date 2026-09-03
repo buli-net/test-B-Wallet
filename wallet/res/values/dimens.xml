@@ -52,6 +52,8 @@
     <dimen name="default_price_text_margin">4dp</dimen>
     <dimen name="default_price_text_offset">3dp</dimen>
     <dimen name="default_selected_width">1dp</dimen>
+    <dimen name="default_last_line_width">2dp</dimen>
+    <dimen name="default_wick_width">1dp</dimen>
     <dimen name="default_text_size">12sp</dimen>
 
     <!-- MarketChartView - dashed last line & labels -->
