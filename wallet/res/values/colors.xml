@@ -105,4 +105,9 @@
 <color name="chart_vol_ma1_default">#FFC107</color>
 <color name="chart_vol_ma2_default">#2196F3</color>
 
+    
+<color name="chart_vol_ma1_default">#FFC107</color>
+<color name="chart_vol_ma2_default">#2196F3</color>
+<color name="chart_grid_color_default">#33FFFFFF</color>
+<color name="chart_bg">#99000000</color>
 </resources>
