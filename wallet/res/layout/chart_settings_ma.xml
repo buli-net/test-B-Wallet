@@ -3,15 +3,15 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:paddingTop="4dp"
-    android:paddingBottom="4dp">
+    android:paddingTop="@dimen/vol_setting_padding_vertical"
+    android:paddingBottom="@dimen/vol_setting_padding_vertical">
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:paddingBottom="8dp"
+        android:paddingBottom="@dimen/vol_setting_padding_vertical"
         android:text="@string/chart_settings_ma"
-        android:textSize="14sp"
+        android:textSize="@dimen/vol_label_text_size"
         android:textStyle="bold" />
 
     <!-- DEFAULT MA - from layout, no hardcode in Java -->
@@ -38,8 +38,8 @@
     <Button
         android:id="@+id/btn_add_ma"
         android:layout_width="match_parent"
-        android:layout_height="44dp"
-        android:layout_marginTop="8dp"
+        android:layout_height="@dimen/default_price_axis_width"
+        android:layout_marginTop="@dimen/vol_setting_padding_vertical"
         android:text="@string/add_ma"
         android:textAllCaps="false" />
 
@@ -48,15 +48,15 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:paddingVertical="4dp"
-        android:layout_marginTop="12dp">
+        android:paddingVertical="@dimen/vol_setting_padding_vertical"
+        android:layout_marginTop="@dimen/vol_setting_padding_vertical">
 
         <TextView
             android:id="@+id/lbMaW"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/chart_ma_line_width"
-            android:textSize="12sp" />
+            android:textSize="@dimen/vol_label_text_size" />
 
         <SeekBar
             android:id="@+id/sbMaW"
