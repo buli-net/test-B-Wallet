@@ -70,7 +70,7 @@
         android:id="@+id/sbWick"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:max="80"
+        android:max="10"
         android:progress="1"
         android:layout_marginTop="@dimen/default_price_text_margin" />
 
