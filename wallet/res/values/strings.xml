@@ -509,6 +509,7 @@
     <string name="default_interval">15m</string>
     <string name="default_symbol">BTCUSDT</string>
 
+    <!-- Chart Settings - deduped -->
     <string name="chart_settings_title">Chart Settings</string>
     <string name="chart_settings_candle">Candle Settings</string>
     <string name="chart_settings_bullish">Bullish Color</string>
@@ -668,4 +669,14 @@
 
     <string name="vol_label">Vol: %.2f </string>
     <string name="vol_ma_format">MA(%1$d): %2$.2f </string>
+
+        <!-- Fix missing keys reported by AAPT -->
+    <string name="chart_selected_section">Selected Line</string>
+    <string name="chart_selected_color">Selected Color</string>
+    <string name="chart_selected_width">Selected width: %d</string>
+    <string name="chart_selected_alpha">Selected alpha: %d</string>
+    <string name="chart_selected_dashed">Dashed Line</string>
+    <string name="chart_candle_settings">Candle Settings</string>
+    <string name="chart_bull_color">Bullish Color</string>
+    <string name="bear">Bearish Color</string>
 </resources>
