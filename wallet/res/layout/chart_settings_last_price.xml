@@ -14,7 +14,6 @@
         android:textSize="@dimen/vol_label_text_size"
         android:textStyle="bold" />
 
-    <!-- Show Last Price -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -36,7 +35,6 @@
             android:checked="true" />
     </LinearLayout>
 
-    <!-- Last Price Color -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -56,10 +54,11 @@
             android:layout_width="@dimen/color_picker_size"
             android:layout_height="@dimen/color_picker_size"
             android:background="@drawable/color_picker_border"
-            android:tag="@color/chart_last_price_line" />
+            android:tag="@color/chart_last_price_line"
+            android:clickable="true"
+            android:focusable="true" />
     </LinearLayout>
 
-    <!-- Price Text Size -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -78,10 +77,9 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:max="32"
-            android:progress="18" />
+            android:progress="@dimen/default_text_size" />
     </LinearLayout>
 
-    <!-- Price Text Color -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -101,10 +99,11 @@
             android:layout_width="@dimen/color_picker_size"
             android:layout_height="@dimen/color_picker_size"
             android:background="@drawable/color_picker_border"
-            android:tag="@color/chart_text" />
+            android:tag="@color/chart_text"
+            android:clickable="true"
+            android:focusable="true" />
     </LinearLayout>
 
-    <!-- Last Line Width -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -123,10 +122,10 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:max="10"
-            android:progress="2" />
+            android:progress="2"
+            android:tag="@dimen/default_selected_width" />
     </LinearLayout>
 
-    <!-- Dashed Line -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
