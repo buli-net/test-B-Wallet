@@ -628,30 +628,7 @@
     <string name="arrow_collapsed" translatable="false">▼</string>
     <string name="arrow_expanded" translatable="false">▲</string>
 
-    <string name="err_missing_dimen" translatable="false">Missing dimen/integer - must define in res, no hardcoded</string>
-    <string name="err_ma_empty" translatable="false">defMaLines empty - check tvDefMaPeriods in layout</string>
-    <string name="err_color_0" translatable="false">Color from layout is 0 - check android:tag in chart_settings_popup.xml</string>
-    <string name="err_defaults_not_loaded" translatable="false">setDefaultsFromLayout() must be called before using MarketChartView</string>
-    <string name="err_candle_0" translatable="false">Candle color 0 from layout</string>
-    <string name="err_ma_color_0" translatable="false">MA color 0 - must come from layout</string>
-    <string name="err_appearance_color" translatable="false">ChartAppearance color 0 - must come from layout tag</string>
-    <string name="err_label_color" translatable="false">Label color 0</string>
-    <string name="err_color_tag" translatable="false">Color 0 - must from layout tag</string>
-    <string name="err_theme_bg" translatable="false">Theme colorBackground missing - must be in theme</string>
-    <string name="err_fiat_0" translatable="false">fiatMultiplier must be from layout, not 0</string>
-    <string name="err_interval_null" translatable="false">interval null - must come from layout</string>
-    <string name="err_symbol_null" translatable="false">symbol/interval null</string>
-    <string name="err_unknown_interval" translatable="false">Unknown interval %1$s</string>
-    <string name="err_price_height" translatable="false">priceChartHeight &lt;=0 - check dimen</string>
-    <string name="err_palette_prefix_missing" translatable="false">R.string.palette_prefix is missing or empty</string>
-    <string name="err_palette_load_failed" translatable="false">Failed to load palette with prefix %1$s</string>
-    <string name="err_palette_not_found" translatable="false">No palette found with prefix %1$s</string>
-    <string name="err_missing_default_view" translatable="false">Missing default view in chart_settings_popup.xml - check all ids</string>
-    <string name="err_bull_bear_tag_missing" translatable="false">Bull/Bear tag missing in layout</string>
-    <string name="err_ma_periods_empty" translatable="false">MA periods empty in layout</string>
-    <string name="err_view_tag_missing" translatable="false">View tag missing color</string>
-    <string name="err_selected_line_color_0">Selected line color is invalid</string>
-
+    
     <string name="key_vol_show_ma">vol_show_ma</string>
     <string name="key_vol_ma1_period">vol_ma1_period</string>
     <string name="key_vol_ma2_period">vol_ma2_period</string>
