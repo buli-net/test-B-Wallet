@@ -76,7 +76,6 @@
               android:title="@string/menu_price_chart" />
     </menu>
 </item>
-
     <!-- end mod maket -->
         
     <item
