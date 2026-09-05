@@ -560,6 +560,7 @@
     <string name="balance_loading">Loading…</string>
     <string name="balance_error">Error</string>
 
+    <string name="fiat_usd" translatable="false">USD</string>
     <string name="url_klines" translatable="false">https://api.binance.com/api/v3/klines?symbol=%1$s&amp;interval=%2$s&amp;limit=%3$d</string>
     <string name="url_ticker" translatable="false">https://api.binance.com/api/v3/ticker/24hr?symbol=%1$s</string>
 
