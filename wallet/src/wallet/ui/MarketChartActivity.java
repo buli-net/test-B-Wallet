@@ -131,6 +131,13 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
     private static final String KEY_INTERVAL = "interval";
     private static final String PREFS_CHART_SETTINGS = "chart_settings";
 
+    // Hardcoded preference keys (from strings.xml)
+    private static final String PREF_CHART = "chart_options_prefs";
+    private static final String PREF_CANDLE = "candle_prefs";
+    private static final String PREF_MA = "ma_prefs";
+    private static final String BULLET_SEPARATOR = " • ";
+    private static final String PALETTE_PREFIX = "palette_";
+
     // ===== CHART STATE =====
     private String currentSymbol = "BTCUSDT";
     private String currentInterval = "15m";
@@ -1821,9 +1828,9 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
                     // Clear all saved preferences
                     getSharedPreferences(PREFS_CHART_SETTINGS, MODE_PRIVATE).edit().clear().commit();
                     getSharedPreferences(PREFS_CHART_STATE, MODE_PRIVATE).edit().clear().commit();
-                    getSharedPreferences(getString(R.string.prefs_chart), Context.MODE_PRIVATE).edit().clear().commit();
-                    getSharedPreferences(getString(R.string.prefs_candle), Context.MODE_PRIVATE).edit().clear().commit();
-                    getSharedPreferences(getString(R.string.prefs_ma), Context.MODE_PRIVATE).edit().clear().commit();
+                    getSharedPreferences(PREF_CHART, Context.MODE_PRIVATE).edit().clear().commit();
+                    getSharedPreferences(PREF_CANDLE, Context.MODE_PRIVATE).edit().clear().commit();
+                    getSharedPreferences(PREF_MA, Context.MODE_PRIVATE).edit().clear().commit();
 
                     // Reset chart view
                     if (marketChartView != null) {
@@ -2554,7 +2561,7 @@ public class MarketChartActivity extends Activity implements ViewModelStoreOwner
                                             fiatVal
                                     );
                                     if (sb.length() > 0) {
-                                        sb.append(getString(R.string.bullet_separator));
+                                        sb.append(BULLET_SEPARATOR);
                                     }
                                     int start = sb.length();
                                     sb.append(label);
