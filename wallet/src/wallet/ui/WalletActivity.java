@@ -267,6 +267,11 @@ public final class WalletActivity extends AbstractWalletActivity {
                     Constants.NETWORK_PARAMETERS.getId().equals(BitcoinNetwork.ID_MAINNET)
                 );
            // end donate 2/4
+           // market - only mainnet 2/3
+                menu.findItem(R.id.menu_market_chart).setVisible(
+                    Constants.NETWORK_PARAMETERS.getId().equals(BitcoinNetwork.ID_MAINNET)
+                );
+           //end market 2/3
                 final String externalStorageState = Environment.getExternalStorageState();
                 final boolean enableRestoreWalletOption = Environment.MEDIA_MOUNTED.equals(externalStorageState)
                         || Environment.MEDIA_MOUNTED_READ_ONLY.equals(externalStorageState);
@@ -306,12 +311,12 @@ public final class WalletActivity extends AbstractWalletActivity {
                 } else if (itemId == R.id.wallet_options_exchange_rates) {
                     startActivity(new Intent(WalletActivity.this, ExchangeRatesActivity.class));
                     return true;
-             //add maket 2/2
+             //add maket 3/3
                 } else if (itemId == R.id.menu_market_chart) {
                      Intent intent = new Intent(WalletActivity.this, MarketChartActivity.class);
                      startActivity(intent);
                      return true;
-                // end maket 2/2
+            // end maket 3/3
                 } else if (itemId == R.id.wallet_options_sweep_wallet) {
                     SweepWalletActivity.start(WalletActivity.this);
                     return true;
