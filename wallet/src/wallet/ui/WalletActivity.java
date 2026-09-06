@@ -268,9 +268,8 @@ public final class WalletActivity extends AbstractWalletActivity {
                 );
            // end donate 2/4
            // market - only mainnet 2/3
-                menu.findItem(R.id.menu_market_chart).setVisible(
-                    Constants.NETWORK_PARAMETERS.getId().equals(BitcoinNetwork.ID_MAINNET)
-                );
+                final boolean isMainnet = Constants.NETWORK_PARAMETERS.getId().equals(BitcoinNetwork.ID_MAINNET);
+                menu.findItem(R.id.menu_market_parent).setVisible(isMainnet);
            //end market 2/3
                 final String externalStorageState = Environment.getExternalStorageState();
                 final boolean enableRestoreWalletOption = Environment.MEDIA_MOUNTED.equals(externalStorageState)
